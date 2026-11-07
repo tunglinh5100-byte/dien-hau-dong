@@ -1770,7 +1770,7 @@ buildCfgPanel(); napNhacGia();
     try { localStorage.setItem('hd_live_user', iu.value.trim()); localStorage.setItem('hd_live_key', k); } catch (e) {}
     want = true; bt.textContent = 'Ngắt kết nối'; setStat('Đang kết nối tới @' + u + '…');
     try { ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k) + '&features.bundleEvents=true'); } catch (e) { setStat('Không mở được kết nối: ' + e.message); return; }
-    ws.onopen = () => { retry = 0; H.S.real = true; if (H.S.auto) document.getElementById('bAuto').click(); setStat('Đã kết nối @' + u + '. Chờ người xem tương tác…'); };
+    ws.onopen = () => { retry = 0; H.S.real = true; setStat('Đã kết nối @' + u + '. Chờ người xem tương tác…'); };
     ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
       const list = Array.isArray(j.messages) ? j.messages : [j];
       list.forEach(m => { const type = m.type || m.event || m.name, d = m.data || m.json && (() => { try { return JSON.parse(m.json); } catch (e) { return null; } })() || m; if (type) handle(type, d || {}); });
@@ -1794,7 +1794,6 @@ buildCfgPanel(); napNhacGia();
   document.addEventListener('keydown', (e) => { if ((e.key === 'h' || e.key === 'H') && !/input|select|textarea/i.test(e.target.tagName)) { document.body.classList.toggle('livemode'); window.scrollTo(0, 0); } });
   if (Q.get('live') === '1') {
     document.body.classList.add('livemode');
-    setTimeout(() => { const bA = document.getElementById('bAuto'); if (bA && bA.classList.contains('on')) bA.click(); }, 300); // live thật: luôn tắt giả lập
     setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
       const iu = document.getElementById('liveUser'), ik = document.getElementById('liveKey'), bc = document.getElementById('bLiveConn');
       if (iu && ik && iu.value && ik.value && bc && bc.textContent.trim() === 'Kết nối') bc.click(); }, 1500);
