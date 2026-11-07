@@ -371,7 +371,18 @@ function cvBestExit(t, win) { // khung khớp dáng nhất trong 'win' giây t�
   for (let k = 1; k <= win * 12; k++) { const i = (i0 + k) % n; if (CV_POSE[i] > best) { best = CV_POSE[i]; bi = i0 + k; } }
   return { t: bi / 12, s: best };
 }
-function cvGrabTo(v, cv) { cvTmpCtx.drawImage(v, 0, 0, CV_W, CV_H * 2); const img = cvTmpCtx.getImageData(0, 0, CV_W, CV_H * 2), d = img.data, half = CV_W * CV_H * 4; for (let i = 0; i < half; i += 4) d[i + 3] = d[i + half]; const c = cv.getContext('2d'); c.clearRect(0, 0, CV_W, CV_H); c.putImageData(img, 0, 0, 0, 0, CV_W, CV_H); }
+// tách nền bằng GPU (bộ lọc SVG: độ sáng nửa dưới → độ trong suốt), không đọc điểm ảnh về CPU nên không tạo rác bộ nhớ mỗi khung
+(() => { const ns = 'http://www.w3.org/2000/svg', sv = document.createElementNS(ns, 'svg'); sv.setAttribute('width', '0'); sv.setAttribute('height', '0'); sv.style.cssText = 'position:absolute;width:0;height:0';
+  sv.innerHTML = '<filter id="cvL2A" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/></filter>'; document.body.appendChild(sv); })();
+let cvGPU = null; // null = chưa thử, true/false
+function cvGrabCPU(v, c) { cvTmpCtx.drawImage(v, 0, 0, CV_W, CV_H * 2); const img = cvTmpCtx.getImageData(0, 0, CV_W, CV_H * 2), d = img.data, half = CV_W * CV_H * 4; for (let i = 0; i < half; i += 4) d[i + 3] = d[i + half]; c.clearRect(0, 0, CV_W, CV_H); c.putImageData(img, 0, 0, 0, 0, CV_W, CV_H); }
+function cvGrabGPU(v, c) { c.save(); c.globalCompositeOperation = 'copy'; c.filter = 'url(#cvL2A)'; c.drawImage(v, 0, CV_H, CV_W, CV_H, 0, 0, CV_W, CV_H); c.filter = 'none'; c.globalCompositeOperation = 'source-in'; c.drawImage(v, 0, 0, CV_W, CV_H, 0, 0, CV_W, CV_H); c.restore(); }
+function cvGrabInto(v, cv) { const c = cv.getContext('2d');
+  if (cvGPU === null) { // thử một lần: trình duyệt có hỗ trợ bộ lọc trên canvas không (iPhone thì không)
+    try { const t = document.createElement('canvas'); t.width = 2; t.height = 2; const x = t.getContext('2d', { willReadFrequently: true }); x.fillStyle = '#808080'; x.fillRect(0, 0, 2, 2); const u = document.createElement('canvas'); u.width = 2; u.height = 2; const y = u.getContext('2d', { willReadFrequently: true }); y.globalCompositeOperation = 'copy'; y.filter = 'url(#cvL2A)'; y.drawImage(t, 0, 0); const a = y.getImageData(0, 0, 1, 1).data[3]; cvGPU = y.filter === 'url(#cvL2A)' && a > 100 && a < 160; } catch (e) { cvGPU = false; } }
+  if (cvGPU) cvGrabGPU(v, c); else cvGrabCPU(v, c); }
+function cvGrabTo(v, cv) { cvGrabInto(v, cv); }
+window.__cvGPU = () => cvGPU;
 function cvTurnStart(v) { CVS.tv = v; cvtOk = false; cvtT = -1; try { v.currentTime = 0; } catch (e) {} cvPlay(v); }
 function cvTurnDone() { const v = CVS.tv; if (cvtOk && v) return v.ended || (v.duration && v.currentTime >= v.duration - .06) || CVS.tt > 4; return CVS.tt > CV_TURN * 2 + .3; }
 const CVW = document.createElement('video'); // cô đi xuyến (quay lưng, bước chân lướt), lặp
@@ -391,12 +402,7 @@ const CVS = { xf: 0, tv: null, mode: 'dance', di: 0, cur: 0, fade: 0, pending: f
 function cvPlay(v) { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cvDanceV() { return CVS.walk ? CVW : CV[CV_DANCE[CVS.di]]; }
 ['pointerdown', 'touchstart', 'click'].forEach(ev => document.addEventListener(ev, () => { const v = cvDanceV(); if (CVS.mode === 'dance') cvPlay(v); cvUnlock(); }, { passive: true }));
-function cvGrab(v, into) {
-  cvTmpCtx.drawImage(v, 0, 0, CV_W, CV_H * 2);
-  const img = cvTmpCtx.getImageData(0, 0, CV_W, CV_H * 2), d = img.data, half = CV_W * CV_H * 4;
-  for (let i = 0; i < half; i += 4) d[i + 3] = d[i + half];
-  const c = CVB[into].getContext('2d'); c.clearRect(0, 0, CV_W, CV_H); c.putImageData(img, 0, 0, 0, 0, CV_W, CV_H);
-}
+function cvGrab(v, into) { cvGrabInto(v, CVB[into]); }
 function cvNextDance() { // sang điệu kế, mờ chéo
   const old = cvDanceV(); old.pause();
   CVS.di = (CVS.di + 1) % CV_DANCE.length; const v = cvDanceV();
@@ -449,7 +455,7 @@ function cvStep(dt) {
       S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .45) { q.pose = 'raise'; q.poseT = 2.4; if (Math.random() < .3) q.bubble = { s: pick(['Con xin cô', 'Lộc cô!', 'Con lạy cô']), t: S.t + rnd(0, .6) }; } }); wave(6); } }
   if (CVS.mode === 'front' && CO.giving && CO.giving.phase === 'give' && !CO.giving.flyPending && (!CVS.fv || CVS.fv.ended || (CVS.fv.duration && CVS.fv.currentTime >= CVS.fv.duration - .08))) { CO.downT = Math.min(CO.downT, .3); if (S.dem && S.dem.p === CO.giving.p) S.dem.t = Math.max(S.dem.t, (S.dem.lim || 10) - 1.6); }
   if (CVS.mode === 'front' && CVS.fv) { const fv = CVS.fv; if (fv.paused && !fv.ended && fv.readyState >= 2 && fv.currentTime < .05) cvPlay(fv);
-    if (fv.readyState >= 2 && fv.videoWidth && fv.currentTime !== cvfT) { try { cvTmpCtx.drawImage(fv, 0, 0, CV_W, CV_H * 2); const img = cvTmpCtx.getImageData(0, 0, CV_W, CV_H * 2), d = img.data, half = CV_W * CV_H * 4; for (let i = 0; i < half; i += 4) d[i + 3] = d[i + half]; const c = CVF_BUF.getContext('2d'); c.clearRect(0, 0, CV_W, CV_H); c.putImageData(img, 0, 0, 0, 0, CV_W, CV_H); cvfT = fv.currentTime; cvfOk = true; } catch (e) {} } }
+    if (fv.readyState >= 2 && fv.videoWidth && fv.currentTime !== cvfT) { try { cvGrabInto(fv, CVF_BUF); cvfT = fv.currentTime; cvfOk = true; } catch (e) {} } }
   else if (CVS.mode === 'turnU') { CVS.tt += dt; if (cvTurnDone()) { CVS.mode = 'dance'; CVS.xf = cvtOk ? 1 : 0; cvPlay(cvDanceV()); } }
   if (CVS.mode === 'dance') {
     const dv = cvDanceV();
