@@ -371,16 +371,36 @@ function cvBestExit(t, win) { // khung khớp dáng nhất trong 'win' giây t�
   for (let k = 1; k <= win * 12; k++) { const i = (i0 + k) % n; if (CV_POSE[i] > best) { best = CV_POSE[i]; bi = i0 + k; } }
   return { t: bi / 12, s: best };
 }
-// tách nền bằng GPU (bộ lọc SVG: độ sáng nửa dưới → độ trong suốt), không đọc điểm ảnh về CPU nên không tạo rác bộ nhớ mỗi khung
-(() => { const ns = 'http://www.w3.org/2000/svg', sv = document.createElementNS(ns, 'svg'); sv.setAttribute('width', '0'); sv.setAttribute('height', '0'); sv.style.cssText = 'position:absolute;width:0;height:0';
-  sv.innerHTML = '<filter id="cvL2A" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/></filter>'; document.body.appendChild(sv); })();
-let cvGPU = null; // null = chưa thử, true/false
+// tách nền bằng GPU (WebGL: nửa trên = màu, nửa dưới = độ trong suốt), không đọc điểm ảnh về CPU nên không tạo rác bộ nhớ mỗi khung
+let cvGPU = /[?&]cpu=1/.test(location.search) ? false : null; // null = chưa thử, true/false
+let cvGL = null, cvGLc = null, cvGLtex = null;
+function cvGLinit() {
+  try {
+    cvGLc = document.createElement('canvas'); cvGLc.width = CV_W; cvGLc.height = CV_H;
+    const gl = cvGLc.getContext('webgl', { premultipliedAlpha: true, alpha: true, preserveDrawingBuffer: true, antialias: false, depth: false, stencil: false }); if (!gl) return false;
+    const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
+    gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, 'precision mediump float;varying vec2 u;uniform sampler2D t;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float m=clamp((texture2D(t,vec2(u.x,.5+u.y*.5)).r-.02)/.96,0.,1.);gl_FragColor=vec4(c*m,m);}'));
+    gl.linkProgram(pr); if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return false; gl.useProgram(pr);
+    const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    cvGLtex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, cvGLtex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.viewport(0, 0, CV_W, CV_H); gl.clearColor(0, 0, 0, 0);
+    cvGLc.addEventListener('webglcontextlost', (e) => { e.preventDefault(); cvGPU = false; });
+    cvGL = gl; return true;
+  } catch (e) { return false; }
+}
 function cvGrabCPU(v, c) { cvTmpCtx.drawImage(v, 0, 0, CV_W, CV_H * 2); const img = cvTmpCtx.getImageData(0, 0, CV_W, CV_H * 2), d = img.data, half = CV_W * CV_H * 4; for (let i = 0; i < half; i += 4) d[i + 3] = d[i + half]; c.clearRect(0, 0, CV_W, CV_H); c.putImageData(img, 0, 0, 0, 0, CV_W, CV_H); }
-function cvGrabGPU(v, c) { c.save(); c.globalCompositeOperation = 'copy'; c.filter = 'url(#cvL2A)'; c.drawImage(v, 0, CV_H, CV_W, CV_H, 0, 0, CV_W, CV_H); c.filter = 'none'; c.globalCompositeOperation = 'source-in'; c.drawImage(v, 0, 0, CV_W, CV_H, 0, 0, CV_W, CV_H); c.restore(); }
+function cvGrabGPU(v, c) { const gl = cvGL; gl.bindTexture(gl.TEXTURE_2D, cvGLtex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  c.save(); c.globalCompositeOperation = 'copy'; c.drawImage(cvGLc, 0, 0); c.restore(); }
 function cvGrabInto(v, cv) { const c = cv.getContext('2d');
-  if (cvGPU === null) { // thử một lần: trình duyệt có hỗ trợ bộ lọc trên canvas không (iPhone thì không)
-    try { const t = document.createElement('canvas'); t.width = 2; t.height = 2; const x = t.getContext('2d', { willReadFrequently: true }); x.fillStyle = '#808080'; x.fillRect(0, 0, 2, 2); const u = document.createElement('canvas'); u.width = 2; u.height = 2; const y = u.getContext('2d', { willReadFrequently: true }); y.globalCompositeOperation = 'copy'; y.filter = 'url(#cvL2A)'; y.drawImage(t, 0, 0); const a = y.getImageData(0, 0, 1, 1).data[3]; cvGPU = y.filter === 'url(#cvL2A)' && a > 100 && a < 160; } catch (e) { cvGPU = false; } }
-  if (cvGPU) cvGrabGPU(v, c); else cvGrabCPU(v, c); }
+  if (cvGPU === null) cvGPU = cvGLinit();
+  if (cvGPU) { try { cvGrabGPU(v, c); return; } catch (e) { cvGPU = false; } }
+  cvGrabCPU(v, c); }
 function cvGrabTo(v, cv) { cvGrabInto(v, cv); }
 window.__cvGPU = () => cvGPU;
 function cvTurnStart(v) { CVS.tv = v; cvtOk = false; cvtT = -1; try { v.currentTime = 0; } catch (e) {} cvPlay(v); }
