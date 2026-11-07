@@ -349,15 +349,17 @@ CV_DANCE.forEach(name => {
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
   v.style.cssText = 'width:2px;height:4px';
   v.addEventListener('error', () => { cvErr = true; });
-  v.src = 'co-' + name + '.mp4?v=4'; CV_HOLD.appendChild(v); CV[name] = v;
+  v.src = 'co-' + name + '.mp4?v=5'; CV_HOLD.appendChild(v); CV[name] = v;
 });
 // clip quay xuống tung lộc (chạy một lần): tiền, quả, hoa hồng.
 const CVF = {}, CVF_REL = { tien: 5.8, qua: 2.9, hoa: 3.1 };
-['tien', 'qua', 'hoa', 'xuong', 'len'].forEach(name => { // xuong/len: clip cô xoay người thật
+// clip xoay người làm sẵn: xu0..xu9 = từ đúng khung múa CV_EXITS[k] quay xuống (tay nối liền), le0..le2 = quay lên rồi nối liền vào khung múa CV_RESUME[r]
+const CV_EXITS = [0.8333,3.7917,7.2083,10.1667,14.4167,17.9583,20.4167,23.2500,27.7917,31.0000], CV_RESUME = [3.0417,12.3750,23.4583];
+['tien', 'qua', 'hoa', ...CV_EXITS.map((e, k) => 'xu' + k), ...CV_RESUME.map((e, r) => 'le' + r)].forEach(name => {
   const v = document.createElement('video');
   v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = 'auto';
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=4'; CV_HOLD.appendChild(v); CVF[name] = v;
+  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=5'; CV_HOLD.appendChild(v); CVF[name] = v;
 });
 const CVF_BUF = document.createElement('canvas'); CVF_BUF.width = CV_W; CVF_BUF.height = CV_H; let cvfOk = false, cvfT = -1;
 const CVT_BUF = document.createElement('canvas'); CVT_BUF.width = CV_W; CVT_BUF.height = CV_H; let cvtOk = false, cvtT = -1;
@@ -429,14 +431,15 @@ function cvStep(dt) {
     else if (!CO.wantMove) CVS.walkAt = null;
   }
   if (CVS.mode === 'dance' && wantDown && CVS.walk) { CVW.pause(); CVS.walk = false; CVS.lastV = null; }
-  if (CVS.mode === 'dance' && wantDown && CVS.exitAt == null) { const v = CV[CV_DANCE[CVS.di]]; const d = v.duration || 58; const b = cvBestExit(v.currentTime % d, 3.5); CVS.exitAt = b.t; CVS.exitWait = 0; }
+  if (CVS.mode === 'dance' && wantDown && CVS.exitAt == null) { const v = CV[CV_DANCE[CVS.di]]; const d = v.duration || 31.8, ct = v.currentTime % d; let bk = 0, bw = 1e9; CV_EXITS.forEach((e, k) => { const w = (e - ct + d) % d; if (w < bw) { bw = w; bk = k; } }); CVS.exitAt = ct + bw; CVS.exitK = bk; CVS.exitWait = 0; }
   if (CVS.mode === 'dance' && CVS.exitAt != null) { const v = CV[CV_DANCE[CVS.di]]; // múa tiếp tới đúng thế tay khớp clip xoay rồi mới xoay
     CVS.exitWait += dt; const d = v.duration || 58, ct = v.currentTime, et = CVS.exitAt % d;
-    const reached = Math.abs(ct - et) < .07 || (ct > et && ct - et < .4 && CVS.exitAt < d) || CVS.exitWait > 4;
+    const reached = Math.abs(ct - et) < .05 || (ct > et && ct - et < .4 && CVS.exitAt < d) || CVS.exitWait > 6;
     if (!wantDown) CVS.exitAt = null;
-    else if (reached) { CVS.exitAt = null; CVS.mode = 'turnD'; CVS.tt = 0; CVS.img = cvLocImg(); v.pause(); cvTurnStart(CVF.xuong); } }
+    else if (reached) { CVS.exitAt = null; CVS.mode = 'turnD'; CVS.tt = 0; CVS.img = cvLocImg(); v.pause(); cvTurnStart(CVF['xu' + (CVS.exitK || 0)]); } }
   else if (CVS.mode === 'turnD') { CVS.tt += dt; if (cvTurnDone()) { CVS.mode = 'front'; CVS.xf = cvtOk ? 1 : 0; cvFrontStart(); } }
-  else if (CVS.mode === 'front') { const ni = cvLocImg(); if (ni !== CVS.img) { CVS.img = ni; cvFrontStart(); } if (!wantDown && !S.loc) { CVS.mode = 'turnU'; CVS.tt = 0; if (CVS.fv) CVS.fv.pause(); cvTurnStart(CVF.len); } }
+  else if (CVS.mode === 'front') { const ni = cvLocImg(); if (ni !== CVS.img) { CVS.img = ni; cvFrontStart(); } if (!wantDown && !S.loc) { CVS.mode = 'turnU'; CVS.tt = 0; if (CVS.fv) CVS.fv.pause(); CVS.rr = ((CVS.rr == null ? -1 : CVS.rr) + 1) % CV_RESUME.length; cvTurnStart(CVF['le' + CVS.rr]);
+    const dz = CV[CV_DANCE[CVS.di]]; try { dz.pause(); dz.currentTime = CV_RESUME[CVS.rr] + .005; } catch (e) {} } }
   if ((CVS.mode === 'turnD' || CVS.mode === 'turnU') && CVS.tv) { const tv = CVS.tv; if (tv.paused && !tv.ended && tv.readyState >= 2 && tv.currentTime < .05) cvPlay(tv);
     if (tv.readyState >= 2 && tv.videoWidth && tv.currentTime !== cvtT && tv.currentTime > 0) { try { cvGrabTo(tv, CVT_BUF); cvtT = tv.currentTime; cvtOk = true; } catch (e) {} } }
   if (CVS.mode === 'front' && CO.giving && CO.giving.phase === 'give' && CO.giving.flyPending) { const g = CO.giving, fv = CVS.fv, rel = CVF_REL[CVS.img] || 2.5;
