@@ -209,7 +209,7 @@ function tungLoc() {
   if (GIA().id === 'codoi' && (S.auto || S.real)) { if (S.loc || CO.giving) { S.locQ = true; return; } if (S.t - (S.locEnd || -1e9) < 20) { S.locQ = true; return; } }
   const AK = !S.auto && !S.real && GIA().id === 'codoi' ? (S.autoKind || 'tien') : 'tien';
   CO.giving = null; // cô về góc phải phía trước chiếu (bên trái đã có bình tim, bảng)
-  S.loc = { kind: AK, ph: 'di', t: 0, gx: GIA().id === 'codoi' ? CARPET.cx + 168 : CARPET.cx + 118, gy: GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 20, arm: 1, u: 0, n: 0 }; S.throwT = .5;
+  S.loc = { kind: AK, ph: 'di', t: 0, gx: GIA().id === 'codoi' ? CARPET.cx + 92 : CARPET.cx + 118, gy: GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 20, arm: 1, u: 0, n: 0 }; S.throwT = .5;
 }
 // cô vung tay, tiền bay ra từ bàn tay
 function nemTien(arm) {
@@ -283,7 +283,7 @@ function coUpdate(dt) {
   if (ongNgoi()) { CO.tx = CARPET.cx; CO.ty = CARPET.cy - 4; CO.downT = 0; }
   if (CO.giving) { CO.giving.t = (CO.giving.t || 0) + dt; if (CO.giving.phase === 'walk' && CO.giving.t > 20) { const g = CO.giving; CO.giving = null; if (S.people.includes(g.p) && !S.dem) goTo(g.p, [[g.p.seat.x, g.p.seat.y]], () => { g.p.state = 'seat'; g.p.pose = 'kneel'; }); } }
   if (laOng() && S.obCall > 0 && ongNgoi() && (CO.sit || 0) > .9) CO.giveT = Math.min(CO.giveT, .5);
-  if (CO.giveT <= 0 && !CO.giving && !S.dem && !S.giving && (laOng() ? ongNgoi() && (CO.sit || 0) > .9 : true) && S.throwT <= 0 && !S.chuyen && congCu() !== 'cheo' && (GIA().tim || 'tien') === 'tien') { const cand = S.people.filter(p => p.state === 'seat'); if (cand.length) { const p = laOng() && S.obFirst && cand.includes(S.obFirst) ? S.obFirst : pick(cand); if (laOng()) S.obFirst = null; CO.giving = { p, kind: pick(GIA().tim === 'sen' ? ['sen', 'sen', 'flower', 'fruit', 'peach'] : GIA().id === 'codoi' ? ['fruit', 'flower', 'fruit', 'flower', 'note'] : ['note', 'note', 'flower', 'fruit', 'peach']), phase: 'walk', t: 0 }; if (laOng()) { if (S.obCall > 0) S.obCall--; } else { CO.tx = GIA().id === 'codoi' ? CARPET.cx + 168 : CARPET.cx; CO.ty = GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 26; }
+  if (CO.giveT <= 0 && !CO.giving && !S.dem && !S.giving && (laOng() ? ongNgoi() && (CO.sit || 0) > .9 : true) && S.throwT <= 0 && !S.chuyen && congCu() !== 'cheo' && (GIA().tim || 'tien') === 'tien') { const cand = S.people.filter(p => p.state === 'seat'); if (cand.length) { const p = laOng() && S.obFirst && cand.includes(S.obFirst) ? S.obFirst : pick(cand); if (laOng()) S.obFirst = null; CO.giving = { p, kind: pick(GIA().tim === 'sen' ? ['sen', 'sen', 'flower', 'fruit', 'peach'] : GIA().id === 'codoi' ? ['fruit', 'flower', 'fruit', 'flower', 'note'] : ['note', 'note', 'flower', 'fruit', 'peach']), phase: 'walk', t: 0 }; if (laOng()) { if (S.obCall > 0) S.obCall--; } else { CO.tx = GIA().id === 'codoi' ? CARPET.cx + 92 : CARPET.cx; CO.ty = GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 26; }
       p.cham = true; goTo(p, [[p.seat.x + (DEM.x - p.seat.x) * .5, Math.max(p.seat.y, DEM.y + 30)], [DEM.x, DEM.y + 2]], () => { p.state = 'xinloc'; p.pose = 'bow'; p.poseT = 1.6; S.dem = { p, t: 0 }; }); } CO.giveT = GIA().id === 'codoi' ? rnd(7, 11) : rnd(12, 20); }
   CO.downT = Math.max(0, CO.downT - dt);
   let dx = CO.tx - CO.x, dy = CO.ty - CO.y, d = Math.hypot(dx, dy), sp = (S.loc ? 70 : S.chuyen ? 46 : congCu() === 'cheo' ? 13 : GIA().id === 'codoi' ? (S.danceSpecial > 0 ? 60 : 44) : S.danceSpecial > 0 ? 38 : 24) * dt; CO.wantMove = d > 1.5; CO.moving = d > 1.5 && sp > 0;
@@ -1436,7 +1436,7 @@ function update(dt) {
           if (kind === 'big') { S.banner = { text: p.name + ' dâng hoa lớn lên cô', t: 0, life: 4 }; for (let i = 0; i < 24; i++) S.particles.push({ x: rnd(180, 360), y: rnd(330, 380), vx: rnd(-20, 20), vy: rnd(20, 60), life: rnd(2, 3), t: 0, kind: 'petal', c: pick(['#f6b6c8', '#ec8fae', '#fff0f4']) }); }
           if (GIA().id === 'codoi') { // con nhang dâng hoa xong quỳ chờ, cô ra mép sập quay xuống ban lộc quả / hoa cho chính người đó
             setTimeout(() => { if (!S.people.includes(p)) { S.giving = 0; return; } p.carry = null; p.state = 'xinloc'; p.pose = 'kneel'; S.dem = { p, t: 0, lim: 20 };
-              if (!S.loc && !S.chuyen) { CO.giving = { p, kind: pick(['fruit', 'flower', 'fruit', 'flower']), phase: 'walk', t: 0 }; CO.tx = CARPET.cx + 168; CO.ty = CARPET.cy + 12; } }, 1400);
+              if (!S.loc && !S.chuyen) { CO.giving = { p, kind: pick(['fruit', 'flower', 'fruit', 'flower']), phase: 'walk', t: 0 }; CO.tx = CARPET.cx + 92; CO.ty = CARPET.cy + 12; } }, 1400);
           } else
           setTimeout(() => { S.giving = 0; goTo(p, [[p.seat.x, p.seat.y]], () => { p.state = 'seat'; p.pose = 'kneel'; setTimeout(() => { p.carry = null; }, 4000); }); }, 1400);
         }, 1600); });
