@@ -66,13 +66,8 @@ body.livemode canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; a
       </div>
     </div>
     <div class="group">
-      <div class="label">Kết nối live thật (EulerStream)</div>
-      <form id="fLive" class="row" autocomplete="off">
-        <input id="liveUser" placeholder="Tên kênh TikTok, vd: @linhxo" style="flex:1 1 160px">
-        <input id="liveKey" type="password" placeholder="API key EulerStream" style="flex:1 1 160px">
-        <button id="bLiveConn" type="submit">Kết nối</button>
-      </form>
-      <div class="legend" id="liveStat" aria-live="polite">Chưa kết nối. Trên máy tính: mở TikFinity là trang tự kết nối. Trên điện thoại: nhập tên kênh và API key EulerStream rồi bấm Kết nối.</div>
+      <div class="label">Kết nối TikFinity</div>
+      <div class="legend" id="liveStat" aria-live="polite">Chưa kết nối. Mở TikFinity trên máy tính (đăng nhập kênh đang live), trang sẽ tự kết nối.</div>
     </div>
     <div class="group">
       <div class="label">Giá hầu</div>
@@ -1741,13 +1736,11 @@ buildCfgPanel(); napNhacGia();
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(frame));
 })();
 
-// ---------- Kết nối phiên live thật qua EulerStream: người xem thật thành con nhang, cô gọi ngẫu nhiên ban lộc ----------
+// ---------- Kết nối TikFinity: người xem thật thành con nhang, cô gọi ngẫu nhiên ban lộc ----------
 (() => {
   const H = window.__hd; if (!H) return; const say = H.say, person = H.person, like = H.like, gift = H.gift, follow = H.follow, shareLive = H.shareLive, addComment = H.addComment;
-  const fm = document.getElementById('fLive'), iu = document.getElementById('liveUser'), ik = document.getElementById('liveKey'), bt = document.getElementById('bLiveConn'), st = document.getElementById('liveStat');
-  if (!fm) return;
-  try { iu.value = localStorage.getItem('hd_live_user') || ''; ik.value = localStorage.getItem('hd_live_key') || ''; } catch (e) {}
-  let ws = null, want = false, retry = 0, timer = null;
+  const st = document.getElementById('liveStat'); if (!st) return;
+  const ws = null;
   const setStat = (t) => { st.textContent = t; };
   const nameOf = (o) => { // tìm tên người xem trong gói tin (an toàn với nhiều phiên bản dữ liệu)
     const u = (o && (o.user || o.fromUser || (o.common && o.common.user))) || null;
@@ -1778,26 +1771,8 @@ buildCfgPanel(); napNhacGia();
     tf.onclose = () => { if (tfOk) setStat('TikFinity: mất kết nối, đang thử lại…'); tfOk = false; if (!ws) H.S.real = false; tf = null; clearTimeout(tfTimer); tfTimer = setTimeout(tfConnect, 5000); };
     tf.onerror = () => {};
   }
-  if (location.protocol !== 'about:' && !/claude\.ai|claudeusercontent/.test(location.host)) tfConnect();
-  function connect() {
-    const u = iu.value.trim().replace(/^@/, ''), k = ik.value.trim();
-    if (!u || !k) { setStat('Anh nhập tên kênh và API key trước nhé.'); return; }
-    try { localStorage.setItem('hd_live_user', iu.value.trim()); localStorage.setItem('hd_live_key', k); } catch (e) {}
-    want = true; bt.textContent = 'Ngắt kết nối'; setStat('Đang kết nối tới @' + u + '…');
-    try { ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k) + '&features.bundleEvents=true'); } catch (e) { setStat('Không mở được kết nối: ' + e.message); return; }
-    ws.onopen = () => { retry = 0; H.S.real = true; setStat('Đã kết nối @' + u + '. Chờ người xem tương tác…'); };
-    ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
-      const list = Array.isArray(j.messages) ? j.messages : [j];
-      if (tfOk) return; // TikFinity đang chạy: dùng TikFinity
-      list.forEach(m => { const type = m.type || m.event || m.name, d = m.data || m.json && (() => { try { return JSON.parse(m.json); } catch (e) { return null; } })() || m; if (type) handle(type, d || {}); });
-      setStat('Đang live @' + u + ' · ' + seen.size + ' người đã tương tác'); };
-    ws.onclose = (e) => { if (!tfOk) H.S.real = false; ws = null;
-      const why = { 4401: 'API key không đúng', 4403: 'gói EulerStream không cho phép', 4404: 'kênh đang không live', 4429: 'quá số kết nối của gói' }[e.code] || ('mất kết nối (' + e.code + ')');
-      if (!want) { setStat('Đã ngắt kết nối.'); return; }
-      if (e.code === 4401 || e.code === 4403) { want = false; bt.textContent = 'Kết nối'; setStat('Không kết nối được: ' + why + '.'); return; }
-      retry++; const w = Math.min(30, 3 * retry); setStat('Chưa kết nối được: ' + why + '. Thử lại sau ' + w + ' giây…'); clearTimeout(timer); timer = setTimeout(() => { if (want) connect(); }, w * 1000); };
-  }
-  fm.addEventListener('submit', (e) => { e.preventDefault(); if (want) { want = false; clearTimeout(timer); if (ws) ws.close(); bt.textContent = 'Kết nối'; H.S.real = false; setStat('Đã ngắt kết nối.'); } else connect(); });
+  tfConnect();
+  window.__hdTf = () => tfOk;
 })();
 
 // ---------- Chế độ live trên điện thoại: chỉ còn khung điện, phủ kín màn hình; chạm 2 lần để thoát ----------
@@ -1811,8 +1786,7 @@ buildCfgPanel(); napNhacGia();
   if (Q.get('live') === '1') {
     document.body.classList.add('livemode');
     setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
-      const iu = document.getElementById('liveUser'), ik = document.getElementById('liveKey'), bc = document.getElementById('bLiveConn');
-      if (iu && ik && iu.value && ik.value && bc && bc.textContent.trim() === 'Kết nối') bc.click(); }, 1500);
+    }, 1500);
   }
   btn.addEventListener('click', () => {
     document.body.classList.add('livemode'); window.scrollTo(0, 0);
