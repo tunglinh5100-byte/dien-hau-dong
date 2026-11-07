@@ -44,6 +44,8 @@ body.livemode .console { display: none; }
 body.livemode .wrap { display: block; max-width: none; }
 body.livemode .phone { position: fixed; inset: 0; max-width: none; width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; margin: 0; z-index: 50; display: flex; align-items: center; justify-content: center; }
 body.livemode canvas { width: 100vw; width: min(100vw, calc(100vh * 9 / 16)); width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9 / 16; }
+body.livemode.rot .phone { display: block; }
+body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; height: 100vw; max-width: none; aspect-ratio: auto; transform: translate(-50%, -50%) rotate(90deg); }
 .lm-hint { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; font: 600 13px var(--ui); color: #fff; background: rgba(0,0,0,.6); padding: 8px 14px; border-radius: 20px; pointer-events: none; transition: opacity .6s; }
 .note { font-size: 13px; color: var(--mute); border-left: 2px solid var(--line); padding-left: 10px; }
 </style>
@@ -1785,6 +1787,8 @@ buildCfgPanel(); napNhacGia();
   document.addEventListener('keydown', (e) => { if ((e.key === 'h' || e.key === 'H') && !/input|select|textarea/i.test(e.target.tagName)) { document.body.classList.toggle('livemode'); window.scrollTo(0, 0); } });
   if (Q.get('live') === '1') {
     document.body.classList.add('livemode');
+    if (Q.get('rot') === '1') document.body.classList.add('rot'); // khung ngang của LIVE Studio: xoay 90° để dùng hết điểm ảnh, LIVE Studio xoay lại
+    if (Q.get('sim') === '0' || Q.get('sim') === '1') setTimeout(() => { const bA = document.getElementById('bAuto'); if (bA && bA.classList.contains('on') !== (Q.get('sim') === '1')) bA.click(); }, 300);
     setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
     }, 1500);
   }
