@@ -1061,7 +1061,7 @@ function drawKhen() {
   const dau = parts[0].replace(/[,\s]+$/, '').trim(), sau = (parts[1] || '').replace(/^[,\s]+/, '').trim();
   ctx.save(); ctx.globalAlpha = Math.max(0, a);
   ctx.font = `800 14px ${SERIF}`; const w1 = ctx.measureText(nm).width; ctx.font = `700 10.5px ${SERIF}`; const w2 = ctx.measureText(dau).width; ctx.font = `700 12px ${SERIF}`; const w3 = sau ? ctx.measureText(sau).width : 0;
-  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, w / 2 + 6, 540 - w / 2 - 6), y = CO.y - (GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : 232) * sc, top = y + 18 - h;
+  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, w / 2 + SAFE_X, 540 - w / 2 - SAFE_X), y = CO.y - (GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : 232) * sc, top = y + 18 - h;
   rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 7, y + 17); ctx.lineTo(x, y + 27); ctx.lineTo(x + 7, y + 17); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
   text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 });
@@ -1371,7 +1371,7 @@ function drawBinh(t) {
     ctx.restore(); });
 }
 function drawBangPhai() { // hướng dẫn nhận lời ban khen, lưu ý ngay bên dưới, cùng một bảng
-  const X = 8, Y = 160, Wd = 150, cx = X + Wd / 2;
+  const X = 8, Y = 192, Wd = 150, cx = X + Wd / 2;
   ctx.font = `600 9.5px ${UI}`; const words = 'Nội dung chỉ nhằm mục đích giới thiệu tín ngưỡng Đạo Mẫu và các đền. Tôi KHÔNG nhận quà tặng dưới mọi hình thức, KHÔNG xem bói, KHÔNG tương tác với ai.'.split(' '), lines = []; let ln = '';
   words.forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > 134 && ln) { lines.push(ln); ln = w; } else ln = tt; }); if (ln) lines.push(ln);
   const h = 88 + lines.length * 12.5; panel(X, Y, Wd, h);
@@ -1398,11 +1398,12 @@ function drawMoi(t) { // dải mời tương tác cuối màn hình, đổi câu
   ctx.translate(270, y + h / 2); ctx.scale(pulse, pulse); text(MOI[i], 0, 0, 14, '#fff3c4', { f: SERIF, w: 800 });
   ctx.restore();
 }
+const SAFE_X = 56;
 function drawOverlay(t) {
   drawMoi(t);
-  // bảng bên phải: nhận lời ban khen + lưu ý
+  // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
+  const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
   drawBangPhai();
-  const BX = 0; ctx.save(); ctx.translate(BX, 0);
   drawBinh(t);
   if (S.timBan) { const b = S.timBan, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1);
     rr(8, 516, 150, 46, 10, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(8, 516, 150, 46, 10); ctx.stroke();
@@ -1488,7 +1489,7 @@ function update(dt) {
   if (S.kick) S.kick = Math.max(0, S.kick - dt * 1.4);
   if (S.drops) { S.drops.forEach(d => d.t += dt); S.drops = S.drops.filter(d => d.t < .6); }
   if (S.burst) { const B = S.burst; B.t += dt;
-    if (!B.boom && B.t >= .45) { B.boom = 1; S.shards = S.shards || []; const X = 83, Y = 438;
+    if (!B.boom && B.t >= .45) { B.boom = 1; S.shards = S.shards || []; const X = 83 + SAFE_X, Y = 438;
       for (let i = 0; i < 22; i++) { const a = rnd(0, 6.28), v = rnd(90, 260); S.shards.push({ x: X + rnd(-20, 20), y: Y + rnd(-20, 20), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, rot: rnd(0, 6), vr: rnd(-9, 9), t: 0, life: rnd(1, 1.6), kind: 'glass', r: rnd(4, 9) }); }
       for (let i = 0; i < 26; i++) { const a = rnd(0, 6.28), v = rnd(60, 220); S.shards.push({ x: X, y: Y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, rot: 0, vr: 0, t: 0, life: rnd(1.2, 2), kind: Math.random() < .55 ? 'heart' : 'drop', r: rnd(4, 8) }); } }
     if (!B.loc && B.t >= .9) { B.loc = 1; if (!S.chuyen) tungLoc(); }
