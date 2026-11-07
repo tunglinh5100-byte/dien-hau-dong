@@ -1793,6 +1793,7 @@ buildCfgPanel(); napNhacGia();
   document.addEventListener('keydown', (e) => { if ((e.key === 'h' || e.key === 'H') && !/input|select|textarea/i.test(e.target.tagName)) { document.body.classList.toggle('livemode'); window.scrollTo(0, 0); } });
   if (Q.get('live') === '1') {
     document.body.classList.add('livemode');
+    setTimeout(() => { const bA = document.getElementById('bAuto'); if (bA && bA.classList.contains('on')) bA.click(); }, 300); // live thật: luôn tắt giả lập
     setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
       const iu = document.getElementById('liveUser'), ik = document.getElementById('liveKey'), bc = document.getElementById('bLiveConn');
       if (iu && ik && iu.value && ik.value && bc && bc.textContent.trim() === 'Kết nối') bc.click(); }, 1500);
