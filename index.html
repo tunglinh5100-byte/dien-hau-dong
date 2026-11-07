@@ -1702,15 +1702,22 @@ setInterval(capNhatGiaInfo, 500);
 // ---------- Loop ----------
 let last = performance.now();
 const FMIN = NHE ? 40 : LIVE1 ? 31 : 0; // live: giới hạn 30 khung/giây (nhe=1: 25) cho nhẹ máy
-function frame(now) {
-  if (FMIN && now - last < FMIN) { requestAnimationFrame(frame); return; }
+let lastRun = performance.now(), errN = 0;
+function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung không làm đứng hình cả trang
+  requestAnimationFrame(frame);
+  if (FMIN && now - last < FMIN) return;
+  lastRun = performance.now();
+  try { frame1(now); } catch (e) { if (errN++ < 20) console.error('frame', e); last = now; }
+}
+// dự phòng: nếu trình duyệt trong LIVE Studio ngừng gọi requestAnimationFrame thì tự vẽ bằng hẹn giờ
+setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRun = n; try { frame1(n); } catch (e) { last = n; } } }, 50);
+function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
   drawBg(t); drawSong(t); drawCungVan(t); drawDem(t); drawMoneyFloor();
   const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
   behind.forEach(p => drawPerson(p, t)); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
   drawBubbles(); drawMoney(); drawFlying(); drawParticles(); drawOverlay(t); drawGiaPill(); drawTenCV(); drawDangOng(t); drawTenNhanLoc(t); if (!S.chuyen) drawKhen(); drawLoiVan(t);
-  requestAnimationFrame(frame);
 }
 
 // ---------- Controls ----------
