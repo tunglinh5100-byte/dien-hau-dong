@@ -72,7 +72,7 @@ body.livemode canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; a
         <input id="liveKey" type="password" placeholder="API key EulerStream" style="flex:1 1 160px">
         <button id="bLiveConn" type="submit">Kết nối</button>
       </form>
-      <div class="legend" id="liveStat" aria-live="polite">Chưa kết nối. Người xem thật bình luận, thả tim, chia sẻ sẽ hiện thành con nhang mang tên thật và được cô gọi ngẫu nhiên ban lộc.</div>
+      <div class="legend" id="liveStat" aria-live="polite">Chưa kết nối. Trên máy tính: mở TikFinity là trang tự kết nối. Trên điện thoại: nhập tên kênh và API key EulerStream rồi bấm Kết nối.</div>
     </div>
     <div class="group">
       <div class="label">Giá hầu</div>
@@ -1752,6 +1752,7 @@ buildCfgPanel(); napNhacGia();
   const nameOf = (o) => { // tìm tên người xem trong gói tin (an toàn với nhiều phiên bản dữ liệu)
     const u = (o && (o.user || o.fromUser || (o.common && o.common.user))) || null;
     if (u) return u.nickname || u.uniqueId || u.displayId || null;
+    if (o && (o.nickname || o.uniqueId)) return o.nickname || o.uniqueId;
     return null; };
   const seen = new Map(); // ai đã tương tác (để cô gọi ngẫu nhiên)
   function handle(type, d) {
@@ -1762,8 +1763,22 @@ buildCfgPanel(); napNhacGia();
     else if (t.includes('like')) { person(nm); like(Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), nm); }
     else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) shareLive(nm); else follow(nm); }
+    else if (t === 'share') shareLive(nm);
+    else if (t === 'follow') follow(nm);
     else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm)) { person(nm); addComment(nm, 'đã vào phiên live'); } }
   }
+  // ---- TikFinity (chạy trên cùng máy tính): tự kết nối, không cần API key ----
+  let tf = null, tfOk = false, tfTimer = null;
+  function tfConnect() {
+    try { tf = new WebSocket('ws://localhost:21213/'); } catch (e) { tfTimer = setTimeout(tfConnect, 5000); return; }
+    tf.onopen = () => { tfOk = true; H.S.real = true; setStat('TikFinity: đã kết nối ● · ' + seen.size + ' người đã tương tác'); };
+    tf.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
+      const type = j.event || j.type, d = j.data || {}; if (type) handle(type, d);
+      setStat('TikFinity: đã kết nối ● · ' + seen.size + ' người đã tương tác'); };
+    tf.onclose = () => { if (tfOk) setStat('TikFinity: mất kết nối, đang thử lại…'); tfOk = false; if (!ws) H.S.real = false; tf = null; clearTimeout(tfTimer); tfTimer = setTimeout(tfConnect, 5000); };
+    tf.onerror = () => {};
+  }
+  if (location.protocol !== 'about:' && !/claude\.ai|claudeusercontent/.test(location.host)) tfConnect();
   function connect() {
     const u = iu.value.trim().replace(/^@/, ''), k = ik.value.trim();
     if (!u || !k) { setStat('Anh nhập tên kênh và API key trước nhé.'); return; }
@@ -1773,9 +1788,10 @@ buildCfgPanel(); napNhacGia();
     ws.onopen = () => { retry = 0; H.S.real = true; setStat('Đã kết nối @' + u + '. Chờ người xem tương tác…'); };
     ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
       const list = Array.isArray(j.messages) ? j.messages : [j];
+      if (tfOk) return; // TikFinity đang chạy: dùng TikFinity
       list.forEach(m => { const type = m.type || m.event || m.name, d = m.data || m.json && (() => { try { return JSON.parse(m.json); } catch (e) { return null; } })() || m; if (type) handle(type, d || {}); });
       setStat('Đang live @' + u + ' · ' + seen.size + ' người đã tương tác'); };
-    ws.onclose = (e) => { H.S.real = false; ws = null;
+    ws.onclose = (e) => { if (!tfOk) H.S.real = false; ws = null;
       const why = { 4401: 'API key không đúng', 4403: 'gói EulerStream không cho phép', 4404: 'kênh đang không live', 4429: 'quá số kết nối của gói' }[e.code] || ('mất kết nối (' + e.code + ')');
       if (!want) { setStat('Đã ngắt kết nối.'); return; }
       if (e.code === 4401 || e.code === 4403) { want = false; bt.textContent = 'Kết nối'; setStat('Không kết nối được: ' + why + '.'); return; }
