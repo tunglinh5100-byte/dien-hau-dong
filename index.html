@@ -290,7 +290,7 @@ function coUpdate(dt) {
   if (d > 1.5) { CO.x += dx / d * Math.min(sp, d); CO.y += dy / d * Math.min(sp, d); }
   else if (CO.giving && CO.giving.phase === 'walk' && S.dem && S.dem.p === CO.giving.p && S.dem.t > 1.2) { const g = CO.giving; g.phase = 'give'; CO.downT = GIA().id === 'codoi' ? 6.6 : 9;
     if (laOng()) giaoTay(g); else if (GIA().id === 'codoi') { g.flyPending = true; CO.downT = 14; } else setTimeout(() => { const p = g.p; S.flying.push({ x: CO.x, y: CO.y - (GIA().id === 'codoi' ? 90 : 150), tx: DEM.x, ty: DEM.y - 34, t: 0, dur: 1, kind: g.kind, p }); }, GIA().id === 'codoi' ? (CV_TD + (CVF_REL[g.kind === 'fruit' || g.kind === 'peach' ? 'qua' : g.kind === 'note' ? 'tien' : 'hoa'] || 3)) * 1000 : 900); }
-  else if (!S.chuyen && !S.loc && !ongNgoi() && GIA().hang !== 'mau') { CO.wait -= dt; if (CO.wait <= 0 && !CO.giving) { if (congCu() === 'cheo') { CO.tx = CARPET.cx; CO.ty = CARPET.cy + 6; CO.wait = 2; } else if (GIA().id === 'codoi') { CO.side = -(CO.side || 1); CO.tx = clamp(CARPET.cx + CO.side * rnd(125, 165), 70, 470); CO.ty = CARPET.cy - rnd(4, 18); } else [CO.tx, CO.ty] = inCarpet(); CO.wait = GIA().id === 'codoi' ? rnd(9, 11.5) : rnd(1.5, 4); if (GIA().id !== 'codoi' && Math.random() < .3) CO.downT = rnd(1.8, 3); } }
+  else if (!S.chuyen && !S.loc && !ongNgoi() && GIA().hang !== 'mau') { CO.wait -= dt; if (CO.wait <= 0 && !CO.giving) { if (congCu() === 'cheo') { CO.tx = CARPET.cx; CO.ty = CARPET.cy + 6; CO.wait = 2; } else if (GIA().id === 'codoi') { CO.side = -(CO.side || 1); CO.tx = CARPET.cx + CO.side * rnd(22, 48); CO.ty = CARPET.cy - rnd(4, 14); } else [CO.tx, CO.ty] = inCarpet(); CO.wait = GIA().id === 'codoi' ? rnd(9, 11.5) : rnd(1.5, 4); if (GIA().id !== 'codoi' && Math.random() < .3) CO.downT = rnd(1.8, 3); } }
   // hướng người: ngang theo hướng đi; "down" khi quay chéo xuống
   const lat = congCu() === 'cheo' && !S.chuyen ? .8 : d > 1.5 ? clamp(dx / (d || 1), -1, 1) * .6 : (CO.giving ? (laOng() ? (CO.giving.tay ? Math.sign(CO.giving.tay.home[0] - CO.x) : 1) * .8 : S.dem ? 0 : Math.sign((CO.giving.p.seat.x - CO.x) || 1) * .7) : 0);
   CO.face += (lat - CO.face) * Math.min(1, dt * 3);
@@ -1387,7 +1387,19 @@ function drawKhayOng(t) { if (!ongNgoi() || (CO.sit || 0) < .5) return; const sc
 function drawDangOng(t) { if (!ongNgoi() || (CO.sit || 0) < .5) return;
   const msg = '☕ Dâng ông cà phê · 🚬 thuốc lá'; ctx.save(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(msg).width + 26, py = CO.y + 30;
   rr(CO.x - w / 2, py - 12, w, 24, 12, 'rgba(90,30,100,.92)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(CO.x - w / 2, py - 12, w, 24, 12); ctx.stroke(); text(msg, CO.x, py, 12, '#fbe9a8', { f: SERIF, w: 700 }); ctx.restore(); }
+const MOI = ['💬 Bình luận "lạy cô" để được cô gọi tên ban lộc', '📍 Bình luận tên quê, cô gọi tên con nhang', '❤️ Thả tim đầy bình 100 tim, cô tung lộc', '↗️ Chia sẻ live để nhận lời ban khen của cô', '🙏 Gõ "thắp hương" để lên dâng hương'];
+function drawMoi(t) { // dải mời tương tác cuối màn hình, đổi câu mỗi 5 giây
+  if (!(S.real || S.auto) || GIA().id !== 'codoi') return;
+  const P = 5, i = Math.floor(t / P) % MOI.length, u = (t % P) / P, a = Math.min(1, u / .08, (1 - u) / .08);
+  const y = 924, h = 30; ctx.save();
+  const g = ctx.createLinearGradient(0, y - 8, 0, y + h + 6); g.addColorStop(0, 'rgba(60,10,8,0)'); g.addColorStop(.25, 'rgba(60,10,8,.82)'); g.addColorStop(1, 'rgba(40,6,5,.9)'); ctx.fillStyle = g; ctx.fillRect(0, y - 8, 540, h + 14);
+  ctx.strokeStyle = 'rgba(230,181,82,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(30, y - 1); ctx.lineTo(510, y - 1); ctx.stroke();
+  ctx.globalAlpha = clamp(a, 0, 1); const pulse = 1 + .03 * Math.sin(t * 6);
+  ctx.translate(270, y + h / 2); ctx.scale(pulse, pulse); text(MOI[i], 0, 0, 14, '#fff3c4', { f: SERIF, w: 800 });
+  ctx.restore();
+}
 function drawOverlay(t) {
+  drawMoi(t);
   // bảng bên phải: nhận lời ban khen + lưu ý
   drawBangPhai();
   const BX = 0; ctx.save(); ctx.translate(BX, 0);
