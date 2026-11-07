@@ -349,15 +349,15 @@ CV_DANCE.forEach(name => {
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
   v.style.cssText = 'width:2px;height:4px';
   v.addEventListener('error', () => { cvErr = true; });
-  v.src = 'co-' + name + '.mp4?v=3'; CV_HOLD.appendChild(v); CV[name] = v;
+  v.src = 'co-' + name + '.mp4?v=4'; CV_HOLD.appendChild(v); CV[name] = v;
 });
 // clip quay xuống tung lộc (chạy một lần): tiền, quả, hoa hồng.
-const CVF = {}, CVF_REL = { tien: 2.8, qua: 2.9, hoa: 3.1 };
+const CVF = {}, CVF_REL = { tien: 5.8, qua: 2.9, hoa: 3.1 };
 ['tien', 'qua', 'hoa', 'xuong', 'len'].forEach(name => { // xuong/len: clip cô xoay người thật
   const v = document.createElement('video');
   v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = 'auto';
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=3'; CV_HOLD.appendChild(v); CVF[name] = v;
+  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=4'; CV_HOLD.appendChild(v); CVF[name] = v;
 });
 const CVF_BUF = document.createElement('canvas'); CVF_BUF.width = CV_W; CVF_BUF.height = CV_H; let cvfOk = false, cvfT = -1;
 const CVT_BUF = document.createElement('canvas'); CVT_BUF.width = CV_W; CVT_BUF.height = CV_H; let cvtOk = false, cvtT = -1;
