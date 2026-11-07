@@ -1788,9 +1788,18 @@ buildCfgPanel(); napNhacGia();
   const btn = document.getElementById('bLiveMode'); if (!btn) return;
   let hint = null, lastTap = 0;
   const exit = () => { document.body.classList.remove('livemode'); if (hint) hint.remove(); hint = null; };
+  // ?live=1 (mở bằng MO LIVE trên máy tính): vào thẳng khung live, phím H mở/ẩn bảng điều khiển, tự kết nối và bật nhạc
+  const Q = new URLSearchParams(location.search);
+  document.addEventListener('keydown', (e) => { if ((e.key === 'h' || e.key === 'H') && !/input|select|textarea/i.test(e.target.tagName)) { document.body.classList.toggle('livemode'); window.scrollTo(0, 0); } });
+  if (Q.get('live') === '1') {
+    document.body.classList.add('livemode');
+    setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
+      const iu = document.getElementById('liveUser'), ik = document.getElementById('liveKey'), bc = document.getElementById('bLiveConn');
+      if (iu && ik && iu.value && ik.value && bc && bc.textContent.trim() === 'Kết nối') bc.click(); }, 1500);
+  }
   btn.addEventListener('click', () => {
     document.body.classList.add('livemode'); window.scrollTo(0, 0);
-    hint = document.createElement('div'); hint.className = 'lm-hint'; hint.textContent = 'Chạm 2 lần vào màn hình để thoát chế độ live'; document.body.appendChild(hint);
+    hint = document.createElement('div'); hint.className = 'lm-hint'; hint.textContent = 'Chạm 2 lần (hoặc bấm phím H) để thoát chế độ live'; document.body.appendChild(hint);
     setTimeout(() => { if (hint) hint.style.opacity = '0'; }, 3500);
     try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
   });
