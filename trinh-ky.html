@@ -76,14 +76,15 @@ function say(s, then) { if (!VOICE) pickVoice(); if (!S.voice || !('speechSynthe
     S.speaking = true; u.onend = u.onerror = () => { S.speaking = false; if (then) then(); }; speechSynthesis.speak(u); return 1; } catch (e) { return 0; } }
 
 // ---------- Việc của thầy: mỗi việc { ten, tuoi | null, that } ----------
-function enqueue(job) { if (S.queue.some(j => j.ten === job.ten) || (S.cur && S.cur.job.ten === job.ten)) return;
+function enqueue(job) { const old = S.queue.findIndex(j => j.ten === job.ten); if (old >= 0) { S.queue[old] = job; return; } if (S.cur && S.cur.job.ten === job.ten && !job.ngay) return;
   if (job.that) { const i = S.queue.findIndex(j => !j.that); if (i >= 0) S.queue.splice(i, 0, job); else S.queue.push(job); } else if (S.queue.length < 2) S.queue.push(job);
   if (S.queue.length > 10) S.queue.splice(10); }
-function startJob(job) { refreshDay(); S.cur = { job, ans: L.phan(job.ten, S.day, job.tuoi || S.nho.get(job.ten) || null, job.sep || S.nhoSep.get(job.ten) || null), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
+function startJob(job) { refreshDay(); const tu = job.tuoi || S.nho.get(job.ten) || null, se = job.sep || S.nhoSep.get(job.ten) || null;
+  S.cur = { job, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
   S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK + 6 + rnd(-3, 3), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
-const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.', 'Ghi thêm năm sinh sếp, vd: sếp 1975.'];
+const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.', 'Ghi thêm năm sinh sếp, vd: sếp 1975.', 'Hỏi ngày khác được: "mai", "thứ 5".'];
 function update(dt) {
   S.t += dt; S.blinkT -= dt; if (S.blinkT < 0) { S.blink = .14; S.blinkT = rnd(2.5, 5.5); } S.blink = Math.max(0, S.blink - dt);
   S.coins.forEach(c => c.t += dt);
@@ -222,9 +223,9 @@ function drawNoi() { const n = S.noi; if (!n || (S.cur && (S.cur.phase === 'phan
   lines.forEach((l, i) => text(l, W / 2, y + 23 + i * 24, 17, '#4a2410', { w: 700 })); ctx.restore(); }
 function badge(x, y, v) { ctx.fillStyle = v > 0 ? '#2f9a4a' : v < 0 ? '#d0453a' : '#8a8a8a'; ctx.beginPath(); ctx.arc(x, y, 11, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); text(v > 0 ? '✓' : v < 0 ? '✗' : '=', x, y + 1, 13, '#fff', { w: 800 }); }
 function iconGio(cx, cy, m) { const r = 30, col = m.tot > 0 ? '#3fa35a' : '#d0453a'; ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill(); ctx.strokeStyle = '#c99a3a'; ctx.lineWidth = 2.5; ctx.stroke();
-  const a0 = ((m.chi * 2 - 1) / 24) * Math.PI * 2 - Math.PI / 2, a1 = a0 + Math.PI / 6; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r - 3, a0, a1); ctx.closePath(); ctx.fill();
+  (m.chis || [m.chi]).forEach(ch => { const a0 = ((ch * 2 - 1) / 24) * Math.PI * 2 - Math.PI / 2, a1 = a0 + Math.PI / 6; ctx.fillStyle = m.chis ? (m.tot > 0 ? '#3fa35a' : 'rgba(208,69,58,.45)') : col; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r - 3, a0, a1); ctx.closePath(); ctx.fill(); });
   ctx.strokeStyle = '#7a5a30'; ctx.lineWidth = 1; for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6 - Math.PI / 2; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * (r - 6), cy + Math.sin(a) * (r - 6)); ctx.lineTo(cx + Math.cos(a) * (r - 2), cy + Math.sin(a) * (r - 2)); ctx.stroke(); }
-  const v = L.VN(), am = ((v.h + v.mi / 60) / 24) * Math.PI * 2 - Math.PI / 2; ctx.strokeStyle = '#3a2410'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(am) * (r - 8), cy + Math.sin(am) * (r - 8)); ctx.stroke(); ctx.fillStyle = '#3a2410'; ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill(); }
+  if (!m.chis) { const v = L.VN(), am = ((v.h + v.mi / 60) / 24) * Math.PI * 2 - Math.PI / 2; ctx.strokeStyle = '#3a2410'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(am) * (r - 8), cy + Math.sin(am) * (r - 8)); ctx.stroke(); } ctx.fillStyle = '#3a2410'; ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill(); }
 function iconNgay(cx, cy, m) { const w = 56, h = 58, x = cx - w / 2, y = cy - h / 2; ctx.fillStyle = '#fffaf0'; rr(x, y, w, h, 7); ctx.fill(); ctx.fillStyle = m.tot > 0 ? '#3fa35a' : '#d0453a'; rr(x, y, w, 16, [7, 7, 0, 0]); ctx.fill();
   text('Th ' + m.mm, cx, y + 8.5, 9, '#fff', { w: 800 }); text(String(m.dd), cx, y + 33, 22, '#3a2410', { f: SERIF, w: 800 }); text('ÂL ' + m.al.d + '/' + m.al.m, cx, y + 50, 8.5, '#8a5a20', { w: 700 });
   ctx.fillStyle = '#c99a3a'; [x + 14, x + w - 14].forEach(rx => { ctx.beginPath(); ctx.arc(rx, y, 3, 0, 7); ctx.fill(); }); }
@@ -241,11 +242,11 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
   text('Kết quả cho', W / 2, y + 22, 14, '#f6dc96', { f: SERIF, w: 700 });
   const tg = ctx.createLinearGradient(0, y + 34, 0, y + 62); tg.addColorStop(0, '#fffbe0'); tg.addColorStop(.5, '#f9d86e'); tg.addColorStop(1, '#e3a53a'); ctx.save(); ctx.font = `800 26px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,205,100,.9)'; ctx.shadowBlur = 10 + 4 * Math.sin(t * 4); ctx.fillStyle = tg; ctx.fillText(ten(A.ten), W / 2, y + 50); ctx.restore();
   // chỉ khung chữ NÊN / KHÔNG NÊN
-  const word = A.nen ? 'NÊN' : 'KHÔNG NÊN', rest = A.nen ? 'trình ký ngay' : A.semMang ? 'sếp mắng đấy! 😤' : 'trình ký lúc này'; ctx.font = `800 34px ${SERIF}`; const ww = ctx.measureText(word).width + 30; ctx.font = `700 17px ${UI}`; const rw = ctx.measureText(rest).width;
+  const word = A.nen ? 'NÊN' : 'KHÔNG NÊN', rest = A.semMang ? 'sếp mắng đấy! 😤' : A.tuongLai ? 'trình ký ' + A.tuongLai : A.nen ? 'trình ký ngay' : 'trình ký lúc này'; ctx.font = `800 34px ${SERIF}`; const ww = ctx.measureText(word).width + 30; let rfs = 17; ctx.font = `700 ${rfs}px ${UI}`; let rw = ctx.measureText(rest).width; while (ww + 12 + rw > w - 24 && rfs > 11) { rfs -= .5; ctx.font = `700 ${rfs}px ${UI}`; rw = ctx.measureText(rest).width; }
   const tot = ww + 12 + rw, fx = W / 2 - tot / 2, fy = y + 76; const glow = .5 + .5 * Math.sin(t * 5);
   ctx.save(); ctx.shadowColor = A.nen ? 'rgba(140,255,170,.9)' : 'rgba(255,120,90,.9)'; ctx.shadowBlur = 8 + glow * 10; ctx.fillStyle = A.nen ? '#1f7a3a' : '#2a0604'; rr(fx, fy, ww, 50, 10); ctx.fill(); ctx.restore();
   ctx.strokeStyle = A.nen ? '#9df0b4' : '#ff9a7a'; ctx.lineWidth = 3; rr(fx, fy, ww, 50, 10); ctx.stroke();
-  text(word, fx + ww / 2, fy + 26, 34, A.nen ? '#eaffef' : '#ffb39a', { f: SERIF, w: 800 }); text(rest, fx + ww + 12, fy + 26, 17, '#fff1d0', { a: 'left', w: 700 });
+  text(word, fx + ww / 2, fy + 26, 34, A.nen ? '#eaffef' : '#ffb39a', { f: SERIF, w: 800 }); text(rest, fx + ww + 12, fy + 26, rfs, '#fff1d0', { a: 'left', w: 700 });
   // lý do: mỗi ô một hình + nhãn ngắn
   const n = A.muc.length, gap = 10, tw = (w - 28 - gap * (n - 1)) / n, ty = y + 142, th = 132;
   A.muc.forEach((m, i) => { const rv = c.phase === 'xong' ? 1 : clamp((c.t - .4 - i * .35) / .3, 0, 1); if (!rv) return; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1) * rv; const tx = x + 14 + i * (tw + gap), cx = tx + tw / 2;
@@ -256,7 +257,7 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
     text(l1, cx, ty + 94, fs, '#fff1d0', { w: 700 }); text(l2 || '', cx, ty + 115, 14.5, m.tot > 0 ? '#9df0b4' : m.tot < 0 ? '#ffb39a' : '#e6e0d4', { w: 800 }); ctx.restore(); });
   // giờ đẹp kế tiếp (chỉ khi KHÔNG NÊN)
   if (gy.length) { const rv = c.phase === 'xong' ? 1 : clamp((c.t - 1.6) / .4, 0, 1); ctx.save(); ctx.globalAlpha = clamp(a, 0, 1) * rv; const sy = ty + th + 12;
-    text('⏰ Giờ đẹp kế tiếp', W / 2, sy + 8, 14, '#f6dc96', { f: SERIF, w: 800 });
+    text('⏰ ' + (A.goiTitle || 'Giờ đẹp kế tiếp'), W / 2, sy + 8, 14, '#f6dc96', { f: SERIF, w: 800 });
     const cw = (w - 28 - 20) / 3; gy.forEach((g, i) => { const p = g.nhan.split(' '), l1 = p[0], l2 = p.slice(1).join(' '), cx0 = x + 14 + i * (cw + 10); ctx.font = `700 13px ${UI}`; const f2 = Math.min(13, 13 * (cw - 10) / Math.max(1, ctx.measureText(l2).width));
       ctx.fillStyle = 'rgba(20,90,45,.85)'; rr(cx0, sy + 20, cw, 48, 10); ctx.fill(); ctx.strokeStyle = '#9df0b4'; ctx.lineWidth = 1.5; ctx.stroke();
       text(l1, cx0 + cw / 2, sy + 35, 16, '#eaffef', { w: 800 }); text(l2, cx0 + cw / 2, sy + 55, f2, '#c9f5d4', { w: 700 }); }); ctx.restore(); }
@@ -269,7 +270,8 @@ function frame(now) { requestAnimationFrame(frame); const dt = clamp((now - last
   } catch (e) { console.error(e); } }
 
 // ---------- Sự kiện người xem ----------
-function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuoi = r.tuoi, sep = r.sep; if (tuoi) S.nho.set(name, tuoi); if (sep) S.nhoSep.set(name, sep);
+function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuoi = r.tuoi, sep = r.sep, ngay = L.hoiNgay(msg, S.day); if (tuoi) S.nho.set(name, tuoi); if (sep) S.nhoSep.set(name, sep);
+  if (ngay) return enqueue({ ten: name, tuoi: tuoi || S.nho.get(name) || null, sep: sep || S.nhoSep.get(name) || null, ngay, that });
   if (tuoi || sep) return enqueue({ ten: name, tuoi: tuoi || S.nho.get(name) || null, sep: sep || S.nhoSep.get(name) || null, that });
   if (/tr[iì]nh k[yý]|gi[oờ] t[oố]t|xem gi[uú]p|th[aầ]y [oơ]i xem/i.test(String(msg))) enqueue({ ten: name, tuoi: null, that }); }
 function onLike(name, n, that) { const v = (S.likes.get(name) || 0) + n; S.likes.set(name, v);
@@ -281,7 +283,7 @@ function onGift(name) { if (!S.cur) noi('Không nhận quà, ' + ten(name) + ' t
 // ---------- Giả lập người xem (tắt bằng ?sim=0) ----------
 const SIM_ON = Q.get('sim') !== '0';
 const NAMES = ['Mơ Dung', 'Thu Hà', 'Quang Huy', 'Kim Oanh', 'Tuấn Đạt', 'Bảo Ngọc', 'Hải Đăng', 'Minh Khôi', 'Lan Hương', 'Văn Tú', 'Diệu Linh', 'Phúc Lộc', 'Trà My', 'Hồng Nhung', 'Đức Minh', 'Ngọc Ánh'];
-const SIM_MSG = ['em 1991 sếp 1975', 'sếp tuổi Thìn, em 1990', 'sếp 1984 ạ', 'em 1995 sếp 1977', 'con sinh 1991', 'em 1995 thầy ơi', '1988', 'con tuổi Hợi', 'thầy xem giúp con trình ký', '96 ạ', 'Canh Ngọ', 'tuổi Dần ạ', '1983'];
+const SIM_MSG = ['Em 1999, mai có nên trình sếp không, sếp sinh năm 85', 'thứ 5 trình được không ạ', 'em 1991, 20/11 thì sao', 'chiều mai được không thầy', 'em 1991 sếp 1975', 'sếp tuổi Thìn, em 1990', 'sếp 1984 ạ', 'em 1995 sếp 1977', 'con sinh 1991', 'em 1995 thầy ơi', '1988', 'con tuổi Hợi', 'thầy xem giúp con trình ký', '96 ạ', 'Canh Ngọ', 'tuổi Dần ạ', '1983'];
 let simT = 3;
 function sim(dt) { if (!SIM_ON) return; simT -= dt; if (simT > 0) return; simT = S.real ? rnd(10, 16) : rnd(3, 6); const nm = pick(NAMES);
   if (Math.random() < .5) onLike(nm, Math.floor(rnd(3, 7)), false); else onComment(nm, pick(SIM_MSG), false); }
