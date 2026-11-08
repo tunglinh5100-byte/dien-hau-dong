@@ -241,6 +241,22 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     return { loai: 'que', ten: name, tieuDe: 'QUẺ TRÌNH KÝ CỦA ' + name.toUpperCase(), sao, ketLuan: ket, lines, que: q,
       speak: name + ' gieo được quẻ ' + q.ten + '. Quẻ ' + q.ngan + ', ' + q.y + '.' }; }
 
+  // ---------- Giờ đẹp kế tiếp trong giờ làm (8h–17h30, thứ hai–thứ sáu) ----------
+  const GIO_LAM = [8, 17.5];
+  function slotTot(n, chi, t) { const g = n.gio[chi]; if (!g.tot) return false;
+    let d = 2 + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
+    if (t) d += quanHe(n.chiN, t.chi).diem + (XUNG(chi, t.chi) ? -2 : LUC_HOP(chi, t.chi) || TAM_HOP(chi, t.chi) ? 1 : 0);
+    return d >= 1; }
+  const hStr = h => Math.floor(h) + 'h' + (h % 1 ? String(Math.round(h % 1 * 60)).padStart(2, '0') : '');
+  function gioDepToi(n0, t, max) { const out = [], now = n0.gioHienTai + n0.phut / 60;
+    for (let d = 0; d < 14 && out.length < (max || 3); d++) { const dt = new Date(Date.UTC(n0.yy, n0.mm - 1, n0.dd + d)), n = ngay(dt.getUTCDate(), dt.getUTCMonth() + 1, dt.getUTCFullYear());
+      if (n.wd === 0 || n.wd === 6) continue;
+      for (let chi = 4; chi <= 9 && out.length < (max || 3); chi++) { const g = n.gio[chi], a = Math.max(g.tu, GIO_LAM[0]), b = Math.min(g.den, GIO_LAM[1]); if (b <= a) continue;
+        if (d === 0 && a < now) continue; if (!slotTot(n, chi, t)) continue;
+        const buoi = a < 11 ? 'sáng' : a < 13 ? 'trưa' : 'chiều', ngayNoi = d === 0 ? 'nay' : d === 1 ? 'mai' : n.thu.toLowerCase() + ' ' + n.dd + '/' + n.mm;
+        out.push({ nhan: hStr(a) + '–' + hStr(b) + ' ' + buoi + ' ' + ngayNoi, gio: g.ten, d }); } }
+    return out; }
+
   // ---------- Câu phán gọn: NÊN / KHÔNG NÊN trình ký lúc này, lý do dạng hình (giờ, ngày, tuổi), mỗi nhãn ≤ 7 chữ ----------
   function phan(name, n, t) {
     const cur = n.gio[gioCuaGioDong(n.gioHienTai)];
@@ -255,10 +271,13 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
       muc.push({ loai: 'tuoi', tot, chiTuoi: t.chi, chiDoi: xg ? cur.chi : n.chiN, quan: xg ? 'xung' : q.diem > 0 ? 'hợp' : q.diem < 0 ? (q.ten === 'xung' ? 'xung' : 'hại') : hp ? 'hợp' : 'bình',
         nhan: 'Tuổi ' + ten + ' · ' + (xg ? 'xung giờ' : q.diem > 0 ? 'hợp ngày' : q.diem < 0 ? (q.ten === 'xung' ? 'xung ngày' : 'hại ngày') : hp ? 'hợp giờ' : 'bình hòa'), phu: '' });
       tuoiNoi = ', tuổi ' + ten; }
-    const nen = cur.tot && diem >= 1;
-    const speak = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
-    return { ten: name, nen, muc, speak }; }
+    const bay = n.gioHienTai + n.phut / 60, lam = n.wd >= 1 && n.wd <= 5 && bay >= GIO_LAM[0] && bay < GIO_LAM[1];
+    if (!lam) { muc[0].tot = -1; muc[0].nhan = (n.wd === 0 || n.wd === 6 ? n.thu : 'Giờ ' + cur.ten) + ' · ngoài giờ làm'; }
+    const nen = lam && cur.tot && diem >= 1, goiY = nen ? [] : gioDepToi(n, t, 3);
+    const speak0 = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
+    const speak = (lam ? speak0 : name + tuoiNoi + '. Không nên trình ký lúc này, đang ngoài giờ làm.') + (goiY.length ? ' Giờ đẹp kế tiếp: ' + goiY[0].nhan.replace(/(\d+)h(\d+)?/g, (m, h, mi) => h + ' giờ' + (mi ? ' ' + mi : '')).replace('–', ' đến ') + '.' : '');
+    return { ten: name, nen, muc, goiY, speak }; }
 
-  const API = { phan, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
+  const API = { phan, gioDepToi, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LICH = API;
 })(typeof window !== 'undefined' ? window : globalThis);
