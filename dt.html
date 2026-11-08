@@ -1851,6 +1851,7 @@ buildCfgPanel(); napNhacGia();
 #dtStart small{font-weight:500;font-size:14px;color:#bbb;max-width:320px;line-height:1.5}
 #dtStart input{font:500 16px system-ui,sans-serif;padding:10px 12px;border-radius:10px;border:1px solid #555;background:#111;color:#fff;width:280px}
 #dtCfg{display:grid;gap:8px;justify-items:center}
+#dtStart #dtTest{font:600 15px system-ui,sans-serif;padding:10px 20px;background:#333;border:1px solid #777}
 #dtStart #dtCfgTog{font:500 14px system-ui,sans-serif;color:#999;text-decoration:underline;background:none;border:0;padding:6px}
 </style>
 <script>
@@ -1892,11 +1893,22 @@ buildCfgPanel(); napNhacGia();
   ov.innerHTML = '<div>Điện Hầu Đồng Live</div><button id="dtGo" type="button">▶ Mở điện</button>' +
     '<small>Bật LIVE trên TikTok (chia sẻ màn hình) trước, rồi mở trang này và bấm nút. Màn hình luôn sáng, nhạc văn tự bật, người xem thật tự hiện.</small>' +
     '<button id="dtCfgTog" type="button">Cài đặt kênh</button>' +
-    '<div id="dtCfg" hidden><input id="dtUser" placeholder="Tên kênh TikTok, vd: @linhxo" autocomplete="off"><input id="dtKey" type="password" placeholder="API key EulerStream" autocomplete="off"><small>Chỉ nhập một lần, máy tự nhớ.</small></div>';
+    '<div id="dtCfg" hidden><input id="dtUser" placeholder="Tên kênh TikTok, vd: @linhxo" autocomplete="off"><input id="dtKey" type="password" placeholder="API key EulerStream" autocomplete="off"><button id="dtTest" type="button">Kiểm tra key</button><small id="dtTestRes">Chỉ nhập một lần, máy tự nhớ.</small></div>';
   document.body.appendChild(ov);
   const iu = ov.querySelector('#dtUser'), ik = ov.querySelector('#dtKey'), cfg = ov.querySelector('#dtCfg');
   iu.value = LS.get('hd_live_user'); ik.value = LS.get('hd_live_key');
   if (!iu.value || !ik.value) cfg.hidden = false;
+  ov.querySelector('#dtTest').addEventListener('click', () => {
+    const u = iu.value.trim().replace(/^@/, ''), k = ik.value.trim(), r = ov.querySelector('#dtTestRes');
+    if (!u || !k) { r.textContent = 'Anh nhập tên kênh và API key trước nhé.'; return; }
+    LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', k);
+    r.textContent = 'Đang kiểm tra…'; let t;
+    try { t = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k)); } catch (e) { r.textContent = 'Không mở được kết nối.'; return; }
+    const done = (msg) => { r.textContent = msg; try { t.onclose = null; t.close(); } catch (e) {} };
+    t.onopen = () => done('✅ Key đúng, kênh @' + u + ' đang live, sẵn sàng.');
+    t.onclose = (e) => { r.textContent = ({ 4401: '❌ API key không đúng, anh copy lại key.', 4403: '❌ Gói Euler không cho phép kết nối.', 4404: '✅ Key đúng. Kênh @' + u + ' chưa live (bình thường), lên live là tự kết nối.', 4429: '⚠️ Đang vượt số kết nối của gói, thử lại sau ít phút.' })[e.code] || ('⚠️ Chưa rõ (mã ' + e.code + '). ' + (e.reason || 'Kiểm tra mạng rồi thử lại.')); };
+    setTimeout(() => { if (r.textContent === 'Đang kiểm tra…') done('⚠️ Không có phản hồi, kiểm tra mạng.'); }, 15000);
+  });
   ov.querySelector('#dtCfgTog').addEventListener('click', () => { cfg.hidden = !cfg.hidden; });
   ov.querySelector('#dtGo').addEventListener('click', () => {
     LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim());
