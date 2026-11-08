@@ -1814,7 +1814,7 @@ buildCfgPanel(); napNhacGia();
     tf.onclose = () => { if (tfOk) setStat('TikFinity: mất kết nối, đang thử lại…'); tfOk = false; if (!ws) H.S.real = false; tf = null; clearTimeout(tfTimer); tfTimer = setTimeout(tfConnect, 5000); };
     tf.onerror = () => {};
   }
-  tfConnect();
+  /* dt.html: điện thoại không có TikFinity, dùng EulerStream bên dưới */
   window.__hdTf = () => tfOk;
 })();
 
@@ -1846,25 +1846,66 @@ buildCfgPanel(); napNhacGia();
 
 
 <style>
-#dtStart{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#f4d47c;font:700 22px "Be Vietnam Pro",system-ui,sans-serif;text-align:center;padding:24px}
+#dtStart{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#f4d47c;font:700 22px "Be Vietnam Pro",system-ui,sans-serif;text-align:center;padding:24px}
 #dtStart button{font:700 24px "Be Vietnam Pro",system-ui,sans-serif;padding:22px 40px;border-radius:999px;border:2px solid #f4d47c;background:#7a1010;color:#fff}
 #dtStart small{font-weight:500;font-size:14px;color:#bbb;max-width:320px;line-height:1.5}
+#dtStart input{font:500 16px system-ui,sans-serif;padding:10px 12px;border-radius:10px;border:1px solid #555;background:#111;color:#fff;width:280px}
+#dtCfg{display:grid;gap:8px;justify-items:center}
+#dtStart #dtCfgTog{font:500 14px system-ui,sans-serif;color:#999;text-decoration:underline;background:none;border:0;padding:6px}
 </style>
 <script>
 // ---------- Trang riêng cho điện thoại live (dt.html). Không ảnh hưởng index.html trên máy tính ----------
 (() => {
+  const LS = { get: k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
   let lock = null;
   const keepAwake = async () => { try { if (navigator.wakeLock) lock = await navigator.wakeLock.request('screen'); } catch (e) {} };
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+
+  // ---- Người xem thật qua EulerStream (chạy qua mạng, không cần máy tính) ----
+  const H = window.__hd; let ws = null, retry = 0, stat = 'Chưa kết nối người xem thật';
+  const nameOf = (o) => { const u = (o && (o.user || o.fromUser || (o.common && o.common.user))) || null;
+    if (u) return u.nickname || u.uniqueId || u.displayId || null; if (o && (o.nickname || o.uniqueId)) return o.nickname || o.uniqueId; return null; };
+  function handle(type, d) {
+    if (!H) return; const name = nameOf(d); if (!name) return; const nm = String(name).slice(0, 24); const t = String(type || '').toLowerCase();
+    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c) H.say(nm, c); }
+    else if (t.includes('like')) { H.person(nm); H.like(Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), nm); }
+    else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); H.gift(nm, dc >= 99 ? 'big' : 'loc'); }
+    else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) H.shareLive(nm); else H.follow(nm); }
+    else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm)) { H.person(nm); H.addComment(nm, 'đã vào phiên live'); } }
+  }
+  function connect() {
+    const u = LS.get('hd_live_user').replace(/^@/, '').trim(), k = LS.get('hd_live_key').trim();
+    if (!u || !k) { stat = 'Chưa nhập kênh / API key: chỉ chạy giả lập'; return; }
+    try { ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k) + '&features.bundleEvents=true'); } catch (e) { setTimeout(connect, 10000); return; }
+    ws.onopen = () => { retry = 0; if (H) H.S.real = true; stat = 'Đã kết nối @' + u; };
+    ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
+      const list = Array.isArray(j.messages) ? j.messages : [j];
+      list.forEach(m => { const type = m.type || m.event || m.name; let d = m.data || null; if (!d && m.json) { try { d = JSON.parse(m.json); } catch (e) {} } if (type) handle(type, d || m); }); };
+    ws.onclose = (e) => { if (H) H.S.real = false; ws = null;
+      if (e.code === 4401 || e.code === 4403) { stat = e.code === 4401 ? 'API key Euler không đúng' : 'Gói Euler không cho phép'; return; }
+      retry++; setTimeout(connect, Math.min(30, 5 * retry) * 1000); }; // kênh chưa live (4404) thì tự thử lại
+    ws.onerror = () => {};
+  }
+  window.__dtStat = () => stat;
+
   const ov = document.createElement('div'); ov.id = 'dtStart';
-  ov.innerHTML = '<div>Điện Hầu Đồng Live</div><button type="button">▶ Mở điện</button><small>Bật LIVE trên TikTok (chia sẻ màn hình) trước, rồi mở trang này và bấm nút. Màn hình sẽ luôn sáng, nhạc văn tự bật.</small>';
+  ov.innerHTML = '<div>Điện Hầu Đồng Live</div><button id="dtGo" type="button">▶ Mở điện</button>' +
+    '<small>Bật LIVE trên TikTok (chia sẻ màn hình) trước, rồi mở trang này và bấm nút. Màn hình luôn sáng, nhạc văn tự bật, người xem thật tự hiện.</small>' +
+    '<button id="dtCfgTog" type="button">Cài đặt kênh</button>' +
+    '<div id="dtCfg" hidden><input id="dtUser" placeholder="Tên kênh TikTok, vd: @linhxo" autocomplete="off"><input id="dtKey" type="password" placeholder="API key EulerStream" autocomplete="off"><small>Chỉ nhập một lần, máy tự nhớ.</small></div>';
   document.body.appendChild(ov);
-  ov.querySelector('button').addEventListener('click', () => {
+  const iu = ov.querySelector('#dtUser'), ik = ov.querySelector('#dtKey'), cfg = ov.querySelector('#dtCfg');
+  iu.value = LS.get('hd_live_user'); ik.value = LS.get('hd_live_key');
+  if (!iu.value || !ik.value) cfg.hidden = false;
+  ov.querySelector('#dtCfgTog').addEventListener('click', () => { cfg.hidden = !cfg.hidden; });
+  ov.querySelector('#dtGo').addEventListener('click', () => {
+    LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim());
     ov.remove();
     document.body.classList.add('livemode'); window.scrollTo(0, 0);
     try { const de = document.documentElement; (de.requestFullscreen || de.webkitRequestFullscreen || (() => {})).call(de); } catch (e) {}
     keepAwake();
     const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
+    connect();
   });
 })();
 </script>
