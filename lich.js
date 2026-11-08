@@ -275,7 +275,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     let tuoiNoi = '';
     if (t) { const q = quanHe(n.chiN, t.chi), xg = XUNG(cur.chi, t.chi), hp = LUC_HOP(cur.chi, t.chi) || TAM_HOP(cur.chi, t.chi); diem += q.diem + (xg ? -2 : hp ? 1 : 0);
       const tot = xg ? -1 : q.diem > 0 || hp ? 1 : q.diem < 0 ? -1 : 0, ten = (t.can !== null && t.can !== undefined ? CAN[t.can] + ' ' : '') + CHI[t.chi] + (t.nam ? ' ' + t.nam : '');
-      muc.push({ loai: 'tuoi', tot, chiTuoi: t.chi, chiDoi: xg ? cur.chi : n.chiN, quan: xg ? 'xung' : q.diem > 0 ? 'hợp' : q.diem < 0 ? (q.ten === 'xung' ? 'xung' : 'hại') : hp ? 'hợp' : 'bình',
+      muc.push({ loai: 'tuoi', tot, chiTuoi: t.chi, chiDoi: xg || (q.diem === 0 && hp) ? cur.chi : n.chiN, quan: xg ? 'xung' : q.diem > 0 ? 'hợp' : q.diem < 0 ? (q.ten === 'xung' ? 'xung' : 'hại') : hp ? 'hợp' : 'bình',
         nhan: 'Tuổi ' + ten + ' · ' + (xg ? 'xung giờ' : q.diem > 0 ? 'hợp ngày' : q.diem < 0 ? (q.ten === 'xung' ? 'xung ngày' : 'hại ngày') : hp ? 'hợp giờ' : 'bình hòa'), phu: '' });
       tuoiNoi = ', tuổi ' + ten; }
     const bay = n.gioHienTai + n.phut / 60, lam = n.wd >= 1 && n.wd <= 5 && bay >= GIO_LAM[0] && bay < GIO_LAM[1];
