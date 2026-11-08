@@ -22,12 +22,12 @@ canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9
 #start #test { font: 600 15px system-ui; padding: 10px 20px; background: #333; border: 1px solid #777; }
 #start small { color: #999; font: 500 13px system-ui; max-width: 320px; line-height: 1.45; }
 </style></head><body>
-<div id="wrap"><canvas id="cv" width="540" height="960" aria-label="Thầy Kinh Dịch xem giờ tốt trình ký"></canvas></div>
+<div id="wrap"><canvas id="cv" width="540" height="960" aria-label="Xem giờ tốt trình ký"></canvas></div>
 <div id="start">
   <h1>Xem Giờ Trình Ký</h1>
-  <p class="sub">Thầy Kinh Dịch gieo quẻ, xem giờ hoàng đạo để trình ký sếp. Nội dung giải trí, tham khảo theo lịch vạn niên.</p>
+  <p class="sub">Gieo quẻ, xem giờ hoàng đạo để trình ký sếp. Nội dung giải trí, tham khảo theo lịch vạn niên.</p>
   <button id="go" type="button">▶ Mở phòng xem</button>
-  <label><input id="voice" type="checkbox" checked style="width:auto"> Giọng thầy đọc lời giải</label>
+  <label><input id="voice" type="checkbox" checked style="width:auto"> Đọc to kết quả</label>
   <button id="tog" type="button">Cài đặt kênh</button>
   <div id="cfg" hidden>
     <input id="u" placeholder="Tên kênh TikTok, vd: @linhxo" autocomplete="off">
@@ -79,11 +79,11 @@ function say(s, then) { if (!VOICE) pickVoice(); if (!S.voice || !('speechSynthe
 function enqueue(job) { if (S.queue.some(j => j.ten === job.ten) || (S.cur && S.cur.job.ten === job.ten)) return;
   if (job.that) { const i = S.queue.findIndex(j => !j.that); if (i >= 0) S.queue.splice(i, 0, job); else S.queue.push(job); } else if (S.queue.length < 2) S.queue.push(job);
   if (S.queue.length > 10) S.queue.splice(10); }
-function startJob(job) { refreshDay(); S.cur = { job, ans: L.phan(job.ten, S.day, job.tuoi), phase: 'goi', t: 0, tossI: 0 }; noi('Để thầy xem cho con ' + ten(job.ten) + '…', 99); sWood(); }
+function startJob(job) { refreshDay(); S.cur = { job, ans: L.phan(job.ten, S.day, job.tuoi), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
   S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK + 6 + rnd(-3, 3), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
-const IDLE = ['Sắp trình ký? Thả 10 tim, thầy xem.', 'Bình luận năm sinh, thầy xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Thầy không nhận quà, thả tim là được.'];
+const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.'];
 function update(dt) {
   S.t += dt; S.blinkT -= dt; if (S.blinkT < 0) { S.blink = .14; S.blinkT = rnd(2.5, 5.5); } S.blink = Math.max(0, S.blink - dt);
   S.coins.forEach(c => c.t += dt);
@@ -94,7 +94,7 @@ function update(dt) {
   if (!c) { S.idleT -= dt; if (S.idleT <= 0 && S.queue.length) startJob(S.queue.shift()); else if (S.idleT < -6 && !S.noi) { S.idleT = 0; noi(IDLE[S.idleI++ % IDLE.length], 5); } return; }
   c.t += dt;
   if (c.phase === 'goi' && c.t > 1.2) { c.phase = 'gieo'; c.t = 0; throwCoins(); }
-  else if (c.phase === 'gieo' && c.t > 1.15) { c.tossI++; c.t = 0; if (c.tossI >= 3) { c.phase = 'suy'; noi('Hừm… để thầy bấm độn…', 99); } else throwCoins(); }
+  else if (c.phase === 'gieo' && c.t > 1.15) { c.tossI++; c.t = 0; if (c.tossI >= 3) { c.phase = 'suy'; noi('Đang tính giờ…', 99); } else throwCoins(); }
   else if (c.phase === 'suy' && c.t > 2.4) { c.phase = 'phan'; c.t = 0; S.noi = null; sGong(); burst(); say(c.ans.speak, () => { c.spoke = true; }); }
   else if (c.phase === 'phan' && c.t > 10 && (c.spoke || c.t > 20)) { c.phase = 'xong'; c.t = 0; }
   else if (c.phase === 'xong' && c.t > .5) { S.cur = null; S.coins = []; S.idleT = 1.5; }
@@ -238,7 +238,7 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
   ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.translate(W / 2, y + h); ctx.scale(pop, pop); ctx.translate(-W / 2, -(y + h));
   ctx.shadowColor = 'rgba(80,30,10,.35)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6; const bg = ctx.createLinearGradient(0, y, 0, y + h); bg.addColorStop(0, 'rgba(168,36,28,.98)'); bg.addColorStop(1, 'rgba(96,14,10,.98)'); ctx.fillStyle = bg; rr(x, y, w, h, 18); ctx.fill(); ctx.shadowColor = 'transparent';
   ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = 'rgba(96,14,10,.98)'; tail(W / 2, y + h - 1, y + h + 20); ctx.fill(); ctx.beginPath(); ctx.moveTo(W / 2 - 12, y + h); ctx.lineTo(W / 2, y + h + 20); ctx.lineTo(W / 2 + 12, y + h); ctx.stroke();
-  text('Thầy xem cho con', W / 2, y + 22, 14, '#f6dc96', { f: SERIF, w: 700 });
+  text('Kết quả cho', W / 2, y + 22, 14, '#f6dc96', { f: SERIF, w: 700 });
   const tg = ctx.createLinearGradient(0, y + 34, 0, y + 62); tg.addColorStop(0, '#fffbe0'); tg.addColorStop(.5, '#f9d86e'); tg.addColorStop(1, '#e3a53a'); ctx.save(); ctx.font = `800 26px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,205,100,.9)'; ctx.shadowBlur = 10 + 4 * Math.sin(t * 4); ctx.fillStyle = tg; ctx.fillText(ten(A.ten), W / 2, y + 50); ctx.restore();
   // chỉ khung chữ NÊN / KHÔNG NÊN
   const word = A.nen ? 'NÊN' : 'KHÔNG NÊN', rest = A.nen ? 'trình ký ngay' : 'trình ký lúc này'; ctx.font = `800 34px ${SERIF}`; const ww = ctx.measureText(word).width + 30; ctx.font = `700 17px ${UI}`; const rw = ctx.measureText(rest).width;
@@ -267,9 +267,9 @@ function onComment(name, msg, that) { const tuoi = L.docTuoi(msg, S.day.yy); if 
   if (/tr[iì]nh k[yý]|gi[oờ] t[oố]t|xem gi[uú]p|th[aầ]y [oơ]i xem/i.test(String(msg))) enqueue({ ten: name, tuoi: null, that }); }
 function onLike(name, n, that) { const v = (S.likes.get(name) || 0) + n; S.likes.set(name, v);
   if (v >= 10) { S.likes.set(name, 0); const lx = S.lastXem.get(name) || -999; if (S.t - lx > 120) { S.lastXem.set(name, S.t); enqueue({ ten: name, tuoi: null, that }); } } }
-function onShare(name) { if (!S.cur) noi('Đa tạ con ' + ten(name) + ' đã chia sẻ, chúc con ký đâu trúng đó!', 4); }
-function onFollow(name) { if (!S.cur) noi('Chào con ' + ten(name) + '!', 3); }
-function onGift(name) { if (!S.cur) noi('Thầy không nhận quà, con ' + ten(name) + ' thả tim là được rồi.', 4); }
+function onShare(name) { if (!S.cur) noi('Cảm ơn ' + ten(name) + ' đã chia sẻ, chúc ký đâu trúng đó!', 4); }
+function onFollow(name) { if (!S.cur) noi('Chào ' + ten(name) + '!', 3); }
+function onGift(name) { if (!S.cur) noi('Không nhận quà, ' + ten(name) + ' thả tim là được rồi.', 4); }
 
 // ---------- Giả lập người xem (tắt bằng ?sim=0) ----------
 const SIM_ON = Q.get('sim') !== '0';
@@ -315,7 +315,7 @@ document.getElementById('go').addEventListener('click', () => {
   try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); }); } catch (e) {}
   try { const de = document.documentElement; (de.requestFullscreen || de.webkitRequestFullscreen || (() => {})).call(de); } catch (e) {}
-  eulerConnect(); tfConnect(); setTimeout(() => noi('Sắp trình ký? Thả 10 tim, thầy xem.', 6), 800);
+  eulerConnect(); tfConnect(); setTimeout(() => noi('Sắp trình ký? Thả 10 tim để xem.', 6), 800);
 });
 if (Q.get('auto') === '1') document.getElementById('go').click();
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(frame));

@@ -256,7 +256,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
         nhan: 'Tuổi ' + ten + ' · ' + (xg ? 'xung giờ' : q.diem > 0 ? 'hợp ngày' : q.diem < 0 ? (q.ten === 'xung' ? 'xung ngày' : 'hại ngày') : hp ? 'hợp giờ' : 'bình hòa'), phu: '' });
       tuoiNoi = ', tuổi ' + ten; }
     const nen = cur.tot && diem >= 1;
-    const speak = 'Con ' + name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
+    const speak = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
     return { ten: name, nen, muc, speak }; }
 
   const API = { phan, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
