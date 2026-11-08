@@ -1746,6 +1746,7 @@ function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
   camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
+  if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
   ctx.save(); camShear(); drawBg(t); drawSong(t); drawMoneyFloor(); drawDem(t); ctx.restore();
   camShift(1);
   try {
@@ -1760,7 +1761,7 @@ function frame1(now) {
 }
 // ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
 const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
-const CAM = { t: 0, P: 0, S: 1.15, PIV: 560, A: 36 }; // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
+const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55 }; window.__cam = CAM; // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
 function camUpd(dt) {
   if (!CAM_ON) { CAM.P = 0; CAM.S = 1; return; }
   CAM.t += dt; const T = 26, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
