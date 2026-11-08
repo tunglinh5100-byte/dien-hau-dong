@@ -241,6 +241,19 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     return { loai: 'que', ten: name, tieuDe: 'QUẺ TRÌNH KÝ CỦA ' + name.toUpperCase(), sao, ketLuan: ket, lines, que: q,
       speak: name + ' gieo được quẻ ' + q.ten + '. Quẻ ' + q.ngan + ', ' + q.y + '.' }; }
 
-  const API = { CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
+  // ---------- Câu phán gọn: nên trình ký ngay / chưa nên, kèm lý do (giờ, ngày, tuổi) ----------
+  function phan(name, n, t) {
+    const cur = n.gio[gioCuaGioDong(n.gioHienTai)];
+    let diem = (cur.tot ? 2 : -2) + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
+    const ly = ['Giờ ' + cur.ten + ' (' + khung(cur) + ') là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ' ' + cur.than + ': ' + cur.loi + '.',
+      'Ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo ' : 'hắc đạo ') + n.than + (n.tamNuong ? ', lại phạm Tam Nương' : '') + (n.nguyetKy ? ', lại phạm Nguyệt Kỵ' : '') + '.'];
+    let tuoiNoi = '';
+    if (t) { const q = quanHe(n.chiN, t.chi), xg = XUNG(cur.chi, t.chi), hp = LUC_HOP(cur.chi, t.chi) || TAM_HOP(cur.chi, t.chi); diem += q.diem + (xg ? -2 : hp ? 1 : 0);
+      ly.push('Con tuổi ' + tenTuoi(t) + ': ' + q.loi + (xg ? ', giờ này lại xung tuổi' : hp ? ', giờ này hợp tuổi' : '') + '.'); tuoiNoi = ', tuổi ' + tenTuoi(t).replace(/[()]/g, ''); }
+    const nen = cur.tot && diem >= 1;
+    const speak = 'Con ' + name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Chưa nên trình ký. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
+    return { ten: name, nen, ly, speak }; }
+
+  const API = { phan, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LICH = API;
 })(typeof window !== 'undefined' ? window : globalThis);
