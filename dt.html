@@ -1745,61 +1745,36 @@ setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRu
 function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
-  camUpd(dt); ctx.save(); camApply(); // camera lia/zoom: chỉ cảnh điện, các bảng chữ đứng yên
-  drawBg(t); drawSong(t); drawCungVan(t); drawDem(t); drawMoneyFloor();
-  const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
-  behind.forEach(p => drawPerson(p, t)); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
-  drawBubbles(); drawMoney(); drawFlying(); drawParticles(); drawTenCV(); drawDangOng(t); drawTenNhanLoc(t);
+  camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
+  ctx.save(); camShear(); drawBg(t); drawSong(t); drawMoneyFloor(); drawDem(t); ctx.restore();
+  camShift(1);
+  try {
+    ctx.save(); ctx.translate(camOff(704), 0); drawCungVan(t); ctx.restore();
+    const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
+    behind.forEach(p => drawPerson(p, t)); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
+    drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
+    ctx.save(); ctx.translate(camOff(704), 0); drawTenCV(); ctx.restore(); drawDangOng(t); drawTenNhanLoc(t);
+  } finally { camShift(-1); }
   ctx.restore();
-  if (!S.chuyen) { const m = CAM.z < 1.5 ? camMap(CO.x, CO.y) : [CO.x, CO.y]; ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t);
+  if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t);
 }
-// ---------- Camera: toàn cảnh ↔ cận cô ↔ lia hàng con nhang; zoom vào người vừa bình luận / đang nhận lộc ----------
+// ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
 const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
-const CAM = { x: W / 2, y: H / 2, z: 1, tx: W / 2, ty: H / 2, tz: 1, shot: 0, st: 0, cut: false, fx: null, ft: 0, lastC: 0, cool: 0 };
-// Mỗi góc: d = số giây, f(k) với k: 0→1 trong góc đó trả [x, y, zoom, 'co' = giữ đầu cô dưới các bảng chữ]
-const sm = k => k * k * (3 - 2 * k), lerp = (a, b, k) => a + (b - a) * k;
-const SHOTS = [
-  { n: 'toàn cảnh', d: 8, f: k => [W / 2, H / 2, 1 + .03 * Math.sin(k * 3.14)] },
-  { n: 'trung cảnh cô', d: 8, f: k => [CO.x, CO.y - 120, 1.32 - .04 * k, 'co'] },
-  { n: 'cận cô', d: 6, f: k => [CO.x, CO.y - 160, 1.75 + .08 * k, 'co'] },
-  { n: 'đẩy máy vào cô', d: 9, f: k => [lerp(W / 2, CO.x, sm(k)), lerp(H / 2, CO.y - 140, sm(k)), lerp(1, 1.55, sm(k)), 'co'] },
-  { n: 'kéo máy ra', d: 9, f: k => [lerp(CO.x, W / 2, sm(k)), lerp(CO.y - 140, H / 2, sm(k)), lerp(1.6, 1, sm(k)), 'co'] },
-  { n: 'lia trái sang phải con nhang', d: 8, f: k => [lerp(170, 370, sm(k)), 820, 1.95] },
-  { n: 'lia phải sang trái con nhang', d: 8, f: k => [lerp(370, 170, sm(k)), 820, 1.9] },
-  { n: 'lia dọc từ con nhang lên cô', d: 9, f: k => [lerp(270, CO.x, sm(k)), lerp(830, CO.y - 120, sm(k)), lerp(1.95, 1.4, sm(k)), k > .5 ? 'co' : ''] },
-  { n: 'cung văn', d: 7, f: k => [lerp(95, 120, k), 680, 2.1 - .1 * k] },
-  { n: 'bục nhận lộc', d: 6, f: k => [270, 760, lerp(1.9, 2.05, k)] },
-  { n: 'chéo góc phải', d: 8, f: k => [lerp(380, CO.x + 30, sm(k)), lerp(830, CO.y - 110, sm(k)), lerp(1.95, 1.38, sm(k)), k > .45 ? 'co' : ''] },
-  { n: 'hàng sau góc trái', d: 7, f: k => [lerp(150, 230, k), 860, 1.9] },
-  { n: 'hàng sau góc phải', d: 7, f: k => [lerp(390, 310, k), 860, 1.9] },
-  { n: 'nhìn chéo cô và con nhang', d: 8, f: k => [lerp(220, 320, k), lerp(560, 600, k), 1.22, 'co'] }];
-function camNext() { let n; do n = Math.floor(Math.random() * SHOTS.length); while (n === CAM.shot || (SHOTS[n].n === SHOTS[CAM.shot].n)); CAM.shot = n; CAM.st = 0; CAM.cut = Math.random() < .4; }
+const CAM = { t: 0, P: 0, S: 1.15, PIV: 560, A: 36 }; // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
 function camUpd(dt) {
-  if (!CAM_ON) { CAM.x = W / 2; CAM.y = H / 2; CAM.z = 1; return; }
-  CAM.st += dt; CAM.cool -= dt; CAM.tt = (CAM.tt || 0) + dt;
-  const D = S.dem; let tgt = null, focus = false;
-  if (D && D.p && D !== CAM.lastD && CAM.dcool <= 0) { CAM.lastD = D; CAM.dT = 4; CAM.dcool = 20; }
-  CAM.dcool = (CAM.dcool || 0) - dt; if (CAM.dT > 0) CAM.dT -= dt;
-  if (D && D.p && CAM.lastD === D && CAM.dT > 0) { tgt = [(D.p.x + CO.x) / 2, CO.y - 100, 1.25, 'co']; focus = true; }
-  else {
-    const c = S.comments[S.comments.length - 1];
-    if (c && c.t > CAM.lastC && CAM.cool <= 0) { CAM.lastC = c.t; const p = S.people.find(q => q.name === c.name && q.state === 'seat' && q.y > 690); if (p) { CAM.fx = p; CAM.ft = 3.5; CAM.cool = 12; } }
-    if (CAM.fx && CAM.ft > 0) { CAM.ft -= dt; tgt = [270 + (CAM.fx.x - 270) * .6, CAM.fx.y + 20, 1.95]; focus = true; } else CAM.fx = null;
-  }
-  if (!tgt) { const sh = SHOTS[CAM.shot]; if (CAM.st > sh.d) camNext(); const s2 = SHOTS[CAM.shot]; tgt = s2.f(clamp(CAM.st / s2.d, 0, 1)); }
-  let [tx, ty, tz, kind] = tgt;
-  if (kind === 'co') ty = Math.min(ty, CO.y - 220 + 100 / tz); // đầu cô ≥ 380 trên màn hình, không bị bảng che
-  tx += Math.sin(CAM.tt * .7) * 3 + Math.sin(CAM.tt * 1.9) * 1.2; ty += Math.sin(CAM.tt * .9 + 1) * 2.5; // rung nhẹ như máy cầm tay
-  CAM.tx = tx; CAM.ty = ty; CAM.tz = tz;
-  if (CAM.cut && !focus && CAM.st < .05) { CAM.x = tx; CAM.y = ty; CAM.z = tz; } // cắt cảnh
-  const k = 1 - Math.exp(-dt * (focus ? 1.6 : 2.2)); CAM.x += (CAM.tx - CAM.x) * k; CAM.y += (CAM.ty - CAM.y) * k; CAM.z += (CAM.tz - CAM.z) * k;
+  if (!CAM_ON) { CAM.P = 0; CAM.S = 1; return; }
+  CAM.t += dt; const T = 26, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
+  const v = u < 9 ? e(u / 9) : u < 13 ? 1 : u < 22 ? 1 - e((u - 13) / 9) : 0; // sang phải 9s, dừng 4s, sang trái 9s, dừng 4s
+  CAM.P = CAM.A * (2 * v - 1);
 }
-function camView() { const z = Math.max(1, CAM.z), hw = W / (2 * z), hh = H / (2 * z); return [clamp(CAM.x, hw, W - hw), clamp(CAM.y, hh, H - hh), z]; }
-function camMap(x, y) { const [cx, cy, z] = camView(); return [(x - cx) * z + W / 2, (y - cy) * z + H / 2]; }
-function camApply() {
-  const z = Math.max(1, CAM.z), hw = W / (2 * z), hh = H / (2 * z), cx = clamp(CAM.x, hw, W - hw), cy = clamp(CAM.y, hh, H - hh);
-  ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-cx, -cy);
+const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
+function camBase() { ctx.translate(W / 2, H / 2); ctx.scale(CAM.S, CAM.S); ctx.translate(-W / 2, -H / 2); }
+function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
+function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
+  const sh = o => { if (o && typeof o.x === 'number' && typeof o.y === 'number') o.x += d * camOff(o.y); };
+  S.people.forEach(sh); if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); sh(CO); S.floats.forEach(sh); S.particles.forEach(sh);
 }
+function camMap(x, y) { return [(x + camOff(y) - W / 2) * CAM.S + W / 2, (y - H / 2) * CAM.S + H / 2]; }
 
 // ---------- Controls ----------
 const ME = 'Bạn (thử)';
