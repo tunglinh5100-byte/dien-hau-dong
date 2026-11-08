@@ -243,19 +243,26 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
 
   // ---------- Giờ đẹp kế tiếp trong giờ làm (8h–17h30, thứ hai–thứ sáu) ----------
   const GIO_LAM = [8, 17.5];
-  function slotTot(n, chi, t) { const g = n.gio[chi]; if (!g.tot) return false;
-    let d = 2 + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
-    if (t) d += quanHe(n.chiN, t.chi).diem + (XUNG(chi, t.chi) ? -2 : LUC_HOP(chi, t.chi) || TAM_HOP(chi, t.chi) ? 1 : 0);
-    return d >= 1; }
+  // điểm một khung giờ cho một tuổi: null = loại (giờ hắc đạo, ngày/giờ xung hoặc hại tuổi, ngày quá xấu)
+  function diemSlot(n, chi, t) { const g = n.gio[chi]; if (!g.tot) return null;
+    let d = g.hang + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
+    if (t) { if (XUNG(n.chiN, t.chi)) return null; if (XUNG(chi, t.chi) || HAI(chi, t.chi)) return null;
+      d += quanHe(n.chiN, t.chi).diem + (LUC_HOP(chi, t.chi) ? 2 : TAM_HOP(chi, t.chi) ? 1 : 0); }
+    return d >= 4 ? d : null; }
+  const slotTot = (n, chi, t) => diemSlot(n, chi, t) !== null;
   const hStr = h => Math.floor(h) + 'h' + (h % 1 ? String(Math.round(h % 1 * 60)).padStart(2, '0') : '');
-  function gioDepToi(n0, t, max) { const out = [], now = n0.gioHienTai + n0.phut / 60;
-    for (let d = 0; d < 14 && out.length < (max || 3); d++) { const dt = new Date(Date.UTC(n0.yy, n0.mm - 1, n0.dd + d)), n = ngay(dt.getUTCDate(), dt.getUTCMonth() + 1, dt.getUTCFullYear());
-      if (n.wd === 0 || n.wd === 6) continue;
-      for (let chi = 4; chi <= 9 && out.length < (max || 3); chi++) { const g = n.gio[chi], a = Math.max(g.tu, GIO_LAM[0]), b = Math.min(g.den, GIO_LAM[1]); if (b <= a) continue;
-        if (d === 0 && a < now) continue; if (!slotTot(n, chi, t)) continue;
-        const buoi = a < 11 ? 'sáng' : a < 13 ? 'trưa' : 'chiều', ngayNoi = d === 0 ? 'nay' : d === 1 ? 'mai' : n.thu.toLowerCase() + ' ' + n.dd + '/' + n.mm;
-        out.push({ nhan: hStr(a) + '–' + hStr(b) + ' ' + buoi + ' ' + ngayNoi, gio: g.ten, d }); } }
-    return out; }
+  const THU_NGAN = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  // 3 khung giờ đẹp nhất trong 3 ngày làm việc tới (thứ 2–6, 8h–17h30), xếp theo thời gian
+  function gioDepToi(n0, t, max) { max = max || 3; const now = n0.gioHienTai + n0.phut / 60, cand = []; let ngayLam = 0;
+    for (let d = 0; d < 14 && ngayLam < 3; d++) { const dt = new Date(Date.UTC(n0.yy, n0.mm - 1, n0.dd + d)), n = ngay(dt.getUTCDate(), dt.getUTCMonth() + 1, dt.getUTCFullYear());
+      if (n.wd === 0 || n.wd === 6) continue; if (d === 0 && now >= GIO_LAM[1]) continue; ngayLam++;
+      for (let chi = 4; chi <= 9; chi++) { const g = n.gio[chi], a = Math.max(g.tu, GIO_LAM[0]), b = Math.min(g.den, GIO_LAM[1]); if (b <= a) continue;
+        if (d === 0 && a < now) continue; const sc = diemSlot(n, chi, t); if (sc === null) continue;
+        const buoi = a < 11 ? 'sáng' : a < 13 ? 'trưa' : 'chiều', ngayNoi = d === 0 ? 'hôm nay' : d === 1 ? 'ngày mai' : n.dd + '/' + n.mm;
+        cand.push({ d, a, b, sc: sc - d * .3 - (b - a < 1.5 ? .5 : 0), gio: g.ten, than: g.than, buoi, thu: THU_NGAN[n.wd], thuDay: n.thu.toLowerCase(), ngayNoi,
+          nhan: hStr(a) + '–' + hStr(b) + ' ' + buoi + ' ' + THU_NGAN[n.wd] + ' ' + ngayNoi }); } }
+    return cand.sort((x, y) => y.sc - x.sc).slice(0, max).sort((x, y) => x.d - y.d || x.a - y.a); }
+  const noiGio = g => hStr(g.a).replace('h', ' giờ ').replace(/ $/, '') + ' đến ' + hStr(g.b).replace('h', ' giờ ').replace(/ $/, '') + ' ' + g.buoi + ' ' + g.thuDay + (g.d === 0 ? ' hôm nay' : g.d === 1 ? ' ngày mai' : ' ' + g.ngayNoi);
 
   // ---------- Câu phán gọn: NÊN / KHÔNG NÊN trình ký lúc này, lý do dạng hình (giờ, ngày, tuổi), mỗi nhãn ≤ 7 chữ ----------
   function phan(name, n, t) {
@@ -275,7 +282,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     if (!lam) { muc[0].tot = -1; muc[0].nhan = (n.wd === 0 || n.wd === 6 ? n.thu : 'Giờ ' + cur.ten) + ' · ngoài giờ làm'; }
     const nen = lam && cur.tot && diem >= 1, goiY = nen ? [] : gioDepToi(n, t, 3);
     const speak0 = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
-    const speak = (lam ? speak0 : name + tuoiNoi + '. Không nên trình ký lúc này, đang ngoài giờ làm.') + (goiY.length ? ' Giờ đẹp kế tiếp: ' + goiY[0].nhan.replace(/(\d+)h(\d+)?/g, (m, h, mi) => h + ' giờ' + (mi ? ' ' + mi : '')).replace('–', ' đến ') + '.' : '');
+    const speak = (lam ? speak0 : name + tuoiNoi + '. Không nên trình ký lúc này, đang ngoài giờ làm.') + (goiY.length ? ' Giờ đẹp kế tiếp: ' + noiGio(goiY[0]) + '.' : '');
     return { ten: name, nen, muc, goiY, speak }; }
 
   const API = { phan, gioDepToi, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
