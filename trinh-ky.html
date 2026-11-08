@@ -53,7 +53,7 @@ function wrap(s, maxW, size, o = {}) { ctx.font = `${o.w || 600} ${size}px ${o.f
 const ten = s => { s = String(s || '').trim(); return s.length > 18 ? s.slice(0, 17) + '…' : s; };
 
 // ---------- Trạng thái ----------
-const S = { t: 0, day: null, queue: [], cur: null, idleT: 3, noi: null, likes: new Map(), lastXem: new Map(), coins: [], smoke: [], sparks: [], voice: true, sound: false, real: false, blinkT: 2, blink: 0, idleI: 0 };
+const S = { nho: new Map(), nhoSep: new Map(), t: 0, day: null, queue: [], cur: null, idleT: 3, noi: null, likes: new Map(), lastXem: new Map(), coins: [], smoke: [], sparks: [], voice: true, sound: false, real: false, blinkT: 2, blink: 0, idleI: 0 };
 function refreshDay() { S.day = L.homNay(); } refreshDay(); setInterval(refreshDay, 15000);
 // ---------- Âm thanh (WebAudio, tự tạo, không tải file) ----------
 let AC = null, master = null;
@@ -79,11 +79,11 @@ function say(s, then) { if (!VOICE) pickVoice(); if (!S.voice || !('speechSynthe
 function enqueue(job) { if (S.queue.some(j => j.ten === job.ten) || (S.cur && S.cur.job.ten === job.ten)) return;
   if (job.that) { const i = S.queue.findIndex(j => !j.that); if (i >= 0) S.queue.splice(i, 0, job); else S.queue.push(job); } else if (S.queue.length < 2) S.queue.push(job);
   if (S.queue.length > 10) S.queue.splice(10); }
-function startJob(job) { refreshDay(); S.cur = { job, ans: L.phan(job.ten, S.day, job.tuoi), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
+function startJob(job) { refreshDay(); S.cur = { job, ans: L.phan(job.ten, S.day, job.tuoi || S.nho.get(job.ten) || null, job.sep || S.nhoSep.get(job.ten) || null), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
   S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK + 6 + rnd(-3, 3), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
-const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.'];
+const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.', 'Ghi thêm năm sinh sếp, vd: sếp 1975.'];
 function update(dt) {
   S.t += dt; S.blinkT -= dt; if (S.blinkT < 0) { S.blink = .14; S.blinkT = rnd(2.5, 5.5); } S.blink = Math.max(0, S.blink - dt);
   S.coins.forEach(c => c.t += dt);
@@ -230,7 +230,7 @@ function iconNgay(cx, cy, m) { const w = 56, h = 58, x = cx - w / 2, y = cy - h 
   ctx.fillStyle = '#c99a3a'; [x + 14, x + w - 14].forEach(rx => { ctx.beginPath(); ctx.arc(rx, y, 3, 0, 7); ctx.fill(); }); }
 function iconTuoi(cx, cy, m) { const a = [cx - 24, cy], b = [cx + 24, cy], col = m.quan === 'hợp' ? '#3fa35a' : m.quan === 'bình' ? '#9a9a9a' : m.quan === 'hại' ? '#e08a2a' : '#d0453a';
   ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); if (m.quan === 'xung') { ctx.moveTo(a[0] + 15, cy); for (let i = 1; i <= 4; i++) ctx.lineTo(a[0] + 15 + i * 4.5, cy + (i % 2 ? -6 : 6)); } else { if (m.quan === 'hại') ctx.setLineDash([4, 3]); ctx.moveTo(a[0] + 15, cy); ctx.lineTo(b[0] - 15, cy); } ctx.stroke(); ctx.setLineDash([]);
-  [[a, m.chiTuoi, 'tuổi'], [b, m.chiDoi, '']].forEach(([p, chi], i) => { ctx.fillStyle = i ? '#f3e3c3' : '#fff1c4'; ctx.beginPath(); ctx.arc(p[0], p[1], 16, 0, 7); ctx.fill(); ctx.strokeStyle = '#c99a3a'; ctx.lineWidth = 2; ctx.stroke(); text(L.CHI[chi], p[0], p[1] + 1, 11, '#5a2410', { f: SERIF, w: 800 }); });
+  [[a, m.chiTuoi, 'tuổi'], [b, m.chiDoi, '']].forEach(([p, chi], i) => { ctx.fillStyle = i ? '#f3e3c3' : m.loai === 'sep' ? '#ffd2c2' : '#fff1c4'; if (!i && m.loai === 'sep') text('👑', p[0], p[1] - 22, 11, '#fff'); ctx.beginPath(); ctx.arc(p[0], p[1], 16, 0, 7); ctx.fill(); ctx.strokeStyle = '#c99a3a'; ctx.lineWidth = 2; ctx.stroke(); text(L.CHI[chi], p[0], p[1] + 1, 11, '#5a2410', { f: SERIF, w: 800 }); });
   text(m.quan === 'hợp' ? '♥' : m.quan === 'xung' ? '⚡' : m.quan === 'hại' ? '!' : '=', cx, cy - 16, 12, col, { w: 800 }); }
 function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase !== 'xong')) return; const A = c.ans;
   const a = c.phase === 'xong' ? 1 - c.t / .5 : clamp(c.t / .35, 0, 1), pop = 1 + Math.max(0, .25 - c.t) * (c.phase === 'phan' ? 1 : 0);
@@ -241,7 +241,7 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
   text('Kết quả cho', W / 2, y + 22, 14, '#f6dc96', { f: SERIF, w: 700 });
   const tg = ctx.createLinearGradient(0, y + 34, 0, y + 62); tg.addColorStop(0, '#fffbe0'); tg.addColorStop(.5, '#f9d86e'); tg.addColorStop(1, '#e3a53a'); ctx.save(); ctx.font = `800 26px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,205,100,.9)'; ctx.shadowBlur = 10 + 4 * Math.sin(t * 4); ctx.fillStyle = tg; ctx.fillText(ten(A.ten), W / 2, y + 50); ctx.restore();
   // chỉ khung chữ NÊN / KHÔNG NÊN
-  const word = A.nen ? 'NÊN' : 'KHÔNG NÊN', rest = A.nen ? 'trình ký ngay' : 'trình ký lúc này'; ctx.font = `800 34px ${SERIF}`; const ww = ctx.measureText(word).width + 30; ctx.font = `700 17px ${UI}`; const rw = ctx.measureText(rest).width;
+  const word = A.nen ? 'NÊN' : 'KHÔNG NÊN', rest = A.nen ? 'trình ký ngay' : A.semMang ? 'sếp mắng đấy! 😤' : 'trình ký lúc này'; ctx.font = `800 34px ${SERIF}`; const ww = ctx.measureText(word).width + 30; ctx.font = `700 17px ${UI}`; const rw = ctx.measureText(rest).width;
   const tot = ww + 12 + rw, fx = W / 2 - tot / 2, fy = y + 76; const glow = .5 + .5 * Math.sin(t * 5);
   ctx.save(); ctx.shadowColor = A.nen ? 'rgba(140,255,170,.9)' : 'rgba(255,120,90,.9)'; ctx.shadowBlur = 8 + glow * 10; ctx.fillStyle = A.nen ? '#1f7a3a' : '#2a0604'; rr(fx, fy, ww, 50, 10); ctx.fill(); ctx.restore();
   ctx.strokeStyle = A.nen ? '#9df0b4' : '#ff9a7a'; ctx.lineWidth = 3; rr(fx, fy, ww, 50, 10); ctx.stroke();
@@ -250,7 +250,7 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
   const n = A.muc.length, gap = 10, tw = (w - 28 - gap * (n - 1)) / n, ty = y + 142, th = 132;
   A.muc.forEach((m, i) => { const rv = c.phase === 'xong' ? 1 : clamp((c.t - .4 - i * .35) / .3, 0, 1); if (!rv) return; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1) * rv; const tx = x + 14 + i * (tw + gap), cx = tx + tw / 2;
     ctx.fillStyle = 'rgba(255,240,210,.12)'; rr(tx, ty, tw, th, 12); ctx.fill(); ctx.strokeStyle = 'rgba(242,207,114,.55)'; ctx.lineWidth = 1.2; ctx.stroke();
-    if (m.loai === 'gio') iconGio(cx, ty + 44, m); else if (m.loai === 'ngay') iconNgay(cx, ty + 44, m); else iconTuoi(cx, ty + 44, m);
+    const isc = tw < 120 ? .82 : 1; ctx.save(); ctx.translate(cx, ty + 44); ctx.scale(isc, isc); if (m.loai === 'gio') iconGio(0, 0, m); else if (m.loai === 'ngay') iconNgay(0, 0, m); else iconTuoi(0, 0, m); ctx.restore();
     badge(tx + tw - 14, ty + 14, m.tot);
     const [l1, l2] = m.nhan.split(' · '); let fs = 13.5; ctx.font = `700 ${fs}px ${UI}`; while (ctx.measureText(l1).width > tw - 12 && fs > 10) { fs -= .5; ctx.font = `700 ${fs}px ${UI}`; }
     text(l1, cx, ty + 94, fs, '#fff1d0', { w: 700 }); text(l2 || '', cx, ty + 115, 14.5, m.tot > 0 ? '#9df0b4' : m.tot < 0 ? '#ffb39a' : '#e6e0d4', { w: 800 }); ctx.restore(); });
@@ -269,7 +269,8 @@ function frame(now) { requestAnimationFrame(frame); const dt = clamp((now - last
   } catch (e) { console.error(e); } }
 
 // ---------- Sự kiện người xem ----------
-function onComment(name, msg, that) { const tuoi = L.docTuoi(msg, S.day.yy); if (tuoi) return enqueue({ ten: name, tuoi, that });
+function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuoi = r.tuoi, sep = r.sep; if (tuoi) S.nho.set(name, tuoi); if (sep) S.nhoSep.set(name, sep);
+  if (tuoi || sep) return enqueue({ ten: name, tuoi: tuoi || S.nho.get(name) || null, sep: sep || S.nhoSep.get(name) || null, that });
   if (/tr[iì]nh k[yý]|gi[oờ] t[oố]t|xem gi[uú]p|th[aầ]y [oơ]i xem/i.test(String(msg))) enqueue({ ten: name, tuoi: null, that }); }
 function onLike(name, n, that) { const v = (S.likes.get(name) || 0) + n; S.likes.set(name, v);
   if (v >= 10) { S.likes.set(name, 0); const lx = S.lastXem.get(name) || -999; if (S.t - lx > 120) { S.lastXem.set(name, S.t); enqueue({ ten: name, tuoi: null, that }); } } }
@@ -280,7 +281,7 @@ function onGift(name) { if (!S.cur) noi('Không nhận quà, ' + ten(name) + ' t
 // ---------- Giả lập người xem (tắt bằng ?sim=0) ----------
 const SIM_ON = Q.get('sim') !== '0';
 const NAMES = ['Mơ Dung', 'Thu Hà', 'Quang Huy', 'Kim Oanh', 'Tuấn Đạt', 'Bảo Ngọc', 'Hải Đăng', 'Minh Khôi', 'Lan Hương', 'Văn Tú', 'Diệu Linh', 'Phúc Lộc', 'Trà My', 'Hồng Nhung', 'Đức Minh', 'Ngọc Ánh'];
-const SIM_MSG = ['con sinh 1991', 'em 1995 thầy ơi', '1988', 'con tuổi Hợi', 'thầy xem giúp con trình ký', '96 ạ', 'Canh Ngọ', 'tuổi Dần ạ', '1983'];
+const SIM_MSG = ['em 1991 sếp 1975', 'sếp tuổi Thìn, em 1990', 'sếp 1984 ạ', 'em 1995 sếp 1977', 'con sinh 1991', 'em 1995 thầy ơi', '1988', 'con tuổi Hợi', 'thầy xem giúp con trình ký', '96 ạ', 'Canh Ngọ', 'tuổi Dần ạ', '1983'];
 let simT = 3;
 function sim(dt) { if (!SIM_ON) return; simT -= dt; if (simT > 0) return; simT = S.real ? rnd(10, 16) : rnd(3, 6); const nm = pick(NAMES);
   if (Math.random() < .5) onLike(nm, Math.floor(rnd(3, 7)), false); else onComment(nm, pick(SIM_MSG), false); }

@@ -243,48 +243,64 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
 
   // ---------- Giờ đẹp kế tiếp trong giờ làm (8h–17h30, thứ hai–thứ sáu) ----------
   const GIO_LAM = [8, 17.5];
-  // điểm một khung giờ cho một tuổi: null = loại (giờ hắc đạo, ngày/giờ xung hoặc hại tuổi, ngày quá xấu)
-  function diemSlot(n, chi, t) { const g = n.gio[chi]; if (!g.tot) return null;
-    let d = g.hang + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
-    if (t) { if (XUNG(n.chiN, t.chi)) return null; if (XUNG(chi, t.chi) || HAI(chi, t.chi)) return null;
-      d += quanHe(n.chiN, t.chi).diem + (LUC_HOP(chi, t.chi) ? 2 : TAM_HOP(chi, t.chi) ? 1 : 0); }
-    return d >= 4 ? d : null; }
-  const slotTot = (n, chi, t) => diemSlot(n, chi, t) !== null;
+  // điểm một khung giờ cho người trình (t) và sếp (sep): null = loại (giờ hắc đạo, ngày/giờ xung hoặc hại tuổi, ngày quá xấu)
+  function diemTuoi(n, chi, t) { if (!t) return 0; if (XUNG(n.chiN, t.chi) || XUNG(chi, t.chi) || HAI(chi, t.chi)) return null;
+    return quanHe(n.chiN, t.chi).diem + (LUC_HOP(chi, t.chi) ? 2 : TAM_HOP(chi, t.chi) ? 1 : 0); }
+  function diemSlot(n, chi, t, sep) { const g = n.gio[chi]; if (!g.tot) return null;
+    const a = diemTuoi(n, chi, t), b = diemTuoi(n, chi, sep); if (a === null || b === null) return null;
+    const d = g.hang + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0) + a + b; return d >= 4 ? d : null; }
+  const slotTot = (n, chi, t, sep) => diemSlot(n, chi, t, sep) !== null;
   const hStr = h => Math.floor(h) + 'h' + (h % 1 ? String(Math.round(h % 1 * 60)).padStart(2, '0') : '');
   const THU_NGAN = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   // 3 khung giờ đẹp nhất trong 3 ngày làm việc tới (thứ 2–6, 8h–17h30), xếp theo thời gian
-  function gioDepToi(n0, t, max) { max = max || 3; const now = n0.gioHienTai + n0.phut / 60, cand = []; let ngayLam = 0;
-    for (let d = 0; d < 14 && ngayLam < 3; d++) { const dt = new Date(Date.UTC(n0.yy, n0.mm - 1, n0.dd + d)), n = ngay(dt.getUTCDate(), dt.getUTCMonth() + 1, dt.getUTCFullYear());
-      if (n.wd === 0 || n.wd === 6) continue; if (d === 0 && now >= GIO_LAM[1]) continue; ngayLam++;
+  function gioDepToi(n0, t, max, sep) { max = max || 3; const now = n0.gioHienTai + n0.phut / 60, cand = []; let ngayLam = 0;
+    for (let d = 0; d < 21 && ngayLam < 3; d++) { const dt = new Date(Date.UTC(n0.yy, n0.mm - 1, n0.dd + d)), n = ngay(dt.getUTCDate(), dt.getUTCMonth() + 1, dt.getUTCFullYear());
+      if (n.wd === 0 || n.wd === 6) continue; if (d === 0 && now >= GIO_LAM[1]) continue; let co = false;
       for (let chi = 4; chi <= 9; chi++) { const g = n.gio[chi], a = Math.max(g.tu, GIO_LAM[0]), b = Math.min(g.den, GIO_LAM[1]); if (b <= a) continue;
-        if (d === 0 && a < now) continue; const sc = diemSlot(n, chi, t); if (sc === null) continue;
+        if (d === 0 && a < now) continue; const sc = diemSlot(n, chi, t, sep); if (sc === null) continue; co = true;
         const buoi = a < 11 ? 'sáng' : a < 13 ? 'trưa' : 'chiều', ngayNoi = d === 0 ? 'hôm nay' : d === 1 ? 'ngày mai' : n.dd + '/' + n.mm;
         cand.push({ d, a, b, sc: sc - d * .3 - (b - a < 1.5 ? .5 : 0), gio: g.ten, than: g.than, buoi, thu: THU_NGAN[n.wd], thuDay: n.thu.toLowerCase(), ngayNoi,
-          nhan: hStr(a) + '–' + hStr(b) + ' ' + buoi + ' ' + THU_NGAN[n.wd] + ' ' + ngayNoi }); } }
+          nhan: hStr(a) + '–' + hStr(b) + ' ' + buoi + ' ' + THU_NGAN[n.wd] + ' ' + ngayNoi }); }
+      if (co) ngayLam++; }
     return cand.sort((x, y) => y.sc - x.sc).slice(0, max).sort((x, y) => x.d - y.d || x.a - y.a); }
   const noiGio = g => hStr(g.a).replace('h', ' giờ ').replace(/ $/, '') + ' đến ' + hStr(g.b).replace('h', ' giờ ').replace(/ $/, '') + ' ' + g.buoi + ' ' + g.thuDay + (g.d === 0 ? ' hôm nay' : g.d === 1 ? ' ngày mai' : ' ' + g.ngayNoi);
 
-  // ---------- Câu phán gọn: NÊN / KHÔNG NÊN trình ký lúc này, lý do dạng hình (giờ, ngày, tuổi), mỗi nhãn ≤ 7 chữ ----------
-  function phan(name, n, t) {
+  // ---------- Đọc năm sinh người trình và năm sinh sếp trong cùng một bình luận ("em 1991 sếp 1975", "sếp tuổi Thìn") ----------
+  const kd1 = s => [...bo(s)].map(c => c === 'đ' ? 'd' : c.normalize('NFD').replace(/[̀-ͯ]/g, '')).join(''); // giữ nguyên độ dài để cắt chuỗi gốc
+  const TOK = '(?:(?:tuoi|sinh|nam|doi)\\s+)?((?:19|20)\\d{2}|\\d{2}(?!\\d)|(?:giap|at|binh|dinh|mau|ky|canh|tan|nham|quy)\\s+(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi)|(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi))(?![a-z0-9])';
+  function docHaiTuoi(raw, namNay) { const s = String(raw || ''), k = kd1(s); let sep = null, rest = s;
+    const m = new RegExp('(?:^|[^a-z])(sep|xep|boss|sep minh|sep em)\\s*(?:la|:|-|,)?\\s*' + TOK).exec(k);
+    if (m) { const tok = m[2], at = m.index + m[0].indexOf(m[1]), raw2 = s.substr(k.indexOf(tok, at), tok.length);
+      sep = docTuoi('tuoi ' + (/^\d{2}$/.test(tok) ? tok : raw2), namNay) || docTuoi('tuoi ' + tok, namNay);
+      rest = s.slice(0, at) + ' ' + s.slice(m.index + m[0].length); }
+    return { tuoi: docTuoi(rest, namNay), sep }; }
+  const tenNgan = t => (t.can !== null && t.can !== undefined ? CAN[t.can] + ' ' : '') + CHI[t.chi] + (t.nam ? ' ' + t.nam : '');
+
+  // ---------- Câu phán gọn: NÊN / KHÔNG NÊN trình ký lúc này, lý do dạng hình (giờ, ngày, tuổi, sếp), mỗi nhãn ≤ 7 chữ ----------
+  function oTuoi(n, cur, t, ai) { // ai: 'tuoi' (người trình) | 'sep'
+    const q = quanHe(n.chiN, t.chi), xg = XUNG(cur.chi, t.chi), hai = HAI(cur.chi, t.chi), hp = LUC_HOP(cur.chi, t.chi) || TAM_HOP(cur.chi, t.chi);
+    const diem = q.diem + (xg ? -2 : hai ? -1 : hp ? 1 : 0), tot = xg || hai || q.diem < 0 ? -1 : q.diem > 0 || hp ? 1 : 0;
+    const quan = q.diem < 0 ? (q.ten === 'xung' ? 'xung' : 'hại') : xg ? 'xung' : hai ? 'hại' : q.diem > 0 || hp ? 'hợp' : 'bình';
+    const theoGio = q.diem === 0 && (xg || hai || hp), ket = quan === 'bình' ? 'bình hòa' : quan + (theoGio ? ' giờ' : ' ngày');
+    return { diem, xauSep: ai === 'sep' && tot < 0, o: { loai: ai, tot, chiTuoi: t.chi, chiDoi: theoGio ? cur.chi : n.chiN, quan, nhan: (ai === 'sep' ? 'Sếp ' : 'Tuổi ') + tenNgan(t) + ' · ' + ket, phu: '' } }; }
+  function phan(name, n, t, sep) {
     const cur = n.gio[gioCuaGioDong(n.gioHienTai)];
     let diem = (cur.tot ? 2 : -2) + (n.hoangDao ? 1 : -1) - (n.tamNuong || n.nguyetKy ? 1 : 0);
     const muc = [
       { loai: 'gio', tot: cur.tot ? 1 : -1, chi: cur.chi, nhan: 'Giờ ' + cur.ten + ' · ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo'), phu: khung(cur) },
       { loai: 'ngay', tot: n.hoangDao && !n.tamNuong && !n.nguyetKy ? 1 : -1, dd: n.dd, mm: n.mm, al: n.al,
         nhan: 'Ngày ' + n.canChi + ' · ' + (n.tamNuong ? 'Tam Nương' : n.nguyetKy ? 'Nguyệt Kỵ' : n.hoangDao ? 'hoàng đạo' : 'hắc đạo'), phu: n.than }];
-    let tuoiNoi = '';
-    if (t) { const q = quanHe(n.chiN, t.chi), xg = XUNG(cur.chi, t.chi), hp = LUC_HOP(cur.chi, t.chi) || TAM_HOP(cur.chi, t.chi); diem += q.diem + (xg ? -2 : hp ? 1 : 0);
-      const tot = xg ? -1 : q.diem > 0 || hp ? 1 : q.diem < 0 ? -1 : 0, ten = (t.can !== null && t.can !== undefined ? CAN[t.can] + ' ' : '') + CHI[t.chi] + (t.nam ? ' ' + t.nam : '');
-      muc.push({ loai: 'tuoi', tot, chiTuoi: t.chi, chiDoi: xg || (q.diem === 0 && hp) ? cur.chi : n.chiN, quan: xg ? 'xung' : q.diem > 0 ? 'hợp' : q.diem < 0 ? (q.ten === 'xung' ? 'xung' : 'hại') : hp ? 'hợp' : 'bình',
-        nhan: 'Tuổi ' + ten + ' · ' + (xg ? 'xung giờ' : q.diem > 0 ? 'hợp ngày' : q.diem < 0 ? (q.ten === 'xung' ? 'xung ngày' : 'hại ngày') : hp ? 'hợp giờ' : 'bình hòa'), phu: '' });
-      tuoiNoi = ', tuổi ' + ten; }
+    let tuoiNoi = '', semMang = false;
+    if (t) { const r = oTuoi(n, cur, t, 'tuoi'); diem += r.diem; muc.push(r.o); tuoiNoi = ', tuổi ' + tenNgan(t); }
+    if (sep) { const r = oTuoi(n, cur, sep, 'sep'); diem += r.diem; muc.push(r.o); semMang = r.xauSep; }
     const bay = n.gioHienTai + n.phut / 60, lam = n.wd >= 1 && n.wd <= 5 && bay >= GIO_LAM[0] && bay < GIO_LAM[1];
     if (!lam) { muc[0].tot = -1; muc[0].nhan = (n.wd === 0 || n.wd === 6 ? n.thu : 'Giờ ' + cur.ten) + ' · ngoài giờ làm'; }
-    const nen = lam && cur.tot && diem >= 1, goiY = nen ? [] : gioDepToi(n, t, 3);
-    const speak0 = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' : 'Không nên trình ký lúc này. ') + 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
-    const speak = (lam ? speak0 : name + tuoiNoi + '. Không nên trình ký lúc này, đang ngoài giờ làm.') + (goiY.length ? ' Giờ đẹp kế tiếp: ' + noiGio(goiY[0]) + '.' : '');
-    return { ten: name, nen, muc, goiY, speak }; }
+    const nen = lam && cur.tot && diem >= 1 && !semMang, goiY = nen ? [] : gioDepToi(n, t, 3, sep);
+    const vi = 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
+    const speak = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' + vi : !lam ? 'Không nên trình ký lúc này, đang ngoài giờ làm.' : semMang ? 'Không nên trình ký, hôm nay xấu với tuổi sếp, trình là sếp mắng đấy!' : 'Không nên trình ký lúc này. ' + vi)
+      + (goiY.length ? ' Giờ đẹp kế tiếp: ' + noiGio(goiY[0]) + '.' : '');
+    return { ten: name, nen, semMang: semMang && lam, muc, goiY, speak }; }
 
-  const API = { phan, gioDepToi, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
+  const API = { phan, gioDepToi, docHaiTuoi, CAN, CHI, THU, GIO, THAN, QUE, amLich, ngay, homNay, VN, docTuoi, tenTuoi, quanHe, traLoiGio, traLoiTuoi, traLoiQue, gioCuaGioDong, GIO_HC, khung, SAO, dongHoGioTot };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LICH = API;
 })(typeof window !== 'undefined' ? window : globalThis);
