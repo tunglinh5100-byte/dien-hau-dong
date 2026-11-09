@@ -62,6 +62,7 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
       <div class="row">
         <button id="bAuto" class="on" type="button">Giả lập: đang chạy</button>
         <button id="bSound" type="button">Bật nhạc hầu đồng</button>
+        <button id="bDD" type="button">Góc máy tự động</button>
         <button id="bJoin10" type="button">+ 10 con nhang vào</button>
         <button id="bCfg" type="button">Khai báo giá hầu</button>
         <button id="bLiveMode" type="button">Chế độ live trên điện thoại</button>
@@ -622,7 +623,7 @@ window.__hdLenh = (d, c) => { try {
   return true; } catch (e) { return false; } };
 // nút điều khiển từ xa (trang dk.html trên điện thoại) qua kênh ntfy.sh miễn phí
 (function () { try { const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k';
-  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|bo|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
+  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|bo|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); else if ((m === 'ddbat' || m === 'ddtat') && window.__hdDD) window.__hdDD(m === 'ddbat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
   mo(); } catch (e) {} })();
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
@@ -1744,6 +1745,7 @@ function lvUp(name, lv) {
   if (p) { for (let i = 0; i < 16; i++) S.particles.push({ x: sx + rnd(-18, 18), y: sy + rnd(10, 60), vx: rnd(-26, 26), vy: rnd(-50, -10), life: rnd(1, 1.8), t: 0, kind: 'spark' }); p.pose = 'raise'; p.poseT = 2.6; }
   if (lv >= 3) { S.banner = { text: '⬆ ' + name + ' lên ' + LV_TEN[lv] + ' · được ban áo khăn mới', t: 0, life: 3.6 }; try { trongChau([0, .35]); } catch (e) {} }
   addComment(name, 'lên cấp ' + lv + ': ' + LV_TEN[lv]);
+  if (typeof ddCanNguoi === 'function') setTimeout(() => ddCanNguoi(name), 400);
 }
 function lvCong(name, k, r, pts) {
   const truoc = lvOf(r.xp); r.xp += pts; const sau = lvOf(r.xp); lvDirty = true;
@@ -1764,7 +1766,8 @@ function lvEv(name, d, t) {
   t = String(t || '').toLowerCase();
   if (t.includes('chat')) { const c = norm(String(d.comment || d.content || ''));
     if (/^(cap|cap do|cap may|lv|level)\??$/.test(c.trim())) { const l = lvOf(r.xp); S.banner = { text: name + ': Lv' + l + ' ' + LV_TEN[l] + (l < 5 ? ' · còn ' + (LV_XP[l + 1] - r.xp) + ' điểm lên ' + LV_TEN[l + 1] : ' · cấp cao nhất'), t: 0, life: 4 }; }
-    if ((r.c || 0) < 10) { r.c = (r.c || 0) + 1; lvCong(name, k, r, 3); } }
+    if ((r.c || 0) < 10) { r.c = (r.c || 0) + 1; lvCong(name, k, r, 3); }
+    if (typeof DD !== 'undefined' && !DD.evt && Math.random() < .3) setTimeout(() => ddCanNguoi(name), 600); }
   else if (t.includes('like')) { r.lk = (r.lk || 0) + Math.max(1, +(d.count || d.likeCount || 1)); const du = Math.min(20, Math.floor(r.lk / 5)) - (r.lkp || 0); if (du > 0) { r.lkp = (r.lkp || 0) + du; lvCong(name, k, r, du); } }
   else if (t.includes('share') || (t.includes('social') && (JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase().includes('share') || +d.action === 3))) { if ((r.s || 0) < 2) { r.s = (r.s || 0) + 1; lvCong(name, k, r, 15); } }
   else if (t.includes('follow') || t.includes('social')) { if (!r.f) { r.f = 1; lvCong(name, k, r, 20); } }
@@ -1969,24 +1972,55 @@ const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55, T: 26, on: true }; window.__c
 // chỉnh camera từ xa: mỗi phút đọc cam.json trên GitHub, áp dụng ngay không cần tải lại trang (nhạc không bị tắt)
 (function camRemote() {
   const ap = j => { if (!j || typeof j !== 'object') return; const n = (v, a, b) => typeof v === 'number' && isFinite(v) ? Math.min(b, Math.max(a, v)) : null;
-    const A = n(j.A, 0, 90), T = n(j.T, 8, 120), Sc = n(j.S, 1, 1.4); if (A !== null) CAM.A = A; if (T !== null) CAM.T = T; if (Sc !== null) CAM.S = Sc; if (typeof j.on === 'boolean') CAM.on = j.on; };
+    const A = n(j.A, 0, 90), T = n(j.T, 8, 120), Sc = n(j.S, 1, 1.4); if (A !== null) CAM.A = A; if (T !== null) CAM.T = T; if (Sc !== null) CAM.S = Sc; if (typeof j.on === 'boolean') CAM.on = j.on; if (typeof j.dd === 'boolean' && j.dd !== camRemote.dd) { camRemote.dd = j.dd; if (window.__hdDD && camRemote.lan) window.__hdDD(j.dd); } camRemote.lan = 1; };
   const go = () => { try { fetch('cam.json?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(ap).catch(() => {}); } catch (e) {} };
   go(); setInterval(go, 60000);
 })(); // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
+// ---------- Đạo diễn ảo: tự chuyển góc máy (toàn cảnh, cận cô, lướt đám con nhang, cận người vừa lên cấp, cẩu máy) ----------
+// Bật/tắt: nút trên trang điều khiển, trang dk.html (từ xa), cam.json "dd": true/false, hoặc thêm ?dd=0 vào link
+const DD = { on: true, z: 1, fx: 270, fy: 480, cx: 270, cy: 480, tz: 1, tfx: 270, tfy: 480, k: 1.2, shot: 'rong', t: 0, i: 0, evt: null, dur: 8, sweep: 0, who: null };
+try { const q = new URLSearchParams(location.search).get('dd'); const ls = localStorage.getItem('hd_dd'); DD.on = q === '0' ? false : q === '1' ? true : ls === '0' ? false : true; } catch (e) {}
+function ddSet(on) { DD.on = !!on; try { localStorage.setItem('hd_dd', DD.on ? '1' : '0'); } catch (e) {} const b = document.getElementById('bDD'); if (b) { b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; } S.banner = { text: DD.on ? '🎥 Góc máy tự động: bật' : '🎥 Góc máy tự động: tắt', t: 0, life: 2.2 }; }
+const DD_LICH = ['rong', 'co', 'thap', 'rong', 'can', 'cau', 'co', 'thap'];
+const DD_DUR = { rong: 8, co: 7, thap: 9, can: 5.5, cau: 7, loc: 6 };
+function ddNguoi() { const ds = S.people.filter(p => p.state === 'seat' && !String(p.name).startsWith('​')); if (!ds.length) return null; const that = ds.filter(p => LVK[p.name]); return pick(that.length ? that : ds); }
+function ddCanNguoi(name) { if (!DD.on) return; const p = S.people.find(q => q.name === name); if (p && p.state === 'seat') DD.evt = { shot: 'can', p, t: 0, dur: 4.5 }; }
+function ddUpd(dt) {
+  if (!CAM_ON || !DD.on || S.chuyen && S.chuyen.t < .1) { DD.tz = 1; DD.tfx = 270; DD.tfy = 480; DD.k = 1.6; }
+  else {
+    let shot, p = null;
+    if (S.dem && S.dem.p && S.people.includes(S.dem.p) && (S.dem.t || 0) < 6) shot = 'loc';
+    else if (S.chuyen) shot = 'cau';
+    else if (DD.evt && DD.evt.t < DD.evt.dur && S.people.includes(DD.evt.p)) { DD.evt.t += dt; shot = 'can'; p = DD.evt.p; }
+    else { DD.evt = null; DD.t += dt; if (DD.t > DD.dur) { DD.t = 0; DD.i = (DD.i + 1) % DD_LICH.length; DD.shot = DD_LICH[DD.i]; DD.dur = DD_DUR[DD.shot]; DD.who = DD.shot === 'can' ? ddNguoi() : null; DD.sweep = Math.random() < .5 ? 1 : -1; } shot = DD.shot; if (shot === 'can') p = DD.who; }
+    const u = clamp(DD.t / DD.dur, 0, 1);
+    if (shot === 'co') { DD.tz = laOng() && ongNgoi() ? 1.45 : 1.6; DD.tfx = CO.x; DD.tfy = CO.y - 130; DD.k = 1; }
+    else if (shot === 'thap') { DD.tz = 1.55; DD.tfx = 270 + DD.sweep * (u * 2 - 1) * 150; DD.tfy = 790; DD.k = 1.3; }
+    else if (shot === 'can' && p) { DD.tz = 2; DD.tfx = p.x; DD.tfy = p.y - 46 * (p.seat ? p.seat.s : 1); DD.k = 1.5; }
+    else if (shot === 'loc') { DD.tz = 1.55; DD.tfx = (CO.x + DEM.x) / 2; DD.tfy = 590; DD.k = 1.1; }
+    else if (shot === 'cau') { const v = S.chuyen ? clamp(S.chuyen.t / 14, 0, 1) : u, e = v * v * (3 - 2 * v); DD.tz = 1.6 - .35 * e; DD.tfx = 270 + (CO.x - 270) * e; DD.tfy = 820 - 330 * e; DD.k = 2.2; }
+    else { DD.tz = 1; DD.tfx = 270; DD.tfy = 480; DD.k = 1; }
+  }
+  const a = Math.min(1, dt * DD.k); DD.z += (DD.tz - DD.z) * a; DD.fx += (DD.tfx - DD.fx) * a; DD.fy += (DD.tfy - DD.fy) * a;
+  const sc = CAM.S * DD.z, hw = W / 2 / sc, hh = H / 2 / sc; // không cho máy lia ra ngoài khung cảnh
+  DD.cx = clamp(DD.fx, hw - 30 * (DD.z - 1), W - hw + 30 * (DD.z - 1)); DD.cy = clamp(DD.fy, hh, H - hh);
+}
+window.__hdDD = ddSet;
 function camUpd(dt) {
+  ddUpd(dt);
   if (!CAM_ON || !CAM.on) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
   const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
   CAM.P = CAM.A * (2 * v - 1);
 }
 const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
-function camBase() { ctx.translate(W / 2, H / 2); ctx.scale(CAM.S, CAM.S); ctx.translate(-W / 2, -H / 2); }
+function camBase() { const sc = CAM.S * DD.z; ctx.translate(W / 2, H / 2); ctx.scale(sc, sc); ctx.translate(-DD.cx, -DD.cy); }
 function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
 function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
   const sh = o => { if (o && typeof o.x === 'number' && typeof o.y === 'number') o.x += d * camOff(o.y); };
   S.people.forEach(sh); if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); sh(CO); S.floats.forEach(sh); S.particles.forEach(sh);
 }
-function camMap(x, y) { return [(x + camOff(y) - W / 2) * CAM.S + W / 2, (y - H / 2) * CAM.S + H / 2]; }
+function camMap(x, y) { const sc = CAM.S * DD.z; return [(x + camOff(y) - DD.cx) * sc + W / 2, (y - DD.cy) * sc + H / 2]; }
 
 // ---------- Controls ----------
 const ME = 'Bạn (thử)';
@@ -1998,6 +2032,7 @@ document.getElementById('bShare').addEventListener('click', () => { lvThu('share
 document.getElementById('bLanMoi').addEventListener('click', () => lvThuLanMoi());
 document.getElementById('bCfg').addEventListener('click', () => { const d = document.getElementById('cfg'); d.hidden = !d.hidden; });
 document.getElementById('bJoin10').addEventListener('click', () => { for (let i = 0; i < 10; i++) setTimeout(() => { const n = pick(NAMES) + ' ' + Math.floor(rnd(1, 99)); person(n); }, i * 250); });
+{ const b = document.getElementById('bDD'); b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; b.addEventListener('click', () => ddSet(!DD.on)); }
 const bA = document.getElementById('bAuto'); bA.addEventListener('click', () => { S.auto = !S.auto; if (!S.auto && GIA().id === 'codoi') { S.people = []; S.queue = []; S.dem = null; S.giving = 0; CO.giving = null; S.floats = []; S.autoT = 30; KHEN.q = []; KHEN.cur = null; if (S.seats) S.seats.forEach(q => q.who = null); } bA.classList.toggle('on', S.auto); bA.textContent = S.auto ? 'Giả lập: đang chạy' : 'Giả lập: tạm dừng'; });
 const bS = document.getElementById('bSound'); bS.addEventListener('click', () => { S.sound = !S.sound; bS.classList.toggle('on', S.sound); bS.textContent = S.sound ? 'Tắt nhạc hầu đồng' : 'Bật nhạc hầu đồng'; if (S.sound) { acGet(); musStart(); try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} } else musStop(); });
 // ---------- 4 giai đoạn mỗi giá, chỉ chuyển khi anh gõ lệnh: 1 thỉnh mời · 2 thay khăn áo, múa · 3 văn phát lộc · 4 xe loan hồi cung ----------
