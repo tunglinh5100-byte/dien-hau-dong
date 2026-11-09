@@ -84,7 +84,7 @@ function enqueue(job) { const old = S.queue.findIndex(j => j.ten === job.ten); i
 function startJob(job) { refreshDay(); const tu = job.tuoi || S.nho.get(job.ten) || null, se = job.sep || S.nhoSep.get(job.ten) || null;
   S.cur = { job, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
-  S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK + 6 + rnd(-3, 3), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
+  S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK - 3 + rnd(-2, 2), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
 const IDLE = ['Sắp trình ký? Thả 10 tim để xem.', 'Bình luận năm sinh, xem theo tuổi.', 'Xem cho vui, tham khảo lịch vạn niên.', 'Không nhận quà, thả tim là được.', 'Ghi thêm năm sinh sếp, vd: sếp 1975.', 'Hỏi ngày khác được: "mai", "thứ 5".'];
 function update(dt) {
@@ -259,16 +259,32 @@ function drawPhan(t) { const c = S.cur; if (!c || (c.phase !== 'phan' && c.phase
     text(l1, cx, ty + 94, fs, '#fff1d0', { w: 700 }); text(l2 || '', cx, ty + 115, 14.5, m.tot > 0 ? '#9df0b4' : m.tot < 0 ? '#ffb39a' : '#e6e0d4', { w: 800 }); ctx.restore(); });
   // giờ đẹp kế tiếp (chỉ khi KHÔNG NÊN)
   if (gy.length) { const rv = c.phase === 'xong' ? 1 : clamp((c.t - 1.6) / .4, 0, 1); ctx.save(); ctx.globalAlpha = clamp(a, 0, 1) * rv; const sy = ty + th + 12;
-    text('⏰ ' + (A.goiTitle || 'Giờ đẹp kế tiếp'), W / 2, sy + 8, 14, '#f6dc96', { f: SERIF, w: 800 });
+    text('⏰ ' + (A.goiTitle || 'Giờ đẹp tiếp theo'), W / 2, sy + 8, 14, '#f6dc96', { f: SERIF, w: 800 });
     const cw = (w - 28 - 20) / 3; gy.forEach((g, i) => { const p = g.nhan.split(' '), l1 = p[0], l2 = p.slice(1).join(' '), cx0 = x + 14 + i * (cw + 10); ctx.font = `700 13px ${UI}`; const f2 = Math.min(13, 13 * (cw - 10) / Math.max(1, ctx.measureText(l2).width));
       ctx.fillStyle = 'rgba(20,90,45,.85)'; rr(cx0, sy + 20, cw, 48, 10); ctx.fill(); ctx.strokeStyle = '#9df0b4'; ctx.lineWidth = 1.5; ctx.stroke();
       text(l1, cx0 + cw / 2, sy + 35, 16, '#eaffef', { w: 800 }); text(l2, cx0 + cw / 2, sy + 55, f2, '#c9f5d4', { w: 700 }); }); ctx.restore(); }
   ctx.restore(); }
+function drawBien(t) { // biển gỗ treo từ trần: mục đích của live
+  const sw = Math.sin(t * .8) * .012, cx = W / 2, y = 116, w = 340, h = 74; const c = S.cur, an = c && (c.phase === 'phan' || c.phase === 'xong') ? (c.phase === 'xong' ? clamp(c.t / .5, 0, 1) : 1 - clamp(c.t / .3, 0, 1)) : 1; if (an <= 0) return; ctx.save(); ctx.globalAlpha = an; ctx.translate(cx, 0); ctx.rotate(sw);
+  ctx.strokeStyle = '#8a6a44'; ctx.lineWidth = 2; [-120, 120].forEach(dx => { ctx.beginPath(); ctx.moveTo(dx * .8, 0); ctx.lineTo(dx, y + 4); ctx.stroke(); ctx.fillStyle = '#c9a25a'; ctx.beginPath(); ctx.arc(dx, y + 4, 3.5, 0, 7); ctx.fill(); });
+  ctx.shadowColor = 'rgba(60,30,10,.35)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5; const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#9a5a2a'); g.addColorStop(1, '#6e3c1a'); ctx.fillStyle = g; rr(-w / 2, y, w, h, 12); ctx.fill(); ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 2.5; rr(-w / 2 + 5, y + 5, w - 10, h - 10, 9); ctx.stroke();
+  ctx.strokeStyle = 'rgba(40,20,8,.25)'; ctx.lineWidth = 1; [y + 24, y + 48].forEach(yy => { ctx.beginPath(); ctx.moveTo(-w / 2 + 10, yy); ctx.lineTo(w / 2 - 10, yy + 2); ctx.stroke(); });
+  const tg = ctx.createLinearGradient(0, y + 14, 0, y + 44); tg.addColorStop(0, '#fff3c4'); tg.addColorStop(1, '#e8b048'); ctx.font = `800 25px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = tg; ctx.fillText('XEM GIỜ TRÌNH KÝ SẾP', 0, y + 30);
+  text('Lúc này có nên trình ký không?', 0, y + 56, 13.5, '#fbe7c0', { w: 700 }); ctx.restore(); }
+function drawHuongDan(t) { // bảng hướng dẫn tương tác, đặt trên mặt trước bàn trà
+  const x = 22, y = 900, w = W - 44, h = 56; ctx.save(); ctx.fillStyle = 'rgba(40,20,10,.86)'; rr(x, y, w, h, 12); ctx.fill(); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1.5; ctx.stroke();
+  text('CÁCH XEM', x + 14, y + 10, 9.5, '#e6b552', { a: 'left', f: SERIF, w: 800 });
+  const items = [['❤️', 'Thả 10 tim', 'xem giờ ngay'], ['🎂', 'Gõ năm sinh', '"em 1991"'], ['👑', 'Thêm tuổi sếp', '"sếp 1985"'], ['📅', 'Hỏi ngày khác', '"mai", "thứ 5"']];
+  const cw = (w - 20) / 2; items.forEach((it, i) => { const cx = x + 10 + (i % 2) * cw, cy = y + 26 + Math.floor(i / 2) * 20, hl = Math.floor(t / 2.5) % 4 === i;
+    if (hl) { ctx.fillStyle = 'rgba(230,181,82,.18)'; rr(cx - 2, cy - 9, cw - 6, 18, 6); ctx.fill(); }
+    text(it[0], cx + 10, cy + 1, 13, '#fff', { a: 'center' }); text(it[1], cx + 24, cy, 13, '#fff1d0', { a: 'left', w: 800 }); ctx.font = `800 13px ${UI}`; const w1 = ctx.measureText(it[1]).width;
+    text('→ ' + it[2], cx + 30 + w1, cy, 12.5, '#f6dc96', { a: 'left', w: 600 }); }); ctx.restore(); }
 let last = performance.now();
 function frame(now) { requestAnimationFrame(frame); const dt = clamp((now - last) / 1000, 0, .05); last = now;
   try { update(dt); sim(dt); const t = S.t; drawBg(t);
     ctx.save(); ctx.translate(HX, BASE_Y); ctx.scale(SC, SC); ctx.translate(-HX, -DESK); drawThay(t); drawDesk(t); drawCoins(); drawSparks(); ctx.restore();
-    drawNoi(); drawPhan(t);
+    drawBien(t); drawHuongDan(t); drawNoi(); drawPhan(t);
   } catch (e) { console.error(e); } }
 
 // ---------- Sự kiện người xem ----------

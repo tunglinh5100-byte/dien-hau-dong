@@ -241,7 +241,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     return { loai: 'que', ten: name, tieuDe: 'QUẺ TRÌNH KÝ CỦA ' + name.toUpperCase(), sao, ketLuan: ket, lines, que: q,
       speak: name + ' gieo được quẻ ' + q.ten + '. Quẻ ' + q.ngan + ', ' + q.y + '.' }; }
 
-  // ---------- Giờ đẹp kế tiếp trong giờ làm (8h–17h30, thứ hai–thứ sáu) ----------
+  // ---------- Giờ đẹp tiếp theo trong giờ làm (8h–17h30, thứ hai–thứ sáu) ----------
   const GIO_LAM = [8, 17.5];
   // điểm một khung giờ cho người trình (t) và sếp (sep): null = loại (giờ hắc đạo, ngày/giờ xung hoặc hại tuổi, ngày quá xấu)
   function diemTuoi(n, chi, t) { if (!t) return 0; if (XUNG(n.chiN, t.chi) || XUNG(chi, t.chi) || HAI(chi, t.chi)) return null;
@@ -299,7 +299,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
     const nen = lam && cur.tot && diem >= 1 && !semMang && !n.tamNuong && !n.nguyetKy, goiY = nen ? [] : gioDepToi(n, t, 3, sep);
     const vi = 'Vì giờ ' + cur.ten + ' là giờ ' + (cur.tot ? 'hoàng đạo' : 'hắc đạo') + ', ngày ' + n.canChi + ' là ngày ' + (n.hoangDao ? 'hoàng đạo' : 'hắc đạo') + '.';
     const speak = name + tuoiNoi + '. ' + (nen ? 'Nên trình ký ngay. ' + vi : !lam ? 'Không nên trình ký lúc này, đang ngoài giờ làm.' : semMang ? 'Không nên trình ký, hôm nay xấu với tuổi sếp, trình là sếp mắng đấy!' : 'Không nên trình ký lúc này. ' + vi)
-      + (goiY.length ? ' Giờ đẹp kế tiếp: ' + noiGio(goiY[0]) + '.' : '');
+      + (goiY.length ? ' Giờ đẹp tiếp theo: ' + noiGio(goiY[0]) + '.' : '');
     return { ten: name, nen, semMang: semMang && lam, muc, goiY, speak }; }
 
   // ---------- Hỏi về ngày tương lai: "mai", "ngày kia", "thứ 5", "tuần sau thứ 3", "15/11", "ngày 20", "3 ngày nữa", "sáng mai" ----------
