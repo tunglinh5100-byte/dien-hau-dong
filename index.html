@@ -93,6 +93,7 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
         <button data-say="Con ở Lạng Sơn" type="button">Khoe quê</button>
         <button id="bFollow" type="button">Follow</button>
         <button id="bShare" type="button">Share</button>
+        <button id="bLanMoi" type="button">Thử: vào live lần mới</button>
       </div>
     </div>
     <div class="group">
@@ -163,6 +164,7 @@ function person(name) {
   const free = S.seats.filter(s => !s.who); if (!free.length) { const old = S.people.find(v => v.state === 'seat' && !v.quen) || S.people.find(v => v.state === 'seat') || S.people.find(v => v.state !== 'xinloc' && !v.goingHuong); if (!old) return { name, seat: { x: 270, y: 900, s: 1 }, state: 'ghost', pose: 'kneel', wp: [] }; old.seat.who = null; S.people.splice(S.people.indexOf(old), 1); S.viewers--; return person(name); }
   const seat = free.sort((a, b) => a.y - b.y || Math.abs(a.x - 270) - Math.abs(b.x - 270))[QUEN[name] ? 0 : Math.floor(rnd(0, Math.min(6, free.length)))];
   p = { name, coat: pick(COATS), sex: Math.random() < .6 ? 'nu' : 'nam', hairC: pick(['#1c120c', '#22160e', '#2e1d12', '#1a1410']), seat, x: 270, y: 960, state: 'enter', pose: 'walk', poseT: 0, wp: [[seat.x, seat.y]], q: [], carry: null };
+  p.lv = LVK[name] && LV[LVK[name]] ? lvOf(LV[LVK[name]].xp) : name === ME ? 1 : lvSim();
   if (QUEN[name]) { p.quen = true; setTimeout(() => float(270, 560, '⭐ Con nhang quen ' + name + ' đã về', '#f6dc96'), 1200); }
   seat.who = p; S.people.push(p); S.viewers++; return p;
 }
@@ -1182,13 +1184,14 @@ function drawTrays(t) {
 
 // ---------- Con nhang (back view) ----------
 function drawPerson(p, t) {
-  const s = p.state === 'seat' ? p.seat.s : 1;
-  let lean = 0, arms = null;
+  const s = p.state === 'seat' ? p.seat.s : 1, lv = p.lv || 2;
+  let lean = lv === 1 ? 3 : 0, arms = null;
   if (p.pose === 'bow') lean = 6 + Math.abs(Math.sin(t * 3)) * 6;
   if (p.pose === 'raise') arms = 'up'; if (p.pose === 'reach') arms = 'reach'; if (p.pose === 'clap') arms = 'clap'; if (p.pose === 'cheer') arms = 'wave';
   const walking = p.state === 'walk', bob = walking ? Math.abs(Math.sin(t * 8 + p.x)) * 2 : 0;
   ctx.save(); ctx.translate(p.x, p.y - bob); if (p.state === 'seat') ctx.rotate(p.seat.lean + (p.pose === 'kneel' ? Math.sin(S.t * 2.6 + (p.seat.x % 7) * .12) * .05 : 0)); ctx.scale(1.7 * s, 1.7 * s);
-  ctx.globalAlpha = .35; ctx.beginPath(); ctx.ellipse(0, 1, 11, 3.5, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.globalAlpha = .35; ctx.beginPath(); ctx.ellipse(0, 1, 11, 3.5, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = lv === 1 ? .62 : 1;
+  if (lv === 5) { const pu = .55 + .2 * Math.sin(t * 3 + p.x), ag = ctx.createRadialGradient(0, -18, 2, 0, -18, 24); ag.addColorStop(0, `rgba(255,214,110,${pu})`); ag.addColorStop(1, 'rgba(255,190,60,0)'); ctx.fillStyle = ag; ctx.beginPath(); ctx.ellipse(0, -18, 22, 26, 0, 0, 6.28); ctx.fill(); }
   const im = null;
   if (im) { const h = 42, w = h * im.naturalWidth / im.naturalHeight; ctx.save();
     if (walking) ctx.rotate(Math.sin(t * 8 + p.x) * .07);
@@ -1199,7 +1202,7 @@ function drawPerson(p, t) {
     ctx.restore(); }
   else {
   const kneel = !walking && p.pose !== 'walk' && p.state !== 'stand', nu = p.sex === 'nu', SK = '#e3b78c', sw = nu ? 7.6 : 9.2, top = (kneel ? -21 : -26) + lean * .5;
-  const coat = p.quen ? '#b0261e' : p.coat;
+  const coat = lv === 1 ? ['#6d6258', '#5e5a52', '#74685c', '#66605a'][(p.name.length + p.name.charCodeAt(0)) % 4] : lv === 5 ? '#c9962a' : (p.quen && lv < 3) ? '#b0261e' : p.coat;
   const g = ctx.createLinearGradient(-11, 0, 11, 0); g.addColorStop(0, shade(coat, -.35)); g.addColorStop(.45, shade(coat, .1)); g.addColorStop(1, shade(coat, -.4));
   if (kneel) { // bàn chân gập phía sau
     ctx.beginPath(); ctx.ellipse(-4.5, -1, 3.2, 1.8, -.2, 0, 6.28); ctx.fillStyle = '#c99a72'; ctx.fill(); ctx.beginPath(); ctx.ellipse(4.5, -1, 3.2, 1.8, .2, 0, 6.28); ctx.fill();
@@ -1208,8 +1211,11 @@ function drawPerson(p, t) {
   // thân: eo, vai tròn
   ctx.beginPath(); ctx.moveTo(-(nu ? 8 : 8.5), kneel ? -7 : -11); ctx.quadraticCurveTo(-(nu ? 6.2 : 8), (top - 7) * .6, -sw, top + 3); ctx.quadraticCurveTo(-sw + .5, top, -sw + 3, top - .5); ctx.lineTo(sw - 3, top - .5); ctx.quadraticCurveTo(sw - .5, top, sw, top + 3); ctx.quadraticCurveTo(nu ? 6.2 : 8, (top - 7) * .6, nu ? 8 : 8.5, kneel ? -7 : -11); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, top + 1); ctx.lineTo(0, kneel ? -8 : -12); ctx.stroke();
+  if (lv === 1) { rr(-6.5, top + 7, 4, 3.6, .6, '#4a423b'); rr(2.6, top + 12, 3.4, 3, .6, '#8a7a68'); ctx.strokeStyle = 'rgba(30,24,20,.5)'; ctx.lineWidth = .5; ctx.beginPath(); ctx.moveTo(-5.5, top + 8); ctx.lineTo(-3.5, top + 10); ctx.moveTo(3, top + 13); ctx.lineTo(5.4, top + 14.4); ctx.stroke(); }
+  if (lv >= 3) { ctx.strokeStyle = '#f0c75a'; ctx.lineWidth = lv >= 4 ? 1.4 : 1; ctx.beginPath(); ctx.moveTo(-sw + 2.5, top + .6); ctx.quadraticCurveTo(0, top + 3.2, sw - 2.5, top + .6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-(nu ? 8 : 8.5), (kneel ? -7 : -11) - 1); ctx.lineTo(nu ? 8 : 8.5, (kneel ? -7 : -11) - 1); ctx.stroke(); }
+  if (lv >= 4) { const gd = lv === 5 ? '#fff0b0' : '#f0c75a'; [[0, top + 7], [-3.6, top + 10.5], [3.6, top + 10.5], [0, top + 13.5], [-2, top + 16.5], [2, top + 16.5]].forEach(([x, y]) => circ(x, y, .9, gd)); ctx.strokeStyle = gd; ctx.lineWidth = .6; ctx.beginPath(); ctx.arc(0, top + 10.5, 4.2, 0, 6.28); ctx.stroke(); }
   // tay
-  const arm = (x0, y0, x1, y1, x2, y2) => { ctx.strokeStyle = shade(coat, -.15); ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(x1, y1, x2, y2); ctx.stroke(); circ(x2, y2, 1.6, SK); };
+  const arm = (x0, y0, x1, y1, x2, y2) => { ctx.strokeStyle = shade(coat, -.15); ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(x1, y1, x2, y2); ctx.stroke(); if (lv >= 4) { ctx.strokeStyle = '#f0c75a'; ctx.lineWidth = .9; ctx.beginPath(); ctx.arc(x1 + (x2 - x1) * .78, y1 + (y2 - y1) * .78, 1.9, 0, 6.28); ctx.stroke(); } circ(x2, y2, 1.6, SK); };
   const sy = top + 2.5;
   if (arms === 'up') [-1, 1].forEach(k => arm(k * (sw - 1.5), sy, k * (sw + 3), sy - 7, k * (sw + 1), sy - 14 - Math.abs(Math.sin(t * 8)) * 3));
   else if (arms === 'clap') { const c = Math.abs(Math.sin(t * 12)) * 3.5; [-1, 1].forEach(k => arm(k * (sw - 1.5), sy, k * (sw + 1), sy + 5, k * (1.6 + c), sy - 6)); }
@@ -1229,16 +1235,20 @@ function drawPerson(p, t) {
   } else { // tóc ngắn, lộ gáy
     ctx.beginPath(); ctx.ellipse(0, hy + 4.4, 3.4, 1.6, 0, 0, Math.PI); ctx.fillStyle = '#c99a72'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, hy, 3.6, Math.PI * 1.15, Math.PI * 1.75); ctx.stroke(); }
+  if (lv === 1) { ctx.strokeStyle = p.hairC; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; [[-4, -1.2, -6.5, -3.5], [-1.5, -1.6, -2.2, -5.2], [1.6, -1.6, 3, -5], [4, -1.2, 6.8, -3]].forEach(([a, b, c2, d2]) => { ctx.beginPath(); ctx.moveTo(a, hy + b - 3.6); ctx.lineTo(c2, hy + d2 - 2.4); ctx.stroke(); }); }
+  if (lv >= 3) { const kc = lv === 5 ? '#e9b43a' : lv === 4 ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
+    ctx.lineWidth = 3; ctx.strokeStyle = kc; ctx.beginPath(); ctx.ellipse(0, hy - 2.4, 5.9, 2.5, 0, 0, 6.28); ctx.stroke(); ctx.lineWidth = .6; ctx.strokeStyle = lv >= 4 ? '#ffe39a' : 'rgba(255,255,255,.35)'; ctx.stroke();
+    if (lv >= 4) { const fx = nu ? 4.6 : 0, fy = hy - 4.6; for (let i = 0; i < 5; i++) { const a = i * 1.2566 + t * .4; circ(fx + Math.cos(a) * 1.5, fy + Math.sin(a) * 1.5, 1.1, lv === 5 ? '#ff6a6a' : '#f4a0b8'); } circ(fx, fy, .8, '#ffe39a'); } }
   ctx.restore();
-  if (p.quen) { ctx.lineWidth = 2.4; ctx.strokeStyle = '#c62a22'; ctx.beginPath(); ctx.ellipse(0, hy - 2.6, 5.8, 2.4, 0, 0, 6.28); ctx.stroke(); ctx.strokeStyle = '#f4d47c'; ctx.lineWidth = .6; ctx.stroke(); }
+  if (p.quen && lv < 3) { ctx.lineWidth = 2.4; ctx.strokeStyle = '#c62a22'; ctx.beginPath(); ctx.ellipse(0, hy - 2.6, 5.8, 2.4, 0, 0, 6.28); ctx.stroke(); ctx.strokeStyle = '#f4d47c'; ctx.lineWidth = .6; ctx.stroke(); }
   }
   if (p.carry) drawItem(p.carry, 11, -22, .8);
   ctx.restore();
   // name tag
   if (String(p.name).startsWith('\u200b') || (S.dem && S.dem.p === p)) return;
-  const tag = (p.quen ? '⭐ ' : '') + p.name + (p.que ? ' · ' + p.que : '');
+  const tag = 'Lv' + lv + ' ' + (p.quen ? '⭐ ' : '') + p.name + (p.que ? ' · ' + p.que : '');
   ctx.font = `600 ${8.5 * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8;
-  rr(p.x - w / 2, p.y - 62 * s - 6, w, 12, 6, p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)'); text(tag, p.x, p.y - 62 * s, 8.5 * Math.max(.9, s), p.quen ? '#ffe39a' : '#fff', { w: 600 });
+  rr(p.x - w / 2, p.y - 62 * s - 6, w, 12, 6, ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * Math.max(.9, s), lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff', { w: 600 });
 }
 
 // ---------- Effects + overlay ----------
@@ -1501,7 +1511,7 @@ function drawKhayOng(t) { if (!ongNgoi() || (CO.sit || 0) < .5) return; const sc
 function drawDangOng(t) { if (!ongNgoi() || (CO.sit || 0) < .5) return;
   const msg = '☕ Dâng ông cà phê · 🚬 thuốc lá'; ctx.save(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(msg).width + 26, py = CO.y + 30;
   rr(CO.x - w / 2, py - 12, w, 24, 12, 'rgba(90,30,100,.92)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(CO.x - w / 2, py - 12, w, 24, 12); ctx.stroke(); text(msg, CO.x, py, 12, '#fbe9a8', { f: SERIF, w: 700 }); ctx.restore(); }
-const MOI = ['💬 Bình luận "lạy cô" để được cô gọi tên ban lộc', '📍 Bình luận tên quê, cô gọi tên con nhang', '❤️ Thả tim đầy bình 100 tim, cô tung lộc', '↗️ Chia sẻ live để nhận lời ban khen của cô', '🙏 Gõ "thắp hương" để lên dâng hương'];
+const MOI = ['💬 Bình luận "lạy cô" để được cô gọi tên ban lộc', '📍 Bình luận tên quê, cô gọi tên con nhang', '❤️ Thả tim đầy bình 100 tim, cô tung lộc', '↗️ Chia sẻ live để nhận lời ban khen của cô', '🙏 Gõ "thắp hương" để lên dâng hương', '⬆ Mỗi lần về điện, áo khăn của bạn đẹp thêm một bậc', '❤️💬↗️ Thả tim, bình luận, chia sẻ để lên cấp Đệ tử, Thanh đồng', '🔎 Gõ "cấp" để xem cấp của mình'];
 function drawMoi(t) { // dải mời tương tác cuối màn hình, đổi câu mỗi 5 giây
   if (!(S.real || S.auto) || GIA().id !== 'codoi') return;
   const P = 5, i = Math.floor(t / P) % MOI.length, u = (t % P) / P, a = Math.min(1, u / .08, (1 - u) / .08);
@@ -1677,6 +1687,54 @@ function checkTiers() {
 }
 function nextTierText() { const n5 = (Math.floor(S.likes / 500) + 1) * 500; return n5 % 1000 === 0 ? ['Mốc ' + n5.toLocaleString('vi-VN') + (laOng() ? ' tim: cả điện vái lạy ông' : ' tim: cả điện vỗ tay, hoa rơi'), n5 - S.likes] : ['Mốc ' + n5.toLocaleString('vi-VN') + (laOng() ? ' tim: ông ngự văn đặc biệt' : ' tim: cô múa hát đặc biệt'), n5 - S.likes]; }
 // (3) Con nhang quen: ai follow kênh được nhớ lại ở các phiên sau
+// ---------- Cấp độ con nhang: lần đầu vào thì áo xấu, quay lại và thả tim, bình luận, chia sẻ thì áo khăn đẹp dần ----------
+// Lưu trong trình duyệt của máy đang live (localStorage 'hd_lv'), theo ID TikTok nên đổi tên vẫn giữ cấp.
+const LV_TEN = ['', 'Khách vãng lai', 'Con nhang', 'Con nhang thân', 'Đệ tử', 'Thanh đồng'];
+const LV_XP = [0, 0, 20, 30, 90, 200]; // lần 1 = 10 điểm, lần 2 = 20 (Lv2), lần 3 = 30 (Lv3); tương tác thì lên nhanh hơn
+const LV_GIO = 3 * 3600 * 1000; // vắng quá 3 giờ rồi vào lại thì tính là một lần vào mới
+let LV = {}; try { LV = JSON.parse(localStorage.getItem('hd_lv') || '{}') || {}; } catch (e) {}
+const LVK = {}; // tên đang hiện trên màn hình -> khoá lưu (ID TikTok)
+let lvDirty = false; setInterval(() => { if (!lvDirty) return; lvDirty = false;
+  try { const ks = Object.keys(LV); if (ks.length > 4000) ks.sort((a, b) => LV[a].at - LV[b].at).slice(0, ks.length - 3500).forEach(k => delete LV[k]); localStorage.setItem('hd_lv', JSON.stringify(LV)); } catch (e) {} }, 4000);
+function lvOf(xp) { let l = 1; for (let i = 2; i <= 5; i++) if (xp >= LV_XP[i]) l = i; return l; }
+function lvSim() { return pick([1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5]); }
+function lvMoi(r) { r.v++; r.xp += 10; r.c = 0; r.lk = 0; r.lkp = 0; r.s = 0; r.vt = Date.now(); }
+function lvUp(name, lv) {
+  const p = S.people.find(q => q.name === name); if (p) p.lv = lv;
+  const sx = p ? p.seat.x : 270, sy = p ? p.seat.y - 80 * p.seat.s : 560;
+  float(sx, sy, '⬆ Lv' + lv + ' ' + LV_TEN[lv], '#ffe39a');
+  if (p) { for (let i = 0; i < 16; i++) S.particles.push({ x: sx + rnd(-18, 18), y: sy + rnd(10, 60), vx: rnd(-26, 26), vy: rnd(-50, -10), life: rnd(1, 1.8), t: 0, kind: 'spark' }); p.pose = 'raise'; p.poseT = 2.6; }
+  if (lv >= 3) { S.banner = { text: '⬆ ' + name + ' lên ' + LV_TEN[lv] + ' · được ban áo khăn mới', t: 0, life: 3.6 }; try { trongChau([0, .35]); } catch (e) {} }
+  addComment(name, 'lên cấp ' + lv + ': ' + LV_TEN[lv]);
+}
+function lvCong(name, k, r, pts) {
+  const truoc = lvOf(r.xp); r.xp += pts; const sau = lvOf(r.xp); lvDirty = true;
+  if (sau > truoc) lvUp(name, sau);
+}
+// gọi từ phần kết nối TikFinity / EulerStream cho MỖI sự kiện của người xem thật
+function lvEv(name, d, t) {
+  const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || {};
+  const k = String(u.userId || u.uniqueId || (d && (d.userId || d.uniqueId)) || name);
+  LVK[name] = k; let r = LV[k], now = Date.now(), lanMoi = false;
+  if (!r) { r = LV[k] = { n: name, v: 0, xp: 0, at: 0, f: 0 }; }
+  r.n = name;
+  if (now - (r.at || 0) > LV_GIO) { const truoc = lvOf(r.xp); lvMoi(r); lanMoi = true; const sau = lvOf(r.xp);
+    if (r.v >= 2) setTimeout(() => { float(270, 600, '🏮 ' + name + ' về điện lần thứ ' + r.v, '#f6dc96'); if (sau > truoc) lvUp(name, sau); }, 1600);
+    else if (sau > truoc) setTimeout(() => lvUp(name, sau), 1600); }
+  r.at = now; lvDirty = true;
+  const p = S.people.find(q => q.name === name); if (p) p.lv = lvOf(r.xp);
+  t = String(t || '').toLowerCase();
+  if (t.includes('chat')) { const c = norm(String(d.comment || d.content || ''));
+    if (/^(cap|cap do|cap may|lv|level)\??$/.test(c.trim())) { const l = lvOf(r.xp); S.banner = { text: name + ': Lv' + l + ' ' + LV_TEN[l] + (l < 5 ? ' · còn ' + (LV_XP[l + 1] - r.xp) + ' điểm lên ' + LV_TEN[l + 1] : ' · cấp cao nhất'), t: 0, life: 4 }; }
+    if ((r.c || 0) < 10) { r.c = (r.c || 0) + 1; lvCong(name, k, r, 3); } }
+  else if (t.includes('like')) { r.lk = (r.lk || 0) + Math.max(1, +(d.count || d.likeCount || 1)); const du = Math.min(20, Math.floor(r.lk / 5)) - (r.lkp || 0); if (du > 0) { r.lkp = (r.lkp || 0) + du; lvCong(name, k, r, du); } }
+  else if (t.includes('share') || (t.includes('social') && (JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase().includes('share') || +d.action === 3))) { if ((r.s || 0) < 2) { r.s = (r.s || 0) + 1; lvCong(name, k, r, 15); } }
+  else if (t.includes('follow') || t.includes('social')) { if (!r.f) { r.f = 1; lvCong(name, k, r, 20); } }
+}
+// nút thử trên trang điều khiển: "Bạn (thử)" được tính như người xem thật
+function lvThu(kind) { const d = { user: { uniqueId: '__thu__' }, comment: 'lạy cô', count: 50 }; lvEv(ME, d, kind); }
+function lvThuLanMoi() { const r = LV['__thu__']; if (r) r.at = 0; lvEv(ME, { user: { uniqueId: '__thu__' } }, 'member'); const p = person(ME); if (p) p.lv = lvOf(LV['__thu__'].xp); }
+window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvDirty = true; } };
 let QUEN = {}; try { QUEN = JSON.parse(localStorage.getItem('hd_quen') || '{}') || {}; } catch (e) {}
 function luuQuen() { try { localStorage.setItem('hd_quen', JSON.stringify(QUEN)); } catch (e) {} }
 function follow(name) {
@@ -1881,11 +1939,12 @@ function camMap(x, y) { return [(x + camOff(y) - W / 2) * CAM.S + W / 2, (y - H 
 
 // ---------- Controls ----------
 const ME = 'Bạn (thử)';
-document.querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => say(ME, b.dataset.say)));
+document.querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => { lvThu('chat'); say(ME, b.dataset.say); }));
 document.querySelectorAll('[data-gift]').forEach(b => b.addEventListener('click', () => gift(ME, b.dataset.gift)));
-document.getElementById('bLike').addEventListener('click', () => { like(50, ME); khen(ME); });
-document.getElementById('bFollow').addEventListener('click', () => follow(ME));
-document.getElementById('bShare').addEventListener('click', () => shareLive(ME));
+document.getElementById('bLike').addEventListener('click', () => { lvThu('like'); like(50, ME); khen(ME); });
+document.getElementById('bFollow').addEventListener('click', () => { lvThu('follow'); follow(ME); });
+document.getElementById('bShare').addEventListener('click', () => { lvThu('share'); shareLive(ME); });
+document.getElementById('bLanMoi').addEventListener('click', () => lvThuLanMoi());
 document.getElementById('bCfg').addEventListener('click', () => { const d = document.getElementById('cfg'); d.hidden = !d.hidden; });
 document.getElementById('bJoin10').addEventListener('click', () => { for (let i = 0; i < 10; i++) setTimeout(() => { const n = pick(NAMES) + ' ' + Math.floor(rnd(1, 99)); person(n); }, i * 250); });
 const bA = document.getElementById('bAuto'); bA.addEventListener('click', () => { S.auto = !S.auto; if (!S.auto && GIA().id === 'codoi') { S.people = []; S.queue = []; S.dem = null; S.giving = 0; CO.giving = null; S.floats = []; S.autoT = 30; KHEN.q = []; KHEN.cur = null; if (S.seats) S.seats.forEach(q => q.who = null); } bA.classList.toggle('on', S.auto); bA.textContent = S.auto ? 'Giả lập: đang chạy' : 'Giả lập: tạm dừng'; });
@@ -1954,7 +2013,7 @@ buildCfgPanel(); napNhacGia();
     const name = nameOf(d); if (!name) return;
     const nm = String(name).slice(0, 24); seen.set(nm, H.S.t);
     const t = String(type || '').toLowerCase();
-    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) say(nm, c); }
+    if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) say(nm, c); }
     else if (t.includes('like')) { person(nm); like(Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), nm); }
     else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) shareLive(nm); else follow(nm); }
