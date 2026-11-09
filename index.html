@@ -395,14 +395,14 @@ CV_DANCE.forEach(name => {
   v.src = 'co-' + name + '.mp4?v=5'; CV_HOLD.appendChild(v); CV[name] = v;
 });
 // clip quay xuống tung lộc (chạy một lần): tiền, quả, hoa hồng.
-const CVF = {}, CVF_REL = { tien: 5.8, qua: 2.9, hoa: 3.1 };
+const CVF = {}, CVF_REL = { tien: 1.22, qua: 2.9, hoa: 3.1 }; // tien: đã cắt bỏ 3 lần nhún trước khi tung
 // clip xoay người làm sẵn: xu0..xu9 = từ đúng khung múa CV_EXITS[k] quay xuống (tay nối liền), le0..le2 = quay lên rồi nối liền vào khung múa CV_RESUME[r]
 const CV_EXITS = [0.8333,3.7917,7.2083,10.1667,14.4167,17.9583,20.4167,23.2500,27.7917,31.0000], CV_RESUME = [3.0417,12.3750,23.4583];
 ['tien', 'qua', 'hoa', ...CV_EXITS.map((e, k) => 'xu' + k), ...CV_RESUME.map((e, r) => 'le' + r)].forEach(name => {
   const v = document.createElement('video');
   v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = 'auto';
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=5'; CV_HOLD.appendChild(v); CVF[name] = v;
+  v.style.cssText = 'width:2px;height:4px'; v.src = 'co-' + name + '.mp4?v=' + (name === 'tien' ? 6 : 5); CV_HOLD.appendChild(v); CVF[name] = v;
 });
 const CVF_BUF = document.createElement('canvas'); CVF_BUF.width = CV_W; CVF_BUF.height = CV_H; let cvfOk = false, cvfT = -1;
 const CVT_BUF = document.createElement('canvas'); CVT_BUF.width = CV_W; CVT_BUF.height = CV_H; let cvtOk = false, cvtT = -1;
