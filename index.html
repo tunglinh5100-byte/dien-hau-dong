@@ -1487,7 +1487,7 @@ function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích g
   const X = 8, Y = 192, Wd = 150, cx = X + Wd / 2, h = 176, BY = Y + 84, BH = h - 90, LH = 12.5;
   panel(X, Y, Wd, h);
   text('Nhận lời ban khen của ' + xung(), cx, Y + 16, 11, '#f2cf72', { f: SERIF, w: 800 });
-  text('💬 Bình luận', cx, Y + 36, 10.5, '#fff', { w: 700 }); text('hoặc ↗️ chia sẻ live', cx, Y + 51, 10.5, '#fff', { w: 700 });
+  text('Bình luận', cx, Y + 36, 10.5, '#fff', { w: 700 }); text('hoặc chia sẻ live', cx, Y + 51, 10.5, '#fff', { w: 700 });
   ctx.strokeStyle = 'rgba(230,181,82,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X + 14, Y + 63); ctx.lineTo(X + Wd - 14, Y + 63); ctx.stroke();
   const g = GIA(), ten = 'Sự tích ' + (g.ten || ''); ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 75, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
