@@ -189,6 +189,7 @@ function gift(name, kind) {
 }
 function like(n, ai) { S.likes += n; S.kick = 1; if (laOng() && ongNgoi()) { S.ob.last = S.t; if (!S.cafeFull) { const truoc = S.cafe || 0; S.cafe = Math.min(S.goal, truoc + n); if (truoc < S.goal - 1 && S.cafe >= S.goal - 1) S.cafe99 = ai || ''; const st = truoc / S.goal; S.pha = { k: st < .3 ? 'goi' : st < .85 ? 'nuoc' : 'thia', t: 0 }; } } for (let i = 0; i < Math.min(n, 6); i++) (S.drops = S.drops || []).push({ sx: rnd(135, 175), sy: rnd(360, 400), t: -i * .12 }); MUS.boost = 3; for (let i = 0; i < Math.min(n, 8); i++) S.particles.push({ x: rnd(470, 520), y: rnd(880, 905), vx: rnd(-8, 8), vy: rnd(-80, -40), life: 1.8, t: 0, kind: 'heart' }); }
 function tungLoc() {
+  if (S.chuyen) { wave(12); return; } // đang xe giá, thỉnh, thay khăn áo: chưa ban lộc
   if (laOng()) { S.timBan = { text: '', t: 0, life: 5 }; S.obCall = (S.obCall || 0) + 3;
     if (S.chuyen) { wave(12); return; }
     if (S.ob.ph !== 'ngoi') { if (S.ob.t < (S.ob.min || 0)) S.ob.cho = true; else { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } }
@@ -335,9 +336,9 @@ function tayNgoaiKhan(t) { const c = S.chuyen; if (!c || (CO.sit || 0) < .8) ret
   const arm = (s, ex, ey, wx, wy, ang, kind) => { sleeve(ex, ey, 5.5, wx, wy, 6.5); const dx = wx - ex, dy = wy - ey, L = Math.hypot(dx, dy) || 1, px = -dy / L * 7, py = dx / L * 7; ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(wx + px, wy + py); ctx.lineTo(wx - px, wy - py); ctx.stroke(); banTay(wx + dx / L * 4, wy + dy / L * 4, ang, kind, 1.05); };
   // xe giá hồi cung: hai tay ra khỏi khăn, múa dẻo một lượt, rồi giữ nguyên tới hết xe giá
   if (T < CG.thinh + .6 && T > CG.veil[1]) { const e = prog(T, [CG.veil[1] + .2, CG.veil[1] + 1]) * (1 - prog(T, [CG.thinh, CG.thinh + .6])); if (e <= 0) return; const k = prog(T, [CG.veil[1] + 1, CG.veil[1] + 4.6]), m = Math.sin(k * Math.PI * 2) * (1 - k * .3);
-    [-1, 1].forEach(s => { const d = k < 1 ? 1 : 0; // tay ló nửa ra khỏi khăn lên ngang đầu như lúc thỉnh, bàn tay múa dẻo một lượt rồi giữ
-      const sx0 = s * 22, sy0 = -184, elx = s * (24 + 15 * e), ely = -184 - 12 * e, wx = s * (24 + 10 * e + Math.cos(k * 6.28) * 2 * d), wy = -186 - 34 * e + Math.sin(k * 6.28 + s) * 2 * d;
-      sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (k < 1 ? -.25 + .45 * m : -.15), 'mo'); }); return; }
+    [-1, 1].forEach(s => { const d = k < 1 ? 1 : 0; // hai tay ló ra khỏi khăn, đặt lên đỉnh đầu, bàn tay múa dẻo một lượt rồi giữ trên đầu
+      const sx0 = s * 22, sy0 = -186, elx = s * (24 + 16 * e), ely = -186 - 14 * e, wx = s * (24 - 10 * e + Math.cos(k * 6.28) * 1.5 * d), wy = -190 - 34 * e + Math.sin(k * 6.28 + s) * 1.5 * d;
+      sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (k < 1 ? -1.05 + .35 * m : -1.15), 'mo'); }); return; }
   // thỉnh: chỉ giá có số (Cô Đôi) mới giơ tay lên đầu, tay phải ra số
   const so = SO_GIA[c.toId]; if (!so || T < CG.thinh) return;
   const e = prog(T, [CG.thinh + .3, CG.thinh + 1.3]) * (1 - prog(T, [CG.thinh + 8.5, CG.thinh + 9.3])); if (e <= 0) return;
@@ -1005,7 +1006,7 @@ function phatVan(a, b, done) { try { VAN_STOP = b; VAN_DONE = done || null; VAN_
 function giaDur() { const g = GIA(); return g.hang === 'mau' ? 75 : 360; }
 function GIA() { if (typeof S !== 'undefined' && S.chuyen && S.chuyen.look) return S.chuyen.look; return GIA_DS.list.find(g => g.id === GIA_DS.active) || GIA_DS.list[0] || GIA_MAC_DINH; }
 function luuGia() { try { localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items: { codoi: GIA_DS.list[0], ongbay: GIA_DS.list[1] } })); } catch (e) {} }
-function laOng() { return GIA().id === 'ongbay'; }
+function laOng() { const c = typeof S !== 'undefined' && S.chuyen; if (c && c.t >= CG.thinh) return c.toId === 'ongbay'; return GIA().id === 'ongbay'; } // từ lúc thỉnh: con nhang xưng theo giá đang thỉnh
 function xung() { return laOng() ? 'ông' : 'cô'; }
 function ongNgoi() { return laOng() && S.ob && S.ob.ph === 'ngoi' && !S.loc; }
 // nhạc văn của từng giá lưu trong IndexedDB (file âm thanh anh chọn)
