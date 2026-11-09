@@ -296,7 +296,7 @@ function coUpdate(dt) {
   // hướng người: ngang theo hướng đi; "down" khi quay chéo xuống
   const lat = congCu() === 'cheo' && !S.chuyen ? .8 : d > 1.5 ? clamp(dx / (d || 1), -1, 1) * .6 : (CO.giving ? (laOng() ? (CO.giving.tay ? Math.sign(CO.giving.tay.home[0] - CO.x) : 1) * .8 : S.dem ? 0 : Math.sign((CO.giving.p.seat.x - CO.x) || 1) * .7) : 0);
   CO.face += (lat - CO.face) * Math.min(1, dt * 3);
-  const wantDown = (CO.downT > 0 || S.throwT > 0) && congCu() !== 'cheo' ? 1 : 0; CO.down += (wantDown - CO.down) * Math.min(1, dt * 4);
+  let wantDown = (CO.downT > 0 || S.throwT > 0) && congCu() !== 'cheo' ? 1 : 0; if (wantDown && laOng() && !ongNgoi() && !CO.giving && !S.chuyen) wantDown = .4; /* ông múa hèo: chỉ quay nghiêng nửa người, không quay hẳn xuống */ CO.down += (wantDown - CO.down) * Math.min(1, dt * 4);
 }
 function depthScale(y) { return .9 + (y - (CARPET.cy - CARPET.ry)) / (CARPET.ry * 2) * .16; }
 // ---------- Đổ bóng 3D: ánh sáng chính từ phía ban thờ (trên, trái) ----------
