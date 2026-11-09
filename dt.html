@@ -79,6 +79,7 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
       <div class="row">
         <button id="bGiaCo" type="button">Giá Cô Đôi</button>
         <button id="bGiaOng" type="button">Giá Ông Hoàng Bảy</button>
+        <button id="bGiaBo" type="button">Giá Cô Bơ</button>
         <button id="bOngNgoi" type="button">Ông Bảy: múa ↔ ngồi</button>
         <button id="bHoiCung" type="button">🐉 Xe loan thánh giá</button>
         <button id="bTuChuyen" type="button" hidden>Tự chuyển giá: tắt</button>
@@ -328,10 +329,11 @@ function faceShade(hx, hy, r) {
   inClip(() => { const b = ctx.createLinearGradient(0, hy - r, 0, hy - r + 8); b.addColorStop(0, 'rgba(90,40,20,.35)'); b.addColorStop(1, 'rgba(90,40,20,0)'); ctx.fillStyle = b; ctx.fillRect(hx - r, hy - r, r * 2, 9); });
 }
 // tay đưa ra ngoài khăn phủ diện: xe giá (mọi giá) múa dẻo rồi giữ tay; thỉnh Cô Đôi giơ hai tay lên đầu, tay phải ra số 2
-const SO_GIA = { codoi: 2 }; // giá nào thỉnh thì giơ số (sau này thêm giá khác vào đây)
+const SO_GIA = { codoi: 2, cobo: 3 }; // giá nào thỉnh thì giơ số (sau này thêm giá khác vào đây)
 function banTay(x, y, ang, kind, k) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(k || 1, k || 1);
   const sk = skinFill(0, 0, 5), fin = (dx, len, a, w) => { ctx.save(); ctx.translate(dx, -3); ctx.rotate(a); ctx.strokeStyle = '#d9a87c'; ctx.lineWidth = w + 1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(0, -len * .6, len * .12 * Math.sign(a || 1), -len); ctx.stroke(); ctx.strokeStyle = '#f1cfa6'; ctx.lineWidth = w; ctx.stroke(); ctx.restore(); };
-  if (kind === 'hai') { fin(-1.6, 9.5, -.2, 2.1); fin(1.6, 9.5, .2, 2.1); ctx.beginPath(); ctx.ellipse(0, 1, 4.2, 4.6, 0, 0, 6.28); ctx.fillStyle = sk; ctx.fill(); [-1.5, 1.5].forEach(dx => { ctx.beginPath(); ctx.arc(dx + 1, -2.6, 1.3, 0, 6.28); ctx.fillStyle = '#e8bf95'; ctx.fill(); }); fin(-4, 4.5, -1.1, 2); }
+  if (kind === 'ba') { fin(-2.6, 8.5, -.3, 2); fin(0, 9.8, 0, 2.1); fin(2.6, 8.5, .3, 2); ctx.beginPath(); ctx.ellipse(0, 1, 4.4, 4.6, 0, 0, 6.28); ctx.fillStyle = sk; ctx.fill(); ctx.beginPath(); ctx.arc(3.2, -1.6, 1.3, 0, 6.28); ctx.fillStyle = '#e8bf95'; ctx.fill(); fin(-4.2, 4.5, -1.1, 2); }
+  else if (kind === 'hai') { fin(-1.6, 9.5, -.2, 2.1); fin(1.6, 9.5, .2, 2.1); ctx.beginPath(); ctx.ellipse(0, 1, 4.2, 4.6, 0, 0, 6.28); ctx.fillStyle = sk; ctx.fill(); [-1.5, 1.5].forEach(dx => { ctx.beginPath(); ctx.arc(dx + 1, -2.6, 1.3, 0, 6.28); ctx.fillStyle = '#e8bf95'; ctx.fill(); }); fin(-4, 4.5, -1.1, 2); }
   else { [-2.6, -.9, .9, 2.6].forEach((dx, i) => fin(dx, [6.5, 8, 7.8, 6.2][i], (dx / 2.6) * .18 - .35, 1.8)); ctx.beginPath(); ctx.ellipse(0, 1, 4.2, 4.6, 0, 0, 6.28); ctx.fillStyle = sk; ctx.fill(); fin(-4.2, 5, -1, 2); } // bàn tay mở, ngón cong ra sau (dẻo)
   ctx.restore(); }
 function tayNgoaiKhan(t) { const c = S.chuyen; if (!c || (CO.sit || 0) < .8) return; const T = c.t, ao = GIA().ao || '#f3efe6';
@@ -346,7 +348,7 @@ function tayNgoaiKhan(t) { const c = S.chuyen; if (!c || (CO.sit || 0) < .8) ret
   const e = prog(T, [CG.thinh + .3, CG.thinh + 1.3]) * (1 - prog(T, [CG.thinh + 8.5, CG.thinh + 9.3])); if (e <= 0) return;
   [-1, 1].forEach(s => { // ló nửa cánh tay ra khỏi khăn, khuỷu cong mềm, bàn tay ngang đỉnh đầu
     const sx0 = s * 22, sy0 = -184, elx = s * (24 + 15 * e), ely = -184 - 12 * e, wx = s * (24 + 10 * e), wy = -186 - 34 * e;
-    sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (-.25 + .08 * Math.sin(T * 2)), s > 0 ? 'hai' : 'mo'); }); }
+    sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (-.25 + .08 * Math.sin(T * 2)), s > 0 ? (so === 3 ? 'ba' : 'hai') : 'mo'); }); }
 function veilVe(vs, t) { if (!(vs.toss > 0)) { khanPhu(vs.a, t); return; } khanTung(vs.toss, t); }
 // tung khăn: hai tay nâng khăn khỏi đầu → khăn mở bung trên đầu → hắt ra đằng sau, khăn đang mở bay đi
 function khanTung(u, t) {
@@ -613,14 +615,14 @@ window.__hdLenh = (d, c) => { try {
   const chu = (new URLSearchParams(location.search).get('chu') || 'linhxiaocheng').toLowerCase();
   const laChu = id === chu || nn === 'linh xo' || d.isModerator === true || u.isModerator === true || !!(u.userIdentity && (u.userIdentity.isModeratorOfAnchor || u.userIdentity.isAnchor)) || !!(d.userIdentity && (d.userIdentity.isModeratorOfAnchor || d.userIdentity.isAnchor));
   const k = String(c || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').trim();
-  const m = k.match(/^[#!\/]\s*(ong ?bay|ong|co ?doi|co|thinh|moi|mua|ngoi|loc|phat ?loc|hoi ?cung|xe ?loan)(?![a-z])/); if (!m) return false;
+  const m = k.match(/^[#!\/]\s*(ong ?bay|ong|co ?doi|co ?bo|bo|co|thinh|moi|mua|ngoi|loc|phat ?loc|hoi ?cung|xe ?loan)(?![a-z])/); if (!m) return false;
   if (!laChu) return true; // lệnh của người lạ: bỏ qua, không hiện lên điện
   const H = window.__hd; if (!H || !H.lenh) return true; const w = m[1].replace(/ /g, '');
-  H.lenh({ ongbay: 'ong', ong: 'ong', codoi: 'co', co: 'co', thinh: 'thinh', moi: 'thinh', mua: 'mua', ngoi: 'loc', loc: 'loc', phatloc: 'loc', hoicung: 'hoicung', xeloan: 'hoicung' }[w] || w);
+  H.lenh({ ongbay: 'ong', ong: 'ong', codoi: 'co', co: 'co', cobo: 'bo', bo: 'bo', thinh: 'thinh', moi: 'thinh', mua: 'mua', ngoi: 'loc', loc: 'loc', phatloc: 'loc', hoicung: 'hoicung', xeloan: 'hoicung' }[w] || w);
   return true; } catch (e) { return false; } };
 // nút điều khiển từ xa (trang dk.html trên điện thoại) qua kênh ntfy.sh miễn phí
 (function () { try { const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k';
-  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
+  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|bo|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
   mo(); } catch (e) {} })();
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
@@ -1000,14 +1002,16 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   const ONG_BAY = { id: 'ongbay', ten: 'Ông Hoàng Bảy', hang: 'hoang', ao: '#5a2d6b', vay: '#5a2d6b', khan: '#4a2257', vienKhan: '#c9a03a', dai: '#e6b552', congCu: 'heo', tim: 'tien', giong: 'nam', coNhac: false };
   let luu = null, cu = null; try { luu = JSON.parse(localStorage.getItem('hd_gia_live4') || 'null'); } catch (e) {} try { cu = JSON.parse(localStorage.getItem('hd_gia_codoi') || 'null'); } catch (e) {}
   const it = (luu && luu.items) || {};
-  GIA_DS = { active: luu && luu.active === 'ongbay' ? 'ongbay' : 'codoi', list: [Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' })] }; }
+  const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
+  const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), Object.assign(CO_BO, it.cobo || {}, { id: 'cobo', hang: 'co', congCu: 'cheo' })];
+  GIA_DS = { active: luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; }
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
 const VAN_AU = new Audio('van36.mp3'); VAN_AU.preload = 'auto'; let VAN_STOP = 0, VAN_DONE = null;
 VAN_AU.addEventListener('timeupdate', () => { if (VAN_STOP && VAN_AU.currentTime >= VAN_STOP) { VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); } });
 function phatVan(a, b, done) { try { VAN_STOP = b; VAN_DONE = done || null; VAN_AU.currentTime = Math.max(0, a); VAN_AU.volume = 1; const p = VAN_AU.play(); if (p && p.catch) p.catch(() => { if (done) done(); }); } catch (e) { if (done) done(); } }
 function giaDur() { const g = GIA(); return g.hang === 'mau' ? 75 : 360; }
 function GIA() { if (typeof S !== 'undefined' && S.chuyen && S.chuyen.look) return S.chuyen.look; return GIA_DS.list.find(g => g.id === GIA_DS.active) || GIA_DS.list[0] || GIA_MAC_DINH; }
-function luuGia() { try { localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items: { codoi: GIA_DS.list[0], ongbay: GIA_DS.list[1] } })); } catch (e) {} }
+function luuGia() { try { const items = {}; GIA_DS.list.forEach(g => { items[g.id] = g; }); localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items })); } catch (e) {} }
 function laOng() { const c = typeof S !== 'undefined' && S.chuyen; if (c && c.t >= CG.thinh) return c.toId === 'ongbay'; return GIA().id === 'ongbay'; } // từ lúc thỉnh: con nhang xưng theo giá đang thỉnh
 function xung() { return laOng() ? 'ông' : 'cô'; }
 function ongNgoi() { return laOng() && S.ob && S.ob.ph === 'ngoi' && !S.loc; }
@@ -1559,8 +1563,8 @@ function update(dt) {
   S.particles.forEach(p => { p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; }); S.particles = S.particles.filter(p => p.t < p.life);
   S.floats.forEach(f => f.t += dt); S.floats = S.floats.filter(f => f.t < f.life);
   if (!laOng() && !S.chuyen && GIA().hang !== 'mau') { S.coT = (S.coT || 0) + dt; // cô: múa → văn phát lộc → múa … tự chạy tuần tự, trừ xe giá
-    if (!S.phaLoc && S.coT > 60 && !S.loc && !CO.giving) { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · Cô Đôi tung lộc cho con nhang', t: 0, life: 5 }; }
-    else if (S.phaLoc && S.coT > 50 && !S.loc && !CO.giving) { S.phaLoc = false; S.coT = 0; S.banner = { text: 'Cô Đôi múa quạt', t: 0, life: 4 }; } }
+    if (!S.phaLoc && S.coT > 60 && !S.loc && !CO.giving) { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · ' + (GIA().id === 'cobo' ? 'Cô Bơ' : 'Cô Đôi') + ' tung lộc cho con nhang', t: 0, life: 5 }; }
+    else if (S.phaLoc && S.coT > 50 && !S.loc && !CO.giving) { S.phaLoc = false; S.coT = 0; S.banner = { text: (GIA().id === 'cobo' ? 'Cô Bơ múa chèo' : 'Cô Đôi múa quạt'), t: 0, life: 4 }; } }
   if (laOng() && !S.chuyen) { S.ob.t += dt; const dur = S.ob.ph === 'mua' ? 60 : 180;
     if (S.ob.cho && S.ob.ph === 'mua' && S.ob.t >= (S.ob.min || 0) && !S.chuyen) { S.ob.cho = false; S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
     if (S.ob.t > dur && !S.chuyen && !S.loc && !S.dem && !CO.giving && !(S.obCall > 0) && (S.ob.ph === 'mua' || S.t - (S.ob.last || -1e9) > 30)) { S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: S.ob.ph === 'ngoi' ? 'Ông Bảy ngự nghe văn · dâng ông cà phê, thuốc lá' : 'Ông Bảy đứng lên múa hèo', t: 0, life: 4 }; }
@@ -1645,7 +1649,7 @@ function musStop() { try { bgm.pause(); } catch (e) {} }
 // (1) Bình chọn cô múa gì tiếp: gõ 1 / 2 / 3
 const POLL_OPTS = [['moi', 'Múa mồi'], ['quat', 'Múa quạt'], ['kiem', 'Múa kiếm'], ['khan', 'Múa khăn'], ['heo', 'Múa hèo']];
 S.poll = null; S.pollNext = 40; S.ccOverride = null;
-function congCu() { return S.ccOverride || GIA().congCu; }
+function congCu() { const c = S.ccOverride || GIA().congCu; return c === 'cheo' && (S.loc || S.chuyen) ? 'khan' : c; } // Cô Bơ: múa chèo; lúc tung lộc, chuyển giá thì cầm khăn
 function startPoll() { const cur = congCu(); const opts = POLL_OPTS.filter(o => o[0] !== cur).sort(() => Math.random() - .5).slice(0, 3); S.poll = { opts, votes: {}, t: 0, life: 45 }; S.banner = { text: 'Cô múa gì tiếp? Gõ 1, 2 hoặc 3 để chọn', t: 0, life: 3.5 }; }
 function vote(name, n) { if (!S.poll) return false; const i = +n - 1; if (!(i >= 0 && i < S.poll.opts.length)) return false; S.poll.votes[name] = i; return true; }
 function updPoll(dt) {
@@ -1889,7 +1893,7 @@ document.getElementById('bJoin10').addEventListener('click', () => { for (let i 
 const bA = document.getElementById('bAuto'); bA.addEventListener('click', () => { S.auto = !S.auto; if (!S.auto && GIA().id === 'codoi') { S.people = []; S.queue = []; S.dem = null; S.giving = 0; CO.giving = null; S.floats = []; S.autoT = 30; KHEN.q = []; KHEN.cur = null; if (S.seats) S.seats.forEach(q => q.who = null); } bA.classList.toggle('on', S.auto); bA.textContent = S.auto ? 'Giả lập: đang chạy' : 'Giả lập: tạm dừng'; });
 const bS = document.getElementById('bSound'); bS.addEventListener('click', () => { S.sound = !S.sound; bS.classList.toggle('on', S.sound); bS.textContent = S.sound ? 'Tắt nhạc hầu đồng' : 'Bật nhạc hầu đồng'; if (S.sound) { acGet(); musStart(); try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} } else musStop(); });
 // ---------- 4 giai đoạn mỗi giá, chỉ chuyển khi anh gõ lệnh: 1 thỉnh mời · 2 thay khăn áo, múa · 3 văn phát lộc · 4 xe loan hồi cung ----------
-function vanCua(g) { const n = g.id === 'ongbay' ? 'Ông Hoàng Bảy' : g.id === 'codoi' ? 'Cô Đôi' : g.ten; return VAN_GIA.find(v => v.ten === n) || null; }
+function vanCua(g) { const n = g.id === 'ongbay' ? 'Ông Hoàng Bảy' : g.id === 'codoi' ? 'Cô Đôi' : g.id === 'cobo' ? 'Cô Bơ Thoải Cung' : g.ten; return VAN_GIA.find(v => v.ten === n) || null; }
 function giaBan(id) { const g = Object.assign({}, GIA_DS.list.find(x => x.id === id) || GIA()); g.van = vanCua(g); return g; }
 function batDauHoiCung(toId, choThinh) {
   if (S.chuyen) return; const from = Object.assign({}, GIA()); from.van = vanCua(from); const to = giaBan(toId || GIA_DS.active);
@@ -1903,7 +1907,7 @@ function giaiDoan() { const c = S.chuyen; if (c) return c.t < CG.thinh ? 4 : c.t
 const GD_TEN = { 1: 'Thỉnh mời', 2: 'Thay khăn áo · múa', 3: 'Văn phát lộc', 4: 'Xe loan hồi cung' };
 function lenhPha(w) { const c = S.chuyen;
   if (w === 'hoicung') { if (!c) batDauHoiCung(nextGiaId(), false); return; } // xe loan giá này xong tự thỉnh giá sau
-  if (w === 'ong' || w === 'co' || w === 'thinh') { const id = w === 'ong' ? 'ongbay' : w === 'co' ? 'codoi' : (c ? c.toId : GIA_DS.active);
+  if (w === 'ong' || w === 'co' || w === 'bo' || w === 'thinh') { const id = w === 'ong' ? 'ongbay' : w === 'co' ? 'codoi' : w === 'bo' ? 'cobo' : (c ? c.toId : GIA_DS.active);
     if (c) { // đang xe giá / thỉnh mà anh bấm thỉnh giá khác: đổi ngay sang thỉnh giá anh chọn
       if (w === 'thinh' || id === c.toId) { c.choThinh = false; return; }
       if (c.t >= CG.dung[0] - .5) { S.lenhCho = w; return; } // giá mới sắp đứng dậy: chờ xong rồi làm
@@ -1913,14 +1917,15 @@ function lenhPha(w) { const c = S.chuyen;
     batDauHoiCung(id, false); return; }
   if (w === 'mua') { if (c) { if (c.t >= CG.thinh) c.choMua = false; return; }
     S.phaLoc = false; S.coT = 0; if (laOng() && S.ob.ph !== 'mua') { S.ob.ph = 'mua'; S.ob.t = 0; chuyenNhacOng(); }
-    S.banner = { text: laOng() ? 'Ông Bảy đứng lên múa hèo' : 'Cô Đôi múa quạt', t: 0, life: 4 }; capNhatGiaInfo(); return; }
+    S.banner = { text: laOng() ? 'Ông Bảy đứng lên múa hèo' : (GIA().id === 'cobo' ? 'Cô Bơ múa chèo' : 'Cô Đôi múa quạt'), t: 0, life: 4 }; capNhatGiaInfo(); return; }
   if (w === 'loc') { if (c) return;
     if (laOng()) { if (S.ob.ph !== 'ngoi') { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); } S.obCall = (S.obCall || 0) + 3; S.banner = { text: 'Ông Bảy ngự · hút thuốc, uống cà phê · gọi con nhang lên nhận lộc', t: 0, life: 5 }; }
-    else { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · Cô Đôi tung lộc cho con nhang', t: 0, life: 5 }; if (!S.loc && !CO.giving) tungLoc(); else S.locQ = true; }
+    else { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · ' + (GIA().id === 'cobo' ? 'Cô Bơ' : 'Cô Đôi') + ' tung lộc cho con nhang', t: 0, life: 5 }; if (!S.loc && !CO.giving) tungLoc(); else S.locQ = true; }
     wave(12); capNhatGiaInfo(); } }
 function doiGia(id) { if (GIA_DS.active === id) return; GIA_DS.active = id; S.ob = { ph: 'mua', t: 0 }; S.ccOverride = null; S.poll = null; luuGia(); napNhacGia(); S.loc = null; S.banner = { text: 'Giá ' + GIA().ten + ' ngự đồng', t: 0, life: 4 }; wave(10); capNhatGiaInfo(); const cs = document.getElementById('cfg'); if (cs && !cs.hidden) { cs.hidden = true; } }
 document.getElementById('bGiaCo').addEventListener('click', () => lenhPha('co'));
 document.getElementById('bGiaOng').addEventListener('click', () => lenhPha('ong'));
+document.getElementById('bGiaBo').addEventListener('click', () => lenhPha('bo'));
 document.getElementById('bOngNgoi').addEventListener('click', () => { if (!laOng()) return; S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); });
 document.getElementById('bHoiCung').addEventListener('click', () => { if (S.sound) acGet(); lenhPha('hoicung'); });
 const bT = document.getElementById('bTuChuyen'); bT.addEventListener('click', () => { S.tuChuyen = !S.tuChuyen; bT.classList.toggle('on', S.tuChuyen); bT.textContent = 'Tự chuyển giá sau 6 phút: ' + (S.tuChuyen ? 'bật' : 'tắt'); capNhatGiaInfo(); });
