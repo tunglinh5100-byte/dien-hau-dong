@@ -1735,6 +1735,18 @@ function lvEv(name, d, t) {
 function lvThu(kind) { const d = { user: { uniqueId: '__thu__' }, comment: 'lạy cô', count: 50 }; lvEv(ME, d, kind); }
 function lvThuLanMoi() { const r = LV['__thu__']; if (r) r.at = 0; lvEv(ME, { user: { uniqueId: '__thu__' } }, 'member'); const p = person(ME); if (p) p.lv = lvOf(LV['__thu__'].xp); }
 window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvDirty = true; } };
+// ---------- Xem mẫu tạo hình 5 cấp: mở trang với ?capdo=1 ----------
+const CAPDO = new URLSearchParams(location.search).get('capdo') === '1';
+const CAPDO_P = [[1, 'Lần đầu vào', 135, 330, 'nam'], [2, 'Vào lần 2', 405, 330, 'nu'], [3, 'Vào lần 3', 135, 600, 'nu'], [4, 'Tương tác nhiều', 405, 600, 'nu'], [5, 'Fan cứng', 270, 870, 'nam']]
+  .map(([lv, name, x, y, sex], i) => ({ name, lv, x, y, sex, coat: ['#2f6f9e', '#b04a5a', '#3f8a5c', '#7a4fa0', '#c07a2c'][i], hairC: '#1c120c', state: 'seat', pose: 'kneel', seat: { x, y, s: 2.2, lean: 0 }, wp: [] }));
+function drawCapDo(t) {
+  ctx.save(); ctx.fillStyle = '#1e0805'; ctx.fillRect(0, 0, W, H);
+  text('Tạo hình con nhang theo cấp', 270, 46, 24, '#f6dc96', { f: SERIF, w: 800 });
+  text('Quay lại live và thả tim, bình luận, chia sẻ để lên cấp', 270, 78, 13, '#e8d6b8', { w: 600 });
+  CAPDO_P.forEach(p => { if (p.lv === 4 && (t % 4) < 2.4) { p.pose = 'raise'; } else p.pose = 'kneel'; drawPerson(p, t);
+    text(LV_TEN[p.lv], p.x, p.y + 26, 15, p.lv >= 3 ? '#ffe39a' : '#f0e6d8', { f: SERIF, w: 800 }); });
+  ctx.restore();
+}
 let QUEN = {}; try { QUEN = JSON.parse(localStorage.getItem('hd_quen') || '{}') || {}; } catch (e) {}
 function luuQuen() { try { localStorage.setItem('hd_quen', JSON.stringify(QUEN)); } catch (e) {} }
 function follow(name) {
@@ -1911,6 +1923,7 @@ function frame1(now) {
   } finally { camShift(-1); }
   ctx.restore();
   if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t);
+  if (CAPDO) drawCapDo(t);
 }
 // ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
 const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
