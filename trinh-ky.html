@@ -347,8 +347,8 @@ document.getElementById('go').addEventListener('click', () => {
 if (Q.get('auto') === '1') document.getElementById('go').click();
 // tự cập nhật khi có bản mới (chỉ ở chế độ ?auto=1 trên máy tính, vì tải lại tự vào phòng và bật nhạc được): đọc ver.txt mỗi phút, đổi thì tải lại lúc rảnh
 if (Q.get('auto') === '1') { let ver0 = null, cho = false;
-  const chk = () => fetch('ver.txt?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : null).then(v => { if (!v) return; v = v.trim(); if (ver0 === null) ver0 = v; else if (v !== ver0) cho = true; }).catch(() => {});
-  chk(); setInterval(chk, 60000); setInterval(() => { if (cho && !S.cur && !S.queue.length) location.reload(); }, 2000); }
+  const chk = () => fetch('ver.txt?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : null).then(v => { if (!v) return; v = v.trim(); if (ver0 === null) ver0 = v; else if (v !== ver0) cho = v; }).catch(() => {});
+  chk(); setInterval(chk, 60000); setInterval(() => { if (cho && !S.cur && !S.queue.length) { const u = new URL(location.href); u.searchParams.set('v', cho); location.replace(u.toString()); } }, 2000); }
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(frame));
 window.__tk = { S, onComment, onLike, enqueue };
 })();
