@@ -36,8 +36,8 @@ canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9
     <small id="res">Chỉ nhập một lần, máy tự nhớ. Không nhập thì chỉ chạy giả lập.</small>
   </div>
 </div>
-<script src="lich.js?v=1794200822"></script>
-<script src="lofi.js?v=1794200822"></script>
+<script src="lich.js?v=1794200967"></script>
+<script src="lofi.js?v=1794200967"></script>
 <script>
 (() => {
 'use strict';
@@ -87,8 +87,8 @@ function enqueue(job) { const old = S.queue.findIndex(j => j.ten === job.ten); i
     if (!S.cur || S.cur.phase === 'xong') S.idleT = 0; }
   else if (S.queue.length < 1 && !S.queue.some(j => j.that)) S.queue.push(job);
   if (S.queue.length > 12) S.queue.splice(12); }
-function startJob(job) { refreshDay(); const tu = job.tuoi || S.nho.get(job.ten) || null, se = job.sep || S.nhoSep.get(job.ten) || null;
-  S.cur = { job, tuDung: tu, seDung: se, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
+function startJob(job) { refreshDay(); const dong = S.queue.filter(j => j.that).length >= 1; const tu = job.tuoi || S.nho.get(job.ten) || null, se = job.sep || S.nhoSep.get(job.ten) || null;
+  S.cur = { job, dong, tuDung: tu, seDung: se, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
   S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK - 3 + rnd(-2, 2), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
@@ -105,8 +105,8 @@ function update(dt) {
   const nhanh = c.job.that, cho = S.queue.some(j => j.that);
   if (c.phase === 'goi' && c.t > (nhanh ? .5 : 1.2)) { c.phase = 'gieo'; c.t = 0; throwCoins(); }
   else if (c.phase === 'gieo' && c.t > (nhanh ? .95 : 1.15)) { c.tossI++; c.t = 0; if (c.tossI >= (nhanh ? 1 : 3)) { c.phase = 'suy'; noi('Đang tính giờ…', 99); } else throwCoins(); }
-  else if (c.phase === 'suy' && c.t > (nhanh ? 1.1 : 2.4)) { c.phase = 'phan'; c.t = 0; S.noi = null; sGong(); burst(); say(c.ans.speak, () => { c.spoke = true; }); }
-  else if (c.phase === 'phan' && c.t > (cho ? 5.5 : nhanh ? 8 : 10) && (c.spoke || c.t > 40)) { c.phase = 'xong'; c.t = 0; } // luôn đọc hết lời người trước rồi mới sang người sau
+  else if (c.phase === 'suy' && c.t > (nhanh ? 1.1 : 2.4)) { c.phase = 'phan'; c.t = 0; S.noi = null; sGong(); burst(); say(c.dong && c.ans.speakNgan ? c.ans.speakNgan : c.ans.speak, () => { c.spoke = true; }); }
+  else if (c.phase === 'phan' && c.t > (cho ? 5 : nhanh ? 8 : 10) && (c.spoke || c.t > 40)) { c.phase = 'xong'; c.t = 0; } // luôn đọc hết lời người trước rồi mới sang người sau
   else if (c.phase === 'xong' && c.t > .5) { S.cur = null; S.coins = []; S.idleT = S.queue.some(j => j.that) ? .2 : 1.5; }
 }
 function burst() { for (let i = 0; i < 26; i++) { const a = rnd(0, 6.28), v = rnd(30, 110); S.sparks.push({ x: HX, y: HY - 10, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, t: 0, life: rnd(1, 1.8), c: pick(['#ffe39a', '#f6c453', '#fff6d6']) }); } }
@@ -293,15 +293,20 @@ let last = performance.now();
 function frame(now) { requestAnimationFrame(frame); const dt = clamp((now - last) / 1000, 0, .05); last = now;
   try { update(dt); updChao(dt); sim(dt); const t = S.t; drawBg(t);
     ctx.save(); ctx.translate(HX, BASE_Y); ctx.scale(SC, SC); ctx.translate(-HX, -DESK); drawThay(t); drawDesk(t); drawCoins(); drawSparks(); ctx.restore();
-    drawBien(t); drawHuongDan(t); drawTiep(); drawChao(); drawNoi(); drawPhan(t);
+    drawBien(t); drawHuongDan(t); drawTiep(); drawChao(); drawNoi(); drawPhan(t); drawDbg();
   } catch (e) { console.error(e); } }
 
 // ---------- Sự kiện người xem ----------
-function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuoi = r.tuoi, sep = r.sep, ngay = L.hoiNgay(msg, S.day); if (tuoi) S.nho.set(name, tuoi); if (sep) S.nhoSep.set(name, sep);
+const DBG = Q.get('debug') === '1', dbgLog = [];
+function dbg(name, msg, r, ngay, hoi) { if (!DBG) return; dbgLog.unshift(ten(name) + ': "' + String(msg).slice(0, 40) + '" → ' + (r.tuoi ? 'tuổi ' + L.tenTuoi(r.tuoi) : '-') + (r.sep ? ', sếp ' + L.tenTuoi(r.sep) : '') + (ngay ? ', hỏi +' + ngay.d + ' ngày' : '') + (hoi ? '' : ' (không hỏi)')); dbgLog.splice(8); }
+function drawDbg() { if (!DBG) return; ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.78)'; rr(8, 8, W - 16, 22 + dbgLog.length * 15, 8); ctx.fill(); text('DEBUG · real=' + S.real + ' · chờ=' + S.queue.length, 16, 18, 10, '#9df0b4', { a: 'left', w: 700 });
+  dbgLog.forEach((l, i) => text(l, 16, 33 + i * 15, 10, '#fff', { a: 'left', w: 600 })); ctx.restore(); }
+function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuoi = r.tuoi, sep = r.sep, ngay = L.hoiNgay(msg, S.day); if (that && (tuoi || sep || ngay)) dbg(name, msg, r, ngay, true); if (tuoi) S.nho.set(name, tuoi); if (sep) S.nhoSep.set(name, sep);
   if (ngay) return enqueue({ ten: name, tuoi: tuoi || S.nho.get(name) || null, sep: sep || S.nhoSep.get(name) || null, ngay, that });
   if (tuoi || sep) return enqueue({ ten: name, tuoi: tuoi || S.nho.get(name) || null, sep: sep || S.nhoSep.get(name) || null, that });
   const hoi = /tr[iì]nh|k[yý]|gi[oờ]|xem|n[eê]n|đ[uư][ơợ]c kh|s[eế]p|tu[oổ]i|ng[aà]y|h[oô]m nay|b[aâ]y gi[oờ]|th[aầ]y/i.test(String(msg));
-  if (hoi || (that && !S.lastXem.has(name))) enqueue({ ten: name, tuoi: S.nho.get(name) || null, sep: S.nhoSep.get(name) || null, that }); }
+  dbg(name, msg, r, ngay, hoi);
+  if (hoi || (that && (!S.lastXem.has(name) || S.t - S.lastXem.get(name) > 60))) enqueue({ ten: name, tuoi: S.nho.get(name) || null, sep: S.nhoSep.get(name) || null, that }); }
 function onLike(name, n, that) { const v = (S.likes.get(name) || 0) + n; S.likes.set(name, v);
   if (v >= 10) { S.likes.set(name, 0); const lx = S.lastXem.get(name) || -999; if (S.t - lx > 120) { S.lastXem.set(name, S.t); enqueue({ ten: name, tuoi: null, that }); } } }
 // ---------- Chào người mới vào phòng ----------
