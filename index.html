@@ -604,7 +604,7 @@ function drawCoVideo(t, x, y, sc) {
   if (S.danceSpecial > 0 && Math.random() < .5) S.particles.push({ x: x + rnd(-60, 60), y: y - rnd(50, 180), vx: rnd(-10, 10), vy: rnd(-30, -10), life: 1.2, t: 0, kind: 'spark' });
 }
 const coBufOk = true, coVidErr = false; // giữ tên cũ cho khung lời khen
-window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a), doiGia: (id) => doiGia(id), lenh: (w) => lenhPha(w), ongPh: (ph) => { if (!laOng() || !S.ob) return; if (S.ob.ph !== ph) { S.ob.ph = ph; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); } } };
+window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a), doiGia: (id) => doiGia(id), lenh: (w) => lenhPha(w), am: (bat) => { const b = document.getElementById('bSound'); if (b && !!S.sound !== !!bat) b.click(); try { VAN_AU.muted = !bat; } catch (e) {} S.banner = { text: bat ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh', t: 0, life: 2.5 }; }, ongPh: (ph) => { if (!laOng() || !S.ob) return; if (S.ob.ph !== ph) { S.ob.ph = ph; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); } } };
 // ---------- Lệnh đổi giá bằng bình luận của chủ kênh / quản trị viên: #ong, #co, #ngoi, #mua ----------
 window.__hdLenh = (d, c) => { try {
   const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || d || {}, id = String(u.uniqueId || u.displayId || d.uniqueId || '').toLowerCase(), nn = String(u.nickname || d.nickname || '').toLowerCase().trim();
@@ -618,7 +618,7 @@ window.__hdLenh = (d, c) => { try {
   return true; } catch (e) { return false; } };
 // nút điều khiển từ xa (trang dk.html trên điện thoại) qua kênh ntfy.sh miễn phí
 (function () { try { const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k';
-  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
+  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
   mo(); } catch (e) {} })();
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
@@ -1836,11 +1836,44 @@ setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRu
 function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
-  drawBg(t); drawSong(t); drawCungVan(t); drawDem(t); drawMoneyFloor();
-  const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
-  behind.forEach(p => drawPerson(p, t)); drawThamDong(t); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
-  drawBubbles(); drawMoney(); drawFlying(); drawParticles(); drawOverlay(t); drawGiaPill(); drawTenCV(); drawDangOng(t); drawTenNhanLoc(t); if (!S.chuyen) drawKhen(); drawLoiVan(t);
+  camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
+  if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
+  ctx.save(); camShear(); drawBg(t); drawSong(t); drawMoneyFloor(); drawDem(t); ctx.restore();
+  camShift(1);
+  try {
+    ctx.save(); ctx.translate(camOff(704), 0); drawCungVan(t); ctx.restore();
+    const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
+    behind.forEach(p => drawPerson(p, t)); drawThamDong(t); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
+    drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
+    ctx.save(); ctx.translate(camOff(704), 0); drawTenCV(); ctx.restore(); drawDangOng(t); drawTenNhanLoc(t);
+  } finally { camShift(-1); }
+  ctx.restore();
+  if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t);
 }
+// ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
+const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
+const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55, T: 26, on: true }; window.__cam = CAM;
+// chỉnh camera từ xa: mỗi phút đọc cam.json trên GitHub, áp dụng ngay không cần tải lại trang (nhạc không bị tắt)
+(function camRemote() {
+  const ap = j => { if (!j || typeof j !== 'object') return; const n = (v, a, b) => typeof v === 'number' && isFinite(v) ? Math.min(b, Math.max(a, v)) : null;
+    const A = n(j.A, 0, 90), T = n(j.T, 8, 120), Sc = n(j.S, 1, 1.4); if (A !== null) CAM.A = A; if (T !== null) CAM.T = T; if (Sc !== null) CAM.S = Sc; if (typeof j.on === 'boolean') CAM.on = j.on; };
+  const go = () => { try { fetch('cam.json?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(ap).catch(() => {}); } catch (e) {} };
+  go(); setInterval(go, 60000);
+})(); // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
+function camUpd(dt) {
+  if (!CAM_ON || !CAM.on) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
+  CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
+  const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
+  CAM.P = CAM.A * (2 * v - 1);
+}
+const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
+function camBase() { ctx.translate(W / 2, H / 2); ctx.scale(CAM.S, CAM.S); ctx.translate(-W / 2, -H / 2); }
+function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
+function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
+  const sh = o => { if (o && typeof o.x === 'number' && typeof o.y === 'number') o.x += d * camOff(o.y); };
+  S.people.forEach(sh); if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); sh(CO); S.floats.forEach(sh); S.particles.forEach(sh);
+}
+function camMap(x, y) { return [(x + camOff(y) - W / 2) * CAM.S + W / 2, (y - H / 2) * CAM.S + H / 2]; }
 
 // ---------- Controls ----------
 const ME = 'Bạn (thử)';
