@@ -1004,7 +1004,8 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   const it = (luu && luu.items) || {};
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
   const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), Object.assign(CO_BO, it.cobo || {}, { id: 'cobo', hang: 'co', congCu: 'cheo' })];
-  GIA_DS = { active: luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; }
+  const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
+  GIA_DS = { active: ds.some(g => g.id === qg) ? qg : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; }
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
 const VAN_AU = new Audio('van36.mp3'); VAN_AU.preload = 'auto'; let VAN_STOP = 0, VAN_DONE = null;
 VAN_AU.addEventListener('timeupdate', () => { if (VAN_STOP && VAN_AU.currentTime >= VAN_STOP) { VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); } });
