@@ -268,7 +268,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
   // ---------- Đọc năm sinh người trình và năm sinh sếp trong cùng một bình luận ("em 1991 sếp 1975", "sếp tuổi Thìn") ----------
   const kd1 = s => [...bo(s)].map(c => c === 'đ' ? 'd' : c.normalize('NFD').replace(/[̀-ͯ]/g, '')).join(''); // giữ nguyên độ dài để cắt chuỗi gốc
   const TOK = '(?:(?:tuoi|sinh|nam|doi)\\s+){0,3}((?:19|20)\\d{2}|\\d{2}(?!\\d)|(?:giap|at|binh|dinh|mau|ky|canh|tan|nham|quy)\\s+(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi)|(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi))(?![a-z0-9])';
-  const boNgay = r => String(r || '').replace(/\d{1,2}\s*\/\s*\d{1,2}(?:\s*\/\s*\d{2,4})?/g, ' ').replace(/ng[aàá]y\s*\d{1,2}(?!\d)/gi, ' ').replace(/\d{1,2}\s*ng[aà]y\s*(?:n[uữ]a|t[oớ]i)/gi, ' ');
+  const boNgay = r => String(r || '').replace(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*((?:19|20)\d{2})/g, ' $3 ').replace(/\d{1,2}\s*\/\s*\d{1,2}(?:\s*\/\s*\d{2,4})?/g, ' ').replace(/ng[aàá]y\s*\d{1,2}(?!\d)/gi, ' ').replace(/\d{1,2}\s*ng[aà]y\s*(?:n[uữ]a|t[oớ]i)/gi, ' ');
   function docHaiTuoi(raw, namNay) { const s = boNgay(raw), k = kd1(s); let sep = null, rest = s;
     const m = new RegExp('(?:^|[^a-z])(sep|xep|boss|sep minh|sep em)\\s*(?:la|:|-|,)?\\s*' + TOK).exec(k);
     if (m) { const tok = m[2], at = m.index + m[0].indexOf(m[1]), raw2 = s.substr(k.indexOf(tok, at), tok.length);
@@ -304,9 +304,11 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
 
   // ---------- Hỏi về ngày tương lai: "mai", "ngày kia", "thứ 5", "tuần sau thứ 3", "15/11", "ngày 20", "3 ngày nữa", "sáng mai" ----------
   const WD = { hai: 1, ba: 2, tu: 3, nam: 4, sau: 5, bay: 6, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6 };
-  function hoiNgay(raw, n0) { const k = ' ' + kd1(raw).replace(/[^a-z0-9/]+/g, ' ') + ' '; let d = null, m;
+  function hoiNgay(raw, n0) { raw = String(raw || '').replace(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*((?:19|20)\d{2})/g, (m0, a, b, y) => +y < n0.yy ? ' ' : m0).replace(/sinh\s*(?:ng[aà]y|th[aá]ng|n[aă]m)?\s*\d{1,2}(?![\d\/.\-])/gi, ' ');
+    const k = ' ' + kd1(raw).replace(/[^a-z0-9/]+/g, ' ') + ' '; let d = null, m;
     const wd0 = n0.wd, toDate = (dd, mm, yy) => Math.round((Date.UTC(yy, mm - 1, dd) - Date.UTC(n0.yy, n0.mm - 1, n0.dd)) / 864e5);
-    if ((m = k.match(/ (\d{1,2})\/(\d{1,2})(?:\/(\d{4}))? /))) { const dd = +m[1], mm = +m[2]; if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) { d = toDate(dd, mm, m[3] ? +m[3] : n0.yy); if (d < 0 && !m[3]) d = toDate(dd, mm, n0.yy + 1); } }
+    const kk = ' ' + kd1(raw).replace(/[^a-z0-9/.\-]+/g, ' ') + ' ', re = /(\d{1,2})\s*[\/.\-]\s*(\d{1,2})(?:\s*[\/.\-]\s*(\d{4}))?(?![\d\/.\-])/g;
+    while (d === null && (m = re.exec(kk))) { const dd = +m[1], mm = +m[2], yy = m[3] ? +m[3] : null; if (yy && yy < n0.yy) continue; if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) { let x = toDate(dd, mm, yy || n0.yy); if (x < 0 && !yy) x = toDate(dd, mm, n0.yy + 1); if (x >= 1 && x <= 120) d = x; } }
     if (d === null && (m = k.match(/ (\d{1,2}) ngay (?:nua|toi) /))) d = +m[1];
     if (d === null && (m = k.match(/ (?:thu ?(hai|ba|tu|nam|sau|bay|[2-7])|t([2-7])) /))) { const wt = WD[m[1] || m[2]]; let x = 1; while ((wd0 + x) % 7 !== wt) x++;
       if (/ tuan (?:sau|toi) /.test(k)) { let mon = 1; while ((wd0 + mon) % 7 !== 1) mon++; x = mon + (wt - 1); } d = x; }
