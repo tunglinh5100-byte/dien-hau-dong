@@ -115,6 +115,8 @@
     namNay = namNay || VN().yy; const k = ' ' + khongDau(raw).replace(/[^a-z0-9 ]/g, ' ') + ' ';
     let y = null, m;
     if ((m = k.match(/ (19[3-9]\d|20[0-2]\d) /))) y = +m[1];
+    else if ((m = k.match(/ 2k(\d{1,2}) /))) y = 2000 + +m[1];                         // 2k1, 2k5, 2k10
+    else if ((m = k.match(/ (\d{2}) tuoi /)) && !/ (?:sinh|nam) \d{2} tuoi /.test(k)) { const a = +m[1]; if (a >= 14 && a <= 80) y = namNay - a; } // "em 35 tuổi" là tuổi, không phải năm
     else if ((m = k.match(/ (?:sinh|tuoi|nam|doi|con|em|toi|minh|cho) (?:nam )?(\d{2}) /)) || (m = k.match(/^ (\d{2}) $/)) || (m = k.match(/ (\d{2}) (?:tuoi|ak|a|nhe|ha|oi) /))) { const v = +m[1]; y = v <= (namNay % 100) - 10 ? 2000 + v : 1900 + v; }
     if (y && y >= 1930 && y <= namNay - 12) return { nam: y, can: (y + 6) % 10, chi: (y + 8) % 12 };
     const chi = timChi(raw); if (chi === null || chi < 0) return null;
@@ -267,7 +269,7 @@ Hỏa Thủy Vị Tế|b|chưa xong, còn bước cuối`.split('\n').map((l, i)
 
   // ---------- Đọc năm sinh người trình và năm sinh sếp trong cùng một bình luận ("em 1991 sếp 1975", "sếp tuổi Thìn") ----------
   const kd1 = s => [...bo(s)].map(c => c === 'đ' ? 'd' : c.normalize('NFD').replace(/[̀-ͯ]/g, '')).join(''); // giữ nguyên độ dài để cắt chuỗi gốc
-  const TOK = '(?:(?:tuoi|sinh|nam|doi)\\s+){0,3}((?:19|20)\\d{2}|\\d{2}(?!\\d)|(?:giap|at|binh|dinh|mau|ky|canh|tan|nham|quy)\\s+(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi)|(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi))(?![a-z0-9])';
+  const TOK = '(?:(?:tuoi|sinh|nam|doi)\\s+){0,3}((?:19|20)\\d{2}|2k\\d{1,2}|\\d{2}(?!\\d)|(?:giap|at|binh|dinh|mau|ky|canh|tan|nham|quy)\\s+(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi)|(?:ty|ti|suu|dan|mao|meo|thin|ngo|mui|than|dau|tuat|hoi))(?![a-z0-9])';
   const boNgay = r => String(r || '').replace(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*((?:19|20)\d{2})/g, ' $3 ').replace(/\d{1,2}\s*\/\s*\d{1,2}(?:\s*\/\s*\d{2,4})?/g, ' ').replace(/ng[aàá]y\s*\d{1,2}(?!\d)/gi, ' ').replace(/\d{1,2}\s*ng[aà]y\s*(?:n[uữ]a|t[oớ]i)/gi, ' ');
   function docHaiTuoi(raw, namNay) { const s = boNgay(raw), k = kd1(s); let sep = null, rest = s;
     const m = new RegExp('(?:^|[^a-z])(sep|xep|boss|sep minh|sep em)\\s*(?:la|:|-|,)?\\s*' + TOK).exec(k);

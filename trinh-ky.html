@@ -36,8 +36,8 @@ canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9
     <small id="res">Chỉ nhập một lần, máy tự nhớ. Không nhập thì chỉ chạy giả lập.</small>
   </div>
 </div>
-<script src="lich.js?v=1794200497"></script>
-<script src="lofi.js?v=1794200497"></script>
+<script src="lich.js?v=1794200822"></script>
+<script src="lofi.js?v=1794200822"></script>
 <script>
 (() => {
 'use strict';
@@ -78,14 +78,17 @@ function say(s, then) { if (!VOICE) pickVoice(); if (!S.voice || !('speechSynthe
     S.speaking = true; u.onend = u.onerror = () => { S.speaking = false; if (then) then(); }; speechSynthesis.speak(u); return 1; } catch (e) { S.speaking = false; if (then) setTimeout(then, 0); return 0; } }
 
 // ---------- Việc của thầy: mỗi việc { ten, tuoi | null, that } ----------
-function enqueue(job) { const old = S.queue.findIndex(j => j.ten === job.ten); if (old >= 0) { S.queue[old] = job; return; } if (S.cur && S.cur.job.ten === job.ten && !job.ngay) return;
+const khoa = j => [j.tuoi ? j.tuoi.chi + '-' + j.tuoi.nam : '', j.sep ? j.sep.chi + '-' + j.sep.nam : '', j.ngay ? j.ngay.d + (j.ngay.buoi || '') : ''].join('|');
+function enqueue(job) { const old = S.queue.findIndex(j => j.ten === job.ten); if (old >= 0) { S.queue[old] = job; return; }
+  if (S.cur && S.cur.job.ten === job.ten && S.cur.phase !== 'xong') { const cu = S.cur.job; // đang xem cho chính người này: có thông tin mới (tuổi, sếp, ngày) thì xem lại, không thì bỏ
+    const moi = Object.assign({}, job, { tuoi: job.tuoi || cu.tuoi, sep: job.sep || cu.sep }); if (khoa(moi) === khoa({ tuoi: S.cur.tuDung, sep: S.cur.seDung, ngay: cu.ngay })) return; job = moi; }
   if (job.that) { S.queue = S.queue.filter(j => j.that); S.queue.push(job); S.lastXem.set(job.ten, S.t);
     if (S.cur && !S.cur.job.that && S.cur.phase !== 'xong') { S.cur.phase = 'xong'; S.cur.t = .4; try { speechSynthesis.cancel(); } catch (e) {} } // bỏ lượt giả lập đang chạy
     if (!S.cur || S.cur.phase === 'xong') S.idleT = 0; }
   else if (S.queue.length < 1 && !S.queue.some(j => j.that)) S.queue.push(job);
   if (S.queue.length > 12) S.queue.splice(12); }
 function startJob(job) { refreshDay(); const tu = job.tuoi || S.nho.get(job.ten) || null, se = job.sep || S.nhoSep.get(job.ten) || null;
-  S.cur = { job, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
+  S.cur = { job, tuDung: tu, seDung: se, ans: job.ngay ? L.phanNgay(job.ten, S.day, job.ngay, tu, se) : L.phan(job.ten, S.day, tu, se), phase: 'goi', t: 0, tossI: 0 }; noi('Đang xem cho ' + ten(job.ten) + '…', 99); sWood(); }
 function throwCoins() { const faces = [0, 1, 2].map(() => Math.random() < .5 ? 1 : 0);
   S.coins = faces.map((f, i) => ({ x0: HX + rnd(-8, 8), y0: HY + 130, x1: HX - 46 + i * 46 + rnd(-8, 8), y1: DESK - 3 + rnd(-2, 2), t: -i * .06, dur: .62, face: f, rot: rnd(8, 14) })); setTimeout(sCoin, 560); }
 function noi(s, life) { S.noi = { s, t: 0, life: life || 5 }; }
