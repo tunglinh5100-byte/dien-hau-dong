@@ -342,7 +342,9 @@ function tayNgoaiKhan(t) { const c = S.chuyen; if (!c || (CO.sit || 0) < .8) ret
   // thỉnh: chỉ giá có số (Cô Đôi) mới giơ tay lên đầu, tay phải ra số
   const so = SO_GIA[c.toId]; if (!so || T < CG.thinh) return;
   const e = prog(T, [CG.thinh + .3, CG.thinh + 1.3]) * (1 - prog(T, [CG.thinh + 8.5, CG.thinh + 9.3])); if (e <= 0) return;
-  [-1, 1].forEach(s => { const wx = s * (34 - 6 * e), wy = -168 - 70 * e; arm(s, s * 21, -190 + 22 * (1 - e), wx, wy, s * (.12 + .1 * Math.sin(T * 2)), s > 0 ? 'hai' : 'mo'); }); }
+  [-1, 1].forEach(s => { // ló nửa cánh tay ra khỏi khăn, khuỷu cong mềm, bàn tay ngang đỉnh đầu
+    const sx0 = s * 22, sy0 = -184, elx = s * (24 + 15 * e), ely = -184 - 12 * e, wx = s * (24 + 10 * e), wy = -186 - 34 * e;
+    sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (-.25 + .08 * Math.sin(T * 2)), s > 0 ? 'hai' : 'mo'); }); }
 function veilVe(vs, t) { if (!(vs.toss > 0)) { khanPhu(vs.a, t); return; } khanTung(vs.toss, t); }
 // tung khăn: hai tay nâng khăn khỏi đầu → khăn mở bung trên đầu → hắt ra đằng sau, khăn đang mở bay đi
 function khanTung(u, t) {
