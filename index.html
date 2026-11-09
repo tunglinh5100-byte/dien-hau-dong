@@ -1739,7 +1739,7 @@ function updChuyenGia(dt) {
   if (!F.dung && t >= CG.dung[0]) { F.dung = true; GIA_DS.active = c.toId; luuGia(); c.look = null; wave(14); S.danceSpecial = 3; trongChau([0, .4, .8]);
     S.banner = { text: 'Giá ' + c.toTen + ' ngự đồng', t: 0, life: 4 };
     for (let i = 0; i < 40; i++) S.particles.push({ x: rnd(150, 390), y: rnd(300, 380), vx: rnd(-20, 20), vy: rnd(20, 60), life: rnd(2, 3.5), t: 0, kind: 'petal', c: pick(['#f6b6c8', '#ec8fae', '#fff0f4', '#f7d56a']) }); }
-  if (t >= CG.het) { S.chuyen = null; S.giaT = 0; S.ob = { ph: 'mua', t: 0, min: 20 }; /* lần múa đầu sau thay khăn áo: ít nhất 20 giây */ S.coT = 0; S.phaLoc = false; napNhacGia(); S.volTarget = .85; capNhatGiaInfo(); }
+  if (t >= CG.het) { S.chuyen = null; S.giaT = 0; S.ob = { ph: 'mua', t: 0, min: 20 }; /* lần múa đầu sau thay khăn áo: ít nhất 20 giây */ S.coT = 0; S.phaLoc = false; if (S.lenhCho) { const l = S.lenhCho; S.lenhCho = null; setTimeout(() => lenhPha(l), 300); } napNhacGia(); S.volTarget = .85; capNhatGiaInfo(); }
 }
 function veilState() { const c = S.chuyen; if (!c) return GIA().hang === 'mau' ? { a: 1, toss: 0 } : null; const t = c.t;
   if (c.to.hang === 'mau' && t >= CG.veil[0]) return { a: c.from.hang === 'mau' ? 1 : Math.min(1, prog(t, CG.veil)), toss: 0 };
@@ -1868,7 +1868,12 @@ const GD_TEN = { 1: 'Thỉnh mời', 2: 'Thay khăn áo · múa', 3: 'Văn phát
 function lenhPha(w) { const c = S.chuyen;
   if (w === 'hoicung') { if (!c) batDauHoiCung(nextGiaId(), false); return; } // xe loan giá này xong tự thỉnh giá sau
   if (w === 'ong' || w === 'co' || w === 'thinh') { const id = w === 'ong' ? 'ongbay' : w === 'co' ? 'codoi' : (c ? c.toId : GIA_DS.active);
-    if (c) { if (c.choThinh && c.t < CG.thinh) { const to = giaBan(id); Object.assign(c, { to, toId: to.id, toTen: to.ten, choThinh: false }); } return; }
+    if (c) { // đang xe giá / thỉnh mà anh bấm thỉnh giá khác: đổi ngay sang thỉnh giá anh chọn
+      if (w === 'thinh' || id === c.toId) { c.choThinh = false; return; }
+      if (c.t >= CG.dung[0] - .5) { S.lenhCho = w; return; } // giá mới sắp đứng dậy: chờ xong rồi làm
+      const to = giaBan(id); Object.assign(c, { to, toId: to.id, toTen: to.ten, choThinh: false, vanXong: false, choVan: 0 });
+      if (c.t >= CG.thinh) { try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); } catch (e) {} ['thinh', 'toss', 'ao', 'khan'].forEach(k => { c.flags[k] = false; }); c.look = Object.assign({}, c.from, { ao: '#f3efe6', vay: '#18161a', dai: '#f3efe6' }); c.t = CG.thinh - .05; }
+      S.banner = { text: 'Đổi sang thỉnh giá ' + to.ten, t: 0, life: 3 }; capNhatGiaInfo(); return; }
     batDauHoiCung(id, false); return; }
   if (w === 'mua') { if (c) { if (c.t >= CG.thinh) c.choMua = false; return; }
     S.phaLoc = false; S.coT = 0; if (laOng() && S.ob.ph !== 'mua') { S.ob.ph = 'mua'; S.ob.t = 0; chuyenNhacOng(); }
