@@ -568,7 +568,19 @@ function drawCoVideo(t, x, y, sc) {
   if (S.danceSpecial > 0 && Math.random() < .5) S.particles.push({ x: x + rnd(-60, 60), y: y - rnd(50, 180), vx: rnd(-10, 10), vy: rnd(-30, -10), life: 1.2, t: 0, kind: 'spark' });
 }
 const coBufOk = true, coVidErr = false; // giữ tên cũ cho khung lời khen
-window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a) };
+window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a), doiGia: (id) => doiGia(id), ongPh: (ph) => { if (!laOng() || !S.ob) return; if (S.ob.ph !== ph) { S.ob.ph = ph; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); } } };
+// ---------- Lệnh đổi giá bằng bình luận của chủ kênh / quản trị viên: #ong, #co, #ngoi, #mua ----------
+window.__hdLenh = (d, c) => { try {
+  const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || d || {}, id = String(u.uniqueId || u.displayId || d.uniqueId || '').toLowerCase(), nn = String(u.nickname || d.nickname || '').toLowerCase().trim();
+  const chu = (new URLSearchParams(location.search).get('chu') || 'linhxiaocheng').toLowerCase();
+  const laChu = id === chu || nn === 'linh xo' || d.isModerator === true || u.isModerator === true || !!(u.userIdentity && (u.userIdentity.isModeratorOfAnchor || u.userIdentity.isAnchor)) || !!(d.userIdentity && (d.userIdentity.isModeratorOfAnchor || d.userIdentity.isAnchor));
+  const k = String(c || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').trim();
+  const m = k.match(/^[#!\/]\s*(ong ?bay|ong|co ?doi|co|ngoi|mua)\b/); if (!m) return false;
+  if (!laChu) return true; // lệnh của người lạ: bỏ qua, không hiện lên điện
+  const H = window.__hd; if (!H || !H.doiGia) return true; const w = m[1].replace(' ', '');
+  if (w === 'ong' || w === 'ongbay') H.doiGia('ongbay'); else if (w === 'co' || w === 'codoi') H.doiGia('codoi'); else H.ongPh(w === 'ngoi' ? 'ngoi' : 'mua');
+  return true; } catch (e) { return false; } };
+
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
 function drawCo(t) {
   const sc = depthScale(CO.y) * 1.02, x = CO.x, y = CO.y;
@@ -1828,7 +1840,7 @@ buildCfgPanel(); napNhacGia();
     const name = nameOf(d); if (!name) return;
     const nm = String(name).slice(0, 24); seen.set(nm, H.S.t);
     const t = String(type || '').toLowerCase();
-    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c) say(nm, c); }
+    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) say(nm, c); }
     else if (t.includes('like')) { person(nm); like(Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), nm); }
     else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) shareLive(nm); else follow(nm); }
@@ -1901,7 +1913,7 @@ buildCfgPanel(); napNhacGia();
     if (u) return u.nickname || u.uniqueId || u.displayId || null; if (o && (o.nickname || o.uniqueId)) return o.nickname || o.uniqueId; return null; };
   function handle(type, d) {
     if (!H) return; const name = nameOf(d); if (!name) return; const nm = String(name).slice(0, 24); const t = String(type || '').toLowerCase();
-    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c) H.say(nm, c); }
+    if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) H.say(nm, c); }
     else if (t.includes('like')) { H.person(nm); H.like(Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), nm); }
     else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); H.gift(nm, dc >= 99 ? 'big' : 'loc'); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) H.shareLive(nm); else H.follow(nm); }
