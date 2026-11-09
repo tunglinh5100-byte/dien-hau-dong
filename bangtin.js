@@ -1,6 +1,6 @@
-// Bảng tin chạy chậm cuối màn hình live (giống máy nhắc chữ).
-// Anh sửa nội dung ngay trên GitHub: mỗi dòng một câu, đặt trong dấu nháy đơn, cuối dòng có dấu phẩy.
-// "chung" chạy ở mọi giá; các mục còn lại chỉ chạy khi đang ngự đúng giá đó, xen kẽ với "chung".
+// Sự tích hiển thị trong bảng bên trái màn hình live, chữ tự cuộn lên như máy nhắc chữ, hết lại quay về đầu.
+// Anh sửa nội dung ngay trên GitHub: mỗi câu đặt trong dấu nháy đơn, cuối câu có dấu phẩy.
+// Mục của giá đang ngự hiện trước, sau đó đến các câu "chung".
 window.BANG_TIN = {
   chung: [
     'Tín ngưỡng thờ Mẫu Tam phủ của người Việt được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại năm 2016',
@@ -10,7 +10,6 @@ window.BANG_TIN = {
     'Các hàng Thánh trong Tứ phủ: Thánh Mẫu, Quan Lớn, Chầu Bà, Ông Hoàng, Thánh Cô, Thánh Cậu',
     'Mẫu Liễu Hạnh là một trong Tứ bất tử của tín ngưỡng dân gian Việt Nam',
     'Lộc Thánh ban là món quà tượng trưng cho may mắn, bình an, con nhang thường mang về chia cho gia đình',
-    'Đền Chi Lăng, Đồng Mỏ, Lạng Sơn kính mời quý khách thập phương về dâng hương',
   ],
   ongbay: [
     'Ông Hoàng Bảy còn gọi là Ông Bảy Bảo Hà, được thờ chính tại đền Bảo Hà, tỉnh Lào Cai',
