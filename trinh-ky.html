@@ -37,6 +37,7 @@ canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9
   </div>
 </div>
 <script src="lich.js"></script>
+<script src="lofi.js"></script>
 <script>
 (() => {
 'use strict';
@@ -63,9 +64,10 @@ function tone(f, dur, vol, type, at) { const a = AC; if (!a || !S.sound) return;
 const sCoin = () => { [2637, 3520, 4186].forEach((f, i) => tone(f * rnd(.97, 1.03), .25, .05, 'sine', i * .012)); };
 const sWood = () => { tone(820, .09, .18, 'triangle'); tone(410, .12, .08, 'sine'); };
 const sGong = () => { [110, 165, 220, 331].forEach((f, i) => tone(f, 3.2 - i * .4, .14 / (i + 1), 'sine')); };
-const PENTA = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3];
-function ambient() { if (!S.sound || !AC) return; const f = pick(PENTA) * pick([1, 1, .5]); tone(f, 2.2, .045, 'triangle'); tone(f * 2.01, 1.2, .012, 'sine'); }
-setInterval(() => { if (Math.random() < .6) ambient(); }, 1700);
+// nhạc nền lofi trà đạo (lofi.js), nhỏ lại khi đọc kết quả
+let LOFI = null, musicGain = null;
+function musicStart() { if (!AC || LOFI || !window.makeLofi) return; musicGain = AC.createGain(); musicGain.gain.value = .8; musicGain.connect(master); LOFI = window.makeLofi(AC, musicGain); setInterval(() => { if (S.sound) LOFI.schedule(AC.currentTime + .6); }, 150); }
+setInterval(() => { if (musicGain && AC) musicGain.gain.setTargetAtTime(S.speaking ? .32 : (S.cur && S.cur.phase === 'phan' ? .55 : .8), AC.currentTime, .4); }, 300);
 
 // ---------- Giọng thầy ----------
 let VOICE = null;
@@ -320,7 +322,7 @@ document.getElementById('test').addEventListener('click', () => { const u = iu.v
   setTimeout(() => { if (res.textContent === 'Đang kiểm tra…') done('⚠️ Không có phản hồi, kiểm tra mạng.'); }, 15000); });
 document.getElementById('go').addEventListener('click', () => {
   LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim()); S.voice = vo.checked; LS.set('tk_voice', vo.checked ? '1' : '0');
-  st.remove(); S.sound = true; acGet(); sGong();
+  st.remove(); S.sound = true; acGet(); sGong(); musicStart();
   try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); }); } catch (e) {}
   try { const de = document.documentElement; (de.requestFullscreen || de.webkitRequestFullscreen || (() => {})).call(de); } catch (e) {}
