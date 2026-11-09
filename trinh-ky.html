@@ -36,8 +36,8 @@ canvas { width: min(100vw, calc(100dvh * 9 / 16)); height: auto; aspect-ratio: 9
     <small id="res">Chỉ nhập một lần, máy tự nhớ. Không nhập thì chỉ chạy giả lập.</small>
   </div>
 </div>
-<script src="lich.js?v=1794200117"></script>
-<script src="lofi.js?v=1794200117"></script>
+<script src="lich.js?v=1794200234"></script>
+<script src="lofi.js?v=1794200234"></script>
 <script>
 (() => {
 'use strict';
@@ -288,9 +288,9 @@ function drawHuongDan(t) { // bảng hướng dẫn tương tác, đặt trên m
     text('→ ' + it[2], cx + 30 + w1, cy, 12.5, '#f6dc96', { a: 'left', w: 600 }); }); ctx.restore(); }
 let last = performance.now();
 function frame(now) { requestAnimationFrame(frame); const dt = clamp((now - last) / 1000, 0, .05); last = now;
-  try { update(dt); sim(dt); const t = S.t; drawBg(t);
+  try { update(dt); updChao(dt); sim(dt); const t = S.t; drawBg(t);
     ctx.save(); ctx.translate(HX, BASE_Y); ctx.scale(SC, SC); ctx.translate(-HX, -DESK); drawThay(t); drawDesk(t); drawCoins(); drawSparks(); ctx.restore();
-    drawBien(t); drawHuongDan(t); drawTiep(); drawNoi(); drawPhan(t);
+    drawBien(t); drawHuongDan(t); drawTiep(); drawChao(); drawNoi(); drawPhan(t);
   } catch (e) { console.error(e); } }
 
 // ---------- Sự kiện người xem ----------
@@ -301,6 +301,16 @@ function onComment(name, msg, that) { const r = L.docHaiTuoi(msg, S.day.yy), tuo
   if (hoi || (that && !S.lastXem.has(name))) enqueue({ ten: name, tuoi: S.nho.get(name) || null, sep: S.nhoSep.get(name) || null, that }); }
 function onLike(name, n, that) { const v = (S.likes.get(name) || 0) + n; S.likes.set(name, v);
   if (v >= 10) { S.likes.set(name, 0); const lx = S.lastXem.get(name) || -999; if (S.t - lx > 120) { S.lastXem.set(name, S.t); enqueue({ ten: name, tuoi: null, that }); } } }
+// ---------- Chào người mới vào phòng ----------
+const daChao = new Set(); let joinQ = [], chaoT = 0, chaoNoiT = -99; S.chao = null;
+function onJoin(name) { if (!name || daChao.has(name)) return; daChao.add(name); joinQ.push(name); if (joinQ.length > 30) joinQ = joinQ.slice(-30); }
+function updChao(dt) { chaoT -= dt; if (S.chao) { S.chao.t += dt; if (S.chao.t > 3.6) S.chao = null; }
+  if (chaoT > 0 || !joinQ.length || S.chao) return; const ds = joinQ.splice(0, joinQ.length), hien = ds.slice(-2).map(ten);
+  S.chao = { s: '👋 Chào ' + hien.join(', ') + (ds.length > 2 ? ' và ' + (ds.length - 2) + ' bạn mới' : '') + '!', t: 0 }; chaoT = 4;
+  if (!S.cur && !S.queue.length && S.t - chaoNoiT > 12 && !S.speaking) { chaoNoiT = S.t; const n0 = hien[hien.length - 1]; noi('Chào ' + n0 + '! Gõ năm sinh để xem giờ trình ký nhé.', 4.5); say('Chào ' + n0 + '. Gõ năm sinh để xem giờ trình ký nhé.'); } }
+function drawChao() { const c = S.chao; if (!c) return; const a = clamp(Math.min(c.t / .25, (3.6 - c.t) / .4), 0, 1); ctx.save(); ctx.globalAlpha = a; ctx.font = `800 13px ${UI}`;
+  const w = Math.min(W - 44, ctx.measureText(c.s).width + 26), y = S.queue.some(j => j.that) ? 838 : 868; ctx.fillStyle = 'rgba(255,248,230,.95)'; rr(W / 2 - w / 2, y, w, 26, 13); ctx.fill(); ctx.strokeStyle = '#c99a3a'; ctx.lineWidth = 1.2; ctx.stroke();
+  text(c.s, W / 2, y + 13.5, 13, '#5a2a10', { w: 800 }); ctx.restore(); }
 function onShare(name) { if (!S.cur) noi('Cảm ơn ' + ten(name) + ' đã chia sẻ, chúc ký đâu trúng đó!', 4); }
 function onFollow(name) { if (!S.cur) noi('Chào ' + ten(name) + '!', 3); }
 function onGift(name) { if (!S.cur) noi('Không nhận quà, ' + ten(name) + ' thả tim là được rồi.', 4); }
@@ -310,7 +320,7 @@ const SIM_ON = Q.get('sim') !== '0';
 const NAMES = ['Mơ Dung', 'Thu Hà', 'Quang Huy', 'Kim Oanh', 'Tuấn Đạt', 'Bảo Ngọc', 'Hải Đăng', 'Minh Khôi', 'Lan Hương', 'Văn Tú', 'Diệu Linh', 'Phúc Lộc', 'Trà My', 'Hồng Nhung', 'Đức Minh', 'Ngọc Ánh'];
 const SIM_MSG = ['Em 1999, mai có nên trình sếp không, sếp sinh năm 85', 'thứ 5 trình được không ạ', 'em 1991, 20/11 thì sao', 'chiều mai được không thầy', 'em 1991 sếp 1975', 'sếp tuổi Thìn, em 1990', 'sếp 1984 ạ', 'em 1995 sếp 1977', 'con sinh 1991', 'em 1995 thầy ơi', '1988', 'con tuổi Hợi', 'thầy xem giúp con trình ký', '96 ạ', 'Canh Ngọ', 'tuổi Dần ạ', '1983'];
 let simT = 3;
-function sim(dt) { if (!SIM_ON) return; simT -= dt; if (simT > 0) return; simT = S.real ? rnd(10, 16) : rnd(3, 6); const nm = pick(NAMES);
+function sim(dt) { if (!SIM_ON || S.real) return; // đã nối live thật thì tắt hẳn giả lập simT -= dt; if (simT > 0) return; simT = S.real ? rnd(10, 16) : rnd(3, 6); const nm = pick(NAMES);
   if (Math.random() < .5) onLike(nm, Math.floor(rnd(3, 7)), false); else onComment(nm, pick(SIM_MSG), false); }
 
 // ---------- Kết nối live: EulerStream (điện thoại) + TikFinity (máy tính) ----------
@@ -320,7 +330,8 @@ function handle(type, d) { const name = nameOf(d); if (!name) return; const nm =
   else if (t.includes('like')) onLike(nm, Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))), true);
   else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; onGift(nm); }
   else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) onShare(nm); else onFollow(nm); }
-  else if (t === 'share') onShare(nm); else if (t === 'follow') onFollow(nm); }
+  else if (t === 'share') onShare(nm); else if (t === 'follow') onFollow(nm);
+  else if (t.includes('member') || t.includes('join')) onJoin(nm); }
 const LS = { get: k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 let ws = null, retry = 0;
 function eulerConnect() { const u = LS.get('hd_live_user').replace(/^@/, '').trim(), k = LS.get('hd_live_key').trim(); if (!u || !k) return;
@@ -359,7 +370,7 @@ if (Q.get('auto') === '1') { let ver0 = null, cho = false;
   const chk = () => fetch('ver.txt?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : null).then(v => { if (!v) return; v = v.trim(); if (ver0 === null) ver0 = v; else if (v !== ver0) cho = v; }).catch(() => {});
   chk(); setInterval(chk, 60000); setInterval(() => { if (cho && !S.cur && !S.queue.length) { const u = new URL(location.href); u.searchParams.set('v', cho); location.replace(u.toString()); } }, 2000); }
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(frame));
-window.__tk = { S, onComment, onLike, enqueue };
+window.__tk = { S, onComment, onLike, enqueue, onJoin, handle };
 })();
 </script>
 </body></html>
