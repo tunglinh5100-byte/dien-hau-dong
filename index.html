@@ -77,7 +77,6 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
       <div class="row">
         <button id="bGiaCo" type="button">Giá Cô Đôi</button>
         <button id="bGiaOng" type="button">Giá Ông Hoàng Bảy</button>
-        <button id="bGiaBo" type="button">Giá Cô Bơ</button>
         <button id="bOngNgoi" type="button">Ông Bảy: múa ↔ ngồi</button>
         <button id="bHoiCung" type="button">🐉 Xe loan thánh giá</button>
         <button id="bTuChuyen" type="button" hidden>Tự chuyển giá: tắt</button>
@@ -1001,7 +1000,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   let luu = null, cu = null; try { luu = JSON.parse(localStorage.getItem('hd_gia_live4') || 'null'); } catch (e) {} try { cu = JSON.parse(localStorage.getItem('hd_gia_codoi') || 'null'); } catch (e) {}
   const it = (luu && luu.items) || {};
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
-  const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), Object.assign(CO_BO, it.cobo || {}, { id: 'cobo', hang: 'co', congCu: 'cheo' })];
+  const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' })]; // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
   const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
   GIA_DS = { active: ds.some(g => g.id === qg) ? qg : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; }
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
@@ -1905,6 +1904,7 @@ function batDauHoiCung(toId, choThinh) {
 function giaiDoan() { const c = S.chuyen; if (c) return c.t < CG.thinh ? 4 : c.t < CG.helpIn[0] ? 1 : 2; return laOng() ? (S.ob && S.ob.ph === 'ngoi' ? 3 : 2) : (S.phaLoc ? 3 : 2); }
 const GD_TEN = { 1: 'Thỉnh mời', 2: 'Thay khăn áo · múa', 3: 'Văn phát lộc', 4: 'Xe loan hồi cung' };
 function lenhPha(w) { const c = S.chuyen;
+  if (w === 'bo' && !GIA_DS.list.some(g => g.id === 'cobo')) return; // giá Cô Bơ chưa mở
   if (w === 'hoicung') { if (!c) batDauHoiCung(nextGiaId(), false); return; } // xe loan giá này xong tự thỉnh giá sau
   if (w === 'ong' || w === 'co' || w === 'bo' || w === 'thinh') { const id = w === 'ong' ? 'ongbay' : w === 'co' ? 'codoi' : w === 'bo' ? 'cobo' : (c ? c.toId : GIA_DS.active);
     if (c) { // đang xe giá / thỉnh mà anh bấm thỉnh giá khác: đổi ngay sang thỉnh giá anh chọn
@@ -1924,7 +1924,6 @@ function lenhPha(w) { const c = S.chuyen;
 function doiGia(id) { if (GIA_DS.active === id) return; GIA_DS.active = id; S.ob = { ph: 'mua', t: 0 }; S.ccOverride = null; S.poll = null; luuGia(); napNhacGia(); S.loc = null; S.banner = { text: 'Giá ' + GIA().ten + ' ngự đồng', t: 0, life: 4 }; wave(10); capNhatGiaInfo(); const cs = document.getElementById('cfg'); if (cs && !cs.hidden) { cs.hidden = true; } }
 document.getElementById('bGiaCo').addEventListener('click', () => lenhPha('co'));
 document.getElementById('bGiaOng').addEventListener('click', () => lenhPha('ong'));
-document.getElementById('bGiaBo').addEventListener('click', () => lenhPha('bo'));
 document.getElementById('bOngNgoi').addEventListener('click', () => { if (!laOng()) return; S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); });
 document.getElementById('bHoiCung').addEventListener('click', () => { if (S.sound) acGet(); lenhPha('hoicung'); });
 const bT = document.getElementById('bTuChuyen'); bT.addEventListener('click', () => { S.tuChuyen = !S.tuChuyen; bT.classList.toggle('on', S.tuChuyen); bT.textContent = 'Tự chuyển giá sau 6 phút: ' + (S.tuChuyen ? 'bật' : 'tắt'); capNhatGiaInfo(); });
