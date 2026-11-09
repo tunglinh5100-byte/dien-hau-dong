@@ -337,8 +337,9 @@ function tayNgoaiKhan(t) { const c = S.chuyen; if (!c || (CO.sit || 0) < .8) ret
   const arm = (s, ex, ey, wx, wy, ang, kind) => { sleeve(ex, ey, 5.5, wx, wy, 6.5); const dx = wx - ex, dy = wy - ey, L = Math.hypot(dx, dy) || 1, px = -dy / L * 7, py = dx / L * 7; ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(wx + px, wy + py); ctx.lineTo(wx - px, wy - py); ctx.stroke(); banTay(wx + dx / L * 4, wy + dy / L * 4, ang, kind, 1.05); };
   // xe giá hồi cung: hai tay ra khỏi khăn, múa dẻo một lượt, rồi giữ nguyên tới hết xe giá
   if (T < CG.thinh + .6 && T > CG.veil[1]) { const e = prog(T, [CG.veil[1] + .2, CG.veil[1] + 1]) * (1 - prog(T, [CG.thinh, CG.thinh + .6])); if (e <= 0) return; const k = prog(T, [CG.veil[1] + 1, CG.veil[1] + 4.6]), m = Math.sin(k * Math.PI * 2) * (1 - k * .3);
-    [-1, 1].forEach(s => { const d = k < 1 ? 1 : 0, wx = s * (33 + 8 * e + Math.cos(k * 6.28) * 2 * d), wy = -114 - 13 * e + Math.sin(k * 6.28 + s) * 2 * d; // chỉ ló cổ tay, bàn tay múa dẻo chậm rồi giữ
-      arm(s, s * 30, -112, wx, wy, s * (k < 1 ? .45 + .4 * m : .5), 'mo'); }); return; }
+    [-1, 1].forEach(s => { const d = k < 1 ? 1 : 0; // tay ló nửa ra khỏi khăn lên ngang đầu như lúc thỉnh, bàn tay múa dẻo một lượt rồi giữ
+      const sx0 = s * 22, sy0 = -184, elx = s * (24 + 15 * e), ely = -184 - 12 * e, wx = s * (24 + 10 * e + Math.cos(k * 6.28) * 2 * d), wy = -186 - 34 * e + Math.sin(k * 6.28 + s) * 2 * d;
+      sleeve(sx0, sy0, 5.5, elx, ely, 5.8); arm(s, elx, ely, wx, wy, s * (k < 1 ? -.25 + .45 * m : -.15), 'mo'); }); return; }
   // thỉnh: chỉ giá có số (Cô Đôi) mới giơ tay lên đầu, tay phải ra số
   const so = SO_GIA[c.toId]; if (!so || T < CG.thinh) return;
   const e = prog(T, [CG.thinh + .3, CG.thinh + 1.3]) * (1 - prog(T, [CG.thinh + 8.5, CG.thinh + 9.3])); if (e <= 0) return;
