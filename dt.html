@@ -1133,7 +1133,7 @@ function drawPerson(p, t) {
   const s = p.state === 'seat' ? p.seat.s : 1;
   let lean = 0, arms = null;
   if (p.pose === 'bow') lean = 6 + Math.abs(Math.sin(t * 3)) * 6;
-  if (p.pose === 'raise') arms = 'up'; if (p.pose === 'clap') arms = 'clap'; if (p.pose === 'cheer') arms = 'wave';
+  if (p.pose === 'raise') arms = 'up'; if (p.pose === 'reach') arms = 'reach'; if (p.pose === 'clap') arms = 'clap'; if (p.pose === 'cheer') arms = 'wave';
   const walking = p.state === 'walk', bob = walking ? Math.abs(Math.sin(t * 8 + p.x)) * 2 : 0;
   ctx.save(); ctx.translate(p.x, p.y - bob); if (p.state === 'seat') ctx.rotate(p.seat.lean + (p.pose === 'kneel' ? Math.sin(S.t * 2.6 + (p.seat.x % 7) * .12) * .05 : 0)); ctx.scale(1.7 * s, 1.7 * s);
   ctx.globalAlpha = .35; ctx.beginPath(); ctx.ellipse(0, 1, 11, 3.5, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
@@ -1161,10 +1161,13 @@ function drawPerson(p, t) {
   const sy = top + 2.5;
   if (arms === 'up') [-1, 1].forEach(k => arm(k * (sw - 1.5), sy, k * (sw + 3), sy - 7, k * (sw + 1), sy - 14 - Math.abs(Math.sin(t * 8)) * 3));
   else if (arms === 'clap') { const c = Math.abs(Math.sin(t * 12)) * 3.5; [-1, 1].forEach(k => arm(k * (sw - 1.5), sy, k * (sw + 1), sy + 5, k * (1.6 + c), sy - 6)); }
+  else if (arms === 'reach') { const r = p.reach || 1, q = t * (p.busy ? 6 : 2.5), a = p.busy ? 3 : 1.2; // quay vào giữa, hai tay đưa sang phía đồng: kéo áo, chỉnh khăn
+    arm(r * (sw - 1.5), sy, r * (sw + 6), sy - 2 + Math.sin(q) * a, r * (sw + 12), sy - 4 + Math.sin(q) * a);
+    arm(-r * (sw - 2.5), sy + 1, r * 2, sy - 3 + Math.cos(q) * a, r * (sw + 9), sy - 9 + Math.cos(q) * a); }
   else if (arms === 'wave') { arm(-(sw - 1.5), sy, -(sw + 1), sy + 6, -(sw - 1), sy + 11); arm(sw - 1.5, sy, sw + 4, sy - 5, sw + 2 + Math.sin(t * 10) * 3, sy - 13); }
   else [-1, 1].forEach(k => arm(k * (sw - 1.5), sy, k * (sw + 1.2), sy + 6, k * (sw - 1), sy + 12));
   // cổ + đầu (nhìn từ sau lưng)
-  const hy = top - 6.2;
+  const hy = top - 6.2; ctx.save(); if (p.pose === 'reach') ctx.translate((p.reach || 1) * 1.8, 0); // quay đầu vào giữa
   rr(-2, top - 3.4, 4, 4, 1.5, '#c99a72');
   circ(-5.4, hy + .6, 1.3, SK); circ(5.4, hy + .6, 1.3, SK); // tai
   circ(0, hy, 5.4, p.hairC);
@@ -1174,6 +1177,7 @@ function drawPerson(p, t) {
   } else { // tóc ngắn, lộ gáy
     ctx.beginPath(); ctx.ellipse(0, hy + 4.4, 3.4, 1.6, 0, 0, Math.PI); ctx.fillStyle = '#c99a72'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, hy, 3.6, Math.PI * 1.15, Math.PI * 1.75); ctx.stroke(); }
+  ctx.restore();
   if (p.quen) { ctx.lineWidth = 2.4; ctx.strokeStyle = '#c62a22'; ctx.beginPath(); ctx.ellipse(0, hy - 2.6, 5.8, 2.4, 0, 0, 6.28); ctx.stroke(); ctx.strokeStyle = '#f4d47c'; ctx.lineWidth = .6; ctx.stroke(); }
   }
   if (p.carry) drawItem(p.carry, 11, -22, .8);
@@ -1631,7 +1635,7 @@ function shareLive(name) { const p = person(name); hu(p, name + ' chia sẻ live
 // → tung khăn → tay hương, tay khăn lên thay áo, thay vấn (~30 giây) → cô đứng lên, giá mới ngự đồng
 S.ob = { ph: 'mua', t: 0 }; const GIA_DUR = 360; S.giaT = 0; S.chuyen = null; S.tuChuyen = false; S.volTarget = .85; CO.sit = 0;
 const SEAT_Y = CARPET.cy - CARPET.ry + 8;
-const CG = { l1: [.6, 3.2], n1: [2.8, 6.4], l2: [5.8, 7.6], n2: [7.2, 10.6], veil: [9.4, 10.2], thinh: 10.2, toss: [15.4, 16.6], helpIn: [16.4, 19.6], ao: [21, 24.6], aoDoi: 22.8, khan: [29.5, 33.5], khanDoi: 33.3, helpOut: [44, 47], dung: [47, 48.2], het: 50 };
+const CG = { l1: [.6, 3.2], n1: [2.8, 6.4], l2: [5.8, 7.6], n2: [7.2, 10.6], veil: [9.4, 10.2], thinh: 10.2, toss: [18.9, 20.1], helpIn: [15.4, 18.6], ao: [21, 24.6], aoDoi: 22.8, khan: [29.5, 33.5], khanDoi: 33.3, helpOut: [44, 47], dung: [47, 48.2], het: 50 };
 function nextGiaId() { const l = GIA_DS.list, i = l.findIndex(g => g.id === GIA_DS.active); return l[(i + 1) % l.length].id; }
 function hoiCung() {
   return; // bản live một giá: không hồi cung
@@ -1649,7 +1653,7 @@ function updChuyenGia(dt) {
   if (!S.chuyen) { S.giaT += dt; if (S.tuChuyen && S.giaT >= giaDur()) hoiCung(); CO.sit = GIA().hang === 'mau' ? 1 : ongNgoi() && Math.hypot(CO.x - CARPET.cx, CO.y - (CARPET.cy - 4)) < 3 ? Math.min(1, CO.sit + dt * 1.2) : Math.max(0, CO.sit - dt * 1.2); return; }
   const c = S.chuyen, F = c.flags; let nt = c.t + dt;
   if (c.choThinh && nt >= CG.thinh - .02) nt = CG.thinh - .02; // đồng trùm khăn ngồi chờ lệnh thỉnh
-  if (F.thinh && !c.vanXong && nt >= CG.toss[0] - .02) { nt = CG.toss[0] - .02; c.choVan = (c.choVan || 0) + dt; if (c.choVan > (c.to.van ? c.to.van.se - c.to.van.thinh : 0) + 6) { c.vanXong = true; if (VAN_STOP) { VAN_STOP = 0; try { VAN_AU.pause(); } catch (e) {} } nhacSrc(c.to).then(src => { bgm.src = src; if (S.sound) musStart(); S.volTarget = .85; }); } } // chờ hết văn thỉnh rồi mới giáng
+  if (F.thinh && !c.vanXong && nt >= CG.helpIn[0] - .02) { nt = CG.helpIn[0] - .02; c.choVan = (c.choVan || 0) + dt; if (c.choVan > (c.to.van ? c.to.van.se - c.to.van.thinh : 0) + 6) { c.vanXong = true; if (VAN_STOP) { VAN_STOP = 0; try { VAN_AU.pause(); } catch (e) {} } nhacSrc(c.to).then(src => { bgm.src = src; if (S.sound) musStart(); S.volTarget = .85; }); } } // chờ hết văn thỉnh rồi mới giáng
   if (c.choMua && nt >= CG.helpIn[0] - .02) nt = CG.helpIn[0] - .02; // giá đã giáng, ngồi chờ lệnh thay khăn áo, múa
   c.t = nt; const t = c.t;
   // cô về giữa chiếu, ngồi xuống khi tới nơi; đứng lên ở cuối
@@ -1706,16 +1710,16 @@ function drawLoiVan(t) {
   ctx.restore();
 }
 // tay hương, tay khăn lên thay áo, thay vấn
-const HELPERS = [{ name: '​Tay hương', tag: 'Tay hương', coat: '#7a4a2a', sex: 'nu', hairC: '#1c120c', side: -1 }, { name: '​Tay khăn', tag: 'Tay khăn', coat: '#b0465a', sex: 'nu', hairC: '#22160e', side: 1 }];
+const HELPERS = [{ name: '​Tay hương', tag: 'Tay hương', coat: '#52c6d8', sex: 'nu', hairC: '#1c120c', side: -1 }, { name: '​Tay khăn', tag: 'Tay khăn', coat: '#52c6d8', sex: 'nu', hairC: '#22160e', side: 1 }];
 function drawHelpers(t) {
   const c = S.chuyen; if (!c || c.to.hang === 'mau' || c.t < CG.helpIn[0] || c.t > CG.helpOut[1]) return; const T = c.t;
   const k = T < CG.helpIn[1] ? prog(T, CG.helpIn) : T > CG.helpOut[0] ? 1 - prog(T, CG.helpOut) : 1, walking = T < CG.helpIn[1] || T > CG.helpOut[0];
-  HELPERS.forEach((h, i) => { const sx = CARPET.cx + h.side * 200, sy = CARPET.cy + 40, ex = CO.x + h.side * 66, ey = SEAT_Y + 6;
+  HELPERS.forEach((h, i) => { const sx = CARPET.cx + h.side * 200, sy = CARPET.cy + 40, ex = CO.x + h.side * 40, ey = SEAT_Y + 4;
     const x = sx + (ex - sx) * k, y = sy + (ey - sy) * k; const cloth = between(T, CG.ao), khan = between(T, CG.khan) && h.side > 0;
-    const pose = walking ? 'walk' : (cloth || khan) ? 'raise' : (Math.sin(T * 2.2 + i * 1.7) > 0 ? 'clap' : 'raise');
-    const p = Object.assign({}, h, { x: 0, y: 0, state: walking ? 'walk' : 'stand', pose, seat: null, wp: [] });
-    ctx.save(); ctx.translate(x, y); ctx.scale(2.3, 2.3); drawPerson(p, t); ctx.restore();
-    if (!walking) { ctx.font = `700 10px ${UI}`; const w = ctx.measureText(h.tag).width + 12; rr(x - w / 2, y - 160, w, 15, 7, 'rgba(30,8,6,.7)'); text(h.tag, x, y - 152.5, 10, '#f6dc96', { w: 700 }); }
+    const pose = walking ? 'walk' : 'reach'; // tới nơi: quay vào giữa, đưa tay thay khăn áo cho đồng
+    const p = Object.assign({}, h, { x: 0, y: 0, state: walking ? 'walk' : 'stand', pose, reach: -h.side, busy: cloth || khan, seat: null, wp: [] });
+    ctx.save(); ctx.translate(x, y); ctx.scale(walking ? 1.15 : 1.15 * .8, 1.15); drawPerson(p, t); ctx.restore();
+    if (!walking) { ctx.font = `700 9px ${UI}`; const w = ctx.measureText(h.tag).width + 10; rr(x - w / 2, y - 86, w, 13, 6, 'rgba(30,8,6,.7)'); text(h.tag, x, y - 79.5, 9, '#f6dc96', { w: 700 }); }
   });
   // tấm áo mới căng giữa hai người khi thay áo
   if (between(T, CG.ao)) { const a = Math.min(1, prog(T, CG.ao) * 5, (1 - prog(T, CG.ao)) * 5), L = c.to; ctx.save(); ctx.globalAlpha = a;
