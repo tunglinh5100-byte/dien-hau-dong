@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Điều khiển điện hầu</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#1d0b08;--card:#2c120d;--gold:#f2cf72;--red:#9c2a1e;--txt:#f6e9d6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 system-ui,-apple-system,sans-serif;padding:16px;min-height:100vh}
+h1{font-size:19px;color:var(--gold);margin:4px 0 2px}p{margin:0 0 14px;opacity:.75;font-size:13px}
+button{display:block;width:100%;border:0;border-radius:16px;padding:22px 16px;margin:0 0 12px;font-size:20px;font-weight:800;color:#fff;background:#3a1a14;box-shadow:0 2px 0 rgba(0,0,0,.4)}
+button:active{transform:translateY(2px)}
+#xl{background:linear-gradient(#c0392b,#8e1f16);font-size:24px;padding:30px 16px;border:2px solid var(--gold)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row button{margin:0}
+.ong{background:#5a2d6b}.co{background:#1f8a5a}.mua{background:#7a4a14}.loc{background:#a8762a}
+#st{margin-top:12px;font-size:14px;text-align:center;min-height:20px;color:var(--gold)}
+</style></head><body>
+<h1>Điều khiển điện hầu</h1>
+<p>Bấm nút là trang hầu đang live chuyển ngay, không cần gõ lệnh.</p>
+<button id="xl" data-l="hoicung">🐉 Xe loan thánh giá</button>
+<div class="row"><button class="ong" data-l="ong">Thỉnh Ông Bảy</button><button class="co" data-l="co">Thỉnh Cô Đôi</button></div>
+<div class="row" style="margin-top:12px"><button class="mua" data-l="mua">Múa</button><button class="loc" data-l="loc">Phát lộc</button></div>
+<div id="st"></div>
+<script>
+const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k', st = document.getElementById('st');
+const TEN = { hoicung: 'Xe loan thánh giá', ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', mua: 'Múa', loc: 'Phát lộc' };
+document.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', async () => {
+  const l = b.dataset.l; st.textContent = 'Đang gửi: ' + TEN[l] + '…'; if (navigator.vibrate) navigator.vibrate(30);
+  try { const r = await fetch('https://ntfy.sh/' + tp, { method: 'POST', body: l }); st.textContent = r.ok ? '✓ Đã gửi: ' + TEN[l] + ' (' + new Date().toLocaleTimeString('vi-VN') + ')' : 'Lỗi gửi (' + r.status + '), bấm lại'; }
+  catch (e) { st.textContent = 'Không gửi được, kiểm tra mạng rồi bấm lại'; } }));
+</script></body></html>

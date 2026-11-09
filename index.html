@@ -78,7 +78,7 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
         <button id="bGiaCo" type="button">Giá Cô Đôi</button>
         <button id="bGiaOng" type="button">Giá Ông Hoàng Bảy</button>
         <button id="bOngNgoi" type="button">Ông Bảy: múa ↔ ngồi</button>
-        <button id="bHoiCung" type="button" hidden>Hồi cung, sang giá kế</button>
+        <button id="bHoiCung" type="button">🐉 Xe loan thánh giá</button>
         <button id="bTuChuyen" type="button" hidden>Tự chuyển giá: tắt</button>
       </div>
     </div>
@@ -190,7 +190,8 @@ function gift(name, kind) {
 function like(n, ai) { S.likes += n; S.kick = 1; if (laOng() && ongNgoi()) { S.ob.last = S.t; if (!S.cafeFull) { const truoc = S.cafe || 0; S.cafe = Math.min(S.goal, truoc + n); if (truoc < S.goal - 1 && S.cafe >= S.goal - 1) S.cafe99 = ai || ''; const st = truoc / S.goal; S.pha = { k: st < .3 ? 'goi' : st < .85 ? 'nuoc' : 'thia', t: 0 }; } } for (let i = 0; i < Math.min(n, 6); i++) (S.drops = S.drops || []).push({ sx: rnd(135, 175), sy: rnd(360, 400), t: -i * .12 }); MUS.boost = 3; for (let i = 0; i < Math.min(n, 8); i++) S.particles.push({ x: rnd(470, 520), y: rnd(880, 905), vx: rnd(-8, 8), vy: rnd(-80, -40), life: 1.8, t: 0, kind: 'heart' }); }
 function tungLoc() {
   if (laOng()) { S.timBan = { text: '', t: 0, life: 5 }; S.obCall = (S.obCall || 0) + 3;
-    if (S.ob.ph !== 'ngoi') { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
+    if (S.chuyen) { wave(12); return; }
+    if (S.ob.ph !== 'ngoi') { if (S.ob.t < (S.ob.min || 0)) S.ob.cho = true; else { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } }
     wave(12); return; }
   const tim = GIA().tim || 'tien';
   if (tim === 'goiloc') { // Quan: thầy pháp tấu, quan phán, gọi từng người lên cho lộc (không tung, không ném)
@@ -578,6 +579,10 @@ window.__hdLenh = (d, c) => { try {
   const H = window.__hd; if (!H || !H.lenh) return true; const w = m[1].replace(/ /g, '');
   H.lenh({ ongbay: 'ong', ong: 'ong', codoi: 'co', co: 'co', thinh: 'thinh', moi: 'thinh', mua: 'mua', ngoi: 'loc', loc: 'loc', phatloc: 'loc', hoicung: 'hoicung', xeloan: 'hoicung' }[w] || w);
   return true; } catch (e) { return false; } };
+// nút điều khiển từ xa (trang dk.html trên điện thoại) qua kênh ntfy.sh miễn phí
+(function () { try { const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k';
+  let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) window.__hd.lenh(m); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
+  mo(); } catch (e) {} })();
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
 function drawCo(t) {
@@ -1316,6 +1321,7 @@ function drawParticles() {
 function panel(x, y, w, h) { rr(x, y, w, h, 10, 'rgba(30,8,6,.72)'); ctx.strokeStyle = 'rgba(230,181,82,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.stroke(); }
 function heartP(sz) { ctx.beginPath(); ctx.moveTo(0, sz * .45); ctx.bezierCurveTo(-sz * .98, -sz * .12, -sz * .48, -sz * .9, 0, -sz * .38); ctx.bezierCurveTo(sz * .48, -sz * .9, sz * .98, -sz * .12, 0, sz * .45); ctx.closePath(); }
 function drawLyCafe(t) {
+  if (S.chuyen) return; // đang hồi cung, thỉnh, thay khăn áo: chưa mời cà phê
   if (!ongNgoi()) { // ông đang múa hèo: chưa mời cà phê
     rr(8, 410, 150, 54, 10, 'rgba(30,8,6,.78)'); ctx.strokeStyle = 'rgba(230,181,82,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(8, 410, 150, 54, 10); ctx.stroke();
     text('☕ Chờ ông ngồi nghe văn', 83, 428, 10.5, '#fff', { w: 700 }); text('để mời ông cà phê', 83, 446, 10, '#f2cf72', { f: SERIF, w: 700 }); return; }
@@ -1490,6 +1496,7 @@ function update(dt) {
   S.particles.forEach(p => { p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; }); S.particles = S.particles.filter(p => p.t < p.life);
   S.floats.forEach(f => f.t += dt); S.floats = S.floats.filter(f => f.t < f.life);
   if (laOng()) { S.ob.t += dt; const dur = S.ob.ph === 'mua' ? 60 : 180;
+    if (S.ob.cho && S.ob.ph === 'mua' && S.ob.t >= (S.ob.min || 0) && !S.chuyen) { S.ob.cho = false; S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
     if (S.ob.t > dur && !S.loc && !S.dem && !CO.giving && !(S.obCall > 0) && (S.ob.ph === 'mua' || S.t - (S.ob.last || -1e9) > 30)) { S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: S.ob.ph === 'ngoi' ? 'Ông Bảy ngự nghe văn · dâng ông cà phê, thuốc lá' : 'Ông Bảy đứng lên múa hèo', t: 0, life: 4 }; }
     if (ongNgoi() && CO.sit > .9) { const sc = depthScale(CO.y) * 1.02;
       const ph = (S.t % 9) / 9; if (ph > .44 && ph < .62 && Math.random() < .5) S.particles.push({ x: CO.x + rnd(-6, 6), y: CO.y - 112 * sc, vx: rnd(-6, 6), vy: rnd(-28, -16), life: 2.4, t: 0, kind: 'smoke' }); // khói thuốc phả lên trước mặt
@@ -1669,7 +1676,7 @@ function updChuyenGia(dt) {
   if (!F.dung && t >= CG.dung[0]) { F.dung = true; GIA_DS.active = c.toId; luuGia(); c.look = null; wave(14); S.danceSpecial = 3; trongChau([0, .4, .8]);
     S.banner = { text: 'Giá ' + c.toTen + ' ngự đồng', t: 0, life: 4 };
     for (let i = 0; i < 40; i++) S.particles.push({ x: rnd(150, 390), y: rnd(300, 380), vx: rnd(-20, 20), vy: rnd(20, 60), life: rnd(2, 3.5), t: 0, kind: 'petal', c: pick(['#f6b6c8', '#ec8fae', '#fff0f4', '#f7d56a']) }); }
-  if (t >= CG.het) { S.chuyen = null; S.giaT = 0; S.ob = { ph: 'mua', t: 0 }; napNhacGia(); S.volTarget = .85; capNhatGiaInfo(); }
+  if (t >= CG.het) { S.chuyen = null; S.giaT = 0; S.ob = { ph: 'mua', t: 0, min: 20 }; /* lần múa đầu sau thay khăn áo: ít nhất 20 giây */ napNhacGia(); S.volTarget = .85; capNhatGiaInfo(); }
 }
 function veilState() { const c = S.chuyen; if (!c) return GIA().hang === 'mau' ? { a: 1, toss: 0 } : null; const t = c.t;
   if (c.to.hang === 'mau' && t >= CG.veil[0]) return { a: c.from.hang === 'mau' ? 1 : Math.min(1, prog(t, CG.veil)), toss: 0 };
