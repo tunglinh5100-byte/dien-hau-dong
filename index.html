@@ -1641,7 +1641,7 @@ function hoiCung() {
   trongChau([0, .45, .9, 1.25]);
   if (from.van) { S.volTarget = .12; setTimeout(() => phatVan(from.van.se - .3, from.van.het + .4), 2600); }
 }
-async function nhacSrc(g) { const blob = g.coNhac ? await docNhac(g.id) : null; return blob ? URL.createObjectURL(blob) : g.id === 'ongbay' ? ONG_HEO_SRC : (g.nhacSan === 'bo' ? BO_MUSIC_SRC : MUSIC_SRC); }
+async function nhacSrc(g) { const blob = g.coNhac ? await docNhac(g.id) : null; return blob ? URL.createObjectURL(blob) : g.id === 'ongbay' ? ONG_VAN_SRC : (g.nhacSan === 'bo' ? BO_MUSIC_SRC : MUSIC_SRC); }
 const between = (t, [a, b]) => t >= a && t < b, prog = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1);
 function updChuyenGia(dt) {
   if (!S.chuyen) { S.giaT += dt; if (S.tuChuyen && S.giaT >= giaDur()) hoiCung(); CO.sit = GIA().hang === 'mau' ? 1 : ongNgoi() && Math.hypot(CO.x - CARPET.cx, CO.y - (CARPET.cy - 4)) < 3 ? Math.min(1, CO.sit + dt * 1.2) : Math.max(0, CO.sit - dt * 1.2); return; }
