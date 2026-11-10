@@ -2016,7 +2016,7 @@ const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55, T: 26, on: true }; window.__c
 // Bật/tắt: nút trên trang điều khiển, trang dk.html (từ xa), cam.json "dd": true/false, hoặc thêm ?dd=0 vào link
 const DD = { on: true, z: 1, fx: 270, fy: 480, cx: 270, cy: 480, tz: 1, tfx: 270, tfy: 480, k: 1.2, shot: 'rong', t: 0, i: 0, evt: null, dur: 8, sweep: 0, who: null };
 try { const q = new URLSearchParams(location.search).get('dd'); const ls = localStorage.getItem('hd_dd'); DD.on = q === '0' ? false : q === '1' ? true : ls === '0' ? false : true; } catch (e) {}
-function ddSet(on) { DD.on = !!on; try { localStorage.setItem('hd_dd', DD.on ? '1' : '0'); } catch (e) {} const b = document.getElementById('bDD'); if (b) { b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; } S.banner = { text: DD.on ? '🎥 Góc máy tự động: bật' : '🎥 Góc máy tự động: tắt', t: 0, life: 2.2 }; }
+function ddSet(on) { DD.on = !!on; CAM.tat = !DD.on; try { localStorage.setItem('hd_dd', DD.on ? '1' : '0'); } catch (e) {} const b = document.getElementById('bDD'); if (b) { b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; } S.banner = { text: DD.on ? '🎥 Góc máy: bật (zoom và lia)' : '🎥 Góc máy: tắt (khung đứng yên)', t: 0, life: 2.5 }; }
 const DD_LICH = ['rong', 'co', 'thap', 'rong', 'can', 'cau', 'co', 'thap'];
 const DD_DUR = { rong: 8, co: 7, thap: 9, can: 5.5, cau: 7, loc: 6 };
 function ddNguoi() { const ds = S.people.filter(p => p.state === 'seat' && !String(p.name).startsWith('​')); if (!ds.length) return null; const that = ds.filter(p => LVK[p.name]); return pick(that.length ? that : ds); }
@@ -2045,7 +2045,8 @@ window.__hdDD = ddSet;
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
-  if (!CAM_ON || !CAM.on) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
+  if (CAM.tat === undefined) CAM.tat = !DD.on;
+  if (!CAM_ON || !CAM.on || CAM.tat) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
   const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
   CAM.P = CAM.A * (2 * v - 1);
