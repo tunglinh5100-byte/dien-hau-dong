@@ -628,7 +628,7 @@ window.__hdLenh = (d, c) => { try {
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
 // ---------- Ông Hoàng Bảy bằng video thật (tách nền xanh): múa hèo, ngồi xuống, hút thuốc, uống cà phê, ban lộc, đứng dậy ----------
-const OB = { v: {}, buf: null, cur: null, ok: false, lastT: -1, idle: 0, lastG: null, st: 0, intro: false, exit: false, hold: false, exitTo: null };
+const OB = { v: {}, buf: null, cur: null, ok: false, lastT: -1, idle: 0, lastG: null, st: 0, intro: true, /* mở trang ở giá Ông: bắt đầu từ thỉnh */ exit: false, hold: false, exitTo: null };
 (function obInit() {
   if (/[?&]ob=0/.test(location.search)) return;
   OB.buf = document.createElement('canvas'); OB.buf.width = CV_W; OB.buf.height = CV_H;
