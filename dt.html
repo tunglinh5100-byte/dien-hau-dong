@@ -637,7 +637,7 @@ const OB = { v: {}, buf: null, cur: null, ok: false, lastT: -1, idle: 0, lastG: 
   ['mua', 'ngoi', 'dung', 'thuoc', 'cafe', 'loc', 'ruou'].forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = n === 'mua'; v.preload = 'auto';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'ob-' + n + '.mp4?v=1'; CV_HOLD.appendChild(v); OB.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'ob-' + n + '.mp4?v=2'; CV_HOLD.appendChild(v); OB.v[n] = v; });
 })();
 function obPlay(n) { if (!OB.v[n] || OB.cur === n) return; const old = OB.v[OB.cur]; if (old) try { old.pause(); } catch (e) {} OB.cur = n; OB.st = 0; const v = OB.v[n]; try { v.currentTime = 0; } catch (e) {} cvPlay(v); }
 function obIdle() { OB.idle = (OB.idle + 1) % 3; return OB.idle === 1 ? 'cafe' : 'thuoc'; }
