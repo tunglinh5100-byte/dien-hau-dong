@@ -196,7 +196,7 @@ function tungLoc() {
   if (S.chuyen) { wave(12); return; } // đang xe giá, thỉnh, thay khăn áo: chưa ban lộc
   if (laOng()) { S.timBan = { text: '', t: 0, life: 5 }; S.obCall = (S.obCall || 0) + 3;
     if (S.chuyen) { wave(12); return; }
-    if (S.ob.ph !== 'ngoi') { if (S.ob.t < (S.ob.min || 0)) S.ob.cho = true; else { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } }
+    if (S.ob.ph !== 'ngoi' && !giuMuaOng()) { if (S.ob.t < (S.ob.min || 0)) S.ob.cho = true; else { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } }
     wave(12); return; }
   const tim = GIA().tim || 'tien';
   if (tim === 'goiloc') { // Quan: thầy pháp tấu, quan phán, gọi từng người lên cho lộc (không tung, không ném)
@@ -656,7 +656,7 @@ function obStep(dt) {
   else if (!sit && OB.cur !== 'mua' && OB.cur !== 'dung' && OB.cur !== 'tauhuong') obPlay('dung');
   if (!OB.intro && !OB.exit && sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay(Math.random() < .5 ? 'loc' : 'ruou'); }
   if (OB.cur && OB.cur !== 'mua') { const sx = CARPET.cx, sy = CARPET.cy - 4, k = Math.min(1, dt * 5); CO.x += (sx - CO.x) * k; CO.y += (sy - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; } // ngồi, đứng dậy, thỉnh, xe giá: giữ ông tại chiếu, không trôi theo đường múa
-  if (OB.intro && S.ob) { if (S.ob.ph !== 'mua') S.ob.ph = 'mua'; S.ob.t = 0; }
+  if ((OB.intro || OB.tau) && S.ob) { if (S.ob.ph !== 'mua') S.ob.ph = 'mua'; S.ob.t = 0; S.ob.cho = false; } // thỉnh, thay áo, tấu hương, khai quang: chưa ngồi
   else if (S.ob && S.ob.ph === 'mua' && !OB.exit && /nhac-ong-(heo|tau)/.test(bgm.src) && bgm.duration && !bgm.paused && bgm.currentTime >= bgm.duration - .35) { S.ob.ph = 'ngoi'; S.ob.t = 0; S.ob.cho = false; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } // hết đoạn nhạc múa hèo thì ông ngồi nghe văn // đang thỉnh, thay áo: không tự chuyển sang ngồi nghe văn
   if (OB.cur === 'thayao') { const tv = OB.v.thayao; if (tv && tv.playbackRate !== .6) tv.playbackRate = .6; }
   if (OB.cur === 'tauhuong' && !OB.exit) { const tv = OB.v.tauhuong; if (OB.tauNhac && !bgm.paused && /nhac-ong-tau/.test(bgm.src) && tv && tv.readyState >= 1) { const at = bgm.currentTime; if (at >= 119.9) obTauXong(); else { const m = tauMap(at), c = tv.currentTime; if (c < m[1] - .02 || c > m[2] - .03 || Math.abs(c - m[0]) > .3) try { tv.currentTime = m[0]; } catch (e) {} if (at >= 99 && !OB.kqBan) { OB.kqBan = true; S.banner = { text: 'Ông Hoàng Bảy khai quang', t: 0, life: 4 }; } } } } // hình chạy theo nhạc: tấu hương, khai quang, rồi múa hèo đúng phút 2:00
@@ -1727,8 +1727,8 @@ function update(dt) {
   if (!laOng() && !S.chuyen && GIA().hang !== 'mau') { S.coT = (S.coT || 0) + dt; // cô: múa → văn phát lộc → múa … tự chạy tuần tự, trừ xe giá
     if (!S.phaLoc && S.coT > 60 && !S.loc && !CO.giving) { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · ' + (GIA().id === 'cobo' ? 'Cô Bơ' : 'Cô Đôi') + ' tung lộc cho con nhang', t: 0, life: 5 }; }
     else if (S.phaLoc && S.coT > 50 && !S.loc && !CO.giving) { S.phaLoc = false; S.coT = 0; S.banner = { text: (GIA().id === 'cobo' ? 'Cô Bơ múa chèo' : 'Cô Đôi múa quạt'), t: 0, life: 4 }; } }
-  if (laOng() && !S.chuyen) { S.ob.t += dt; const dur = S.ob.ph === 'mua' ? OB_HEO_DUR : 180;
-    if (S.ob.cho && S.ob.ph === 'mua' && S.ob.t >= (S.ob.min || 0) && !S.chuyen) { S.ob.cho = false; S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
+  if (laOng() && !S.chuyen) { S.ob.t += dt; const dur = S.ob.ph === 'mua' ? (giuMuaOng() ? 1e9 : OB_HEO_DUR) : 180; /* có video: múa đến hết nhạc mới ngồi */
+    if (S.ob.cho && S.ob.ph === 'mua' && S.ob.t >= (S.ob.min || 0) && !S.chuyen && !giuMuaOng()) { S.ob.cho = false; S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
     if (S.ob.t > dur && S.ob.ph === 'mua' && !S.chuyen && !S.loc && !S.dem && !CO.giving && !(S.obCall > 0)) { /* ông đã ngồi nghe văn thì ngồi luôn đến lúc xe giá */ S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: S.ob.ph === 'ngoi' ? 'Ông Bảy ngự nghe văn · dâng ông cà phê, thuốc lá' : 'Ông Bảy đứng lên múa hèo', t: 0, life: 4 }; }
     if (ongNgoi() && CO.sit > .9) { const sc = depthScale(CO.y) * 1.02;
       const ph = (S.t % 9) / 9; if (ph > .44 && ph < .62 && Math.random() < .5) S.particles.push({ x: CO.x + rnd(-6, 6), y: CO.y - 112 * sc, vx: rnd(-6, 6), vy: rnd(-28, -16), life: 2.4, t: 0, kind: 'smoke' }); // khói thuốc phả lên trước mặt
@@ -1985,6 +1985,7 @@ function swayAmt() { const c = S.chuyen; if (!c) return 0; const t = c.t; if (t 
    Cô Đôi : thỉnh = văn thỉnh 3 lượt (KHÔNG nhạc) → thay khăn áo, đứng dậy, múa, ban lộc = nhạc Cô → xe giá = văn xe giá (KHÔNG nhạc)
    Ông Bảy: thỉnh = văn thỉnh 3 lượt → thay khăn áo = văn "Hội thánh hát" → đứng dậy (lặng) → tấu hương 0:00, khai quang 1:39, múa hèo 2:00 = nhac-ong-tau
             → hết nhạc: ngồi nghe văn, ban lộc = van-ong-bay (đến xe giá) → xe giá = văn xe giá (KHÔNG nhạc) */
+function giuMuaOng() { return typeof OB !== 'undefined' && !!OB.buf && laOng() && (OB.intro || OB.tau || (S.ob && S.ob.ph === 'mua' && /nhac-ong-tau/.test(String(bgm.src)))); } // Ông đang lễ hoặc đang múa theo nhạc tấu hương: con nhang tặng quà cũng chưa ngồi, hết nhạc mới ngồi ban lộc
 function nhacPhai() { // true: phải có nhạc giá; false: phải im; null: để nguyên (lễ vẽ cũ ?le=1)
   if (!S.sound || S.cat) return false;
   if (S.chuyen) return null;
@@ -2221,7 +2222,7 @@ function lenhPha(w) { if (window.KHOA_GIA && /^(ong|co|bo|thinh|hoicung)$/.test(
     S.phaLoc = false; S.coT = 0; if (laOng() && S.ob.ph !== 'mua') { S.ob.ph = 'mua'; S.ob.t = 0; chuyenNhacOng(); }
     S.banner = { text: laOng() ? 'Ông Bảy đứng lên múa hèo' : (GIA().id === 'cobo' ? 'Cô Bơ múa chèo' : 'Cô Đôi múa quạt'), t: 0, life: 4 }; capNhatGiaInfo(); return; }
   if (w === 'loc') { if (c) return;
-    if (laOng()) { if (S.ob.ph !== 'ngoi') { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); } S.obCall = (S.obCall || 0) + 3; S.banner = { text: 'Ông Bảy ngự · hút thuốc, uống cà phê · gọi con nhang lên nhận lộc', t: 0, life: 5 }; }
+    if (laOng()) { if (S.ob.ph !== 'ngoi' && !(typeof OB !== 'undefined' && OB.buf && (OB.intro || OB.tau))) { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); } S.obCall = (S.obCall || 0) + 3; S.banner = { text: 'Ông Bảy ngự · hút thuốc, uống cà phê · gọi con nhang lên nhận lộc', t: 0, life: 5 }; }
     else { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · ' + (GIA().id === 'cobo' ? 'Cô Bơ' : 'Cô Đôi') + ' tung lộc cho con nhang', t: 0, life: 5 }; if (!S.loc && !CO.giving) tungLoc(); else S.locQ = true; }
     wave(12); capNhatGiaInfo(); } }
 function doiGia(id) { if (GIA_DS.active === id) return; GIA_DS.active = id; S.ob = { ph: 'mua', t: 0 }; S.ccOverride = null; S.poll = null; luuGia(); napNhacGia(); S.loc = null; S.banner = { text: 'Giá ' + GIA().ten + ' ngự đồng', t: 0, life: 4 }; wave(10); capNhatGiaInfo(); const cs = document.getElementById('cfg'); if (cs && !cs.hidden) { cs.hidden = true; } }
