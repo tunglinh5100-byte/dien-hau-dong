@@ -634,7 +634,7 @@ const OB = { v: {}, buf: null, cur: null, ok: false, lastT: -1, idle: 0, lastG: 
 (function obInit() {
   if (/[?&]ob=0/.test(location.search)) return;
   OB.buf = document.createElement('canvas'); OB.buf.width = CV_W; OB.buf.height = CV_H;
-  ['mua', 'ngoi', 'dung', 'thuoc', 'cafe', 'loc'].forEach(n => { const v = document.createElement('video');
+  ['mua', 'ngoi', 'dung', 'thuoc', 'cafe', 'loc', 'ruou'].forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = n === 'mua'; v.preload = 'auto';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
     v.style.cssText = 'width:2px;height:4px'; v.src = 'ob-' + n + '.mp4?v=1'; CV_HOLD.appendChild(v); OB.v[n] = v; });
@@ -649,7 +649,7 @@ function obStep(dt) {
   else if (sit && OB.cur === 'mua') obPlay('ngoi');
   else if (sit && OB.cur === 'dung') obPlay('ngoi');
   else if (!sit && OB.cur !== 'mua' && OB.cur !== 'dung') obPlay('dung');
-  if (sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay('loc'); }
+  if (sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay(Math.random() < .5 ? 'loc' : 'ruou'); }
   const v = OB.v[OB.cur]; OB.st += dt;
   if (v && !v.loop && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || OB.st > 14)) { if (OB.cur === 'dung') obPlay('mua'); else obPlay(obIdle()); }
   const w = OB.v[OB.cur]; if (w && w.paused && OB.st > .3) cvPlay(w);
