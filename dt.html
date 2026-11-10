@@ -1139,7 +1139,7 @@ async function docNhac(id) { try { const db = await idb(); return await new Prom
 // nhạc văn Ông Hoàng Bảy (anh Linh quay): múa hèo / ngồi nghe văn, đã ghép mượt và lặp liền
 const ONG_HEO_SRC = 'nhac-ong-heo.mp3?v=1'; const OB_HEO_DUR = 29.5; /* nhạc múa hèo anh gửi (29 giây): múa hết đoạn nhạc thì ông ngồi nghe văn */
 const ONG_VAN_SRC = 'van-ong-bay.mp3'; // văn Quan Hoàng Bảy anh gửi, file đi kèm trang
-function chuyenNhacOng() { if (S.chuyen) return; /* đang hồi cung/thỉnh: nhạc do trình tự chuyển giá quyết định */ S.volTarget = 0; clearTimeout(S.nhacT); S.nhacT = setTimeout(() => { if (S.chuyen) return; napNhacGia(); S.volTarget = .85; }, 1900); }
+function chuyenNhacOng() { if (S.chuyen) return; /* đang hồi cung/thỉnh: nhạc do trình tự chuyển giá quyết định */ S.volTarget = 0; clearTimeout(S.nhacT); S.nhacT = setTimeout(() => { if (S.chuyen) return; if (nhacDungGia()) { S.volTarget = .85; return; } napNhacGia(); S.volTarget = .85; }, 1900); }
 async function napNhacGia() {
   if (typeof S !== 'undefined' && S.chuyen) return;
   const g = GIA(); const blob = g.coNhac ? await docNhac(g.id) : null;
@@ -1971,6 +1971,26 @@ function veilState() { const c = S.chuyen; if (!c) return GIA().hang === 'mau' ?
   return { a: 1, toss: prog(t, CG.toss) }; }
 function veilAlpha() { const v = veilState(); return v ? v.a * (1 - v.toss) : 0; }
 function swayAmt() { const c = S.chuyen; if (!c) return 0; const t = c.t; if (t < CG.veil[0]) return 0; if (t < CG.toss[1]) return 1; if (t < CG.helpOut[1]) return .35; return 0; }
+/* ---------- Bảng nhạc: mỗi giai đoạn phát đúng một thứ. iPhone không cho trang chỉnh âm lượng, nên chỗ nào không có nhạc thì DỪNG hẳn, không hạ nhỏ ----------
+   Cô Đôi : thỉnh = văn thỉnh 3 lượt (KHÔNG nhạc) → thay khăn áo, đứng dậy, múa, ban lộc = nhạc Cô → xe giá = văn xe giá (KHÔNG nhạc)
+   Ông Bảy: thỉnh = văn thỉnh 3 lượt → thay khăn áo = văn "Hội thánh hát" → đứng dậy (lặng) → tấu hương 0:00, khai quang 1:39, múa hèo 2:00 = nhac-ong-tau
+            → hết nhạc: ngồi nghe văn, ban lộc = van-ong-bay (đến xe giá) → xe giá = văn xe giá (KHÔNG nhạc) */
+function nhacPhai() { // true: phải có nhạc giá; false: phải im; null: để nguyên (lễ vẽ cũ ?le=1)
+  if (!S.sound || S.cat) return false;
+  if (S.chuyen) return null;
+  const id = GIA().id;
+  if (id === 'codoi' && typeof OC !== 'undefined' && OC.buf) { if (OC.exit || OC.hold) return false; if (OC.intro && !OC.vanXong) return false; }
+  if (id === 'ongbay' && typeof OB !== 'undefined' && OB.buf) { if (OB.intro || OB.exit || OB.hold) return false; if (OB.tau && OB.cur !== 'tauhuong') return false; }
+  return true;
+}
+function nhacDungGia() { const src = String(bgm.src), ong = /nhac-ong|van-ong/.test(src); if (/^blob:/.test(src)) return true; if (GIA().id !== 'ongbay') return !ong; return S.ob && S.ob.ph === 'ngoi' ? /van-ong/.test(src) : /nhac-ong/.test(src); } // Ông: đứng múa = nhạc múa, ngồi = văn nghe
+let NHAC_T = 0;
+function quanNhac(dt) {
+  const k = nhacPhai(); if (k === null) return;
+  if (!k) { if (!bgm.paused) try { bgm.pause(); } catch (e) {} }
+  else { NHAC_T -= dt; if (!nhacDungGia()) { if (!bgm.paused) try { bgm.pause(); } catch (e) {} if (NHAC_T <= 0) { NHAC_T = .6; napNhacGia(); } } else if (bgm.paused && NHAC_T <= 0) { NHAC_T = 1.5; musStart(); } }
+  const ao = laOng() && typeof OB !== 'undefined' && OB.van2 && !OB.van2Xong && !OB.exit; if (!ao && !VAN_OB_AO.paused) try { VAN_OB_AO.pause(); } catch (e) {} // văn thay áo của Ông chỉ phát lúc Ông thay áo
+}
 function updVolume(dt) { if (!bgm) return; const v = bgm.volume + (S.volTarget - bgm.volume) * Math.min(1, dt * .9); try { bgm.volume = clamp(v, 0, 1); } catch (e) {} }
 // lời văn: chữ hiện dần, "giá" và "hồi cung" ngân, luyến láy (chữ lượn sóng, kéo dài nét ngân)
 function drawLoiVan(t) {
@@ -2054,7 +2074,7 @@ function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung khôn
 // dự phòng: nếu trình duyệt trong LIVE Studio ngừng gọi requestAnimationFrame thì tự vẽ bằng hẹn giờ
 setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRun = n; try { frame1(n); } catch (e) { last = n; } } }, 50);
 function frame1(now) {
-  const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); const t = S.t;
+  const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); quanNhac(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
   camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
   if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
@@ -2112,7 +2132,7 @@ function ddUpd(dt) {
 window.__hdDD = ddSet;
 // trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
 (function amMoKhoa() {
-  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { musStart(); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
+  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { [[bgm, () => !nhacPhai()], [VAN_AU, () => !VAN_STOP], [VAN_OB_AO, () => !(OB.van2 && !OB.van2Xong)]].forEach(([a, im]) => { if (a.dataset.moi || !a.paused || !im()) return; a.dataset.moi = '1'; const m = a.muted; a.muted = true; try { const p = a.play(); if (p && p.then) p.then(() => { if (im()) a.pause(); a.muted = m; }).catch(() => { a.muted = m; delete a.dataset.moi; }); } catch (e) { a.muted = m; } }); if (nhacPhai()) setTimeout(musStart, 60); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, mo, { passive: true }));
   setInterval(() => { const chan = S.sound && bgm.paused && VAN_AU.paused && !nghiLe(); if (chan) { if (!S.banner || !/Bấm chuột/.test(S.banner.text)) S.banner = { text: '🔇 Bấm chuột 1 lần vào màn hình để bật âm thanh', t: 0, life: 2.6 }; } }, 2500);
 })();
