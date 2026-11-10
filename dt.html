@@ -675,7 +675,7 @@ function obStep(dt) {
 // cỡ và vị trí từng clip khác nhau (Gemini quay xa gần khác nhau): quy về cùng một khung theo chiếc đệm
 const OB_TF = {"mua": [1, 0, 0], "thuoc": [1, 0, 0], "cafe": [1.0177, -2.21, 2.07], "loc": [1.0849, -12.95, -35.63], "ruou": [0.95, 11.03, -12.2], "thinh": [1.0423, -6.68, -8.6], "thayao": [1.1695, -32.69, -67.88], "xegia": [1.1238, -23.71, -61.93]}, OB_NG = [[1.0151, -2.94, -9.21], [1.05, -20.9, 20.25]];
 function obTf() { const n = OB.shown || OB.cur; if (n === 'ngoi' || n === 'dung') { const v = OB.v[n]; let p = v && v.duration ? clamp(v.currentTime / v.duration, 0, 1) : 0; if (n === 'dung') p = 1 - p; const e = p * p * (3 - 2 * p), a = OB_NG[0], b = OB_NG[1]; return [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]; } return OB_TF[n] || [1, 0, 0]; }
-function nghiLe() { return (typeof OB !== 'undefined' && (OB.intro && OB.cur || OB.exit || OB.hold)) || (typeof OC !== 'undefined' && (OC.intro && OC.cur || OC.exit || OC.hold)) || !!S.cat; }
+function nghiLe() { return (typeof OB !== 'undefined' && OB.buf && laOng() && (OB.intro || OB.exit || OB.hold)) || (typeof OC !== 'undefined' && OC.buf && GIA().id === 'codoi' && (OC.intro || OC.exit || OC.hold)) || !!S.cat; }
 const VAN_OB_AO = new Audio('van-ong-thayao.mp3?v=1'); VAN_OB_AO.preload = 'auto';
 function obVanAo() { // văn "Hội thánh hát" lúc hầu dâng thay khăn áo cho Ông, hết văn mới múa hèo
   if (OB.van2) return; OB.van2 = true; OB.van2Xong = false; S.volTarget = 0;
@@ -1125,7 +1125,7 @@ function idb() { return new Promise((ok, no) => { try { const r = indexedDB.open
 async function luuNhac(id, file) { const db = await idb(); return new Promise(ok => { const tx = db.transaction('nhac', 'readwrite'); tx.objectStore('nhac').put(file, id); tx.oncomplete = ok; }); }
 async function docNhac(id) { try { const db = await idb(); return await new Promise(ok => { const q = db.transaction('nhac').objectStore('nhac').get(id); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); }); } catch (e) { return null; } }
 // nhạc văn Ông Hoàng Bảy (anh Linh quay): múa hèo / ngồi nghe văn, đã ghép mượt và lặp liền
-const ONG_HEO_SRC = 'nhac-ong-heo.mp3?v=1'; const OB_HEO_DUR = 29.5; // nhạc múa hèo anh gửi (29 giây): múa hết đoạn nhạc thì ông ngồi nghe văn
+const ONG_HEO_SRC = 'nhac-ong-heo.mp3?v=1'; const OB_HEO_DUR = 29.5; /* nhạc múa hèo anh gửi (29 giây): múa hết đoạn nhạc thì ông ngồi nghe văn */
 const ONG_VAN_SRC = 'van-ong-bay.mp3'; // văn Quan Hoàng Bảy anh gửi, file đi kèm trang
 function chuyenNhacOng() { if (S.chuyen) return; /* đang hồi cung/thỉnh: nhạc do trình tự chuyển giá quyết định */ S.volTarget = 0; clearTimeout(S.nhacT); S.nhacT = setTimeout(() => { if (S.chuyen) return; napNhacGia(); S.volTarget = .85; }, 1900); }
 async function napNhacGia() {
@@ -1719,7 +1719,7 @@ function update(dt) {
     else if (S.phaLoc && S.coT > 50 && !S.loc && !CO.giving) { S.phaLoc = false; S.coT = 0; S.banner = { text: (GIA().id === 'cobo' ? 'Cô Bơ múa chèo' : 'Cô Đôi múa quạt'), t: 0, life: 4 }; } }
   if (laOng() && !S.chuyen) { S.ob.t += dt; const dur = S.ob.ph === 'mua' ? OB_HEO_DUR : 180;
     if (S.ob.cho && S.ob.ph === 'mua' && S.ob.t >= (S.ob.min || 0) && !S.chuyen) { S.ob.cho = false; S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; }
-    if (S.ob.t > dur && S.ob.ph === 'mua' && !S.chuyen && !S.loc && !S.dem && !CO.giving && !(S.obCall > 0)) { // ông đã ngồi nghe văn thì ngồi luôn đến lúc xe giá S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: S.ob.ph === 'ngoi' ? 'Ông Bảy ngự nghe văn · dâng ông cà phê, thuốc lá' : 'Ông Bảy đứng lên múa hèo', t: 0, life: 4 }; }
+    if (S.ob.t > dur && S.ob.ph === 'mua' && !S.chuyen && !S.loc && !S.dem && !CO.giving && !(S.obCall > 0)) { /* ông đã ngồi nghe văn thì ngồi luôn đến lúc xe giá */ S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); S.banner = { text: S.ob.ph === 'ngoi' ? 'Ông Bảy ngự nghe văn · dâng ông cà phê, thuốc lá' : 'Ông Bảy đứng lên múa hèo', t: 0, life: 4 }; }
     if (ongNgoi() && CO.sit > .9) { const sc = depthScale(CO.y) * 1.02;
       const ph = (S.t % 9) / 9; if (ph > .44 && ph < .62 && Math.random() < .5) S.particles.push({ x: CO.x + rnd(-6, 6), y: CO.y - 112 * sc, vx: rnd(-6, 6), vy: rnd(-28, -16), life: 2.4, t: 0, kind: 'smoke' }); // khói thuốc phả lên trước mặt
       if (Math.random() < .05) S.particles.push({ x: CO.x + 24 * sc + rnd(-2, 2), y: CO.y - 22, vx: rnd(-3, 3), vy: rnd(-16, -9), life: 1.3, t: 0, kind: 'smoke' }); } }
