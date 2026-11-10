@@ -23,7 +23,16 @@ window.BANG_TIN = {
     'Ngày giỗ chính của Ông là 17 tháng 7 âm lịch. Lễ hội đền Bảo Hà được công nhận là Di sản văn hóa phi vật thể cấp quốc gia năm 2016',
     'Đền Bảo Hà ở xã Bảo Hà, tỉnh Lào Cai, là Di tích lịch sử - văn hóa cấp quốc gia',
   ],
-  // Cô Đôi, Cô Bơ: chưa tìm được bài Nhân Dân đọc được nên tạm để trống, bảng sẽ hiện mục "chung"
-  codoi: [],
+  // Cô Đôi: theo bài "Lan tỏa văn hóa tín ngưỡng thờ Mẫu qua du lịch Việt Nam" - nhandan.vn/lan-toa-ve-dep-van-hoa-tin-nguong-tho-mau-qua-du-lich-post907068.html
+  // và "Tân Nhàn mang nghệ thuật truyền thống đến gần khán giả" - nhandan.vn/tan-nhan-mang-nghe-thuat-truyen-thong-den-gan-khan-gia-post344169.html
+  codoi: [
+    'Cô Đôi Thượng Ngàn là một giá hầu trong nghi lễ hầu đồng của tín ngưỡng thờ Mẫu',
+    'Giá văn Cô Đôi Thượng Ngàn có lời cổ, thuộc những giá hầu văn nổi tiếng',
+    'Các vị Thánh thuộc hệ thống Tứ phủ, trong đó Mẫu Liễu Hạnh ở vị trí trung tâm. Nghi lễ hầu đồng có các giá hầu nam thần và nữ thần',
+    'Âm nhạc chầu văn là phần cốt lõi của nghi lễ hầu đồng',
+    'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
+    'Tín ngưỡng thờ Mẫu Tam phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
+  ],
+  // Cô Bơ: chưa tìm được bài Nhân Dân nên để trống, bảng sẽ hiện mục "chung"
   cobo: [],
 };
