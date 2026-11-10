@@ -1193,7 +1193,7 @@ function noiKhen(name, cau) {
   if (!NOI_BAT || typeof speechSynthesis === 'undefined') return; const ten = tenDoc(name); if (!ten) return;
   try { if (speechSynthesis.speaking || speechSynthesis.pending) return;
     const u = new SpeechSynthesisUtterance((cau || 'Ta ban khen cho [tên]').replace('[tên]', ten)); u.lang = 'vi-VN'; if (VI_VOICE) u.voice = VI_VOICE;
-    const muonNam = GIA().giong === 'nam', v = muonNam ? (VI_NAM || VI_NU) : (VI_NU || VI_NAM); if (v) u.voice = v; const vNam = v && LA_NAM(v);
+    const muonNam = GIA().giong === 'nam', v = muonNam ? (VI_NAM || VI_NU) : (VI_NU || VI_NAM); if (!v) { if (!window.__khongGiongVi) { window.__khongGiongVi = 1; S.banner = { text: 'Máy chưa có giọng đọc tiếng Việt, tạm không đọc ban khen', t: 0, life: 5 }; } return; } u.voice = v; const vNam = v && LA_NAM(v);
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
