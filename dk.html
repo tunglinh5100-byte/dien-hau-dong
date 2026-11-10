@@ -22,7 +22,8 @@ button:active{transform:translateY(2px)}
 <div class="row" style="margin-top:12px"><button class="am" data-l="ambat">🔊 Bật âm thanh</button><button class="am tat" data-l="amtat">🔇 Tắt âm thanh</button></div>
 <div id="st"></div>
 <script>
-const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k', st = document.getElementById('st');
+const Q = new URLSearchParams(location.search), GK = Q.get('gia'), tp = Q.get('dk') || ('dienhau-linhxo-7q4k' + (GK ? '-' + GK : '')), st = document.getElementById('st');
+if (GK) { document.querySelector('h1').textContent = 'Điều khiển giá ' + ({ codoi: 'Cô Đôi', ongbay: 'Ông Hoàng Bảy' }[GK] || GK); document.querySelectorAll('[data-l="hoicung"],[data-l="ong"],[data-l="co"]').forEach(b => { b.style.display = 'none'; }); }
 const TEN = { hoicung: 'Xe loan thánh giá', ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', bo: 'Thỉnh Cô Bơ', mua: 'Múa', loc: 'Phát lộc', ambat: 'Bật âm thanh', amtat: 'Tắt âm thanh', ddbat: 'Bật góc máy tự động', ddtat: 'Tắt góc máy tự động' };
 document.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', async () => {
   const l = b.dataset.l; st.textContent = 'Đang gửi: ' + TEN[l] + '…'; if (navigator.vibrate) navigator.vibrate(30);

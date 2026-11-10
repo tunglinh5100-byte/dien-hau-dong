@@ -622,7 +622,7 @@ window.__hdLenh = (d, c) => { try {
   H.lenh({ ongbay: 'ong', ong: 'ong', codoi: 'co', co: 'co', cobo: 'bo', bo: 'bo', thinh: 'thinh', moi: 'thinh', mua: 'mua', ngoi: 'loc', loc: 'loc', phatloc: 'loc', hoicung: 'hoicung', xeloan: 'hoicung' }[w] || w);
   return true; } catch (e) { return false; } };
 // nút điều khiển từ xa (trang dk.html trên điện thoại) qua kênh ntfy.sh miễn phí
-(function () { try { const tp = new URLSearchParams(location.search).get('dk') || 'dienhau-linhxo-7q4k';
+(function () { try { const tp = new URLSearchParams(location.search).get('dk') || ('dienhau-linhxo-7q4k' + (window.KHOA_GIA ? '-' + window.KHOA_GIA : ''));
   let es = null; const mo = () => { try { es = new EventSource('https://ntfy.sh/' + tp + '/sse'); es.onmessage = (e) => { try { const d = JSON.parse(e.data), m = String(d.message || '').trim(); if (/^(hoicung|ong|co|bo|thinh|mua|loc)$/.test(m) && window.__hd && window.__hd.lenh) { window.__hdNhan = m; window.__hd.lenh(m); } else if ((m === 'amtat' || m === 'ambat') && window.__hd && window.__hd.am) window.__hd.am(m === 'ambat'); else if ((m === 'ddbat' || m === 'ddtat') && window.__hdDD) window.__hdDD(m === 'ddbat'); } catch (_) {} }; es.onerror = () => { try { es.close(); } catch (_) {} setTimeout(mo, 5000); }; } catch (_) {} };
   mo(); } catch (e) {} })();
 
@@ -1051,7 +1051,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
   const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' })]; // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
   const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
-  GIA_DS = { active: ds.some(g => g.id === qg) ? qg : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; }
+  GIA_DS = { active: ds.some(g => g.id === qg) ? qg : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; window.KHOA_GIA = ds.some(g => g.id === qg) ? qg : null; } // ?gia=...: máy này chỉ live đúng giá đó, không chuyển giá
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
 const VAN_AU = new Audio('van36.mp3'); VAN_AU.preload = 'auto'; let VAN_STOP = 0, VAN_DONE = null;
 VAN_AU.addEventListener('timeupdate', () => { if (VAN_STOP && VAN_AU.currentTime >= VAN_STOP) { VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); } });
@@ -2106,7 +2106,7 @@ function drawCat() { const c = S.cat; if (!c) return; const now = S.t, dt = clam
   ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#120403'; ctx.fillRect(0, 0, W, H);
   text(c.t < 1.4 ? 'Xe loan thánh giá' : 'Thỉnh giá ' + c.ten, 270, 440, 22, '#f6dc96', { f: SERIF, w: 800 });
   text(c.t < 1.4 ? 'giá trước hồi cung' : 'ngự đồng', 270, 476, 15, '#e8d6b8', { f: SERIF, w: 700 }); ctx.restore(); }
-function lenhPha(w) { const c = S.chuyen; if (window.__hdNhan) { window.__hdNhan = null; S.banner = { text: '📲 Nhận lệnh: ' + ({ ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', hoicung: 'Xe loan', mua: 'Múa', loc: 'Phát lộc', thinh: 'Thỉnh' }[w] || w), t: 0, life: 3 }; }
+function lenhPha(w) { if (window.KHOA_GIA && /^(ong|co|bo|thinh|hoicung)$/.test(w)) { S.banner = { text: 'Máy này chỉ live giá ' + GIA().ten, t: 0, life: 3 }; return; } const c = S.chuyen; if (window.__hdNhan) { window.__hdNhan = null; S.banner = { text: '📲 Nhận lệnh: ' + ({ ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', hoicung: 'Xe loan', mua: 'Múa', loc: 'Phát lộc', thinh: 'Thỉnh' }[w] || w), t: 0, life: 3 }; }
   if (NHANH && (w === 'ong' || w === 'co' || w === 'hoicung') && !c) { if (S.cat || OB.exit) { S.banner = { text: 'Đang chuyển giá, chờ một chút', t: 0, life: 3 }; return; } if (OB.hold) OB.hold = false; const id = w === 'ong' ? 'ongbay' : w === 'co' ? 'codoi' : nextGiaId(); if (id === GIA_DS.active && w !== 'hoicung') { S.banner = { text: 'Đang ngự giá ' + GIA().ten, t: 0, life: 3 }; return; } if (laOng() && OB.ok) { OB.exit = true; OB.exitTo = id; S.banner = { text: 'Ông Bảy xe giá, hồi cung', t: 0, life: 4 }; return; } }
   if (w === 'bo' && !GIA_DS.list.some(g => g.id === 'cobo')) return; // giá Cô Bơ chưa mở
   if (w === 'hoicung') { if (!c) batDauHoiCung(nextGiaId(), false); return; } // xe loan giá này xong tự thỉnh giá sau
