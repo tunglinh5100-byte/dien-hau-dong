@@ -2008,7 +2008,7 @@ const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55, T: 26, on: true }; window.__c
 // chỉnh camera từ xa: mỗi phút đọc cam.json trên GitHub, áp dụng ngay không cần tải lại trang (nhạc không bị tắt)
 (function camRemote() {
   const ap = j => { if (!j || typeof j !== 'object') return; const n = (v, a, b) => typeof v === 'number' && isFinite(v) ? Math.min(b, Math.max(a, v)) : null;
-    const A = n(j.A, 0, 90), T = n(j.T, 8, 120), Sc = n(j.S, 1, 1.4); if (A !== null) CAM.A = A; if (T !== null) CAM.T = T; if (Sc !== null) CAM.S = Sc; if (typeof j.on === 'boolean') CAM.on = j.on; if (typeof j.dd === 'boolean' && j.dd !== camRemote.dd) { camRemote.dd = j.dd; if (window.__hdDD && camRemote.lan) window.__hdDD(j.dd); } camRemote.lan = 1; };
+    const A = n(j.A, 0, 90), T = n(j.T, 8, 120), Sc = n(j.S, 1, 1.4); if (A !== null) CAM.A = A; if (T !== null) CAM.T = T; if (Sc !== null) CAM.S = Sc; if (typeof j.on === 'boolean') CAM.on = j.on; if (typeof j.dd === 'boolean' && j.dd !== camRemote.dd) { camRemote.dd = j.dd; if (window.__hdDD) window.__hdDD(j.dd); } camRemote.lan = 1; };
   const go = () => { try { fetch('cam.json?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(ap).catch(() => {}); } catch (e) {} };
   go(); setInterval(go, 60000);
 })(); // S: phóng cố định nhẹ để có chỗ lia; PIV: tâm quay (ngang chỗ cô đứng)
