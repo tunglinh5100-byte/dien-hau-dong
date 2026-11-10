@@ -1,33 +1,29 @@
 // Sự tích hiển thị trong bảng bên trái màn hình live, chữ tự cuộn lên như máy nhắc chữ, hết lại quay về đầu.
-// Anh sửa nội dung ngay trên GitHub: mỗi câu đặt trong dấu nháy đơn, cuối câu có dấu phẩy.
-// Đang ngự giá nào thì bảng chỉ hiện sự tích của giá đó. Mục "chung" chỉ dùng khi giá chưa có nội dung riêng.
+// Đang ngự giá nào thì bảng chỉ hiện sự tích của giá đó. Giá chưa có nội dung riêng thì hiện mục "chung".
+// Toàn bộ nội dung lấy từ Báo Nhân Dân (nhandan.vn); dòng "Nguồn" tự hiện ở cuối bảng.
+// Anh sửa ngay trên GitHub: mỗi câu đặt trong dấu nháy đơn, cuối câu có dấu phẩy.
 window.BANG_TIN = {
+  nguon: 'Báo Nhân Dân (nhandan.vn)',
+  // Bài: "Thực hành nghi lễ tín ngưỡng thờ Mẫu Tam phủ của người Việt" - nhandan.vn/trinh-dien-thuc-hanh-nghi-le-tin-nguong-tho-mau-tam-phu-cua-nguoi-viet-post864851.html
   chung: [
-    'Tín ngưỡng thờ Mẫu Tam phủ của người Việt được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại năm 2016',
-    'Tứ phủ gồm Thiên phủ (miền trời), Địa phủ (miền đất), Thoải phủ (miền sông nước) và Nhạc phủ (miền núi rừng)',
-    'Hầu đồng là nghi lễ chính của Đạo Mẫu: thanh đồng lần lượt hóa thân các giá Thánh, có cung văn hát chầu văn đi cùng',
-    'Hát chầu văn là lối hát thờ, vừa thỉnh mời các vị Thánh giáng, vừa ca ngợi công đức các vị',
-    'Các hàng Thánh trong Tứ phủ: Thánh Mẫu, Quan Lớn, Chầu Bà, Ông Hoàng, Thánh Cô, Thánh Cậu',
-    'Mẫu Liễu Hạnh là một trong Tứ bất tử của tín ngưỡng dân gian Việt Nam',
-    'Lộc Thánh ban là món quà tượng trưng cho may mắn, bình an, con nhang thường mang về chia cho gia đình',
+    'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
+    'Tín ngưỡng thờ Mẫu Tam phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
+    'Các Thánh Mẫu và các vị thần trong điện thờ có nguồn gốc không chỉ từ người Kinh mà còn từ các dân tộc Mường, Tày, Nùng, Dao',
+    'Nghi lễ lên đồng hội tụ nhiều yếu tố văn hóa dân gian: trang phục, âm nhạc, múa và hát chầu văn',
   ],
+  // Bài: "Lễ hội đền Bảo Hà tưởng nhớ Tướng quân Hoàng Bảy" - nhandan.vn/le-hoi-den-bao-ha-tuong-nho-tuong-quan-hoang-bay-post710405.html
+  // và "Lễ hội đền Bảo Hà tưởng nhớ Thần vệ quốc Hoàng Bảy" - nhandan.vn/le-hoi-den-bao-ha-tuong-nho-than-ve-quoc-hoang-bay-post906649.html
   ongbay: [
-    'Ông Hoàng Bảy là danh tướng thời cuối nhà Lê, được thờ chính tại đền Bảo Hà (xã Bảo Hà, huyện Bảo Yên, tỉnh Lào Cai), dân gian gọi là Ông Bảy Bảo Hà',
-    'Thời ấy giặc thường xuyên cướp phá các châu thuộc phủ Quy Hóa. Triều đình cử Ông dẫn quân ngược sông Hồng đánh đuổi giặc',
-    'Ông lập căn cứ lớn ở Bảo Hà, rèn luyện binh sĩ người các dân tộc địa phương, chỉ huy quân thủy bộ dẹp giặc, giữ yên vùng đất nay là Yên Bái và Lào Cai',
-    'Trong một trận đánh không cân sức, Ông anh dũng hy sinh. Nhân dân trong vùng an táng Ông và lập đền thờ tại Bảo Hà',
-    'Các vua triều Nguyễn là Minh Mạng và Thiệu Trị đều có sắc phong cho Ông. Đền được phong là đền thờ Thần vệ quốc',
-    'Ngày giỗ Ông là 17 tháng 7 âm lịch. Lễ hội đền Bảo Hà được công nhận là Di sản văn hóa phi vật thể quốc gia năm 2016',
-    'Khi giáng đồng, Ông Bảy mặc áo lam, múa hèo oai phong, rồi ngồi nghe văn, hút thuốc, thưởng thức và ban lộc cho con nhang',
-    'Ông nổi tiếng hào sảng, nên nhiều người về đền Bảo Hà cầu tài lộc, buôn bán hanh thông',
+    'Ông Hoàng Bảy là danh tướng Nguyễn Hoàng Bảy, người có công đánh giặc, bảo vệ vùng đất phía Bắc',
+    'Cuối triều Lê (1740-1786), giặc thường xuyên cướp phá các châu thuộc phủ Quy Hóa. Triều đình cử Ông dẫn quân theo sông Hồng đánh đuổi giặc',
+    'Ông giải phóng Khau Bàn, xây dựng Bảo Hà thành căn cứ lớn, huấn luyện binh sĩ từ các thổ ti, tù trưởng',
+    'Ông chỉ huy quân thủy bộ đánh giặc ở Lào Cai, giải phóng các châu thuộc phủ Quy Hóa, nay là Yên Bái và Lào Cai',
+    'Ông hy sinh anh dũng trong một trận đánh không cân sức. Nhân dân trong vùng an táng Ông và lập đền thờ tại Bảo Hà',
+    'Các vua Minh Mạng, Thiệu Trị tặng Ông danh hiệu "Trấn an hiển liệt". Đền được sắc phong "Thần vệ quốc"',
+    'Ngày giỗ chính của Ông là 17 tháng 7 âm lịch. Lễ hội đền Bảo Hà được công nhận là Di sản văn hóa phi vật thể cấp quốc gia năm 2016',
+    'Đền Bảo Hà ở xã Bảo Hà, tỉnh Lào Cai, là Di tích lịch sử - văn hóa cấp quốc gia',
   ],
-  codoi: [
-    'Cô Đôi Thượng Ngàn thuộc hàng Thánh Cô trong Tứ phủ, là vị Thánh Cô miền núi rừng (Nhạc phủ), theo hầu cận Mẫu Thượng Ngàn',
-    'Khi giáng đồng, Cô Đôi mặc áo xanh lá thêu kim tuyến, khăn vấn xanh cài hoa, đeo kiềng và vòng tay',
-    'Cô múa mồi, múa quạt, múa tay không, đi xuyến hướng lên ban Công Đồng, rồi quay xuống tung lộc cho con nhang',
-    'Lộc Cô ban gồm tiền, quả, hoa, là lộc tượng trưng cho may mắn, bình an, con nhang thường mang về chia cho gia đình',
-  ],
-  cobo: [
-    'Cô Bơ Thoải Cung thuộc hàng Thánh Cô miền sông nước (Thoải phủ), khi giáng đồng mặc áo trắng',
-  ],
+  // Cô Đôi, Cô Bơ: chưa tìm được bài Nhân Dân đọc được nên tạm để trống, bảng sẽ hiện mục "chung"
+  codoi: [],
+  cobo: [],
 };
