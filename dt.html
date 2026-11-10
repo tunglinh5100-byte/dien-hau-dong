@@ -649,7 +649,7 @@ function obStep(dt) {
   else if (OB.exit) { if (!OB.cur || OB.cur === 'mua' || OB.cur === 'dung') obPlay('ngoi'); else if (OB.cur !== 'ngoi' && OB.cur !== 'xegia' && OB.cur !== 'thinh' && OB.cur !== 'thayao') obPlay('xegia'); }
   else if (OB.intro) { if (!OB.cur) obPlay('thinh');
     if (!OB.vanBat) { OB.vanBat = true; OB.vanXong = false; const vg = vanCua({ id: 'ongbay' }); S.volTarget = 0; S.banner = { text: 'Cung văn thỉnh giá Ông Hoàng Bảy', t: 0, life: 3.5 };
-      if (vg) { let lan = VAN_LAP; const xong = () => { OB.vanXong = true; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OB.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OB.vanXong = true; }
+      if (vg) { let lan = VAN_LAP; const xong = () => { if (OB.vanXong) return; OB.vanXong = true; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OB.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OB.vanXong = true; }
     if (OB.cur === 'thinh' && !OB.vanXong) { const tv = OB.v.thinh; if (tv && tv.currentTime > 4.2) { try { tv.currentTime = .5; } catch (e) {} } } } // trùm khăn lắc lư theo văn thỉnh cho tới hết văn rồi mới hất khăn
   else if (!OB.cur) obPlay(sit ? 'thuoc' : 'mua');
   else if (sit && OB.cur === 'mua') obPlay('ngoi');
@@ -661,7 +661,7 @@ function obStep(dt) {
   if (!OB.hold && v && !v.loop && !(OB.cur === 'thinh' && OB.intro && !OB.vanXong) && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || OB.st > 14)) {
     if (OB.exit) { if (OB.cur === 'xegia') { OB.exit = false; OB.hold = true; try { v.pause(); } catch (e) {} const g = GIA_DS.list.find(x => x.id === OB.exitTo) || {}; S.cat = { t: 0, id: OB.exitTo, ten: g.ten || '', cu: !(OB.exitTo === 'codoi' && OC.buf) }; } else obPlay('xegia'); }
     else if (OB.cur === 'thinh') obPlay('thayao');
-    else if (OB.cur === 'thayao') { OB.intro = false; OB.vanBat = false; S.ob.ph = 'mua'; S.ob.t = 0; obPlay('dung'); try { if (S.sound) musStart(); } catch (e) {} chuyenNhacOng(); }
+    else if (OB.cur === 'thayao') { OB.intro = false; OB.vanBat = false; S.ob.ph = 'mua'; S.ob.t = 0; obPlay('dung'); S.volTarget = .85; }
     else if (OB.cur === 'dung') obPlay('mua'); else obPlay(obIdle()); }
   const w = OB.v[OB.cur]; if (w && w.paused && OB.st > .3 && !OB.hold) cvPlay(w);
   if (w && w.readyState >= 2 && w.currentTime !== OB.lastT) { try { cvGrabTo(w, OB.buf); OB.lastT = w.currentTime; OB.ok = true; OB.shown = OB.cur; } catch (e) {} }
@@ -670,6 +670,7 @@ function obStep(dt) {
 // cỡ và vị trí từng clip khác nhau (Gemini quay xa gần khác nhau): quy về cùng một khung theo chiếc đệm
 const OB_TF = {"mua": [1, 0, 0], "thuoc": [1, 0, 0], "cafe": [1.0177, -2.21, 2.07], "loc": [1.0849, -12.95, -35.63], "ruou": [0.95, 11.03, -12.2], "thinh": [1.0423, -6.68, -8.6], "thayao": [1.1695, -32.69, -67.88], "xegia": [1.1238, -23.71, -61.93]}, OB_NG = [[1.0151, -2.94, -9.21], [1.05, -20.9, 20.25]];
 function obTf() { const n = OB.shown || OB.cur; if (n === 'ngoi' || n === 'dung') { const v = OB.v[n]; let p = v && v.duration ? clamp(v.currentTime / v.duration, 0, 1) : 0; if (n === 'dung') p = 1 - p; const e = p * p * (3 - 2 * p), a = OB_NG[0], b = OB_NG[1]; return [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]; } return OB_TF[n] || [1, 0, 0]; }
+function nghiLe() { return (typeof OB !== 'undefined' && (OB.intro && OB.cur || OB.exit || OB.hold)) || (typeof OC !== 'undefined' && (OC.intro && OC.cur || OC.exit || OC.hold)) || !!S.cat; }
 let obLastNow = performance.now();
 // ---------- Cô Đôi nghi lễ bằng video thật: thỉnh (giơ tay số 2 theo văn, tung khăn), thay khăn áo, đứng dậy; xe giá: ngồi xuống, vái, múa tay, trùm khăn ----------
 const OC = { v: {}, buf: null, cur: null, ok: false, lastT: -1, st: 0, intro: true, exit: false, hold: false, exitTo: null, vanBat: false, vanXong: false };
@@ -691,13 +692,13 @@ function ocStep(dt) {
   else if (OC.exit) { if (!OC.cur) ocPlay('ngoi'); }
   else if (OC.intro) { if (!OC.cur) ocPlay('thinh');
     if (!OC.vanBat) { OC.vanBat = true; OC.vanXong = false; const vg = vanCua({ id: 'codoi' }); S.volTarget = 0; S.banner = { text: 'Cung văn thỉnh giá Cô Đôi Thượng Ngàn', t: 0, life: 3.5 };
-      if (vg) { let lan = VAN_LAP; const xong = () => { OC.vanXong = true; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OC.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OC.vanXong = true; }
+      if (vg) { let lan = VAN_LAP; const xong = () => { if (OC.vanXong) return; OC.vanXong = true; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OC.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OC.vanXong = true; }
     if (OC.cur === 'thinh' && !OC.vanXong) { const tv = OC.v.thinh; if (tv && tv.currentTime > 4.3) { try { tv.currentTime = .6; } catch (e) {} } } } // giơ tay số 2 theo văn thỉnh, hết văn mới tung khăn
   const v = OC.v[OC.cur]; OC.st += dt;
   if (!OC.hold && v && !(OC.cur === 'thinh' && OC.intro && !OC.vanXong) && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || OC.st > 14)) {
     if (OC.exit) { if (OC.cur === 'xegia') { OC.exit = false; OC.hold = true; try { v.pause(); } catch (e) {} const g = GIA_DS.list.find(x => x.id === OC.exitTo) || {}; S.cat = { t: 0, id: OC.exitTo, ten: g.ten || '', cu: !(OC.exitTo === 'ongbay' && OB.buf) }; } else ocPlay('xegia'); }
     else if (OC.cur === 'thinh') ocPlay('thayao');
-    else if (OC.cur === 'thayao') { S.volTarget = .85; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} ocPlay('dungday'); }
+    else if (OC.cur === 'thayao') { S.volTarget = .85; ocPlay('dungday'); }
     else if (OC.cur === 'dungday') { OC.intro = false; OC.vanBat = false; OC.cur = null; OC.ok = false; CO.giveT = 8; return false; }
   }
   const w = OC.v[OC.cur]; if (w && w.paused && OC.st > .3 && !OC.hold) cvPlay(w);
@@ -1241,7 +1242,7 @@ function noiKhen(name, cau) {
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
-function updKhen(dt) { if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 5) KHEN.cur = null; } if (!KHEN.cur && KHEN.q.length && !(laOng() && !ongNgoi())) { /* giá ông: chỉ ban khen khi ông ngồi */ const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
+function updKhen(dt) { if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 5) KHEN.cur = null; } if (!KHEN.cur && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 function drawKhen() {
   const k = KHEN.cur; if (!k) return; const a = Math.min(1, k.t / .2, (5 - k.t) / .3), sc = depthScale(CO.y) * 1.02;
   const nm = k.name.length > 18 ? k.name.slice(0, 17) + '…' : k.name;
@@ -2059,8 +2060,8 @@ const CAM = { t: 0, P: 0, S: 1.2, PIV: 520, A: 55, T: 26, on: true }; window.__c
 // ---------- Đạo diễn ảo: tự chuyển góc máy (toàn cảnh, cận cô, lướt đám con nhang, cận người vừa lên cấp, cẩu máy) ----------
 // Bật/tắt: nút trên trang điều khiển, trang dk.html (từ xa), cam.json "dd": true/false, hoặc thêm ?dd=0 vào link
 const DD = { on: true, z: 1, fx: 270, fy: 480, cx: 270, cy: 480, tz: 1, tfx: 270, tfy: 480, k: 1.2, shot: 'rong', t: 0, i: 0, evt: null, dur: 8, sweep: 0, who: null };
-try { const q = new URLSearchParams(location.search).get('dd'); const ls = localStorage.getItem('hd_dd'); DD.on = q === '0' ? false : q === '1' ? true : ls === '0' ? false : true; } catch (e) {}
-function ddSet(on) { DD.on = !!on; CAM.tat = !DD.on; try { localStorage.setItem('hd_dd', DD.on ? '1' : '0'); } catch (e) {} const b = document.getElementById('bDD'); if (b) { b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; } S.banner = { text: DD.on ? '🎥 Góc máy: bật (zoom và lia)' : '🎥 Góc máy: tắt (khung đứng yên)', t: 0, life: 2.5 }; }
+try { const q = new URLSearchParams(location.search).get('dd'); const ls = localStorage.getItem('hd_dd'); DD.on = q === '1'; } catch (e) {}
+function ddSet(on) { DD.on = !!on; try { localStorage.setItem('hd_dd', DD.on ? '1' : '0'); } catch (e) {} const b = document.getElementById('bDD'); if (b) { b.classList.toggle('on', DD.on); b.textContent = DD.on ? 'Góc máy tự động: bật' : 'Góc máy tự động: tắt'; } S.banner = { text: DD.on ? '🎥 Góc máy: bật (zoom và lia)' : '🎥 Góc máy: tắt (khung đứng yên)', t: 0, life: 2.5 }; }
 const DD_LICH = ['rong', 'co', 'thap', 'rong', 'can', 'cau', 'co', 'thap'];
 const DD_DUR = { rong: 8, co: 7, thap: 9, can: 5.5, cau: 7, loc: 6 };
 function ddNguoi() { const ds = S.people.filter(p => p.state === 'seat' && !String(p.name).startsWith('​')); if (!ds.length) return null; const that = ds.filter(p => LVK[p.name]); return pick(that.length ? that : ds); }
@@ -2086,10 +2087,10 @@ function ddUpd(dt) {
   DD.cx = clamp(DD.fx, hw - 30 * (DD.z - 1), W - hw + 30 * (DD.z - 1)); DD.cy = clamp(DD.fy, hh, H - hh);
 }
 window.__hdDD = ddSet;
+window.__hdAm = () => ({ nhac: String(bgm.src).slice(0, 25).replace(/^.*\//, ''), am: +bgm.volume.toFixed(2), chay: !bgm.paused, van: VAN_AU.paused ? '-' : Math.round(VAN_AU.currentTime), khen: KHEN.cur ? KHEN.cur.name : '', tich: TICH.id, cam: +CAM.P.toFixed(1), zoom: +DD.z.toFixed(2), ph: S.ob && S.ob.ph, giving: !!CO.giving, dem: !!S.dem });
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
-  if (CAM.tat === undefined) CAM.tat = !DD.on;
   if (!CAM_ON || !CAM.on || CAM.tat) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
   const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
