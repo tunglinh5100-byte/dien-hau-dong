@@ -1,6 +1,6 @@
 // Sự tích hiển thị trong bảng bên trái màn hình live, chữ tự cuộn lên như máy nhắc chữ, hết lại quay về đầu.
 // Anh sửa nội dung ngay trên GitHub: mỗi câu đặt trong dấu nháy đơn, cuối câu có dấu phẩy.
-// Mục của giá đang ngự hiện trước, sau đó đến các câu "chung".
+// Đang ngự giá nào thì bảng chỉ hiện sự tích của giá đó. Mục "chung" chỉ dùng khi giá chưa có nội dung riêng.
 window.BANG_TIN = {
   chung: [
     'Tín ngưỡng thờ Mẫu Tam phủ của người Việt được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại năm 2016',
@@ -12,13 +12,20 @@ window.BANG_TIN = {
     'Lộc Thánh ban là món quà tượng trưng cho may mắn, bình an, con nhang thường mang về chia cho gia đình',
   ],
   ongbay: [
-    'Ông Hoàng Bảy còn gọi là Ông Bảy Bảo Hà, được thờ chính tại đền Bảo Hà, tỉnh Lào Cai',
-    'Tương truyền Ông Hoàng Bảy trấn giữ vùng biên ải phía Bắc, có công dẹp giặc giữ yên bờ cõi',
-    'Khi giáng đồng, Ông Bảy múa hèo, rồi ngồi nghe văn, hút thuốc, thưởng thức và ban lộc cho con nhang',
+    'Ông Hoàng Bảy là danh tướng thời cuối nhà Lê, được thờ chính tại đền Bảo Hà (xã Bảo Hà, huyện Bảo Yên, tỉnh Lào Cai), dân gian gọi là Ông Bảy Bảo Hà',
+    'Thời ấy giặc thường xuyên cướp phá các châu thuộc phủ Quy Hóa. Triều đình cử Ông dẫn quân ngược sông Hồng đánh đuổi giặc',
+    'Ông lập căn cứ lớn ở Bảo Hà, rèn luyện binh sĩ người các dân tộc địa phương, chỉ huy quân thủy bộ dẹp giặc, giữ yên vùng đất nay là Yên Bái và Lào Cai',
+    'Trong một trận đánh không cân sức, Ông anh dũng hy sinh. Nhân dân trong vùng an táng Ông và lập đền thờ tại Bảo Hà',
+    'Các vua triều Nguyễn là Minh Mạng và Thiệu Trị đều có sắc phong cho Ông. Đền được phong là đền thờ Thần vệ quốc',
+    'Ngày giỗ Ông là 17 tháng 7 âm lịch. Lễ hội đền Bảo Hà được công nhận là Di sản văn hóa phi vật thể quốc gia năm 2016',
+    'Khi giáng đồng, Ông Bảy mặc áo lam, múa hèo oai phong, rồi ngồi nghe văn, hút thuốc, thưởng thức và ban lộc cho con nhang',
+    'Ông nổi tiếng hào sảng, nên nhiều người về đền Bảo Hà cầu tài lộc, buôn bán hanh thông',
   ],
   codoi: [
-    'Cô Đôi Thượng Ngàn thuộc hàng Thánh Cô, cai quản miền núi rừng thượng ngàn (Nhạc phủ)',
-    'Khi giáng đồng, Cô Đôi mặc áo xanh, múa mồi, múa quạt, đi xuyến rồi tung lộc cho con nhang',
+    'Cô Đôi Thượng Ngàn thuộc hàng Thánh Cô trong Tứ phủ, là vị Thánh Cô miền núi rừng (Nhạc phủ), theo hầu cận Mẫu Thượng Ngàn',
+    'Khi giáng đồng, Cô Đôi mặc áo xanh lá thêu kim tuyến, khăn vấn xanh cài hoa, đeo kiềng và vòng tay',
+    'Cô múa mồi, múa quạt, múa tay không, đi xuyến hướng lên ban Công Đồng, rồi quay xuống tung lộc cho con nhang',
+    'Lộc Cô ban gồm tiền, quả, hoa, là lộc tượng trưng cho may mắn, bình an, con nhang thường mang về chia cho gia đình',
   ],
   cobo: [
     'Cô Bơ Thoải Cung thuộc hàng Thánh Cô miền sông nước (Thoải phủ), khi giáng đồng mặc áo trắng',
