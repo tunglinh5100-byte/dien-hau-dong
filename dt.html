@@ -611,7 +611,7 @@ function drawCoVideo(t, x, y, sc) {
   if (S.danceSpecial > 0 && Math.random() < .5) S.particles.push({ x: x + rnd(-60, 60), y: y - rnd(50, 180), vx: rnd(-10, 10), vy: rnd(-30, -10), life: 1.2, t: 0, kind: 'spark' });
 }
 const coBufOk = true, coVidErr = false; // giữ tên cũ cho khung lời khen
-window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a), doiGia: (id) => doiGia(id), lenh: (w) => lenhPha(w), am: (bat) => { const b = document.getElementById('bSound'); if (b && !!S.sound !== !!bat) b.click(); try { VAN_AU.muted = !bat; } catch (e) {} S.banner = { text: bat ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh', t: 0, life: 2.5 }; }, ongPh: (ph) => { if (!laOng() || !S.ob) return; if (S.ob.ph !== ph) { S.ob.ph = ph; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); } } };
+window.__hd = { get S() { return S; }, say: (...a) => say(...a), person: (...a) => person(...a), like: (...a) => like(...a), gift: (...a) => gift(...a), follow: (...a) => follow(...a), shareLive: (...a) => shareLive(...a), addComment: (...a) => addComment(...a), doiGia: (id) => doiGia(id), lenh: (w) => lenhPha(w), am: (bat) => { const b = document.getElementById('bSound'); if (b && !!S.sound !== !!bat) b.click(); try { VAN_AU.muted = !bat; VAN_OB_AO.muted = !bat; } catch (e) {} S.banner = { text: bat ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh', t: 0, life: 2.5 }; }, ongPh: (ph) => { if (!laOng() || !S.ob) return; if (S.ob.ph !== ph) { S.ob.ph = ph; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); } } };
 // ---------- Lệnh đổi giá bằng bình luận của chủ kênh / quản trị viên: #ong, #co, #ngoi, #mua ----------
 window.__hdLenh = (d, c) => { try {
   const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || d || {}, id = String(u.uniqueId || u.displayId || d.uniqueId || '').toLowerCase(), nn = String(u.nickname || d.nickname || '').toLowerCase().trim();
@@ -648,8 +648,8 @@ function obStep(dt) {
   if (OB.hold) { /* xe giá xong: giữ dáng trùm khăn chờ màn chuyển */ }
   else if (OB.exit) { if (!OB.cur || OB.cur === 'mua' || OB.cur === 'dung') obPlay('ngoi'); else if (OB.cur !== 'ngoi' && OB.cur !== 'xegia' && OB.cur !== 'thinh' && OB.cur !== 'thayao') obPlay('xegia'); }
   else if (OB.intro) { if (!OB.cur) obPlay('thinh');
-    if (!OB.vanBat) { OB.vanBat = true; OB.vanXong = false; const vg = vanCua({ id: 'ongbay' }); S.volTarget = 0; S.banner = { text: 'Cung văn thỉnh giá Ông Hoàng Bảy', t: 0, life: 3.5 };
-      if (vg) { let lan = VAN_LAP; const xong = () => { if (OB.vanXong) return; OB.vanXong = true; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OB.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OB.vanXong = true; }
+    if (!OB.vanBat) { OB.vanBat = true; OB.vanXong = false; OB.van2 = false; OB.van2Xong = false; const vg = vanCua({ id: 'ongbay' }); S.volTarget = 0; S.banner = { text: 'Cung văn thỉnh giá Ông Hoàng Bảy', t: 0, life: 3.5 };
+      if (vg) { let lan = VAN_LAP; const xong = () => { if (OB.vanXong) return; OB.vanXong = true; obVanAo(); }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OB.intro) lap(); else xong(); }); lap(); setTimeout(xong, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else { OB.vanXong = true; obVanAo(); } }
     if (OB.cur === 'thinh' && !OB.vanXong) { const tv = OB.v.thinh; if (tv && tv.currentTime > 4.2) { try { tv.currentTime = .5; } catch (e) {} } } } // trùm khăn lắc lư theo văn thỉnh cho tới hết văn rồi mới hất khăn
   else if (!OB.cur) obPlay(sit ? 'thuoc' : 'mua');
   else if (sit && OB.cur === 'mua') obPlay('ngoi');
@@ -657,13 +657,17 @@ function obStep(dt) {
   else if (!sit && OB.cur !== 'mua' && OB.cur !== 'dung') obPlay('dung');
   if (!OB.intro && !OB.exit && sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay(Math.random() < .5 ? 'loc' : 'ruou'); }
   if (OB.cur && OB.cur !== 'mua') { const sx = CARPET.cx, sy = CARPET.cy - 4, k = Math.min(1, dt * 5); CO.x += (sx - CO.x) * k; CO.y += (sy - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; } // ngồi, đứng dậy, thỉnh, xe giá: giữ ông tại chiếu, không trôi theo đường múa
+  if (OB.intro && S.ob) { if (S.ob.ph !== 'mua') S.ob.ph = 'mua'; S.ob.t = 0; } // đang thỉnh, thay áo: không tự chuyển sang ngồi nghe văn
+  if (OB.cur === 'thayao') { const tv = OB.v.thayao; if (tv && tv.playbackRate !== .6) tv.playbackRate = .6; }
   const v = OB.v[OB.cur]; OB.st += dt;
-  if (!OB.hold && v && !v.loop && !(OB.cur === 'thinh' && OB.intro && !OB.vanXong) && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || OB.st > 14)) {
+  OB.cho = OB.cur === 'thayao' && OB.intro && !OB.van2Xong && v && (v.ended || (v.duration && v.currentTime >= v.duration - .08));
+  if (OB.cho) { try { if (!v.paused) v.pause(); } catch (e) {} }
+  if (!OB.hold && !OB.cho && v && !v.loop && !(OB.cur === 'thinh' && OB.intro && !OB.vanXong) && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || (OB.st > 14 && OB.cur !== 'thayao') || OB.st > 30)) {
     if (OB.exit) { if (OB.cur === 'xegia') { OB.exit = false; OB.hold = true; try { v.pause(); } catch (e) {} const g = GIA_DS.list.find(x => x.id === OB.exitTo) || {}; S.cat = { t: 0, id: OB.exitTo, ten: g.ten || '', cu: !(OB.exitTo === 'codoi' && OC.buf) }; } else obPlay('xegia'); }
     else if (OB.cur === 'thinh') obPlay('thayao');
     else if (OB.cur === 'thayao') { OB.intro = false; OB.vanBat = false; S.ob.ph = 'mua'; S.ob.t = 0; obPlay('dung'); S.volTarget = .85; }
     else if (OB.cur === 'dung') obPlay('mua'); else obPlay(obIdle()); }
-  const w = OB.v[OB.cur]; if (w && w.paused && OB.st > .3 && !OB.hold) cvPlay(w);
+  const w = OB.v[OB.cur]; if (w && w.paused && OB.st > .3 && !OB.hold && !OB.cho) cvPlay(w);
   if (w && w.readyState >= 2 && w.currentTime !== OB.lastT) { try { cvGrabTo(w, OB.buf); OB.lastT = w.currentTime; OB.ok = true; OB.shown = OB.cur; } catch (e) {} }
   return OB.ok;
 }
@@ -671,6 +675,12 @@ function obStep(dt) {
 const OB_TF = {"mua": [1, 0, 0], "thuoc": [1, 0, 0], "cafe": [1.0177, -2.21, 2.07], "loc": [1.0849, -12.95, -35.63], "ruou": [0.95, 11.03, -12.2], "thinh": [1.0423, -6.68, -8.6], "thayao": [1.1695, -32.69, -67.88], "xegia": [1.1238, -23.71, -61.93]}, OB_NG = [[1.0151, -2.94, -9.21], [1.05, -20.9, 20.25]];
 function obTf() { const n = OB.shown || OB.cur; if (n === 'ngoi' || n === 'dung') { const v = OB.v[n]; let p = v && v.duration ? clamp(v.currentTime / v.duration, 0, 1) : 0; if (n === 'dung') p = 1 - p; const e = p * p * (3 - 2 * p), a = OB_NG[0], b = OB_NG[1]; return [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]; } return OB_TF[n] || [1, 0, 0]; }
 function nghiLe() { return (typeof OB !== 'undefined' && (OB.intro && OB.cur || OB.exit || OB.hold)) || (typeof OC !== 'undefined' && (OC.intro && OC.cur || OC.exit || OC.hold)) || !!S.cat; }
+const VAN_OB_AO = new Audio('van-ong-thayao.mp3?v=1'); VAN_OB_AO.preload = 'auto';
+function obVanAo() { // văn "Hội thánh hát" lúc hầu dâng thay khăn áo cho Ông, hết văn mới múa hèo
+  if (OB.van2) return; OB.van2 = true; OB.van2Xong = false; S.volTarget = 0;
+  const xong = () => { if (OB.van2Xong) return; OB.van2Xong = true; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; };
+  try { VAN_OB_AO.muted = !S.sound; VAN_OB_AO.currentTime = 0; VAN_OB_AO.onended = xong; const pr = VAN_OB_AO.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) { xong(); }
+  clearTimeout(OB.van2T); OB.van2T = setTimeout(xong, ((VAN_OB_AO.duration || 48) + 4) * 1000); }
 let obLastNow = performance.now();
 // ---------- Cô Đôi nghi lễ bằng video thật: thỉnh (giơ tay số 2 theo văn, tung khăn), thay khăn áo, đứng dậy; xe giá: ngồi xuống, vái, múa tay, trùm khăn ----------
 const OC = { v: {}, buf: null, cur: null, ok: false, lastT: -1, st: 0, intro: true, exit: false, hold: false, exitTo: null, vanBat: false, vanXong: false };
@@ -715,7 +725,7 @@ function ocDraw(t, x, y, sc) {
 function obDraw(t, x, y, sc) {
   const now = performance.now(), dt = Math.min(.1, (now - obLastNow) / 1000); obLastNow = now;
   if (!obStep(dt)) return false;
-  const k = 250 * sc / 530, tf = obTf(); ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.translate(-180, -608); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(OB.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  const k = 250 * sc / 530, tf = obTf(); ctx.save(); ctx.translate(x, y); if (OB.cho) { const b = Math.sin(t * 1.7); ctx.rotate(b * .006); ctx.scale(1, 1 + b * .004); } ctx.scale(k, k); ctx.translate(-180, -608); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(OB.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 function drawCo(t) {
   const sc = depthScale(CO.y) * 1.02, x = CO.x, y = CO.y;
@@ -2089,11 +2099,11 @@ function ddUpd(dt) {
 window.__hdDD = ddSet;
 // trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
 (function amMoKhoa() {
-  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { musStart(); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } } };
+  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { musStart(); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, mo, { passive: true }));
   setInterval(() => { const chan = S.sound && bgm.paused && VAN_AU.paused && !nghiLe(); if (chan) { if (!S.banner || !/Bấm chuột/.test(S.banner.text)) S.banner = { text: '🔇 Bấm chuột 1 lần vào màn hình để bật âm thanh', t: 0, life: 2.6 }; } }, 2500);
 })();
-window.__hdAm = () => ({ nhac: String(bgm.src).slice(0, 25).replace(/^.*\//, ''), am: +bgm.volume.toFixed(2), chay: !bgm.paused, van: VAN_AU.paused ? '-' : Math.round(VAN_AU.currentTime), khen: KHEN.cur ? KHEN.cur.name : '', tich: TICH.id, cam: +CAM.P.toFixed(1), zoom: +DD.z.toFixed(2), ph: S.ob && S.ob.ph, giving: !!CO.giving, dem: !!S.dem });
+window.__hdAm = () => ({ ao: VAN_OB_AO.paused ? '-' : Math.round(VAN_OB_AO.currentTime), cho: !!OB.cho, nhac: String(bgm.src).slice(0, 25).replace(/^.*\//, ''), am: +bgm.volume.toFixed(2), chay: !bgm.paused, van: VAN_AU.paused ? '-' : Math.round(VAN_AU.currentTime), khen: KHEN.cur ? KHEN.cur.name : '', tich: TICH.id, cam: +CAM.P.toFixed(1), zoom: +DD.z.toFixed(2), ph: S.ob && S.ob.ph, giving: !!CO.giving, dem: !!S.dem });
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
