@@ -629,9 +629,43 @@ window.__hdLenh = (d, c) => { try {
   mo(); } catch (e) {} })();
 
 window.__cv = () => ({ gv: (S.giving ? 'G' : '') + (S.dem ? 'D' + S.dem.t.toFixed(1) : '') + (CO.giving ? 'C' + CO.giving.phase + CO.giving.kind : '') + ' q' + (S.queue ? S.queue.length : 0) + (S.locQ ? ' LQ' : ''), tv: CVS.tv ? CVS.tv.src.split('/').pop() + ':' + CVS.tv.currentTime.toFixed(2) + (CVS.tv.paused ? 'p' : '>') + ':' + cvtOk + ':' + CVS.tt.toFixed(2) : '', L: S.loc ? S.loc.ph + ':' + S.loc.t.toFixed(1) + '/' + (S.loc.u || 0).toFixed(1) : '', fv: CVS.fv ? CVS.fv.currentTime.toFixed(2) + (CVS.fv.paused ? 'p' : '>') + (CVS.fv.ended ? 'E' : '') + CVS.fv.readyState : '', x: Math.round(CO.x), mode: CVS.mode, di: CVS.di, img: CVS.img, ok: CVS.ok, t: +cvDanceV().currentTime.toFixed(2), loc: !!S.loc });
+// ---------- Ông Hoàng Bảy bằng video thật (tách nền xanh): múa hèo, ngồi xuống, hút thuốc, uống cà phê, ban lộc, đứng dậy ----------
+const OB = { v: {}, buf: null, cur: null, ok: false, lastT: -1, idle: 0, lastG: null, st: 0 };
+(function obInit() {
+  if (/[?&]ob=0/.test(location.search)) return;
+  OB.buf = document.createElement('canvas'); OB.buf.width = CV_W; OB.buf.height = CV_H;
+  ['mua', 'ngoi', 'dung', 'thuoc', 'cafe', 'loc'].forEach(n => { const v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = n === 'mua'; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'ob-' + n + '.mp4?v=1'; CV_HOLD.appendChild(v); OB.v[n] = v; });
+})();
+function obPlay(n) { if (!OB.v[n] || OB.cur === n) return; const old = OB.v[OB.cur]; if (old) try { old.pause(); } catch (e) {} OB.cur = n; OB.st = 0; const v = OB.v[n]; try { v.currentTime = 0; } catch (e) {} cvPlay(v); }
+function obIdle() { OB.idle = (OB.idle + 1) % 3; return OB.idle === 1 ? 'cafe' : 'thuoc'; }
+function obStep(dt) {
+  if (!OB.buf) return false;
+  if (!laOng() || S.chuyen) { const v = OB.v[OB.cur]; if (v && !v.paused) try { v.pause(); } catch (e) {} OB.cur = null; OB.ok = false; return false; }
+  const sit = S.ob && S.ob.ph === 'ngoi';
+  if (!OB.cur) obPlay(sit ? 'thuoc' : 'mua');
+  else if (sit && OB.cur === 'mua') obPlay('ngoi');
+  else if (sit && OB.cur === 'dung') obPlay('ngoi');
+  else if (!sit && OB.cur !== 'mua' && OB.cur !== 'dung') obPlay('dung');
+  if (sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay('loc'); }
+  const v = OB.v[OB.cur]; OB.st += dt;
+  if (v && !v.loop && (v.ended || (v.duration && v.currentTime >= v.duration - .06) || OB.st > 14)) { if (OB.cur === 'dung') obPlay('mua'); else obPlay(obIdle()); }
+  const w = OB.v[OB.cur]; if (w && w.paused && OB.st > .3) cvPlay(w);
+  if (w && w.readyState >= 2 && w.currentTime !== OB.lastT) { try { cvGrabTo(w, OB.buf); OB.lastT = w.currentTime; OB.ok = true; } catch (e) {} }
+  return OB.ok;
+}
+let obLastNow = performance.now();
+function obDraw(t, x, y, sc) {
+  const now = performance.now(), dt = Math.min(.1, (now - obLastNow) / 1000); obLastNow = now;
+  if (!obStep(dt)) return false;
+  const k = 250 * sc / 530; ctx.save(); ctx.translate(x, y); ctx.drawImage(OB.buf, -180 * k, -608 * k, CV_W * k, CV_H * k); ctx.restore(); return true;
+}
 function drawCo(t) {
   const sc = depthScale(CO.y) * 1.02, x = CO.x, y = CO.y;
   { ctx.save(); ctx.translate(x + 6 * sc, y + 2); ctx.scale(1, .2); const sh = ctx.createRadialGradient(0, 0, 4, 0, 0, 50 * sc); sh.addColorStop(0, 'rgba(0,0,0,.6)'); sh.addColorStop(.6, 'rgba(0,0,0,.28)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(0, 0, 50 * sc, 0, 6.28); ctx.fill(); ctx.restore(); }
+  if (laOng() && obDraw(t, x, y, sc)) return;
   if (GIA().id === 'codoi' && !(CO.sit > .05) && coVideoReady()) { drawCoVideo(t, x, y, sc); return; }
   // turning: squash through the side when switching between back and diagonal-front
   const turn = Math.abs(CO.down - .5) * 2; // 1 at ends, 0 mid-turn
@@ -1949,7 +1983,7 @@ function frame1(now) {
   try {
     ctx.save(); ctx.translate(camOff(704), 0); drawCungVan(t); ctx.restore();
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
-    behind.forEach(p => drawPerson(p, t)); drawThamDong(t); drawKhayOng(t); drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
+    behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
     drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
     ctx.save(); ctx.translate(camOff(704), 0); drawTenCV(); ctx.restore(); drawDangOng(t); drawTenNhanLoc(t);
   } finally { camShift(-1); }
