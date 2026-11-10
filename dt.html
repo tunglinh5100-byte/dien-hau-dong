@@ -2087,6 +2087,12 @@ function ddUpd(dt) {
   DD.cx = clamp(DD.fx, hw - 30 * (DD.z - 1), W - hw + 30 * (DD.z - 1)); DD.cy = clamp(DD.fy, hh, H - hh);
 }
 window.__hdDD = ddSet;
+// trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
+(function amMoKhoa() {
+  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { musStart(); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } } };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, mo, { passive: true }));
+  setInterval(() => { const chan = S.sound && bgm.paused && (VAN_STOP ? VAN_AU.paused : true); if (chan) { if (!S.banner || !/Bấm chuột/.test(S.banner.text)) S.banner = { text: '🔇 Bấm chuột 1 lần vào màn hình để bật âm thanh', t: 0, life: 2.6 }; } }, 2500);
+})();
 window.__hdAm = () => ({ nhac: String(bgm.src).slice(0, 25).replace(/^.*\//, ''), am: +bgm.volume.toFixed(2), chay: !bgm.paused, van: VAN_AU.paused ? '-' : Math.round(VAN_AU.currentTime), khen: KHEN.cur ? KHEN.cur.name : '', tich: TICH.id, cam: +CAM.P.toFixed(1), zoom: +DD.z.toFixed(2), ph: S.ob && S.ob.ph, giving: !!CO.giving, dem: !!S.dem });
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
