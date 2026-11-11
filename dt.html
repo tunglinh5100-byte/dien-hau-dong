@@ -1669,9 +1669,11 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   if (!K.ds) { const ds = [], st = { h: [`800 17px ${SERIF}`, 30, '#f6dc96'], p: [`500 15.5px ${SERIF}`, 23, '#f6e9d6'], n: [`italic 600 12.5px ${SERIF}`, 18, '#e6b552'], u: [`500 11.5px ${SERIF}`, 26, 'rgba(230,181,82,.8)'] };
     ketDong().forEach(([k, x]) => { const [f, lh, c] = st[k]; ctx.font = f; wrapTxt(x, Wd - 64).forEach(l => ds.push({ f, lh, c, l })); if (k === 'p') ds.push({ f, lh: 8, c, l: '' }); });
     K.ds = ds; K.H = ds.reduce((m, d) => m + d.lh, 0); }
-  const top = Y + 100, vis = Hh - 196, du = Math.max(0, K.H - vis), chu = du ? 8 + du / 9 : 1, u = (K.t % (2 * chu)) / chu, e = u < 1 ? u : 2 - u, off = du * Math.min(1, Math.max(0, (e * chu - 4) / Math.max(1, chu - 8))); // cuộn lên rồi cuộn xuống, dừng 4 giây ở hai đầu
-  ctx.save(); ctx.beginPath(); ctx.rect(X + 10, top, Wd - 20, vis); ctx.clip(); let y = top + 6 - off;
-  K.ds.forEach(d => { if (d.l) { ctx.font = d.f; ctx.fillStyle = d.c; ctx.fillText(d.l, 270, y + d.lh / 2); } y += d.lh; }); ctx.restore();
+  const top = Y + 100, vis = Hh - 196, L = K.H + 70, off = K.t < 4 ? 0 : ((K.t - 4) * 18) % L; // chỉ trượt lên một chiều, chậm vừa đọc (18 px/giây), hết bài nối lại từ đầu
+  ctx.save(); ctx.beginPath(); ctx.rect(X + 10, top, Wd - 20, vis); ctx.clip();
+  for (const y0 of [top + 6 - off, top + 6 - off + L]) { if (y0 > top + vis || y0 + K.H < top) continue; let y = y0; K.ds.forEach(d => { if (d.l && y + d.lh > top - 4 && y < top + vis + 4) { ctx.font = d.f; ctx.fillStyle = d.c; ctx.fillText(d.l, 270, y + d.lh / 2); } y += d.lh; }); }
+  const fT = ctx.createLinearGradient(0, top, 0, top + 26); fT.addColorStop(0, 'rgba(60,14,10,1)'); fT.addColorStop(1, 'rgba(60,14,10,0)'); ctx.fillStyle = fT; ctx.fillRect(X + 10, top, Wd - 20, 26);
+  const fB = ctx.createLinearGradient(0, top + vis - 26, 0, top + vis); fB.addColorStop(0, 'rgba(60,14,10,0)'); fB.addColorStop(1, 'rgba(60,14,10,1)'); ctx.fillStyle = fB; ctx.fillRect(X + 10, top + vis - 26, Wd - 20, 26); ctx.restore();
   ctx.restore(); }
 function drawLuuY() { // lưu ý cố định cuối màn hình, trong vùng an toàn TikTok
   ctx.save(); ctx.font = `600 11.5px ${UI}`; const ls = wrapTxt(LUU_Y, 540 - SAFE_X * 2 - 8), lh = 15, h = ls.length * lh + 12, y = 954 - h;
