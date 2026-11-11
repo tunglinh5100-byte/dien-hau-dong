@@ -2171,7 +2171,7 @@ function frame1(now) {
   ctx.save(); camShear(); drawBg(t); drawSong(t); drawMoneyFloor(); drawDem(t); ctx.restore();
   camShift(1);
   try {
-    ctx.save(); ctx.translate(camOff(704), 0); drawCungVan(t); ctx.restore();
+    /* cung văn tạm ẩn: anh Linh cho làm lại, sẽ ngồi bên phải sập hầu */
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
     behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); front.forEach(p => drawPerson(p, t));
     drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
