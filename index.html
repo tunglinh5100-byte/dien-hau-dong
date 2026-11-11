@@ -216,14 +216,15 @@ function tungLoc() {
   S.loc = { kind: AK, ph: 'di', t: 0, gx: GIA().id === 'codoi' ? CARPET.cx + 92 : CARPET.cx + 118, gy: GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 20, arm: 1, u: 0, n: 0 }; S.throwT = .5;
 }
 // cô vung tay, tiền bay ra từ bàn tay
-function muaTien(n) { // mưa lộc: tiền rơi từ trên xuống khắp sân, phủ kín các con nhang
+function muaTien(n) { if (laOng()) return; // mưa lộc: tiền rơi từ trên xuống khắp sân, phủ kín các con nhang
   for (let i = 0; i < n; i++) S.money.push({ kind: 'n2', x: rnd(-10, 550), y: rnd(-120, 40), vx: rnd(-20, 20), vy: rnd(40, 120), vmax: rnd(120, 190), rot: rnd(-1, 1), vr: rnd(-6, 6),
     fw: rnd(2, 3.4), amp: rnd(14, 30), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(600, 940), t: 0, delay: rnd(0, 3.5), landed: 0, lt: 0, d: pickNote() }); }
-function muaHoaQua(n, chi) { // lộc hoa, lộc quả: một phần cô tung ra, phần lớn rơi như mưa từ trên xuống khắp sân, rơi xuống nằm lại một lúc
+function muaHoaQua(n, chi) { if (laOng()) return; // lộc hoa, lộc quả: một phần cô tung ra, phần lớn rơi như mưa từ trên xuống khắp sân, rơi xuống nằm lại một lúc
   const loai = () => chi === 'hoa' ? 'flower' : chi === 'qua' ? pick(['fruit', 'fruit', 'peach']) : pick(['fruit', 'flower', 'fruit', 'flower', 'peach']);
   for (let i = 0; i < Math.round(n * .3); i++) { const tx = rnd(10, 530), ty = rnd(620, 935); S.flying.push({ x: CO.x + rnd(-10, 20), y: CO.y - 110, tx, ty, t: -rnd(0, 2.5), dur: rnd(1, 1.6), kind: loai(), nho: rnd(.8, 1.05), onDone() { S.locDat.push({ kind: this.kind, x: tx, y: ty, s: this.nho * 1.2, r: rnd(-.6, .6), t: 0 }); } }); }
   for (let i = 0; i < Math.round(n * .7); i++) S.muaHQ.push({ kind: loai(), x: rnd(-5, 545), y: rnd(-80, 0), vx: rnd(-15, 15), vy: rnd(150, 230), gy: rnd(600, 940), rot: rnd(0, 6), vr: rnd(-4, 4), s: rnd(.85, 1.2), delay: rnd(0, 3.5), t: 0 }); }
 function nemTien(arm) {
+  if (laOng()) return; // Ông Hoàng Bảy không tung tiền, không mưa tiền
   const h = (CO.hand && CO.hand[arm]) || { x: CO.x, y: CO.y - 150 }, out = Math.sign(h.x - CO.x) || arm;
   if (S.t - (S.lastMua || -99) > 4) { S.lastMua = S.t; muaTien(laOng() ? 160 : 220); } for (let i = 0; i < (laOng() ? 40 : GIA().id === 'codoi' ? 60 : 30); i++) S.money.push({ kind: 'n2', x: h.x + rnd(-4, 4), y: h.y + rnd(-4, 4), vx: (CO.x > CARPET.cx ? -1 : 1) * rnd(70, 185), vy: -rnd(250, 330), rot: rnd(-1, 1), vr: rnd(-7, 7),
     fw: rnd(2, 3.4), amp: rnd(18, 40), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(640, 890), t: 0, delay: i * .015, landed: 0, lt: 0, d: pickNote() });
