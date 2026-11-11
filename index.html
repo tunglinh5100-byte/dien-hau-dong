@@ -1122,9 +1122,15 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
   GIA_DS = { active: ds.some(g => g.id === qg) ? qg : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; window.KHOA_GIA = ds.some(g => g.id === qg) ? qg : null; } // ?gia=...: máy này chỉ live đúng giá đó, không chuyển giá
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
-const VAN_AU = new Audio('van36.mp3'); VAN_AU.preload = 'auto'; let VAN_STOP = 0, VAN_DONE = null;
-VAN_AU.addEventListener('timeupdate', () => { if (VAN_STOP && VAN_AU.currentTime >= VAN_STOP) { VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); } });
-function phatVan(a, b, done, fail) { try { VAN_STOP = b; VAN_DONE = done || null; VAN_AU.currentTime = Math.max(0, a); VAN_AU.volume = 1; const p = VAN_AU.play(); if (p && p.catch) p.catch(() => { if (fail) { VAN_STOP = 0; VAN_DONE = null; fail(); } else if (done) done(); }); } catch (e) { if (done) done(); } }
+const VAN_AU = new Audio('van/g30-thinh.mp3?v=1'); VAN_AU.preload = 'auto'; let VAN_STOP = 0, VAN_DONE = null;
+/* iPhone không cho nhảy tới giữa file văn 25 phút trước khi tải xong (văn phát từ đầu file = thỉnh Tam tòa Thánh Mẫu).
+   Nên mỗi giá có sẵn 2 file riêng: van/g<số>-thinh.mp3 (thỉnh → se giá) và van/g<số>-xe.mp3 (se giá → kết thúc), cắt theo bảng mốc anh Linh gửi. */
+let VAN_KEP = false;
+function vanFile(a, b) { const i = VAN_GIA.findIndex(v => Math.abs(v.thinh - a) < .05 && Math.abs(v.se - b) < .05); if (i >= 0) return 'van/g' + i + '-thinh.mp3?v=1'; const j = VAN_GIA.findIndex(v => Math.abs(v.se - .3 - a) < .05 && Math.abs(v.het + .4 - b) < .05); return j >= 0 ? 'van/g' + j + '-xe.mp3?v=1' : null; }
+function vanXongDoan() { if (!VAN_STOP) return; VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); }
+VAN_AU.addEventListener('ended', () => { if (VAN_KEP) vanXongDoan(); });
+VAN_AU.addEventListener('timeupdate', () => { if (!VAN_KEP && VAN_STOP && VAN_AU.currentTime >= VAN_STOP) { VAN_AU.pause(); VAN_STOP = 0; const f = VAN_DONE; VAN_DONE = null; if (f) f(); } });
+function phatVan(a, b, done, fail) { try { VAN_STOP = b; VAN_DONE = done || null; const fv = vanFile(a, b); VAN_KEP = !!fv; if (fv) { if (!VAN_AU.src.endsWith(fv)) VAN_AU.src = fv; try { VAN_AU.currentTime = 0; } catch (e) {} } else { if (!/van36\.mp3/.test(VAN_AU.src)) VAN_AU.src = 'van36.mp3'; VAN_AU.currentTime = Math.max(0, a); } VAN_AU.volume = 1; const p = VAN_AU.play(); if (p && p.catch) p.catch(() => { if (fail) { VAN_STOP = 0; VAN_DONE = null; fail(); } else if (done) done(); }); } catch (e) { if (done) done(); } }
 function giaDur() { const g = GIA(); return g.hang === 'mau' ? 75 : 360; }
 function GIA() { if (typeof S !== 'undefined' && S.chuyen && S.chuyen.look) return S.chuyen.look; return GIA_DS.list.find(g => g.id === GIA_DS.active) || GIA_DS.list[0] || GIA_MAC_DINH; }
 function luuGia() { try { const items = {}; GIA_DS.list.forEach(g => { items[g.id] = g; }); localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items })); } catch (e) {} }
