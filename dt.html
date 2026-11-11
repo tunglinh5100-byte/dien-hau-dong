@@ -657,7 +657,7 @@ function obStep(dt) {
   else if (sit && OB.cur === 'dung') obPlay('ngoi');
   else if (!sit && OB.cur !== 'mua' && OB.cur !== 'dung' && OB.cur !== 'tauhuong') obPlay('dung');
   if (!OB.intro && !OB.exit && sit && CO.giving && CO.giving !== OB.lastG) { OB.lastG = CO.giving; if (OB.cur === 'thuoc' || OB.cur === 'cafe') obPlay(Math.random() < .5 ? 'loc' : 'ruou'); }
-  if (OB.cur && OB.cur !== 'mua') { const sx = CARPET.cx, sy = CARPET.cy - 4, k = Math.min(1, dt * 5); CO.x += (sx - CO.x) * k; CO.y += (sy - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; } // ngồi, đứng dậy, thỉnh, xe giá: giữ ông tại chiếu, không trôi theo đường múa
+  if (OB.cur && OB.cur !== 'mua') { const kq = obKhaiQuang(), sx = kq ? CARPET.cx + 92 : CARPET.cx, sy = kq ? CARPET.cy + 12 : CARPET.cy - 4, k = Math.min(1, dt * (kq || OB.cur === 'tauhuong' ? .9 : 5)); /* khai quang: đứng góc phải sập hầu như chỗ Cô Đôi tung lộc */ CO.x += (sx - CO.x) * k; CO.y += (sy - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; } // ngồi, đứng dậy, thỉnh, xe giá: giữ ông tại chiếu, không trôi theo đường múa
   if ((OB.intro || OB.tau) && S.ob) { if (S.ob.ph !== 'mua') S.ob.ph = 'mua'; S.ob.t = 0; S.ob.cho = false; } // thỉnh, thay áo, tấu hương, khai quang: chưa ngồi
   else if (S.ob && S.ob.ph === 'mua' && !OB.exit && /nhac-ong-(heo|tau)/.test(bgm.src) && bgm.duration && !bgm.paused && bgm.currentTime >= bgm.duration - .35) { S.ob.ph = 'ngoi'; S.ob.t = 0; S.ob.cho = false; chuyenNhacOng(); S.banner = { text: 'Ông Bảy ngự, nghe văn · quay lại ban lộc cho con nhang', t: 0, life: 4 }; } // hết đoạn nhạc múa hèo thì ông ngồi nghe văn // đang thỉnh, thay áo: không tự chuyển sang ngồi nghe văn
   if (OB.cur === 'thayao') { const tv = OB.v.thayao; if (tv && tv.playbackRate !== .6) tv.playbackRate = .6; }
@@ -690,6 +690,7 @@ function obVanAo() { // văn "Hội thánh hát" lúc hầu dâng thay khăn áo
 function tauMap(t) { const F = 24, A = 728 / F, B = 192 / F, C = 141 / F, D = 176 / F, E = 10 / F, c0 = A, d0 = A + B, e0 = d0 + C, f0 = e0 + D;
   if (t < 91) return [t % A, 0, A]; if (t < 99) return [c0 + t - 91, c0, d0]; if (t < 99 + C) return [d0 + t - 99, d0, e0];
   if (t < 99 + C + 2 * D) return [e0 + (t - 99 - C) % D, e0, f0]; return [Math.min(f0 + E - .01, f0 + t - 99 - C - 2 * D), f0, f0 + E + 1]; }
+function obKhaiQuang() { if (OB.cur !== 'tauhuong') return false; const tv = OB.v.tauhuong; if (OB.tauNhac && !bgm.paused && /nhac-ong-tau/.test(bgm.src)) return bgm.currentTime >= 91.5; return !!tv && tv.currentTime >= 728 / 24 + .5; } // từ lúc xoay người sang khai quang đến hết khai quang
 function obNhacTau() { /* nhạc anh gửi: tấu hương (0:00), khai quang (1:39), múa hèo (2:00); tiếng trống, chiêng đã ghép đúng lúc vái */ try { bgm.src = 'nhac-ong-tau.mp3?v=2'; bgm.currentTime = 0; bgm.volume = .85; } catch (e) {} S.volTarget = .85; OB.tauNhac = true; if (S.sound) musStart(); }
 function obTauXong() { if (OB.cur !== 'tauhuong') return; OB.tau = false; S.ob.ph = 'mua'; S.ob.t = 0; obPlay('mua'); S.banner = { text: 'Ông Hoàng Bảy múa hèo', t: 0, life: 3 }; if (!(OB.tauNhac && !bgm.paused && /nhac-ong-tau/.test(bgm.src))) obNhac(); }
 function obNhac() { try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; } // vào nhạc múa hèo
