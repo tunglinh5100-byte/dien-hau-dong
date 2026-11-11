@@ -2248,7 +2248,7 @@ function rcCan(kind, dur, data, force) { if (RC.shot || (!force && S.t < RC.cool
 function rcNhin(name, force) { const p = S.people.find(q => q.name === name); if (p) rcCan('nguoi', 3.5, p, force); }
 function rcUpd(dt) {
   let tz = 1, fx = 270, fy = 480;
-  const tinh = S.chuyen || S.ket || (laOng() && typeof OB !== 'undefined' && OB.tau);
+  const tinh = true; // anh Linh: bỏ máy quay đẩy/lia, giữ toàn cảnh đứng yên như cũ
   if (tinh) RC.shot = null;
   else {
     if (RC.shot && S.t > RC.shot.until) RC.shot = null;
