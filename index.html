@@ -694,7 +694,7 @@ function tauMap(t) { const f = t * 24; let r = TAU_LICH[TAU_LICH.length - 1]; fo
 function obKhaiQuang() { if (OB.cur !== 'tauhuong') return false; const tv = OB.v.tauhuong; if (OB.tauNhac && !bgm.paused && /nhac-ong-tau/.test(bgm.src)) return bgm.currentTime >= TAU_LICH[7][0] / 24 + .5; return !!tv && tv.currentTime >= TAU_LICH[7][2] / 24 + .5; } // từ lúc xoay người sang khai quang đến hết khai quang
 function obMoiTau() { const tv = OB.v.tauhuong; if (!tv || tv.__moi) return; tv.__moi = 1; try { const p = tv.play(); if (p && p.then) p.then(() => { if (OB.cur !== 'tauhuong') tv.pause(); }).catch(() => { tv.__moi = 0; }); } catch (e) {} } // tải sẵn clip tấu hương trong lúc thay khăn áo
 function obMoGiu() { if (!OB.buf) return; if (!OB.fbuf) { OB.fbuf = document.createElement('canvas'); OB.fbuf.width = CV_W; OB.fbuf.height = CV_H; } const g = OB.fbuf.getContext('2d'); g.clearRect(0, 0, CV_W, CV_H); g.drawImage(OB.buf, 0, 0); OB.fade = { tf: obTf(), a: 1 }; } // giữ khung cuối thay áo để hoà dần sang tấu hương
-function obNhacTau() { /* nhạc anh gửi: tấu hương (0:00), khai quang (1:39), múa hèo (2:00); tiếng trống, chiêng đã ghép đúng lúc vái */ try { bgm.src = 'nhac-ong-tau.mp3?v=5'; bgm.currentTime = 0; bgm.volume = .85; } catch (e) {} S.volTarget = .85; OB.tauNhac = true; if (S.sound) musStart(); }
+function obNhacTau() { /* nhạc anh gửi: tấu hương (0:00), khai quang (1:39), múa hèo (2:00); tiếng trống, chiêng đã ghép đúng lúc vái */ try { bgm.src = 'nhac-ong-tau.mp3?v=6'; bgm.currentTime = 0; bgm.volume = .85; } catch (e) {} S.volTarget = .85; OB.tauNhac = true; if (S.sound) musStart(); }
 function obTauXong() { if (OB.cur !== 'tauhuong') return; OB.tau = false; S.ob.ph = 'mua'; S.ob.t = 0; obPlay('mua'); S.banner = { text: 'Ông Hoàng Bảy múa hèo', t: 0, life: 3 }; if (!(OB.tauNhac && !bgm.paused && /nhac-ong-tau/.test(bgm.src))) obNhac(); }
 function obNhac() { try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; } // vào nhạc múa hèo
 let obLastNow = performance.now();
@@ -1261,7 +1261,7 @@ function chonLoi(loai) { const ong = laOng(), B = ong ? LOI_BAN_ONG : LOI_BAN, K
 function khen(name, loai) { if (!name || String(name).startsWith('​')) return; loai = loai || 'chung'; if (KHEN.cur && KHEN.cur.name === name) return; KHEN.q = KHEN.q.filter(x => x.name !== name); KHEN.q.push({ name, loai }); if (KHEN.q.length > 6) KHEN.q.shift(); }
 // ---------- Cô nói "Ta ban khen cho …" (giọng đọc tiếng Việt có sẵn trên máy) ----------
 let VOL_KHEN = .8; try { const v = parseFloat(localStorage.getItem('hd_vol_khen')); if (v >= .05 && v <= 1) VOL_KHEN = v; } catch (e) {}
-let NOI_BAT = true; try { NOI_BAT = localStorage.getItem('hd_noi') !== '0'; } catch (e) {}
+let NOI_BAT = false; /* anh Linh: tắt hẳn giọng đọc "Ta ban khen…" ở cả hai giá, chỉ hiện chữ và nhạc văn */
 let VI_VOICE = null;
 let VI_NU = null, VI_NAM = null;
 const LA_NAM = v => /\ban\b|namminh|nam minh|male/i.test(v.name) && !/female/i.test(v.name);
@@ -1287,7 +1287,7 @@ function drawKhen() {
   const dau = parts[0].replace(/[,\s]+$/, '').trim(), sau = (parts[1] || '').replace(/^[,\s]+/, '').trim();
   ctx.save(); ctx.globalAlpha = Math.max(0, a);
   ctx.font = `800 14px ${SERIF}`; const w1 = ctx.measureText(nm).width; ctx.font = `700 10.5px ${SERIF}`; const w2 = ctx.measureText(dau).width; ctx.font = `700 12px ${SERIF}`; const w3 = sau ? ctx.measureText(sau).width : 0;
-  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, w / 2 + SAFE_X, 540 - w / 2 - SAFE_X), y = CO.y - (GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : 232) * sc, top = y + 18 - h;
+  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, (laOng() && OB.buf ? 232 : 0) + w / 2 + SAFE_X, 540 - w / 2 - SAFE_X), y = CO.y - (GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 345 : 232) * sc, top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
   rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 7, y + 17); ctx.lineTo(x, y + 27); ctx.lineTo(x + 7, y + 17); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
   text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 });
@@ -2166,11 +2166,12 @@ window.__hdDD = ddSet;
 })();
 window.__van = () => ({ t: VAN_AU.currentTime, xong: OB.vanXong, vol: bgm.volume, bsrc: String(bgm.src).slice(0, 40), ph: S.ob && S.ob.ph });
 window.__hdAm = () => ({ ao: VAN_OB_AO.paused ? '-' : Math.round(VAN_OB_AO.currentTime), cho: !!OB.cho, nhac: String(bgm.src).slice(0, 25).replace(/^.*\//, ''), am: +bgm.volume.toFixed(2), chay: !bgm.paused, van: VAN_AU.paused ? '-' : Math.round(VAN_AU.currentTime), khen: KHEN.cur ? KHEN.cur.name : '', tich: TICH.id, cam: +CAM.P.toFixed(1), zoom: +DD.z.toFixed(2), ph: S.ob && S.ob.ph, giving: !!CO.giving, dem: !!S.dem });
-window.__hdOb = { OB, obPlay, nghiLe, S: () => S, bgm: () => bgm, van: () => VAN_AU };
+window.__hdOb = { OB, obPlay, nghiLe, S: () => S, bgm: () => bgm, van: () => VAN_AU, khen: n => khen(n), KHEN: () => KHEN };
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
-  if (!CAM_ON || !CAM.on || CAM.tat) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
+  const camDung = laOng() && typeof OB !== 'undefined' && OB.buf && OB.tau; // Ông tấu hương, khai quang: máy quay đứng yên
+  if (!CAM_ON || !CAM.on || CAM.tat || camDung) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
   const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
   CAM.P = CAM.A * (2 * v - 1);
