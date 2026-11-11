@@ -217,9 +217,16 @@ function tungLoc() {
   S.loc = { kind: AK, ph: 'di', t: 0, gx: GIA().id === 'codoi' ? CARPET.cx + 92 : CARPET.cx + 118, gy: GIA().id === 'codoi' ? CARPET.cy + 12 : CARPET.cy + 20, arm: 1, u: 0, n: 0 }; S.throwT = .5;
 }
 // cô vung tay, tiền bay ra từ bàn tay
+function muaTien(n) { // mưa lộc: tiền rơi từ trên xuống khắp sân, phủ kín các con nhang
+  for (let i = 0; i < n; i++) S.money.push({ kind: 'n2', x: rnd(-10, 550), y: rnd(-120, 40), vx: rnd(-20, 20), vy: rnd(40, 120), vmax: rnd(120, 190), rot: rnd(-1, 1), vr: rnd(-6, 6),
+    fw: rnd(2, 3.4), amp: rnd(14, 30), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(600, 940), t: 0, delay: rnd(0, 3.5), landed: 0, lt: 0, d: pickNote() }); }
+function muaHoaQua(n, chi) { // lộc hoa, lộc quả: một phần cô tung ra, phần lớn rơi như mưa từ trên xuống khắp sân, rơi xuống nằm lại một lúc
+  const loai = () => chi === 'hoa' ? 'flower' : chi === 'qua' ? pick(['fruit', 'fruit', 'peach']) : pick(['fruit', 'flower', 'fruit', 'flower', 'peach']);
+  for (let i = 0; i < Math.round(n * .3); i++) { const tx = rnd(10, 530), ty = rnd(620, 935); S.flying.push({ x: CO.x + rnd(-10, 20), y: CO.y - 110, tx, ty, t: -rnd(0, 2.5), dur: rnd(1, 1.6), kind: loai(), nho: rnd(.8, 1.05), onDone() { S.locDat.push({ kind: this.kind, x: tx, y: ty, s: this.nho * 1.2, r: rnd(-.6, .6), t: 0 }); } }); }
+  for (let i = 0; i < Math.round(n * .7); i++) S.muaHQ.push({ kind: loai(), x: rnd(-5, 545), y: rnd(-80, 0), vx: rnd(-15, 15), vy: rnd(150, 230), gy: rnd(600, 940), rot: rnd(0, 6), vr: rnd(-4, 4), s: rnd(.85, 1.2), delay: rnd(0, 3.5), t: 0 }); }
 function nemTien(arm) {
   const h = (CO.hand && CO.hand[arm]) || { x: CO.x, y: CO.y - 150 }, out = Math.sign(h.x - CO.x) || arm;
-  for (let i = 0; i < (laOng() ? 26 : GIA().id === 'codoi' ? 32 : 16); i++) S.money.push({ kind: 'n2', x: h.x + rnd(-4, 4), y: h.y + rnd(-4, 4), vx: (CO.x > CARPET.cx ? -1 : 1) * rnd(70, 185), vy: -rnd(250, 330), rot: rnd(-1, 1), vr: rnd(-7, 7),
+  if (S.t - (S.lastMua || -99) > 4) { S.lastMua = S.t; muaTien(laOng() ? 160 : 220); } for (let i = 0; i < (laOng() ? 40 : GIA().id === 'codoi' ? 60 : 30); i++) S.money.push({ kind: 'n2', x: h.x + rnd(-4, 4), y: h.y + rnd(-4, 4), vx: (CO.x > CARPET.cx ? -1 : 1) * rnd(70, 185), vy: -rnd(250, 330), rot: rnd(-1, 1), vr: rnd(-7, 7),
     fw: rnd(2, 3.4), amp: rnd(18, 40), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(640, 890), t: 0, delay: i * .015, landed: 0, lt: 0, d: pickNote() });
   S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .5) { q.pose = 'raise'; q.poseT = 2.6; if (Math.random() < .35) q.bubble = { s: 'Con xin ' + xung(), t: S.t + rnd(0, .8) }; } });
 }
@@ -515,7 +522,7 @@ function cvStep(dt) {
   if (CVS.mode === 'front' && CO.giving && CO.giving.phase === 'give' && CO.giving.flyPending) { const g = CO.giving, fv = CVS.fv, rel = CVF_REL[CVS.img] || 2.5;
     if (!fv || fv.currentTime >= rel || (CVS.ft = (CVS.ft || 0) + dt) > 9) { g.flyPending = false; S.flying.push({ x: CO.x + 14, y: CO.y - 110, tx: DEM.x, ty: DEM.y - 34, t: 0, dur: 1.1, kind: g.kind, p: g.p });
       const more = S.people.filter(q => q.state === 'seat' && q !== g.p).sort(() => Math.random() - .5).slice(0, 2);
-      more.forEach((q, i) => S.flying.push({ x: CO.x + 14, y: CO.y - 110, tx: q.x, ty: q.y - 30, t: -.15 * (i + 1), dur: 1.2, kind: pick(['fruit', 'flower']), p: q }));
+      more.forEach((q, i) => S.flying.push({ x: CO.x + 14, y: CO.y - 110, tx: q.x, ty: q.y - 30, t: -.15 * (i + 1), dur: 1.2, kind: pick(['fruit', 'flower']), p: q })); muaHoaQua(170);
       S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .45) { q.pose = 'raise'; q.poseT = 2.4; if (Math.random() < .3) q.bubble = { s: pick(['Con xin cô', 'Lộc cô!', 'Con lạy cô']), t: S.t + rnd(0, .6) }; } }); wave(6); } }
   if (CVS.mode === 'front' && CO.giving && CO.giving.phase === 'give' && !CO.giving.flyPending && (!CVS.fv || CVS.fv.ended || (CVS.fv.duration && CVS.fv.currentTime >= CVS.fv.duration - .08))) { CO.downT = Math.min(CO.downT, .3); if (S.dem && S.dem.p === CO.giving.p) S.dem.t = Math.max(S.dem.t, (S.dem.lim || 10) - 1.6); }
   if (CVS.mode === 'front' && CVS.fv) { const fv = CVS.fv; if (fv.paused && !fv.ended && fv.readyState >= 2 && fv.currentTime < .05) cvPlay(fv);
@@ -1055,10 +1062,12 @@ function drawItem(kind, x, y, s) {
 }
 const ITEM_NAME = { sen: 'bông sen', note: 'tờ 500.000', flower: 'bông hoa', fruit: 'quả cam', peach: 'quả đào' };
 function updFlying(dt) {
+  S.locDat = (S.locDat || []).filter(d => (d.t += dt) < 7.5);
+  S.muaHQ = (S.muaHQ || []).filter(m => { m.t += dt; if (m.t < m.delay) return true; m.x += (m.vx + Math.sin(m.t * 2 + m.rot) * 25) * dt; m.y += m.vy * dt; m.rot += m.vr * dt; if (m.y >= m.gy) { S.locDat.push({ kind: m.kind, x: m.x, y: m.gy, s: m.s, r: rnd(-.6, .6), t: 0 }); return false; } return true; });
   S.flying.forEach(f => { f.t += dt; if (f.t >= f.dur && !f.done) { f.done = true; if (f.onDone) f.onDone(); const p = f.p; if (p && S.people.includes(p)) { p.carry = f.kind; p.pose = 'raise'; p.poseT = 3; p.bubble = { s: 'Con xin ' + xung(), t: S.t }; S.floats.push({ x: p.x, y: p.y - 56, s: p.name + ' được ' + xung() + ' ban ' + ITEM_NAME[f.kind], c: '#f6dc96', t: 0, life: 2.4 }); setTimeout(() => { if (p.carry === f.kind) p.carry = null; }, 5000); wave(3); } } });
   S.flying = S.flying.filter(f => !f.done);
 }
-function drawFlying() { S.flying.forEach(f => { if (f.an) return; const k = clamp(f.t / f.dur, 0, 1), x = f.x + (f.tx - f.x) * k, y = f.y + (f.ty - f.y) * k - Math.sin(k * Math.PI) * (f.thap ? 22 : 90); ctx.save(); ctx.translate(x, y); ctx.rotate(k * 6); drawItem(f.kind, 0, 0, 1.2); ctx.restore(); }); }
+function drawFlying() { (S.muaHQ || []).forEach(m => { if (m.t < m.delay) return; ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.rot); drawItem(m.kind, 0, 0, m.s); ctx.restore(); }); S.flying.forEach(f => { if (f.an) return; const k = clamp(f.t / f.dur, 0, 1), x = f.x + (f.tx - f.x) * k, y = f.y + (f.ty - f.y) * k - Math.sin(k * Math.PI) * (f.thap ? 22 : 90); ctx.save(); ctx.translate(x, y); ctx.rotate(k * 6); drawItem(f.kind, 0, 0, 1.2 * (f.nho || 1)); ctx.restore(); }); }
 // ---------- Cung văn: trống, đàn nguyệt + hát, sáo ----------
 function musician(x, y, kind, t) {
   ctx.save(); ctx.translate(x, y);
@@ -1485,6 +1494,7 @@ function updTay(dt) { TAY.forEach(tay => { if (!tay.go) return; const dx = tay.g
   if (d <= sp) { tay.x = tay.go[0]; tay.y = tay.go[1]; tay.go = null; const f = tay.then; tay.then = null; if (f) f(); } else { tay.x += dx / d * sp; tay.y += dy / d * sp; } tay.seat.x = tay.x; tay.seat.y = tay.y; }); }
 function noteSz(y) { return .78 + clamp((y - 560) / 340, 0, 1) * .38; }
 function drawMoneyFloor() {
+  (S.locDat || []).forEach(d => { ctx.save(); ctx.globalAlpha = d.t > 6 ? Math.max(0, 1 - (d.t - 6) / 1.5) : 1; ctx.translate(d.x, d.y); ctx.rotate(d.r); ctx.scale(1, .8); drawItem(d.kind, 0, 0, d.s); ctx.restore(); });
   S.money.forEach(m => { if (m.kind !== 'n2' || m.t < m.delay) return; const z = noteSz(m.gy);
     if (m.landed) { ctx.save(); ctx.globalAlpha = m.lt > 4.5 ? Math.max(0, 1 - (m.lt - 4.5) / 1.5) : 1; ctx.translate(m.x, m.gy); ctx.scale(1, m.flat); ctx.rotate(m.rot); note(0, 0, z, m.d, 1); ctx.restore(); }
     else { const k = clamp(1 - (m.gy - m.y) / 260, 0, 1); if (k > 0) { ctx.save(); ctx.globalAlpha = .28 * k; ctx.translate(m.x, m.gy); ctx.scale(1, .3); ctx.beginPath(); ctx.ellipse(0, 0, 18 * z, 9 * z, 0, 0, 7); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore(); } } });
@@ -1798,7 +1808,7 @@ function update(dt) {
     else if (L.ph === 'tung' && GIA().id === 'codoi') { L.u += dt;
       const ct = cvRelT(), K = L.kind || 'tien'; if (!L.rel && ((ct >= CVF_REL[K]) || (ct < 0 && L.u > 8)) && (ct >= 0 || !cvtOk)) { L.rel = true;
         if (K === 'tien') { nemTien(1); setTimeout(() => nemTien(-1), 120); }
-        else { for (let i = 0; i < 9; i++) S.flying.push({ x: CO.x - 10, y: CO.y - 110, tx: rnd(40, 500), ty: rnd(700, 930), t: -i * .09, dur: rnd(1, 1.4), kind: K === 'qua' ? 'fruit' : 'flower', p: null });
+        else { muaHoaQua(170, K === 'qua' ? 'qua' : 'hoa');
           S.floats.push({ x: 270, y: 560, s: 'Cô ban ' + (K === 'qua' ? 'lộc quả' : 'lộc hoa') + ' cho các con nhang đang xem', c: '#f6dc96', t: 0, life: 3.2 }); }
         S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .5) { q.pose = 'raise'; q.poseT = 2.4; } }); }
       if (L.rel && ((CVF[K] && CVF[K].ended) || L.u > 14 || (ct < 0 && L.u > 9))) { S.loc = null; S.locEnd = S.t; S.throwT = 0; CO.wait = 1; setTimeout(() => wave(14), 400); } }
@@ -1807,7 +1817,7 @@ function update(dt) {
   S.money.forEach(m => { if (m.kind !== 'n2') return; m.t += dt; if (m.t < m.delay) return;
     if (m.landed) { m.lt += dt; return; }
     m.vx *= 1 - Math.min(1, (m.vy < 0 ? .25 : .9) * dt); m.vy += 300 * dt;
-    if (m.vy > 0) { m.vy = Math.min(m.vy, 62 + 18 * Math.sin(m.t * m.fw * 2 + m.ph)); // rơi chậm như giấy
+    if (m.vy > 0) { m.vy = Math.min(m.vy, (m.vmax || 62) + 18 * Math.sin(m.t * m.fw * 2 + m.ph)); // rơi chậm như giấy
       const sw = Math.sin(m.t * m.fw + m.ph); m.x += Math.cos(m.t * m.fw + m.ph) * m.amp * m.fw * .5 * dt; m.rot += (sw * .7 - m.rot) * Math.min(1, dt * 5); }
     else m.rot += m.vr * dt;
     m.x += m.vx * dt; m.y += m.vy * dt;
