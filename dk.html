@@ -19,12 +19,13 @@ button:active{transform:translateY(2px)}
 <div class="row"><button class="ong" data-l="ong">Thỉnh Ông Bảy</button><button class="co" data-l="co">Thỉnh Cô Đôi</button></div>
 <div class="row" style="margin-top:12px"><button class="mua" data-l="mua">Múa</button><button class="loc" data-l="loc">Phát lộc</button></div>
 <div class="row" style="margin-top:12px"><button class="mua" data-l="ddbat">🎥 Góc máy: bật</button><button class="am tat" data-l="ddtat">🎥 Góc máy: tắt</button></div>
+<button id="ket" data-l="ket" style="margin-top:12px;width:100%;background:#3a1a10;border:1px solid #e6b552;color:#ffd76a">🙏 Kết thúc chương trình (bấm lần nữa để tiếp tục)</button>
 <div class="row" style="margin-top:12px"><button class="am" data-l="ambat">🔊 Bật âm thanh</button><button class="am tat" data-l="amtat">🔇 Tắt âm thanh</button></div>
 <div id="st"></div>
 <script>
 const Q = new URLSearchParams(location.search), GK = Q.get('gia'), tp = Q.get('dk') || ('dienhau-linhxo-7q4k' + (GK ? '-' + GK : '')), st = document.getElementById('st');
 if (GK) { document.querySelector('h1').textContent = 'Điều khiển giá ' + ({ codoi: 'Cô Đôi', ongbay: 'Ông Hoàng Bảy' }[GK] || GK); document.querySelectorAll('[data-l="hoicung"],[data-l="ong"],[data-l="co"]').forEach(b => { b.style.display = 'none'; }); }
-const TEN = { hoicung: 'Xe loan thánh giá', ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', bo: 'Thỉnh Cô Bơ', mua: 'Múa', loc: 'Phát lộc', ambat: 'Bật âm thanh', amtat: 'Tắt âm thanh', ddbat: 'Bật góc máy tự động', ddtat: 'Tắt góc máy tự động' };
+const TEN = { hoicung: 'Xe loan thánh giá', ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', bo: 'Thỉnh Cô Bơ', mua: 'Múa', loc: 'Phát lộc', ambat: 'Bật âm thanh', amtat: 'Tắt âm thanh', ddbat: 'Bật góc máy tự động', ddtat: 'Tắt góc máy tự động', ket: 'Kết thúc chương trình' };
 document.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', async () => {
   const l = b.dataset.l; st.textContent = 'Đang gửi: ' + TEN[l] + '…'; if (navigator.vibrate) navigator.vibrate(30);
   try { const r = await fetch('https://ntfy.sh/' + tp, { method: 'POST', body: l }); st.textContent = r.ok ? '✓ Đã gửi: ' + TEN[l] + ' (' + new Date().toLocaleTimeString('vi-VN') + ')' : 'Lỗi gửi (' + r.status + '), bấm lại'; }
