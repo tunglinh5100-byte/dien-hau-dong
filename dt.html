@@ -1640,10 +1640,19 @@ function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích g
 }
 /* ---------- Kết chương trình: bấm "Kết thúc" ở trang điều khiển → nhạc văn kết (Hội đã tan rồi…), giữa màn hình hiện giới thiệu tín ngưỡng thờ Mẫu cuộn lên cuộn xuống ---------- */
 const KET_AU = new Audio('nhac-ket.mp3?v=1'); KET_AU.preload = 'auto';
-function ketDong() { const B = window.BANG_TIN || {}, L = [];
-  L.push(['h', 'Tín ngưỡng thờ Mẫu Tam phủ']); (B.chung || []).forEach(x => L.push(['p', x]));
-  (B.codoi || []).slice(2, 4).forEach(x => L.push(['p', x]));
-  L.push(['n', 'Nguồn: ' + (B.nguon || 'Báo Nhân Dân (nhandan.vn)')]); return L; }
+/* Trích nguyên văn Báo Nhân Dân (đặt trong ngoặc kép, ghi rõ bài, ngày, đường dẫn). "…" là đoạn trích chưa hết câu. */
+const KET_TRICH = [
+  { q: ['Thực hành Tín ngưỡng thờ Mẫu Tam phủ của người Việt là Di sản văn hóa phi vật thể đại diện của nhân loại.',
+        'Trong một buổi lễ, thanh đồng sẽ đảm nhiệm vai trò của nhiều vị thần khác nhau.',
+        'Từ góc độ xã hội, với tính chất cởi mở của di sản, đã thúc đẩy sự khoan dung giữa các sắc tộc và tôn giáo.'],
+    c: 'Báo Nhân Dân, "UNESCO công nhận thực hành tín ngưỡng thờ Mẫu của người Việt là Di sản văn hóa phi vật thể", 01/12/2016', u: 'nhandan.vn/…-post279449.html' },
+  { q: ['Tín ngưỡng thờ Mẫu của người Việt là một tín ngưỡng bản địa lâu đời…',
+        'Tín ngưỡng thờ Mẫu bắt nguồn từ tục thờ nữ thần có nguồn gốc sâu xa từ thời “Mẫu hệ”…',
+        'Giá trị cốt lõi của tín ngưỡng thờ mẫu là cái tâm hướng thiện.'],
+    c: 'Báo Nhân Dân, "Phát huy Di sản Thực hành Tín ngưỡng thờ Mẫu tam phủ của người Việt", 17/11/2023', u: 'nhandan.vn/…-post783109.html' },
+];
+function ketDong() { const L = [['h', 'Tín ngưỡng thờ Mẫu Tam phủ']];
+  KET_TRICH.forEach(k => { k.q.forEach(x => L.push(['p', '“' + x + '”'])); L.push(['n', '— ' + k.c]); L.push(['u', k.u]); }); return L; }
 function ketThuc() { if (S.ket) { S.ket = null; try { KET_AU.pause(); } catch (e) {} S.banner = { text: 'Tiếp tục chương trình', t: 0, life: 3 }; return; }
   S.ket = { t: 0 }; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); VAN_OB_AO.pause(); bgm.pause(); } catch (e) {}
   try { KET_AU.currentTime = 0; KET_AU.muted = !S.sound; const p = KET_AU.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
@@ -1656,9 +1665,9 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Cảm ơn cả nhà đã cùng theo dõi', 270, Y + 72);
   ctx.strokeStyle = 'rgba(230,181,82,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X + 40, Y + 92); ctx.lineTo(X + Wd - 40, Y + 92); ctx.moveTo(X + 40, Y + Hh - 88); ctx.lineTo(X + Wd - 40, Y + Hh - 88); ctx.stroke();
   ctx.font = `800 18px ${SERIF}`; ctx.fillStyle = '#ffd76a'; ctx.fillText('Live 11h30 trưa hàng ngày', 270, Y + Hh - 62);
-  ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Hẹn gặp lại cả nhà vào ngày mai', 270, Y + Hh - 34);
-  if (!K.ds) { const ds = [], st = { h: [`800 17px ${SERIF}`, 30, '#f6dc96'], p: [`500 15.5px ${SERIF}`, 23, '#f6e9d6'], n: [`italic 500 12.5px ${SERIF}`, 22, '#e6b552'] };
-    ketDong().forEach(([k, x]) => { const [f, lh, c] = st[k]; ctx.font = f; wrapTxt((k === 'p' ? '✦ ' : '') + x, Wd - 64).forEach(l => ds.push({ f, lh, c, l })); if (k === 'p') ds.push({ f, lh: 8, c, l: '' }); });
+  ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Hẹn gặp lại các ghế vào ngày mai', 270, Y + Hh - 34);
+  if (!K.ds) { const ds = [], st = { h: [`800 17px ${SERIF}`, 30, '#f6dc96'], p: [`500 15.5px ${SERIF}`, 23, '#f6e9d6'], n: [`italic 600 12.5px ${SERIF}`, 18, '#e6b552'], u: [`500 11.5px ${SERIF}`, 26, 'rgba(230,181,82,.8)'] };
+    ketDong().forEach(([k, x]) => { const [f, lh, c] = st[k]; ctx.font = f; wrapTxt(x, Wd - 64).forEach(l => ds.push({ f, lh, c, l })); if (k === 'p') ds.push({ f, lh: 8, c, l: '' }); });
     K.ds = ds; K.H = ds.reduce((m, d) => m + d.lh, 0); }
   const top = Y + 100, vis = Hh - 196, du = Math.max(0, K.H - vis), chu = du ? 8 + du / 9 : 1, u = (K.t % (2 * chu)) / chu, e = u < 1 ? u : 2 - u, off = du * Math.min(1, Math.max(0, (e * chu - 4) / Math.max(1, chu - 8))); // cuộn lên rồi cuộn xuống, dừng 4 giây ở hai đầu
   ctx.save(); ctx.beginPath(); ctx.rect(X + 10, top, Wd - 20, vis); ctx.clip(); let y = top + 6 - off;
