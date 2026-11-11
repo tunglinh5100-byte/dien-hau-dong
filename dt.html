@@ -2056,8 +2056,23 @@ function drawHelpers(t) {
   if (between(T, CG.khan) && T < CG.khanDoi) { const k2 = prog(T, [CG.khan[0], CG.khanDoi]), sc = depthScale(CO.y) * 1.02; ctx.save(); ctx.translate(CO.x, CO.y); ctx.scale(sc, sc);
     const save = S.chuyen.look; S.chuyen.look = Object.assign({}, save, { khan: c.to.khan, vienKhan: c.to.vienKhan }); khanVan(0, -192 + 88 - 11 - (1 - k2) * 70, 15.5, 6, 7, 0); S.chuyen.look = save; ctx.restore(); }
 }
+/* Dải "đang ở bước nào" của giá hầu (đang thử: chỉ hiện khi link có ?buoc=1, chỉ giá Ông) */
+const BUOC_ON = /[?&]buoc=1/.test(location.search);
+const BUOC_ONG = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ban lộc', 'Xe giá'];
+function buocOng() { if (!(typeof OB !== 'undefined' && OB.buf && laOng()) || S.chuyen) return -1;
+  if (OB.exit || OB.hold) return 6; if (OB.intro) return OB.cur === 'thayao' ? 1 : 0;
+  if (OB.tau) return obKhaiQuang() ? 3 : 2; return S.ob && S.ob.ph === 'ngoi' ? 5 : 4; }
+function drawBuoc() { if (!BUOC_ON || S.cat) return; const cur = buocOng(); if (cur < 0) return; const steps = BUOC_ONG, sep = '  ·  ';
+  ctx.save(); ctx.font = `700 11px ${SERIF}`; const parts = steps.map((x, i) => (i === cur ? '▶ ' : '') + x);
+  const wd = (p, i) => { ctx.font = i === cur ? `800 11.5px ${SERIF}` : `600 11px ${SERIF}`; return ctx.measureText(p).width; };
+  ctx.font = `700 11px ${SERIF}`; const ws = ctx.measureText(sep).width; let tw = 0; parts.forEach((p, i) => { tw += wd(p, i) + (i ? ws : 0); });
+  const Wd = Math.min(520, tw + 28), y0 = 128, h = 24; rr(270 - Wd / 2, y0, Wd, h, 12, 'rgba(20,10,8,.72)'); ctx.strokeStyle = 'rgba(230,181,82,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(270 - Wd / 2, y0, Wd, h, 12); ctx.stroke();
+  let x = 270 - tw / 2; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  parts.forEach((p, i) => { if (i) { ctx.font = `700 11px ${SERIF}`; ctx.fillStyle = 'rgba(230,181,82,.55)'; ctx.fillText(sep, x, y0 + h / 2 + .5); x += ws; }
+    const w1 = wd(p, i); ctx.fillStyle = i === cur ? '#ffd76a' : i < cur ? 'rgba(246,233,214,.45)' : 'rgba(246,233,214,.82)'; ctx.fillText(p, x, y0 + h / 2 + .5); x += w1; });
+  ctx.restore(); }
 function drawGiaPill() {
-  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + ' · ' + GD_TEN[giaiDoan()]; ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
+  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + (BUOC_ON && buocOng() >= 0 ? '' : ' · ' + GD_TEN[giaiDoan()]); drawBuoc(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
   rr(270 - w / 2, 160, w, 24, 12, 'rgba(142,33,28,.88)'); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(270 - w / 2, 160, w, 24, 12); ctx.stroke();
   text('🌸 ' + s, 270, 172.5, 12, '#f6dc96', { f: SERIF, w: 700 });
 }
