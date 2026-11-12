@@ -801,7 +801,7 @@ function cbViTri(dt) {
   const L = CB_LICH[CB.i] || [], ten = L[0], kieu = L[5]; let tx = CARPET.cx, ty = CARPET.cy - 4, sp = 3;
   if (kieu === 'di' && !CB.hold) { CB.pha += dt * 2 * Math.PI / 13; tx = CARPET.cx + 78 * Math.sin(CB.pha); ty = CARPET.cy - 4 - 6 * Math.cos(CB.pha); sp = 8; const vx = Math.cos(CB.pha); if (Math.abs(vx) > .2) CB.dir = vx > 0 ? 1 : -1; } // đi xuyến trái phải, quay người theo hướng đi
   else if (ten === 'tungloc' || ten === 'tungloc2') { tx = CARPET.cx - 76; ty = CARPET.cy + 8; sp = 1.6; CB.dir = 1; } // tung lộc ở góc trái sập hầu, gần cung văn, mặt hướng vào giữa
-  else { CB.dir = 1; if (ten === 'vengoi') sp = 1.2; }
+  else { CB.dir = 1; if (ten === 'vengoi') { const v = CB.v.vengoi; sp = v && v.currentTime > 2.6 ? 30 : 2.2; } }
   const k = Math.min(1, dt * sp); CO.x += (tx - CO.x) * k; CO.y += (ty - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y;
   CB.fl = (CB.fl == null ? CB.dir : CB.fl) + (CB.dir - (CB.fl == null ? CB.dir : CB.fl)) * Math.min(1, dt * 7); }
 function cbStep(dt) {
@@ -1392,7 +1392,7 @@ function drawKhen() {
   const dau = parts[0].replace(/[,\s]+$/, '').trim(), sau = (parts[1] || '').replace(/^[,\s]+/, '').trim();
   ctx.save(); ctx.globalAlpha = Math.max(0, a);
   ctx.font = `800 14px ${SERIF}`; const w1 = ctx.measureText(nm).width; ctx.font = `700 10.5px ${SERIF}`; const w2 = ctx.measureText(dau).width; ctx.font = `700 12px ${SERIF}`; const w3 = sau ? ctx.measureText(sau).width : 0;
-  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, (laOng() && OB.buf ? 232 : 0) + w / 2 + SAFE_X, 540 - w / 2 - SAFE_X), y = CO.y - (GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 345 : 232) * sc, top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
+  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, (laOng() && OB.buf ? 232 : 0) + w / 2 + SAFE_X, (GIA().id === 'chaube' ? W - SAFE_X - 185 : 540 - SAFE_X) - w / 2) /* Chầu Bé: không đè lên bảng sự tích bên phải */, y = CO.y - (GIA().id === 'chaube' && CB.buf ? (CB_LICH[CB.i] && ['vengoi', 'banloc', 'xegia', 'thinh', 'tungkhan', 'thayao'].includes(CB_LICH[CB.i][0]) ? 252 : 300) : GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 345 : 232) * sc, /* Chầu Bé: khung ban khen cao qua đầu, không che mặt chầu */ top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
   rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 7, y + 17); ctx.lineTo(x, y + 27); ctx.lineTo(x + 7, y + 17); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
   text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 });
@@ -2330,7 +2330,7 @@ window.__hdOb = { OB, obPlay, nghiLe, S: () => S, bgm: () => bgm, van: () => VAN
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
-  const camDung = laOng() && typeof OB !== 'undefined' && OB.buf && OB.tau; // Ông tấu hương, khai quang: máy quay đứng yên
+  const camDung = (laOng() && typeof OB !== 'undefined' && OB.buf && OB.tau) || (typeof CB !== 'undefined' && cbDangLe() && CB_LICH[CB.i] && CB_LICH[CB.i][0] === 'vengoi'); // Chầu Bé ngồi ngự tửu: máy quay đứng yên // Ông tấu hương, khai quang: máy quay đứng yên
   if (!CAM_ON || !CAM.on || CAM.tat || camDung) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
   const m = T * 9 / 26, h = T * 4 / 26, v = u < m ? e(u / m) : u < m + h ? 1 : u < 2 * m + h ? 1 - e((u - m - h) / m) : 0; // lia sang, dừng, lia về, dừng
