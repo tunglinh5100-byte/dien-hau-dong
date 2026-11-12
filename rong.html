@@ -750,16 +750,16 @@ function ocDraw(t, x, y, sc) {
 
 // ---------- Chầu Bé Bắc Lệ bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 const CB = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CB_TF = {"thinh": [0.8, 29.2, 137], "tungkhan": [0.8, 29.2, 137], "thayao": [0.8, 29.2, 137], "vaihuong": [0.944, -12.7, 23.3], "baisai": [0.944, -2.3, 29], "khaiquang": [0.851, 29.9, 61.6], "muamoi": [0.814, 27.4, 82.8], "tungtien": [0.845, 32.7, 67.9], "tunghoa": [0.845, 30.1, 67.9], "tungqua": [0.845, 35.2, 67.9], "vengoi": [0.845, 25.9, 65.3], "banloc": [0.845, 25.9, 65.3], "xegia": [0.845, 25.9, 65.3]};
+const CB_TF = {"thinh": [0.8, 29.2, 137], "tungkhan": [0.8, 29.2, 137], "thayao": [0.8, 29.2, 137], "vaihuong": [0.944, -12.7, 23.3], "baisai": [0.944, -2.3, 29], "khaiquang": [0.851, 29.9, 61.6], "muamoi": [0.814, 27.4, 82.8], "quay": [0.851, -5.0, 65.0], "tungtien": [0.845, 32.7, 67.9], "tunghoa": [0.845, 30.1, 67.9], "tungqua": [0.845, 35.2, 67.9], "vengoi": [0.845, 25.9, 65.3], "banloc": [0.845, 25.9, 65.3], "xegia": [0.845, 25.9, 65.3]};
 const CB_AU = { thinh: 'cb-nhac-thinh.mp3', tau: 'cb-nhac-tau.mp3', loc: 'cb-nhac-loc.mp3', nv12: 'cb-nhac-nv12.mp3', nv13: 'cb-nhac-nv13.mp3' };
-/* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
+/* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CB_LICH = [
   ['thinh', 'thinh', 0, 0, 'thinh', 'lap', 'Cung văn thỉnh giá Chầu Bé Bắc Lệ'],
   ['tungkhan', 'tau', 0, 10, 'tungkhan', 'vua', 'Chầu Bé giáng đồng, tung khăn'],
   ['thayao', 'tau', 10, 25.5, 'thayao', 'vua', 'Tay hương, tay khăn dâng thay khăn áo cho Chầu'],
   ['vaihuong', 'tau', 25.5, 58.5, 'vaihuong', 'vai', 'Chầu Bé vái hương công đồng'],
   ['baisai', 'tau', 58.5, 99.5, 'baisai', 'di', 'Chầu Bé múa bài sai'],
-  ['khaiquang', 'tau', 99.5, 120.5, 'khaiquang', 'di', 'Chầu Bé múa đuốc khai quang'],
+  ['khaiquang', 'tau', 99.5, 120.5, 'quay', 'xuyen', 'Chầu Bé múa đuốc khai quang'],
   ['muamoi', 'tau', 120.5, 150, 'muamoi', 'di', 'Chầu Bé múa mồi'],
   ['muamoi2', 'loc', 0, 25, 'muamoi', 'di', ''],
   ['tungloc', 'loc', 25, 150, 'tungtien', 'lap', 'Chầu Bé tung lộc cho các con nhang', [[48, 'tien'], [69, 'qua'], [84, 'tien'], [90, 'hoa'], [119, 'tien'], [139, 'qua']]],
@@ -774,14 +774,14 @@ const CB_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CB_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cb-' + n + '.mp4?v=2'; CV_HOLD.appendChild(v); CB.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cb-' + n + '.mp4?v=3'; CV_HOLD.appendChild(v); CB.v[n] = v; });
   CB.au = new Audio(); CB.au.preload = 'auto';
 })();
 function cbDangLe() { return typeof CB !== 'undefined' && !!CB.buf && GIA().id === 'chaube'; }
 function cbReset() { if (!CB.buf) return; CB.i = 0; CB.t = 0; CB.lap = 0; CB.cue = 0; CB.cueClip = null; CB.exitTo = null; CB.hold = false; CB.xong = false; CB.auKey = null; CB.cur = null; CB.ok = false; try { CB.au.pause(); } catch (e) {} cbVao(0); }
 function cbPlay(n, from) { const v = CB.v[n]; if (!v) return; if (CB.cur !== n) { const old = CB.v[CB.cur]; if (old) try { old.pause(); } catch (e) {} CB.cur = n; } CB.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
 function cbAuPlay(key, at) { const a = CB.au; if (!a) return; try { if (CB.auKey !== key) { a.src = CB_AU[key] + '?v=1'; CB.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
-function cbVao(i) { const L = CB_LICH[i]; if (!L) return; CB.i = i; CB.cue = 0; CB.cueClip = null; CB.t = L[2]; CB.lap = 0; const [, au, a, , clip, kieu, chu] = L;
+function cbVao(i) { const L = CB_LICH[i]; if (!L) return; CB.i = i; CB.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CB.cue = 0; CB.cueClip = null; CB.t = L[2]; CB.lap = 0; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CB.auKey === au && !CB.au.paused && Math.abs(CB.au.currentTime - a) < 1.5) {} else cbAuPlay(au, a); } else { try { CB.au.pause(); } catch (e) {} }
   const v = CB.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : 1; }
@@ -797,10 +797,13 @@ function coVideoGia(id) { return (id === 'ongbay' && OB.buf) || (id === 'codoi' 
 function cbCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
   if (k === 'tien') { muaTien(220); if (CB.cur === 'tungtien') cbPlay('tungtien', 0); }
   else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CB.cueClip = c; const v = CB.v[c]; if (v) { v.loop = false; v.playbackRate = 1; } cbPlay(c, 0); setTimeout(() => { if (cbDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
+const CB_QUAY = { di: [2.2, 11.8], q1: 12.6, q2: [14.0, 14.5] }; // clip quay người của Tú: 2,2–11,8 giây đi hướng trái; 11,8–12,6 quay qua lưng; 14,0–14,5 quay tiếp sang hướng mới
 const CB_VAI = [2.4, 5.0]; // clip vái hương: giây 2,4 đến 5,0 cô quay mặt xuống vái, bỏ đoạn đó, chỉ vái lên ban công đồng
 function cbViTri(dt) {
   const L = CB_LICH[CB.i] || [], ten = L[0], kieu = L[5]; let tx = CARPET.cx, ty = CARPET.cy - 4, sp = 3;
-  if (kieu === 'di' && !CB.hold) { CB.pha += dt * 2 * Math.PI / 13; tx = CARPET.cx + 78 * Math.sin(CB.pha); ty = CARPET.cy - 4 - 6 * Math.cos(CB.pha); sp = 8; const vx = Math.cos(CB.pha); if (Math.abs(vx) > .2) CB.dir = vx > 0 ? 1 : -1; } // đi xuyến trái phải, quay người theo hướng đi
+  if (kieu === 'xuyen' && CB.xy && !CB.hold) { const X = CB.xy, v = CB.v.quay, ct = v ? v.currentTime : CB_QUAY.di[0]; let u = X.ph === 'walk' ? clamp((ct - CB_QUAY.di[0]) / (CB_QUAY.di[1] - CB_QUAY.di[0]), 0, 1) : X.ph === 't1' ? 1 : 0;
+    tx = X.m ? CARPET.cx - 45 + 125 * u : CARPET.cx + 80 - 125 * u; /* lệch phải: bên trái có bình tim */ ty = CARPET.cy - 4; const k = Math.min(1, dt * 10); CO.x += (tx - CO.x) * k; CO.y += (ty - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; CB.dir = X.m ? -1 : 1; CB.fl = CB.dir; return; } // khai quang: đi theo clip, quay người thật, không lật hình
+  if (kieu === 'di' && !CB.hold) { CB.pha += dt * 2 * Math.PI / 13; tx = CARPET.cx + 18 + 62 * Math.sin(CB.pha); /* lệch phải: bên trái có bình tim */ ty = CARPET.cy - 4 - 6 * Math.cos(CB.pha); sp = 8; const vx = Math.cos(CB.pha); if (Math.abs(vx) > .2) CB.dir = vx > 0 ? 1 : -1; } // đi xuyến trái phải, quay người theo hướng đi
   else if (ten === 'tungloc' || ten === 'tungloc2') { tx = CARPET.cx - 76; ty = CARPET.cy + 8; sp = 1.6; CB.dir = 1; } // tung lộc ở góc trái sập hầu, gần cung văn, mặt hướng vào giữa
   else { CB.dir = 1; if (ten === 'vengoi') sp = 1.2; }
   const k = Math.min(1, dt * sp); CO.x += (tx - CO.x) * k; CO.y += (ty - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y;
@@ -824,8 +827,13 @@ function cbStep(dt) {
     else {
       const cues = L[7] || []; while (CB.cue < cues.length && CB.t >= cues[CB.cue][0]) { cbCue(cues[CB.cue][1]); CB.cue++; }
       if (CB.cueClip && v && (v.ended || (v.duration && v.currentTime >= v.duration - .06))) { CB.cueClip = null; const b = CB.v[clip]; if (b) b.loop = true; cbPlay(clip, 0); }
+      if (kieu === 'xuyen' && v && CB.xy) { const X = CB.xy, ct = v.currentTime; // đi trái → quay qua lưng → (soi gương) đi phải → quay → đi trái
+        if (X.init) { try { v.currentTime = CB_QUAY.di[0]; } catch (e) {} X.init = false; }
+        else if (X.ph === 'walk' && ct >= CB_QUAY.di[1]) X.ph = 't1';
+        else if (X.ph === 't1' && ct >= CB_QUAY.q1) { X.ph = 't2'; X.m = !X.m; try { v.currentTime = CB_QUAY.q2[0]; } catch (e) {} }
+        else if (X.ph === 't2' && ct >= CB_QUAY.q2[1]) { X.ph = 'walk'; try { v.currentTime = CB_QUAY.di[0]; } catch (e) {} } }
       if (kieu === 'vai' && v && !CB.cueClip) { if (v.currentTime > CB_VAI[0] && v.currentTime < CB_VAI[1]) try { v.currentTime = CB_VAI[1]; } catch (e) {} if (v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = CB_VAI[1]; } catch (e) {} cvPlay(v); } }
-      if (!CB.cueClip && v && !v.loop && kieu !== 'vai' && v.duration && v.currentTime >= v.duration - .06) { if (kieu === 'ngoi') { try { v.currentTime = 3.2; } catch (e) {} cvPlay(v); } else if (!v.paused) try { v.pause(); } catch (e) {} } // ngồi rồi thì lặp đoạn ngự tửu; còn lại giữ dáng cuối
+      if (!CB.cueClip && v && !v.loop && kieu !== 'vai' && kieu !== 'xuyen' && v.duration && v.currentTime >= v.duration - .06) { if (kieu === 'ngoi') { try { v.currentTime = 3.2; } catch (e) {} cvPlay(v); } else if (!v.paused) try { v.pause(); } catch (e) {} } // ngồi rồi thì lặp đoạn ngự tửu; còn lại giữ dáng cuối
       if (CB.t >= den - .05 || (a && CB.auKey === au && a.ended)) cbTiep();
     }
   }
