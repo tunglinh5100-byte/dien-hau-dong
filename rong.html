@@ -755,8 +755,8 @@ const CB_AU = { thinh: 'cb-nhac-thinh.mp3', tau: 'cb-nhac-tau.mp3', loc: 'cb-nha
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CB_LICH = [
   ['thinh', 'thinh', 0, 0, 'thinh', 'lap', 'Cung văn thỉnh giá Chầu Bé Bắc Lệ'],
-  ['tungkhan', null, 0, 0, 'tungkhan', 'mot', 'Chầu Bé giáng đồng, tung khăn'],
-  ['thayao', 'tau', 0, 25.5, 'thayao', 'vua', 'Tay hương, tay khăn dâng thay khăn áo cho Chầu'],
+  ['tungkhan', 'tau', 0, 10, 'tungkhan', 'vua', 'Chầu Bé giáng đồng, tung khăn'],
+  ['thayao', 'tau', 10, 25.5, 'thayao', 'vua', 'Tay hương, tay khăn dâng thay khăn áo cho Chầu'],
   ['vaihuong', 'tau', 25.5, 58.5, 'vaihuong', 'vai', 'Chầu Bé vái hương công đồng'],
   ['baisai', 'tau', 58.5, 99.5, 'baisai', 'di', 'Chầu Bé múa bài sai'],
   ['khaiquang', 'tau', 99.5, 120.5, 'khaiquang', 'di', 'Chầu Bé múa đuốc khai quang'],
@@ -767,7 +767,7 @@ const CB_LICH = [
   ['vengoi', 'nv12', 62, 150, 'vengoi', 'ngoi', 'Chầu Bé về ngồi, ngự tửu'],
   ['banloc', 'nv13', 62, 141, 'banloc', 'lap', 'Chầu Bé ban lộc cho các con nhang'],
   ['xegia', 'nv13', 141, 149.1, 'xegia', 'vua', 'Chầu Bé xe giá hồi cung']];
-const CB_LAP = 3; // văn thỉnh hát 3 lượt
+const CB_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 (function cbInit() {
   if (/[?&]cb=0/.test(location.search)) return;
   CB.buf = document.createElement('canvas'); CB.buf.width = CV_W; CB.buf.height = CV_H;
@@ -2095,7 +2095,7 @@ function shareLive(name) { const p = person(name); hu(p, name + ' chia sẻ live
 // cô về ngồi giữa chiếu trước ban Công Đồng → lời văn ngân luyến → phủ khăn đỏ, nhạc thỉnh giá mới nổi lên, cô ngồi nghiêng ngả
 // → tung khăn → tay hương, tay khăn lên thay áo, thay vấn (~30 giây) → cô đứng lên, giá mới ngự đồng
 S.ob = { ph: 'mua', t: 0 }; const GIA_DUR = 360; S.giaT = 0; S.chuyen = null; S.tuChuyen = false; S.volTarget = .85; CO.sit = 0;
-const SEAT_Y = CARPET.cy - CARPET.ry + 8; const VAN_LAP = 3; // văn thỉnh hát 3 lượt cho dài
+const SEAT_Y = CARPET.cy - CARPET.ry + 8; const VAN_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 const CG = { l1: [.6, 3.2], n1: [2.8, 6.4], l2: [5.8, 7.6], n2: [7.2, 10.6], veil: [4, 5], thinh: 10.2, toss: [18.9, 21.6], helpIn: [15.4, 18.6], ao: [21.6, 25.2], aoDoi: 23.4, khan: [29.5, 33.5], khanDoi: 33.3, helpOut: [44, 47], dung: [47, 48.2], het: 50 };
 function nextGiaId() { const l = GIA_DS.list, i = l.findIndex(g => g.id === GIA_DS.active); return l[(i + 1) % l.length].id; }
 function hoiCung() {
