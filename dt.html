@@ -751,7 +751,7 @@ function ocDraw(t, x, y, sc) {
 
 // ---------- Chầu Bé Bắc Lệ bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 const CB = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CB_TF = {"thinh": [0.8, 29.2, 137], "tungkhan": [0.8, 29.2, 137], "thayao": [0.8, 29.2, 137], "vaihuong": [0.944, -12.7, 23.3], "baisai": [0.944, -2.3, 29], "khaiquang": [0.814, 27.4, 83.6], "tungtien": [0.845, 32.7, 67.9], "tunghoa": [0.845, 30.1, 67.9], "tungqua": [0.845, 35.2, 67.9], "vengoi": [0.845, 25.9, 65.3], "banloc": [0.845, 25.9, 65.3], "xegia": [0.845, 25.9, 65.3]};
+const CB_TF = {"thinh": [0.8, 29.2, 137], "tungkhan": [0.8, 29.2, 137], "thayao": [0.8, 29.2, 137], "vaihuong": [0.944, -12.7, 23.3], "baisai": [0.944, -2.3, 29], "khaiquang": [0.851, 29.9, 61.6], "muamoi": [0.814, 27.4, 82.8], "tungtien": [0.845, 32.7, 67.9], "tunghoa": [0.845, 30.1, 67.9], "tungqua": [0.845, 35.2, 67.9], "vengoi": [0.845, 25.9, 65.3], "banloc": [0.845, 25.9, 65.3], "xegia": [0.845, 25.9, 65.3]};
 const CB_AU = { thinh: 'cb-nhac-thinh.mp3', tau: 'cb-nhac-tau.mp3', loc: 'cb-nhac-loc.mp3', nv12: 'cb-nhac-nv12.mp3', nv13: 'cb-nhac-nv13.mp3' };
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CB_LICH = [
@@ -761,8 +761,8 @@ const CB_LICH = [
   ['vaihuong', 'tau', 25.5, 58.5, 'vaihuong', 'vai', 'Chầu Bé vái hương công đồng'],
   ['baisai', 'tau', 58.5, 99.5, 'baisai', 'di', 'Chầu Bé múa bài sai'],
   ['khaiquang', 'tau', 99.5, 120.5, 'khaiquang', 'di', 'Chầu Bé múa đuốc khai quang'],
-  ['muamoi', 'tau', 120.5, 150, 'khaiquang', 'di', 'Chầu Bé múa mồi'],
-  ['muamoi2', 'loc', 0, 25, 'khaiquang', 'di', ''],
+  ['muamoi', 'tau', 120.5, 150, 'muamoi', 'di', 'Chầu Bé múa mồi'],
+  ['muamoi2', 'loc', 0, 25, 'muamoi', 'di', ''],
   ['tungloc', 'loc', 25, 150, 'tungtien', 'lap', 'Chầu Bé tung lộc cho các con nhang', [[48, 'tien'], [69, 'qua'], [84, 'tien'], [90, 'hoa'], [119, 'tien'], [139, 'qua']]],
   ['tungloc2', 'nv12', 0, 62, 'tunghoa', 'lap', '', [[0.3, 'tien'], [32, 'qua']]],
   ['vengoi', 'nv12', 62, 150, 'vengoi', 'ngoi', 'Chầu Bé về ngồi, ngự tửu'],
@@ -775,7 +775,7 @@ const CB_LAP = 3; // văn thỉnh hát 3 lượt
   Object.keys(CB_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cb-' + n + '.mp4?v=1'; CV_HOLD.appendChild(v); CB.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cb-' + n + '.mp4?v=2'; CV_HOLD.appendChild(v); CB.v[n] = v; });
   CB.au = new Audio(); CB.au.preload = 'auto';
 })();
 function cbDangLe() { return typeof CB !== 'undefined' && !!CB.buf && GIA().id === 'chaube'; }
