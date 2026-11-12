@@ -749,19 +749,19 @@ function ocDraw(t, x, y, sc) {
 }
 
 // ---------- Chầu Bé Bắc Lệ bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
-const CB = { v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
+const CB = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
 const CB_TF = {"thinh": [0.8, 29.2, 137], "tungkhan": [0.8, 29.2, 137], "thayao": [0.8, 29.2, 137], "vaihuong": [0.944, -12.7, 23.3], "baisai": [0.944, -2.3, 29], "khaiquang": [0.814, 27.4, 83.6], "tungtien": [0.845, 32.7, 67.9], "tunghoa": [0.845, 30.1, 67.9], "tungqua": [0.845, 35.2, 67.9], "vengoi": [0.845, 25.9, 65.3], "banloc": [0.845, 25.9, 65.3], "xegia": [0.845, 25.9, 65.3]};
 const CB_AU = { thinh: 'cb-nhac-thinh.mp3', tau: 'cb-nhac-tau.mp3', loc: 'cb-nhac-loc.mp3', nv12: 'cb-nhac-nv12.mp3', nv13: 'cb-nhac-nv13.mp3' };
-/* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
+/* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CB_LICH = [
   ['thinh', 'thinh', 0, 0, 'thinh', 'lap', 'Cung văn thỉnh giá Chầu Bé Bắc Lệ'],
   ['tungkhan', null, 0, 0, 'tungkhan', 'mot', 'Chầu Bé giáng đồng, tung khăn'],
   ['thayao', 'tau', 0, 25.5, 'thayao', 'vua', 'Tay hương, tay khăn dâng thay khăn áo cho Chầu'],
-  ['vaihuong', 'tau', 25.5, 58.5, 'vaihuong', 'vua', 'Chầu Bé vái hương công đồng'],
-  ['baisai', 'tau', 58.5, 99.5, 'baisai', 'lap', 'Chầu Bé múa bài sai'],
-  ['khaiquang', 'tau', 99.5, 120.5, 'khaiquang', 'lap', 'Chầu Bé múa đuốc khai quang'],
-  ['muamoi', 'tau', 120.5, 150, 'khaiquang', 'lap', 'Chầu Bé múa mồi'],
-  ['muamoi2', 'loc', 0, 25, 'khaiquang', 'lap', ''],
+  ['vaihuong', 'tau', 25.5, 58.5, 'vaihuong', 'vai', 'Chầu Bé vái hương công đồng'],
+  ['baisai', 'tau', 58.5, 99.5, 'baisai', 'di', 'Chầu Bé múa bài sai'],
+  ['khaiquang', 'tau', 99.5, 120.5, 'khaiquang', 'di', 'Chầu Bé múa đuốc khai quang'],
+  ['muamoi', 'tau', 120.5, 150, 'khaiquang', 'di', 'Chầu Bé múa mồi'],
+  ['muamoi2', 'loc', 0, 25, 'khaiquang', 'di', ''],
   ['tungloc', 'loc', 25, 150, 'tungtien', 'lap', 'Chầu Bé tung lộc cho các con nhang', [[48, 'tien'], [69, 'qua'], [84, 'tien'], [90, 'hoa'], [119, 'tien'], [139, 'qua']]],
   ['tungloc2', 'nv12', 0, 62, 'tunghoa', 'lap', '', [[0.3, 'tien'], [32, 'qua']]],
   ['vengoi', 'nv12', 62, 150, 'vengoi', 'ngoi', 'Chầu Bé về ngồi, ngự tửu'],
@@ -784,9 +784,9 @@ function cbAuPlay(key, at) { const a = CB.au; if (!a) return; try { if (CB.auKey
 function cbVao(i) { const L = CB_LICH[i]; if (!L) return; CB.i = i; CB.cue = 0; CB.cueClip = null; CB.t = L[2]; CB.lap = 0; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CB.auKey === au && !CB.au.paused && Math.abs(CB.au.currentTime - a) < 1.5) {} else cbAuPlay(au, a); } else { try { CB.au.pause(); } catch (e) {} }
-  const v = CB.v[clip]; if (v) { v.loop = kieu === 'lap'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : 1; }
+  const v = CB.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : 1; }
   if (CB.cur !== clip || kieu !== 'lap') cbPlay(clip, 0);
-  if (chu) S.banner = { text: chu, t: 0, life: 4 }; }
+  CB.chu = chu; /* anh Linh bỏ khung chữ giữa màn hình: không hiện chữ từng đoạn */ }
 function cbTiep() { if (CB.i + 1 < CB_LICH.length) { cbVao(CB.i + 1); return; } cbHet(); }
 function cbHet() { // xe giá xong: giữ dáng trùm khăn, màn chuyển sang giá tiếp
   if (CB.hold) return; CB.hold = true; try { CB.au.pause(); } catch (e) {} const v = CB.v[CB.cur]; if (v) try { v.pause(); } catch (e) {}
@@ -797,11 +797,19 @@ function coVideoGia(id) { return (id === 'ongbay' && OB.buf) || (id === 'codoi' 
 function cbCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
   if (k === 'tien') { muaTien(220); if (CB.cur === 'tungtien') cbPlay('tungtien', 0); }
   else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CB.cueClip = c; const v = CB.v[c]; if (v) { v.loop = false; v.playbackRate = 1; } cbPlay(c, 0); setTimeout(() => { if (cbDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
+const CB_VAI = [2.4, 5.0]; // clip vái hương: giây 2,4 đến 5,0 cô quay mặt xuống vái, bỏ đoạn đó, chỉ vái lên ban công đồng
+function cbViTri(dt) {
+  const L = CB_LICH[CB.i] || [], ten = L[0], kieu = L[5]; let tx = CARPET.cx, ty = CARPET.cy - 4, sp = 3;
+  if (kieu === 'di' && !CB.hold) { CB.pha += dt * 2 * Math.PI / 13; tx = CARPET.cx + 78 * Math.sin(CB.pha); ty = CARPET.cy - 4 - 6 * Math.cos(CB.pha); sp = 8; const vx = Math.cos(CB.pha); if (Math.abs(vx) > .2) CB.dir = vx > 0 ? 1 : -1; } // đi xuyến trái phải, quay người theo hướng đi
+  else if (ten === 'tungloc' || ten === 'tungloc2') { tx = CARPET.cx - 76; ty = CARPET.cy + 8; sp = 1.6; CB.dir = 1; } // tung lộc ở góc trái sập hầu, gần cung văn, mặt hướng vào giữa
+  else { CB.dir = 1; if (ten === 'vengoi') sp = 1.2; }
+  const k = Math.min(1, dt * sp); CO.x += (tx - CO.x) * k; CO.y += (ty - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y;
+  CB.fl = (CB.fl == null ? CB.dir : CB.fl) + (CB.dir - (CB.fl == null ? CB.dir : CB.fl)) * Math.min(1, dt * 7); }
 function cbStep(dt) {
   if (!cbDangLe() || S.chuyen) { const v = CB.v[CB.cur]; if (v && !v.paused) try { v.pause(); } catch (e) {} if (CB.au && !CB.au.paused && !cbDangLe()) try { CB.au.pause(); } catch (e) {} return false; }
   if (!CB.cur && !CB.hold) cbVao(CB.i || 0);
   CO.giving = null; CO.giveT = Math.max(CO.giveT || 0, 6); S.loc = null; S.locQ = false;
-  { const k = Math.min(1, dt * 4); CO.x += (CARPET.cx - CO.x) * k; CO.y += (CARPET.cy - 4 - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; }
+  cbViTri(dt);
   const L = CB_LICH[CB.i], a = CB.au; if (a) a.muted = !S.sound;
   if (!CB.hold && L) {
     const [, au, , den, clip, kieu] = L;
@@ -816,7 +824,8 @@ function cbStep(dt) {
     else {
       const cues = L[7] || []; while (CB.cue < cues.length && CB.t >= cues[CB.cue][0]) { cbCue(cues[CB.cue][1]); CB.cue++; }
       if (CB.cueClip && v && (v.ended || (v.duration && v.currentTime >= v.duration - .06))) { CB.cueClip = null; const b = CB.v[clip]; if (b) b.loop = true; cbPlay(clip, 0); }
-      if (!CB.cueClip && v && !v.loop && v.duration && v.currentTime >= v.duration - .06) { if (kieu === 'ngoi') { try { v.currentTime = 3.2; } catch (e) {} cvPlay(v); } else if (!v.paused) try { v.pause(); } catch (e) {} } // ngồi rồi thì lặp đoạn ngự tửu; còn lại giữ dáng cuối
+      if (kieu === 'vai' && v && !CB.cueClip) { if (v.currentTime > CB_VAI[0] && v.currentTime < CB_VAI[1]) try { v.currentTime = CB_VAI[1]; } catch (e) {} if (v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = CB_VAI[1]; } catch (e) {} cvPlay(v); } }
+      if (!CB.cueClip && v && !v.loop && kieu !== 'vai' && v.duration && v.currentTime >= v.duration - .06) { if (kieu === 'ngoi') { try { v.currentTime = 3.2; } catch (e) {} cvPlay(v); } else if (!v.paused) try { v.pause(); } catch (e) {} } // ngồi rồi thì lặp đoạn ngự tửu; còn lại giữ dáng cuối
       if (CB.t >= den - .05 || (a && CB.auKey === au && a.ended)) cbTiep();
     }
   }
@@ -824,12 +833,12 @@ function cbStep(dt) {
   if (vv && vv.readyState >= 2 && vv.currentTime !== CB.lastT) { try { cvGrabTo(vv, CB.buf); CB.lastT = vv.currentTime; CB.ok = true; CB.shown = CB.cur; } catch (e) {} }
   return CB.ok;
 }
-window.__cb = () => ({ gia: GIA().id, i: CB.i, st: (CB_LICH[CB.i] || [''])[0], cur: CB.cur, ok: CB.ok, t: +CB.t.toFixed(1), au: CB.auKey, ap: CB.au ? CB.au.paused : null, lap: CB.lap, hold: CB.hold, ban: S.banner && S.banner.text, cat: S.cat && S.cat.id }); window.__cbVao = i => cbVao(i); window.__cbSeek = (t, lap) => { try { CB.au.currentTime = t; } catch (e) {} CB.t = t; if (lap != null) CB.lap = lap; };
+window.__cb = () => ({ gia: GIA().id, i: CB.i, st: (CB_LICH[CB.i] || [''])[0], cur: CB.cur, ok: CB.ok, t: +CB.t.toFixed(1), au: CB.auKey, ap: CB.au ? CB.au.paused : null, lap: CB.lap, hold: CB.hold, x: Math.round(CO.x), dir: CB.dir, vt: CB.v[CB.cur] ? +CB.v[CB.cur].currentTime.toFixed(2) : null, cat: S.cat && S.cat.id }); window.__cbVao = i => cbVao(i); window.__cbSeek = (t, lap) => { try { CB.au.currentTime = t; } catch (e) {} CB.t = t; if (lap != null) CB.lap = lap; };
 let cbLastNow = performance.now();
 function cbDraw(t, x, y, sc) {
   const now = performance.now(), dt = Math.min(.1, (now - cbLastNow) / 1000); cbLastNow = now;
   if (!cbStep(dt)) return false;
-  const k = CV_K * sc, tf = CB_TF[CB.shown || CB.cur] || [1, 0, 0]; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CB.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  const k = CV_K * sc, tf = CB_TF[CB.shown || CB.cur] || [1, 0, 0]; ctx.save(); ctx.translate(x, y); const fl = CB.fl == null ? 1 : CB.fl; ctx.scale(k * (Math.abs(fl) < .08 ? .08 * Math.sign(fl || 1) : fl), k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CB.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
 function obDraw(t, x, y, sc) {
@@ -1241,7 +1250,7 @@ function giaDur() { const g = GIA(); return g.hang === 'mau' ? 75 : 360; }
 function GIA() { if (typeof S !== 'undefined' && S.chuyen && S.chuyen.look) return S.chuyen.look; return GIA_DS.list.find(g => g.id === GIA_DS.active) || GIA_DS.list[0] || GIA_MAC_DINH; }
 function luuGia() { try { const items = {}; GIA_DS.list.forEach(g => { items[g.id] = g; }); localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items })); } catch (e) {} }
 function laOng() { const c = typeof S !== 'undefined' && S.chuyen; if (c && c.t >= CG.thinh) return c.toId === 'ongbay'; return GIA().id === 'ongbay'; } // từ lúc thỉnh: con nhang xưng theo giá đang thỉnh
-function xung() { return laOng() ? 'ông' : 'cô'; }
+function xung() { return laOng() ? 'ông' : GIA().id === 'chaube' ? 'Chầu' : 'cô'; }
 function ongNgoi() { return laOng() && S.ob && S.ob.ph === 'ngoi' && !S.loc; }
 // nhạc văn của từng giá lưu trong IndexedDB (file âm thanh anh chọn)
 function idb() { return new Promise((ok, no) => { try { const r = indexedDB.open('hau-dong', 1); r.onupgradeneeded = () => r.result.createObjectStore('nhac'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } }); }
@@ -1840,7 +1849,7 @@ function drawOverlay(t) {
     rr(8, 516, 150, 46, 10, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(8, 516, 150, 46, 10); ctx.stroke();
     text(laOng() ? '☕ Ly cà phê đã đầy' : (!S.auto && !S.real && GIA().id === 'codoi') ? '✿ Cô ban lộc' : '♥ Bình đã đầy ' + S.goal + ' tim', 83, 532, 12, '#fff6d6', { f: SERIF, w: 800 }); text((laOng() ? 'ông ban lộc cho các con nhang' : 'cô phát lộc cho các con nhang'), 83, 550, 9.5, '#f6dc96', { f: SERIF, w: 700 }); ctx.restore(); }
   ctx.restore();
-  if (S.banner) { const b = S.banner, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `800 13px ${SERIF}`; const w = Math.min(500, ctx.measureText(b.text).width + 40);
+  if (S.banner && GIA().id !== 'chaube') { const b = S.banner, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `800 13px ${SERIF}`; const w = Math.min(500, ctx.measureText(b.text).width + 40);
     rr(270 - w / 2, 346, w, 34, 17, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(270 - w / 2, 346, w, 34, 17); ctx.stroke(); text(b.text, 270, 364, 13, '#f6dc96', { f: SERIF, w: 800 }); ctx.restore(); }
 }
 

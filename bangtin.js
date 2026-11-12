@@ -25,6 +25,15 @@ window.BANG_TIN = {
   ],
   // Cô Đôi: theo bài "Lan tỏa văn hóa tín ngưỡng thờ Mẫu qua du lịch Việt Nam" - nhandan.vn/lan-toa-ve-dep-van-hoa-tin-nguong-tho-mau-qua-du-lich-post907068.html
   // và "Tân Nhàn mang nghệ thuật truyền thống đến gần khán giả" - nhandan.vn/tan-nhan-mang-nghe-thuat-truyen-thong-den-gan-khan-gia-post344169.html
+  // Chầu Bé Bắc Lệ (chỉ hiện ở link thử /tn). Nguồn: Sở Văn hoá, Thể thao và Du lịch Lạng Sơn, tài liệu "Thuyết minh các tuyến, điểm du lịch Công viên địa chất Lạng Sơn"; báo Dân Việt (danviet.vn)
+  nguon_chaube: 'Sở VHTTDL Lạng Sơn; báo Dân Việt (danviet.vn)',
+  chaube: [
+    'Chầu Bé Bắc Lệ là vị Thánh Chầu nổi tiếng, được thờ cùng Mẫu Thượng Ngàn tại quần thể đền Bắc Lệ, xã Tân Thành, huyện Hữu Lũng, tỉnh Lạng Sơn',
+    'Đền Bắc Lệ là quần thể hàng chục ngôi đền thờ Mẫu, là điểm khởi đầu của Công viên địa chất Lạng Sơn',
+    'Theo tích truyền, Mẫu Bắc Lệ và Chầu Bé Bắc Lệ có công hiển linh phù trợ các triều đại đánh giặc giữ nước',
+    'Trong tâm thức người dân xứ Lạng, đền Bắc Lệ thờ Mẫu Thượng Ngàn, vị Mẫu sáng tạo và cai quản mọi vùng rừng núi',
+    'Lễ hội đền Bắc Lệ diễn ra vào trung tuần tháng Chín âm lịch hằng năm',
+  ],
   codoi: [
     'Cô Đôi Thượng Ngàn là một giá hầu trong nghi lễ hầu đồng của tín ngưỡng thờ Mẫu',
     'Giá văn Cô Đôi Thượng Ngàn có lời cổ, thuộc những giá hầu văn nổi tiếng',
