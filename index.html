@@ -1774,10 +1774,9 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   ctx.beginPath(); ctx.roundRect(X + 6, Y + 6, Wd - 12, Hh - 12, 14); ctx.strokeStyle = 'rgba(230,181,82,.35)'; ctx.lineWidth = 1; ctx.stroke();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = `800 26px ${SERIF}`; ctx.fillStyle = '#ffd76a'; ctx.fillText('Người yêu thích Đạo Mẫu', 270, Y + 42);
-  ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Cảm ơn cả nhà đã cùng theo dõi', 270, Y + 72);
+  ctx.font = `800 17px ${SERIF}`; ctx.fillStyle = '#ffd76a'; ctx.fillText('Live 11h30 trưa hàng ngày', 270, Y + 72);
   ctx.strokeStyle = 'rgba(230,181,82,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X + 40, Y + 92); ctx.lineTo(X + Wd - 40, Y + 92); ctx.moveTo(X + 40, Y + Hh - 88); ctx.lineTo(X + Wd - 40, Y + Hh - 88); ctx.stroke();
-  ctx.font = `800 18px ${SERIF}`; ctx.fillStyle = '#ffd76a'; ctx.fillText('Live 11h30 trưa hàng ngày', 270, Y + Hh - 62);
-  ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Hẹn gặp lại các ghế vào ngày mai', 270, Y + Hh - 34);
+  ctx.font = `italic 600 15px ${SERIF}`; ctx.fillStyle = '#f6e9d6'; ctx.fillText('Hẹn gặp lại các ghế vào ngày mai', 270, Y + Hh - 46);
   if (!K.ds) { const ds = [], st = { h: [`800 17px ${SERIF}`, 30, '#f6dc96'], p: [`500 15.5px ${SERIF}`, 23, '#f6e9d6'], n: [`italic 600 12.5px ${SERIF}`, 18, '#e6b552'], u: [`500 11.5px ${SERIF}`, 26, 'rgba(230,181,82,.8)'] };
     ketDong().forEach(([k, x]) => { const [f, lh, c] = st[k]; ctx.font = f; wrapTxt(x, Wd - 64).forEach(l => ds.push({ f, lh, c, l })); if (k === 'p') ds.push({ f, lh: 8, c, l: '' }); });
     K.ds = ds; K.H = ds.reduce((m, d) => m + d.lh, 0); }
