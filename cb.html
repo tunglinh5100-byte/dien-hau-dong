@@ -855,7 +855,7 @@ const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: '
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
   ['thinh', 'thinh', 0, 25, 'thinh', 'vua', ''],
-  ['thayao', 'thayao', 0, 340, 'thayao', 'vua', ''],
+  ['thayao', 'thayao', 0, 125.05, 'thayao', 'vua', ''],
   ['camhuong', 'tau', 0, 5, 'camhuong', 'vua', ''],
   ['chaylen0', 'tau', 5, 12.5, 'chaylen', 'vua', ''],
   ['luilen1', 'tau', 12.5, 15.5, 'luilen', 'vua', ''],
@@ -893,7 +893,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
-function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + '?v=1'; CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + '?v=2'; CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
