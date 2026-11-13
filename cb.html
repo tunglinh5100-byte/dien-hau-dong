@@ -856,22 +856,13 @@ const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: '
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
   ['thinh', 'thinh', 0, 25, 'thinh', 'vua', ''],
   ['thayao', 'thayao', 0, 125.05, 'thayao', 'vua', ''],
-  ['camhuong', 'tau', 0, 5, 'camhuong', 'vua', ''],
-  ['chaylen0', 'tau', 5, 12.5, 'chaylen', 'vua', ''],
-  ['luilen1', 'tau', 12.5, 15.5, 'luilen', 'vua', ''],
-  ['chaylen2', 'tau', 15.5, 23, 'chaylen', 'vua', ''],
-  ['luilen3', 'tau', 23, 26, 'luilen', 'vua', ''],
-  ['chaylen4', 'tau', 26, 33.5, 'chaylen', 'vua', ''],
-  ['luilen5', 'tau', 33.5, 36.5, 'luilen', 'vua', ''],
-  ['chaylen6', 'tau', 36.5, 44, 'chaylen', 'vua', ''],
-  ['luilen7', 'tau', 44, 47, 'luilen', 'vua', ''],
-  ['chaylen8', 'tau', 47, 54.5, 'chaylen', 'vua', ''],
-  ['luilen9', 'tau', 54.5, 57.5, 'luilen', 'vua', ''],
-  ['chaylen10', 'tau', 57.5, 65, 'chaylen', 'vua', ''],
-  ['luilen11', 'tau', 65, 68, 'luilen', 'vua', ''],
-  ['chaylen12', 'tau', 68, 75.5, 'chaylen', 'vua', ''],
-  ['luilen13', 'tau', 75.5, 78.5, 'luilen', 'vua', ''],
-  ['chaylen14', 'tau', 78.5, 85, 'chaylen', 'vua', ''],
+  ['camhuong', 'tau', 0, 13, 'camhuong', 'vua', ''], // clip v2 của Tú: cầm hương, lùi, vái
+  ['chaylen', 'tau', 13, 21, 'chaylen', 'vua', ''],
+  ['luilen0', 'tau', 21, 32.5, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
+  ['luilen1', 'tau', 32.5, 44, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
+  ['luilen2', 'tau', 44, 55.5, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
+  ['luilen3', 'tau', 55.5, 67, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
+  ['luilen4', 'tau', 67, 82.05, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
   ['khaiquang', 'khai', 0, 53, 'khaiquang', 'di', ''],
   ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoi', ''],
   ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', ''],
@@ -887,7 +878,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=3'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=4'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
