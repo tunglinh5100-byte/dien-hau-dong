@@ -1386,7 +1386,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   let luu = null, cu = null; try { luu = JSON.parse(localStorage.getItem('hd_gia_live4') || 'null'); } catch (e) {} try { cu = JSON.parse(localStorage.getItem('hd_gia_codoi') || 'null'); } catch (e) {}
   const it = (luu && luu.items) || {};
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
-  const ds = [Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), { id: 'caube', ten: 'Cậu Bé Bản Đền', hang: 'cau', ao: '#1f7a4e', vay: '#f3efe6', khan: '#1f7a4e', vienKhan: '#e8c040', dai: '#d6457f', congCu: 'quat', tim: 'tien', coNhac: false }, Object.assign(CHAU_BE, { id: 'chaube', hang: 'co' })] /* 14/11 anh Linh: Ông Bảy → Cô Đôi → Cậu Bé → Chầu Bé */; /* link thử: thêm Chầu Bé Bắc Lệ */ // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
+  const ds = [Object.assign(CHAU_BE, { id: 'chaube', hang: 'co' }), Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), { id: 'caube', ten: 'Cậu Bé Bản Đền', hang: 'cau', ao: '#1f7a4e', vay: '#f3efe6', khan: '#1f7a4e', vienKhan: '#e8c040', dai: '#d6457f', congCu: 'quat', tim: 'tien', coNhac: false }] /* 14/11 anh Linh: Chầu Bé → Ông Hoàng Bảy → Cô Đôi → Cậu Bé */; /* link thử: thêm Chầu Bé Bắc Lệ */ // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
   const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
   const qd = new URLSearchParams(location.search).get('dau'); /* ?dau=codoi|ongbay: mở giá đó trước, vẫn chuyển giá được */ GIA_DS = { active: ds.some(g => g.id === qg) ? qg : ds.some(g => g.id === qd) ? qd : luu && ds.some(g => g.id === luu.active) ? luu.active : 'codoi', list: ds }; window.KHOA_GIA = ds.some(g => g.id === qg) ? qg : null; } // ?gia=...: máy này chỉ live đúng giá đó, không chuyển giá
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
@@ -1881,7 +1881,7 @@ const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 237 : 192, Wd = 150, cx = X + Wd / 2, h = tt ? 145 : 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
+  const tt = !!buocGia(), X = tt || GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 237 : 192, Wd = 150, cx = X + Wd / 2, h = tt ? 145 : 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
   const g = GIA(), BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
@@ -2386,10 +2386,13 @@ function drawBuoc() { if (!BUOC_ON || S.cat) return; const cur = buocOng(); if (
   ctx.restore(); }
 /* Thanh tiến trình các bước trong giá (anh Linh 14/11): dải sơn son thếp vàng, mỗi bước một đóa sen nhỏ */
 const BUOC_CU = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+const BUOC_CO = ['Thỉnh', 'Thay khăn áo', 'Múa', 'Phát lộc', 'Xe giá'];
 const BUOC_CB = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
 function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước, bước hiện tại]
   if (typeof CU !== 'undefined' && cuDangLe()) { const n = (CU_LICH[CU.i] || [''])[0];
     const k = n === 'thinh' || n === 'tungkhan' ? 0 : /^thayao/.test(n) ? 1 : /^(camhuong|chaylen|luilen)/.test(n) ? 2 : n === 'khaiquang' ? 3 : n === 'muaheo' ? 4 : n === 'vengoi' ? 5 : /^(tungloc|banloc)/.test(n) ? 6 : 7; return [BUOC_CU, k]; }
+  if (typeof OB !== 'undefined' && OB.buf && laOng()) { const k = buocOng(); if (k >= 0) return [BUOC_ONG, k]; }
+  if (typeof OC !== 'undefined' && OC.buf && GIA().id === 'codoi') return [BUOC_CO, OC.exit || OC.hold ? 4 : OC.intro ? (OC.cur === 'thinh' || !OC.cur ? 0 : 1) : S.phaLoc || CO.giving ? 3 : 2];
   if (typeof CB !== 'undefined' && cbDangLe()) { const n = (CB_LICH[CB.i] || [''])[0];
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
@@ -2412,7 +2415,7 @@ function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = 
   ctx.restore(); }
 function drawGiaPill() {
   if (buocGia()) { drawBuoc(); drawTienTrinh(); return; }
-  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + (BUOC_ON && buocOng() >= 0 || buocGia() ? '' : ' · ' + GD_TEN[giaiDoan()]); drawBuoc(); drawTienTrinh(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
+  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + ''; /* 14/11 anh Linh: bỏ hậu tố 'Thay khăn áo · múa' */ drawBuoc(); drawTienTrinh(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
   rr(270 - w / 2, 160, w, 24, 12, 'rgba(142,33,28,.88)'); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(270 - w / 2, 160, w, 24, 12); ctx.stroke();
   text('🌸 ' + s, 270, 172.5, 12, '#f6dc96', { f: SERIF, w: 700 });
 }
@@ -2458,7 +2461,7 @@ function frame1(now) {
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
     if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); if (NHANG) front.forEach(p => drawPerson(p, t));
     if (NHANG) drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
-    ctx.save(); ctx.translate(camOff(704), 0); drawTenCV(); ctx.restore(); drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
+    /* 14/11 anh Linh: bỏ nhãn Thế Hoàn */ drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
   } finally { camShift(-1); }
   ctx.restore();
   if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t); drawKet(); // màn kết chương trình phủ lên trên cùng
