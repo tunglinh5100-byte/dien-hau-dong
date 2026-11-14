@@ -224,7 +224,7 @@ function muaTien(n) { if (laOng()) return; // mưa lộc: tiền rơi từ trên
   for (let i = 0; i < n; i++) S.money.push({ kind: 'n2', x: rnd(-10, 550), y: rnd(-120, 40), vx: rnd(-20, 20), vy: rnd(40, 120), vmax: rnd(120, 190), rot: rnd(-1, 1), vr: rnd(-6, 6),
     fw: rnd(2, 3.4), amp: rnd(14, 30), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(600, 940), t: 0, delay: rnd(0, 3.5), landed: 0, lt: 0, d: pickNote() }); }
 function muaHoaQua(n, chi) { if (laOng()) return; // lộc hoa, lộc quả: một phần cô tung ra, phần lớn rơi như mưa từ trên xuống khắp sân, rơi xuống nằm lại một lúc
-  const loai = () => chi === 'hoa' ? 'flower' : chi === 'qua' ? pick(['fruit', 'fruit', 'peach']) : pick(['fruit', 'flower', 'fruit', 'flower', 'peach']);
+  const loai = () => chi === 'hoa' ? pick(['img:hoa-hong', 'img:hoa-hong', 'flower']) : chi === 'qua' ? pick(['img:qua', 'img:qua', 'fruit', 'peach']) : chi === 'keo' ? 'img:keo-mut' : pick(['img:qua', 'img:hoa-hong', 'fruit', 'flower', 'peach']); // 14/11 anh Linh: dùng ảnh hoa, quả, kẹo mút trong kho đạo cụ
   for (let i = 0; i < Math.round(n * .3); i++) { const tx = rnd(10, 530), ty = rnd(620, 935); S.flying.push({ x: CO.x + rnd(-10, 20), y: CO.y - 110, tx, ty, t: -rnd(0, 2.5), dur: rnd(1, 1.6), kind: loai(), nho: rnd(.8, 1.05), onDone() { S.locDat.push({ kind: this.kind, x: tx, y: ty, s: this.nho * 1.2, r: rnd(-.6, .6), t: 0 }); } }); }
   for (let i = 0; i < Math.round(n * .7); i++) S.muaHQ.push({ kind: loai(), x: rnd(-5, 545), y: rnd(-80, 0), vx: rnd(-15, 15), vy: rnd(150, 230), gy: rnd(600, 940), rot: rnd(0, 6), vr: rnd(-4, 4), s: rnd(.85, 1.2), delay: rnd(0, 3.5), t: 0 }); }
 function nemTien(arm) {
@@ -888,8 +888,8 @@ const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú 
   ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoidi', '', null, null, 3.8], // clip 08 v2 chậm 30%; chỉ lần đầu quỳ (giây 0,5–3,6), các vòng sau lặp từ giây 3,8
   ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 3.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
   ['tungloc', 'loc', 0, 95, 'tungtien', 'lap', '', [[6.1, 'tien'], [14.14, 'tien'], [22.18, 'tien'], [30.22, 'tien'], [38.26, 'tien'], [46.3, 'tien'], [54.34, 'tien'], [62.38, 'tien'], [70.42, 'tien'], [78.46, 'tien'], [86.5, 'tien']]], // 14/11 anh Linh: clip mới của Tú, Cậu quay ra tung lộc cho con nhang (giây 6,1 mỗi vòng)
-  ['banloc', 'banloc', 0, 56, 'tungtien', 'lap', '', [[6.1, 'tien'], [14.14, 'tien'], [22.18, 'tien'], [30.22, 'tien'], [38.26, 'tien'], [46.3, 'tien'], [54.34, 'tien']]], // clip 11 ban lộc Tú gửi vẫn trùng clip 10: tạm dùng clip 10
-  ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[5.9, 'qua'], [13.94, 'qua'], [21.98, 'qua'], [30.02, 'qua'], [38.06, 'qua'], [46.1, 'qua'], [54.14, 'qua'], [62.18, 'qua'], [70.22, 'qua'], [78.26, 'qua'], [86.3, 'qua'], [94.34, 'qua'], [102.38, 'qua'], [110.42, 'qua'], [118.46, 'qua'], [126.5, 'qua'], [134.54, 'qua'], [142.58, 'qua'], [150.62, 'qua'], [158.66, 'qua'], [166.7, 'qua'], [174.74, 'qua'], [182.78, 'qua']]], // clip 12 mới, tung kẹo giây 5,9 mỗi vòng
+  ['banloc', 'banloc', 0, 56, 'tungtien', 'lap', '', [[6.1, 'qua'], [14.14, 'hoa'], [22.18, 'tien'], [30.22, 'qua'], [38.26, 'hoa'], [46.3, 'tien'], [54.34, 'qua']]], // clip 11 ban lộc Tú gửi vẫn trùng clip 10: tạm dùng clip 10; lộc quả, lộc hoa, lộc tiền luân phiên
+  ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[5.9, 'keo'], [13.94, 'keo'], [21.98, 'keo'], [30.02, 'keo'], [38.06, 'keo'], [46.1, 'keo'], [54.14, 'keo'], [62.18, 'keo'], [70.22, 'keo'], [78.26, 'keo'], [86.3, 'keo'], [94.34, 'keo'], [102.38, 'keo'], [110.42, 'keo'], [118.46, 'keo'], [126.5, 'keo'], [134.54, 'keo'], [142.58, 'keo'], [150.62, 'keo'], [158.66, 'keo'], [166.7, 'keo'], [174.74, 'keo'], [182.78, 'keo']]], // clip 12 mới, tung kẹo giây 5,9 mỗi vòng
   ['segia0', 'segia', 0, 42, 'ngoinghe', 'lap', ''], // nghe văn se giá: Cậu ngồi quay lưng lắc lư
   ['xegia', 'segia', 42, 57.05, 'segia', 'vua', '']];  // 18:09 (giây 44 nhạc se giá) Cậu trùm khăn se giá – clip 13 của Tú
 const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
@@ -925,7 +925,7 @@ function cuHet() { // xe giá xong: giữ dáng trùm khăn, màn chuyển sang 
 function cuXeGia(id) { CU.exitTo = id; const xi = CU_LICH.findIndex(l => l[0] === 'xegia'); if (CU.i < xi) cuVao(xi); }
 function cuCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
   if (k === 'tien') { muaTien(220); } // clip tung tiền chạy vòng, mốc tung đã khớp giây 6,8 mỗi vòng
-  else if (!CU.v[k === 'qua' ? 'tungqua' : 'tunghoa']) { muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }
+  else if (k === 'keo' || !CU.v[k === 'qua' ? 'tungqua' : 'tunghoa']) { muaHoaQua(170, k); }
   else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CU.cueClip = c; const v = CU.v[c]; if (v) { v.loop = false; v.playbackRate = 1; } cuPlay(c, 0); setTimeout(() => { if (cuDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
 const CU_QUAY = { di: [2.2, 11.8], q1: 12.6, q2: [14.0, 14.5] }; // clip quay người của Tú: 2,2–11,8 giây đi hướng trái; 11,8–12,6 quay qua lưng; 14,0–14,5 quay tiếp sang hướng mới
 const CU_VAI = [2.4, 5.0]; // clip vái hương: giây 2,4 đến 5,0 cô quay mặt xuống vái, bỏ đoạn đó, chỉ vái lên ban công đồng
@@ -1285,7 +1285,9 @@ function drawSong(t) { // sóng nước Thoải phủ trên thảm khi đủ tim
 function drawSen(x, y, s, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
   [[-1, '#e9e6dc'], [1, '#e9e6dc'], [-.45, '#f6f4ee'], [.45, '#f6f4ee'], [0, '#ffffff']].forEach(([k, c]) => { ctx.save(); ctx.rotate(k * .55); ctx.beginPath(); ctx.moveTo(0, 2); ctx.quadraticCurveTo(-4, -4, 0, -10); ctx.quadraticCurveTo(4, -4, 0, 2); ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = 'rgba(180,170,150,.6)'; ctx.lineWidth = .5; ctx.stroke(); ctx.restore(); });
   circ(0, 0, 2, '#f6d35a'); ctx.restore(); }
+const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new Image(); im.src = 'loc-' + n + '.png?v=1'; LOC_IMG[n] = im; }); // ảnh lộc từ kho đạo cụ (Tú tách nền xanh) – dùng chung mọi giá
 function drawItem(kind, x, y, s) {
+  if (kind && kind.startsWith('img:')) { const im = LOC_IMG[kind.slice(4)]; if (im && im.complete && im.naturalWidth) { const h = (kind === 'img:keo-mut' ? 34 : 24) * s, w = h * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); return; } kind = kind === 'img:hoa-hong' ? 'flower' : 'fruit'; }
   if (kind === 'sen') { drawSen(x, y, 1.1 * s, 0); return; }
   if (kind === 'note') { note(x, y, .7 * s, 5); return; }
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
