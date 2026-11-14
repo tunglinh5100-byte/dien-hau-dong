@@ -885,13 +885,14 @@ const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú 
   ['camhuong6', 'tau', 70.33, 77.47, 'camhuong', 'vua', ''],
   ['chaylen6', 'tau', 77.47, 82.05, 'chaylen', 'vua', ''],
   ['khaiquang', 'khai', 0, 53, 'khaiquang', 'lap', ''], // anh Linh 14/11: khai quang đứng im giữa sập
-  ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoidi', '', null, null, 3.8], // clip 08 v2 chậm 30%; chỉ lần đầu quỳ (giây 0,5–3,6), các vòng sau lặp từ giây 3,8
-  ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 6.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
+  ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoidi', '', null, null, 2.7], // clip 08 v2 chậm 30%; chỉ lần đầu quỳ (giây 0,5–3,6), các vòng sau lặp từ giây 3,8
+  ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 3.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
   ['tungloc', 'loc', 0, 95, 'tungtien', 'lap', '', [[6.1, 'tien'], [14.14, 'tien'], [22.18, 'tien'], [30.22, 'tien'], [38.26, 'tien'], [46.3, 'tien'], [54.34, 'tien'], [62.38, 'tien'], [70.42, 'tien'], [78.46, 'tien'], [86.5, 'tien']]], // 14/11 anh Linh: clip mới của Tú, Cậu quay ra tung lộc cho con nhang (giây 6,1 mỗi vòng)
   ['banloc', 'banloc', 0, 56, 'tungtien', 'lap', '', [[6.1, 'qua'], [14.14, 'hoa'], [22.18, 'tien'], [30.22, 'qua'], [38.26, 'hoa'], [46.3, 'tien'], [54.34, 'qua']]], // clip 11 ban lộc Tú gửi vẫn trùng clip 10: tạm dùng clip 10; lộc quả, lộc hoa, lộc tiền luân phiên
   ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[5.9, 'keo'], [13.94, 'keo'], [21.98, 'keo'], [30.02, 'keo'], [38.06, 'keo'], [46.1, 'keo'], [54.14, 'keo'], [62.18, 'keo'], [70.22, 'keo'], [78.26, 'keo'], [86.3, 'keo'], [94.34, 'keo'], [102.38, 'keo'], [110.42, 'keo'], [118.46, 'keo'], [126.5, 'keo'], [134.54, 'keo'], [142.58, 'keo'], [150.62, 'keo'], [158.66, 'keo'], [166.7, 'keo'], [174.74, 'keo'], [182.78, 'keo']]], // clip 12 mới, tung kẹo giây 5,9 mỗi vòng
   ['segia0', 'segia', 0, 42, 'ngoinghe', 'lap', ''], // nghe văn se giá: Cậu ngồi quay lưng lắc lư
   ['xegia', 'segia', 42, 57.05, 'segia', 'vua', '']];  // 18:09 (giây 44 nhạc se giá) Cậu trùm khăn se giá – clip 13 của Tú
+const CU_RATE = { ngoinghe: .45, antoa: .5, muaheo: .7 }; // 14/11 anh Linh: chậm lại bằng tốc độ phát (không nội suy khung hình, giữ hình nét)
 const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 (function cuInit() {
   if (/[?&]cb=0/.test(location.search)) return;
@@ -899,7 +900,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=14'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=15'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 const CU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
@@ -914,7 +915,7 @@ function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.xy = L[5]
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
   if (!clip) { const o = CU.v[CU.cur]; if (o) try { o.pause(); } catch (e) {} CU.chu = chu; return; }
-  const v = CU.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : 1; }
+  const v = CU.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = v.defaultPlaybackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : (CU_RATE[clip] || 1); }
   if (CU.cur !== clip || kieu !== 'lap') cuPlay(clip, 0);
   CU.chu = chu; /* anh Linh bỏ khung chữ giữa màn hình: không hiện chữ từng đoạn */ }
 function cuTiep() { if (CU.i + 1 < CU_LICH.length) { cuVao(CU.i + 1); return; } cuHet(); }
@@ -1289,7 +1290,7 @@ function drawSen(x, y, s, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot
   circ(0, 0, 2, '#f6d35a'); ctx.restore(); }
 const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new Image(); im.src = 'loc-' + n + '.png?v=1'; LOC_IMG[n] = im; }); // ảnh lộc từ kho đạo cụ (Tú tách nền xanh) – dùng chung mọi giá
 function drawItem(kind, x, y, s) {
-  if (kind && kind.startsWith('img:')) { const im = LOC_IMG[kind.slice(4)]; if (im && im.complete && im.naturalWidth) { const h = (kind === 'img:keo-mut' ? 34 : 24) * s, w = h * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); return; } kind = kind === 'img:hoa-hong' ? 'flower' : 'fruit'; }
+  if (kind && kind.startsWith('img:')) { const im = LOC_IMG[kind.slice(4)]; if (im && im.complete && im.naturalWidth) { const h = (kind === 'img:keo-mut' ? 34 : 48) * s, w = h * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); return; } kind = kind === 'img:hoa-hong' ? 'flower' : 'fruit'; }
   if (kind === 'sen') { drawSen(x, y, 1.1 * s, 0); return; }
   if (kind === 'note') { note(x, y, .7 * s, 5); return; }
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
