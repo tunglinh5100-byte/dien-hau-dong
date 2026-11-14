@@ -237,17 +237,14 @@ function nemTien(arm) {
 
 // ---------- Background: real photo of the điện + terracotta floor below ----------
 const BG = new Image(); BG.src = BG_SRC;
-const FIG_S = +(new URLSearchParams(location.search).get('fig') || .8); function FIG() { return typeof NHANG !== 'undefined' && !NHANG && BG2.complete && BG2.naturalWidth ? FIG_S : 1; } // ảnh đền mới chụp rộng hơn: thu nhỏ cô đồng cho cân với ban thờ (?fig= để chỉnh)
-const BG2 = new Image(); BG2.src = 'nen-den-2.jpg?v=2'; // 14/11 anh Linh: ảnh đền mới (có gương ở giữa), dựng sẵn khung dọc 720x880 toạ độ thế giới, thảm khớp CARPET
 function drawBg(t) {
   ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, H);
   // floor below the photo: Bát Tràng tiles like the photo's floor
   ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); ctx.strokeStyle = 'rgba(90,50,35,.55)'; ctx.lineWidth = 1.2;
   for (let y = 680; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 30); ctx.stroke(); } }
   const fg = ctx.createLinearGradient(0, 680, 0, H); fg.addColorStop(0, 'rgba(40,16,10,.15)'); fg.addColorStop(1, 'rgba(20,8,5,.35)'); ctx.fillStyle = fg; ctx.fillRect(0, 680, W, H - 680);
-  if (!(!NHANG && BG2.complete && BG2.naturalWidth) && BG.complete && BG.naturalWidth) ctx.drawImage(BG, 0, 0, 540, 692);
-  if (!NHANG && BG2.complete && BG2.naturalWidth) ctx.drawImage(BG2, -90, 0, 720, 880);
-  else if (!NHANG && BG.complete && BG.naturalWidth) { // anh Linh 14/11: bỏ nền gạch, thảm sập hầu kéo dài xuống hết màn hình (phần gần máy quay giãn ra theo phối cảnh)
+  if (BG.complete && BG.naturalWidth) ctx.drawImage(BG, 0, 0, 540, 692);
+  if (!NHANG && BG.complete && BG.naturalWidth) { // anh Linh 14/11: bỏ nền gạch, thảm sập hầu kéo dài xuống hết màn hình (phần gần máy quay giãn ra theo phối cảnh)
     // 14/11 anh Linh: giữ nguyên ảnh gốc (cả thảm và bậc gỗ sập), chỉ nối thân sập gỗ xuống tới đáy màn hình
     const Y0 = 690, wg = ctx.createLinearGradient(0, Y0, 0, 880); wg.addColorStop(0, '#42241b'); wg.addColorStop(.25, '#3a1d15'); wg.addColorStop(1, '#22100b'); ctx.fillStyle = wg; ctx.fillRect(-60, Y0, W + 120, 880 - Y0);
     ctx.save(); for (let y = Y0 + 6; y < 880; y += 7 + (y % 5)) { ctx.globalAlpha = .1 + (y % 3) * .04; ctx.strokeStyle = y % 2 ? '#6a3b2a' : '#1a0a06'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-60, y); for (let x = -60; x <= W + 60; x += 40) ctx.lineTo(x, y + Math.sin(x * .02 + y) * 1.2); ctx.stroke(); } ctx.restore(); // vân gỗ
@@ -964,10 +961,10 @@ function cuStep(dt) {
 }
 window.__cu = () => ({ gia: GIA().id, i: CU.i, st: (CU_LICH[CU.i] || [''])[0], cur: CU.cur, ok: CU.ok, t: +CU.t.toFixed(1), au: CU.auKey, ap: CU.au ? CU.au.paused : null, lap: CU.lap, hold: CU.hold, x: Math.round(CO.x), dir: CU.dir, vt: CU.v[CU.cur] ? +CU.v[CU.cur].currentTime.toFixed(2) : null, cat: S.cat && S.cat.id }); window.__cuVao = i => cuVao(i); window.__cuSeek = (t, lap) => { try { CU.au.currentTime = t; } catch (e) {} CU.t = t; if (lap != null) CU.lap = lap; };
 let cuLastNow = performance.now();
-function cuDraw(t, x, y, sc) { if (FIG() !== 1) y += 18; // ảnh đền mới: cô đồng ngồi giữa thảm (lùi ra phía trước)
+function cuDraw(t, x, y, sc) {
   const now = performance.now(), dt = Math.min(.1, (now - cuLastNow) / 1000); cuLastNow = now;
   if (!cuStep(dt)) return false;
-  const k = CV_K * sc * FIG(), tf = CU_TF[CU.shown || CU.cur] || [1, 0, 0]; ctx.save(); ctx.translate(x, y); const fl = CU.fl == null ? 1 : CU.fl; ctx.scale(k * (Math.abs(fl) < .08 ? .08 * Math.sign(fl || 1) : fl), k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  const k = CV_K * sc, tf = CU_TF[CU.shown || CU.cur] || [1, 0, 0]; ctx.save(); ctx.translate(x, y); const fl = CU.fl == null ? 1 : CU.fl; ctx.scale(k * (Math.abs(fl) < .08 ? .08 * Math.sign(fl || 1) : fl), k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
 function obDraw(t, x, y, sc) {
@@ -2418,7 +2415,7 @@ function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); quanNhac(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H);
   camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
-  if (CAM_ON && NHANG && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
+  if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
   ctx.save(); camShear(); drawBg(t); drawSong(t); if (NHANG) { drawMoneyFloor(); drawDem(t); } ctx.restore();
   camShift(1);
   try {
