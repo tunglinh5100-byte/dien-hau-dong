@@ -1849,7 +1849,7 @@ const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 240 : 192, Wd = 150, cx = X + Wd / 2, h = 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
+  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 372 : 192, Wd = 150, cx = X + Wd / 2, h = 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
   const g = GIA(), BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
@@ -2362,10 +2362,12 @@ function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước,
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
 function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
-function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 190, h = 40, cy = y0 + 14, dx = (x1 - x0 - 36) / (n - 1);
+function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 150, h = 64, cy = y0 + 36, dx = (x1 - x0 - 44) / (n - 1); // 14/11: gộp tên giá vào khung tiến trình cho gọn
   ctx.save(); const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, 'rgba(110,22,16,.9)'); g.addColorStop(1, 'rgba(48,8,6,.9)'); rr(x0, y0, x1 - x0, h, 8, g);
   ctx.strokeStyle = 'rgba(230,181,82,.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, h, 8); ctx.stroke(); ctx.strokeStyle = 'rgba(230,181,82,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.roundRect(x0 + 3, y0 + 3, x1 - x0 - 6, h - 6, 6); ctx.stroke();
-  const px = i => x0 + 18 + i * dx;
+  const c0 = S.chuyen, tg = 'Giá ' + (c0 && c0.t >= CG.thinh ? c0.toTen : GIA().ten); text('❀  ' + tg + '  ❀', W / 2, y0 + 14, 12.5, '#f6dc96', { f: SERIF, w: 800 });
+  ctx.strokeStyle = 'rgba(230,181,82,.4)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x0 + 40, y0 + 24); ctx.lineTo(x1 - 40, y0 + 24); ctx.stroke();
+  const px = i => x0 + 22 + i * dx;
   ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(230,181,82,.3)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(n - 1), cy); ctx.stroke(); // dây lụa
   if (k > 0) { const gl = ctx.createLinearGradient(px(0), 0, px(k), 0); gl.addColorStop(0, '#b8862e'); gl.addColorStop(1, '#ffd76a'); ctx.strokeStyle = gl; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(k), cy); ctx.stroke(); }
   const pul = .5 + .5 * Math.sin(S.t * 3);
@@ -2374,9 +2376,10 @@ function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = 
       ctx.beginPath(); ctx.arc(x, cy, 8, 0, 7); ctx.fillStyle = '#9e1c14'; ctx.fill(); ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 1.6; ctx.stroke(); senNho(x, cy + 3, 6.5, '#ffe9a8', '#f2b84a'); }
     else if (i < k) { ctx.beginPath(); ctx.arc(x, cy, 5, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill(); ctx.strokeStyle = '#fff2b0'; ctx.lineWidth = .8; ctx.stroke(); }
     else { ctx.beginPath(); ctx.arc(x, cy, 4.5, 0, 7); ctx.fillStyle = 'rgba(40,8,6,.95)'; ctx.fill(); ctx.strokeStyle = 'rgba(230,181,82,.75)'; ctx.lineWidth = 1; ctx.stroke(); }
-    text(ten, x, y0 + 32, i === k ? 9.6 : 8.6, i === k ? '#ffd76a' : i < k ? 'rgba(246,220,150,.75)' : 'rgba(246,233,214,.6)', { f: SERIF, w: i === k ? 800 : 600 }); });
+    text(ten, x, y0 + 53, i === k ? 9 : 8.4, i === k ? '#ffd76a' : i < k ? 'rgba(246,220,150,.75)' : 'rgba(246,233,214,.6)', { f: SERIF, w: i === k ? 800 : 600 }); });
   ctx.restore(); }
 function drawGiaPill() {
+  if (buocGia()) { drawBuoc(); drawTienTrinh(); return; }
   const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + (BUOC_ON && buocOng() >= 0 || buocGia() ? '' : ' · ' + GD_TEN[giaiDoan()]); drawBuoc(); drawTienTrinh(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
   rr(270 - w / 2, 160, w, 24, 12, 'rgba(142,33,28,.88)'); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(270 - w / 2, 160, w, 24, 12); ctx.stroke();
   text('🌸 ' + s, 270, 172.5, 12, '#f6dc96', { f: SERIF, w: 700 });
