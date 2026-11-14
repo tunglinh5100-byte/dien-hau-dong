@@ -861,11 +861,12 @@ function cbDraw(t, x, y, sc) {
 
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CU_TF = {"thinh": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
+const CU_TF = {"thinh": [1.0, -5, 28], "thinhlap": [1.0, -5, 28], "tungkhan": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
 const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
-  ['thinh', 'thinh', 0, 25, 'thinh', 'vua', ''],
+  ['thinh', 'thinh', 0, 25, 'thinhlap', 'lap', ''], // anh Linh 14/11: suốt văn thỉnh Cậu trùm khăn đỏ lắc lư
+  ['tungkhan', '', 0, 0, 'tungkhan', 'vua', ''], // thỉnh xong mới tung khăn
   ['thayao', 'thayao', 0, 10, 'thayao', 'vua', ''], // hầu dâng thay áo
   ['thayao2', 'thayao', 10, 15, 'ngoinghe', 'lap', ''], // anh Linh 14/11: thay áo xong ngồi 5 giây rồi vào tấu hương
   // tấu hương: clip 03 + 04 của Tú (Cậu quay lưng, hầu dâng quỳ) luân phiên; anh Linh 14/11: chậm lại 30% (clip đã làm chậm 1,43 lần bằng nội suy khung hình)
@@ -896,14 +897,14 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   if (/[?&]cb=0/.test(location.search)) return;
   CU.buf = document.createElement('canvas'); CU.buf.width = CV_W; CU.buf.height = CV_H;
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
-    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinhlap' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=11'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=12'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
-const CU_DEM = { thinh: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 472], tungkeo: [86, 270, 470], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
-const CU_TO = +(new URLSearchParams(location.search).get('to') || 1.3); function cuPhong(n) { return (n === 'thinh' ? 1 : 1.13) * CU_TO; } // 14/11 10:26 anh Linh: nhân vật to như giá đang hầu trên /g (?to= để thử cỡ) // anh Linh 14/11: Cậu nhỏ hơn các giá khác -> phóng 1,13 (thỉnh có khăn trùm đã to sẵn)
-const CU_DAU = { thinh: 162, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 176, tungkeo: 178, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
+const CU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 472], tungkeo: [86, 270, 470], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
+const CU_TO = +(new URLSearchParams(location.search).get('to') || 1.3); function cuPhong(n) { return (/^(thinh|thinhlap|tungkhan)$/.test(n) ? 1 : 1.13) * CU_TO; } // 14/11 10:26 anh Linh: nhân vật to như giá đang hầu trên /g (?to= để thử cỡ) // anh Linh 14/11: Cậu nhỏ hơn các giá khác -> phóng 1,13 (thỉnh có khăn trùm đã to sẵn)
+const CU_DAU = { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 176, tungkeo: 178, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
 function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc * cuPhong(n), top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
@@ -2381,7 +2382,7 @@ const BUOC_CU = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'M�
 const BUOC_CB = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
 function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước, bước hiện tại]
   if (typeof CU !== 'undefined' && cuDangLe()) { const n = (CU_LICH[CU.i] || [''])[0];
-    const k = n === 'thinh' ? 0 : /^thayao/.test(n) ? 1 : /^(camhuong|chaylen|luilen)/.test(n) ? 2 : n === 'khaiquang' ? 3 : n === 'muaheo' ? 4 : n === 'vengoi' ? 5 : /^(tungloc|banloc)/.test(n) ? 6 : 7; return [BUOC_CU, k]; }
+    const k = n === 'thinh' || n === 'tungkhan' ? 0 : /^thayao/.test(n) ? 1 : /^(camhuong|chaylen|luilen)/.test(n) ? 2 : n === 'khaiquang' ? 3 : n === 'muaheo' ? 4 : n === 'vengoi' ? 5 : /^(tungloc|banloc)/.test(n) ? 6 : 7; return [BUOC_CU, k]; }
   if (typeof CB !== 'undefined' && cbDangLe()) { const n = (CB_LICH[CB.i] || [''])[0];
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
