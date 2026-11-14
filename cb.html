@@ -1513,7 +1513,7 @@ function drawKhen() {
   const dau = parts[0].replace(/[,\s]+$/, '').trim(), sau = (parts[1] || '').replace(/^[,\s]+/, '').trim();
   ctx.save(); ctx.globalAlpha = Math.max(0, a);
   ctx.font = `800 14px ${SERIF}`; const w1 = ctx.measureText(nm).width; ctx.font = `700 10.5px ${SERIF}`; const w2 = ctx.measureText(dau).width; ctx.font = `700 12px ${SERIF}`; const w3 = sau ? ctx.measureText(sau).width : 0;
-  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, (laOng() && OB.buf ? 232 : 0) + w / 2 + SAFE_X, (GIA().id === 'chaube' || GIA().id === 'caube' ? W - SAFE_X - 185 : 540 - SAFE_X) - w / 2) /* Chầu Bé: không đè lên bảng sự tích bên phải */, y = CO.y - (GIA().id === 'caube' ? 300 : GIA().id === 'chaube' && CB.buf ? (CB_LICH[CB.i] && ['vengoi', 'banloc', 'xegia', 'thinh', 'tungkhan', 'thayao'].includes(CB_LICH[CB.i][0]) ? 252 : 300) : GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 345 : 232) * sc, /* Chầu Bé: khung ban khen cao qua đầu, không che mặt chầu */ top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
+  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, (laOng() && OB.buf ? 232 : 0) + w / 2 + SAFE_X, (GIA().id === 'chaube' || GIA().id === 'caube' ? W - SAFE_X - 185 : 540 - SAFE_X) - w / 2) /* Chầu Bé: không đè lên bảng sự tích bên phải */, y = CO.y - (GIA().id === 'caube' ? 300 : GIA().id === 'chaube' && CB.buf ? (CB_LICH[CB.i] && ['vengoi', 'banloc', 'xegia', 'thinh', 'tungkhan', 'thayao'].includes(CB_LICH[CB.i][0]) ? 252 : 300) : GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 345 : 232) * sc * (typeof NHANG !== 'undefined' && !NHANG ? 1.3 : 1), /* phóng to sập thì đẩy khung lên cao theo */ /* Chầu Bé: khung ban khen cao qua đầu, không che mặt chầu */ top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
   rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 7, y + 17); ctx.lineTo(x, y + 27); ctx.lineTo(x + 7, y + 17); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
   text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 });
@@ -2460,7 +2460,7 @@ function camUpd(dt) {
   CAM.P = CAM.A * (2 * v - 1);
 }
 const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
-const ZM = 1.45, ZFY = 470; // không con nhang: phóng to vào sập hầu cho cô đồng rõ nhất (điểm y=470 ra giữa màn)
+const ZM = 1.6, ZFY = 455; // không con nhang: phóng to vào sập hầu cho cô đồng rõ nhất (điểm y=470 ra giữa màn)
 function camBase() { const sc = CAM.S * DD.z; if (!NHANG) { ctx.translate(W / 2, H / 2); ctx.scale(ZM, ZM); ctx.translate(-W / 2, -ZFY); } ctx.translate(W / 2, H / 2); ctx.scale(sc, sc); ctx.translate(-DD.cx, -DD.cy); }
 function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
 function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
