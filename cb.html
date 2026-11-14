@@ -861,20 +861,22 @@ function cbDraw(t, x, y, sc) {
 
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CU_TF = {"thinh": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 64.4], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.9, 2.5, 58.5], "chaylen": [0.9, -5.6, 58.5], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
+const CU_TF = {"thinh": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
 const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
   ['thinh', 'thinh', 0, 25, 'thinh', 'vua', ''],
   ['thayao', 'thayao', 0, 10, 'thayao', 'vua', ''], // hầu dâng thay áo
   ['thayao2', 'thayao', 10, 125.05, 'ngoinghe', 'lap', ''], // thay áo xong: Cậu ngồi quay lưng lắc lư nghe văn (đoạn đầu clip se giá, quay xuôi rồi ngược)
-  ['camhuong', 'tau', 0, 13, 'camhuong', 'vua', ''], // clip v2 của Tú: cầm hương, lùi, vái
-  ['chaylen', 'tau', 13, 21, 'chaylen', 'vua', ''],
-  ['luilen0', 'tau', 21, 32.5, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
-  ['luilen1', 'tau', 32.5, 44, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
-  ['luilen2', 'tau', 44, 55.5, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
-  ['luilen3', 'tau', 55.5, 67, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
-  ['luilen4', 'tau', 67, 82.05, 'luilen', 'vua', ''], // clip v2: quỳ dâng hương cho hầu, đứng lùi, lên quỳ vái
+  ['camhuong', 'tau', 0, 6, 'camhuong', 'vua', ''], // 14/11: clip 03 v3 của Tú – Cậu quay lưng, quỳ nhận hương từ hầu dâng quỳ
+  ['chaylen', 'tau', 6, 10, 'chaylen', 'vua', ''], // clip 04 v3
+  ['luilen0', 'tau', 10.0, 20.29, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen1', 'tau', 20.29, 30.59, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen2', 'tau', 30.59, 40.88, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen3', 'tau', 40.88, 51.17, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen4', 'tau', 51.17, 61.46, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen5', 'tau', 61.46, 71.76, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['luilen6', 'tau', 71.76, 82.05, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
   ['khaiquang', 'khai', 0, 53, 'khaiquang', 'di', ''],
   ['muaheo', 'heo', 0, 79, 'muaheo', 'di', ''], // 14/11: clip 08 v2 của Tú, múa hèo quay lưng lên ban công đồng
   ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 3.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
@@ -890,7 +892,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=9'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=10'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
@@ -2219,7 +2221,7 @@ function shareLive(name) { const p = person(name); hu(p, name + ' chia sẻ live
 S.ob = { ph: 'mua', t: 0 }; const GIA_DUR = 360; S.giaT = 0; S.chuyen = null; S.tuChuyen = false; S.volTarget = .85; CO.sit = 0;
 const SEAT_Y = CARPET.cy - CARPET.ry + 8; const VAN_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 const CG = { l1: [.6, 3.2], n1: [2.8, 6.4], l2: [5.8, 7.6], n2: [7.2, 10.6], veil: [4, 5], thinh: 10.2, toss: [18.9, 21.6], helpIn: [15.4, 18.6], ao: [21.6, 25.2], aoDoi: 23.4, khan: [29.5, 33.5], khanDoi: 33.3, helpOut: [44, 47], dung: [47, 48.2], het: 50 };
-function nextGiaId() { const l = GIA_DS.list, i = l.findIndex(g => g.id === GIA_DS.active); return l[(i + 1) % l.length].id; }
+function nextGiaId() { if (new URLSearchParams(location.search).get('dau') === 'caube') return 'caube'; /* 14/11 anh Linh: link thử /tn chỉ chạy giá Cậu Bé, hết giá thì hầu lại từ đầu */ const l = GIA_DS.list, i = l.findIndex(g => g.id === GIA_DS.active); return l[(i + 1) % l.length].id; }
 function hoiCung() {
   return; // bản live một giá: không hồi cung
   if (S.chuyen || GIA_DS.list.length < 2) return;
