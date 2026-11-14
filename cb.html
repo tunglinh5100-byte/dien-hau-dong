@@ -244,8 +244,17 @@ function drawBg(t) {
   for (let y = 680; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 30); ctx.stroke(); } }
   const fg = ctx.createLinearGradient(0, 680, 0, H); fg.addColorStop(0, 'rgba(40,16,10,.15)'); fg.addColorStop(1, 'rgba(20,8,5,.35)'); ctx.fillStyle = fg; ctx.fillRect(0, 680, W, H - 680);
   if (BG.complete && BG.naturalWidth) ctx.drawImage(BG, 0, 0, 540, 692);
+  if (!NHANG && BG.complete && BG.naturalWidth) { // anh Linh 14/11: bỏ nền gạch, thảm sập hầu kéo dài xuống hết màn hình (phần gần máy quay giãn ra theo phối cảnh)
+    const ky = BG.naturalHeight / 692, Y0 = 618; ctx.drawImage(BG, 0, 0, BG.naturalWidth, Y0 * ky, 0, 0, 540, Y0); // ảnh tới hết mép thảm, bỏ bậc gỗ và nền gạch
+    const wg = ctx.createLinearGradient(0, Y0, 0, 880); wg.addColorStop(0, '#4a1a10'); wg.addColorStop(.35, '#5e2414'); wg.addColorStop(1, '#3a120a'); ctx.fillStyle = wg; ctx.fillRect(-60, Y0, W + 120, 880 - Y0); // mặt sập gỗ sơn son
+    ctx.save(); ctx.beginPath(); ctx.rect(-60, Y0, W + 120, 880 - Y0); ctx.clip(); const VX = 270, VY = 330; // ván sập chạy về phía ban (phối cảnh)
+    for (let i = -14; i <= 14; i++) { const xb = 270 + i * 46; ctx.beginPath(); ctx.moveTo(VX + (xb - VX) * (Y0 - VY) / (880 - VY), Y0); ctx.lineTo(xb, 880); ctx.strokeStyle = 'rgba(20,4,2,.35)'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.beginPath(); ctx.moveTo(VX + (xb - VX) * (Y0 - VY) / (880 - VY) + .8, Y0); ctx.lineTo(xb + 1.5, 880); ctx.strokeStyle = 'rgba(255,170,110,.07)'; ctx.lineWidth = 1; ctx.stroke(); }
+    const sh = ctx.createRadialGradient(270, Y0 + 30, 10, 270, Y0 + 60, 300); sh.addColorStop(0, 'rgba(255,190,120,.16)'); sh.addColorStop(1, 'rgba(255,190,120,0)'); ctx.fillStyle = sh; ctx.fillRect(-60, Y0, W + 120, 880 - Y0); // ánh nến phản trên mặt sơn
+    const bd = ctx.createLinearGradient(0, Y0, 0, Y0 + 14); bd.addColorStop(0, 'rgba(10,2,1,.55)'); bd.addColorStop(1, 'rgba(10,2,1,0)'); ctx.fillStyle = bd; ctx.fillRect(-60, Y0, W + 120, 14); ctx.restore(); // bóng mép thảm
+    const sv = ctx.createLinearGradient(0, 0, W, 0); sv.addColorStop(0, 'rgba(20,6,4,.4)'); sv.addColorStop(.16, 'rgba(20,6,4,0)'); sv.addColorStop(.84, 'rgba(20,6,4,0)'); sv.addColorStop(1, 'rgba(20,6,4,.4)'); ctx.fillStyle = sv; ctx.fillRect(-60, Y0, W + 120, 880 - Y0);
+  } else {
   // soften the seam
-  const sg = ctx.createLinearGradient(0, 668, 0, 700); sg.addColorStop(0, 'rgba(176,122,94,0)'); sg.addColorStop(1, 'rgba(168,115,90,1)'); ctx.fillStyle = sg; ctx.fillRect(0, 668, W, 32);
+  const sg = ctx.createLinearGradient(0, 668, 0, 700); sg.addColorStop(0, 'rgba(176,122,94,0)'); sg.addColorStop(1, 'rgba(168,115,90,1)'); ctx.fillStyle = sg; ctx.fillRect(0, 668, W, 32); }
   // candle-warm glow pulsing with lộc moments
   const r = ctx.createRadialGradient(270, 380, 30, 270, 420, 420); r.addColorStop(0, `rgba(255,200,110,${.06 + S.glow * .3})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; ctx.fillRect(0, 0, W, H);
 
@@ -692,7 +701,7 @@ function obStep(dt) {
 // cỡ và vị trí từng clip khác nhau (Gemini quay xa gần khác nhau): quy về cùng một khung theo chiếc đệm
 const OB_TF = {"mua": [1, 0, 0], "thuoc": [1, 0, 0], "cafe": [1.0177, -2.21, 2.07], "loc": [1.0849, -12.95, -35.63], "ruou": [0.95, 11.03, -12.2], "thinh": [1.0423, -6.68, -8.6], "thayao": [1.1695, -32.69, -67.88], "xegia": [1.1238, -23.71, -61.93], "tauhuong": [0.979, 18.9, 9.1]}, OB_NG = [[1.0151, -2.94, -9.21], [1.05, -20.9, 20.25]];
 function obTf() { const n = OB.shown || OB.cur; if (n === 'ngoi' || n === 'dung') { const v = OB.v[n]; let p = v && v.duration ? clamp(v.currentTime / v.duration, 0, 1) : 0; if (n === 'dung') p = 1 - p; const e = p * p * (3 - 2 * p), a = OB_NG[0], b = OB_NG[1]; return [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]; } return OB_TF[n] || [1, 0, 0]; }
-function nghiLe() { return (typeof OB !== 'undefined' && OB.buf && laOng() && (OB.intro || OB.exit || OB.hold || OB.tau)) || (typeof OC !== 'undefined' && OC.buf && GIA().id === 'codoi' && (OC.intro || OC.exit || OC.hold)) || (typeof CB !== 'undefined' && cbDangLe() && (CB.i <= 1 || CB.hold || CB_LICH[CB.i][0] === 'xegia')) || !!S.cat; }
+function nghiLe() { return (typeof OB !== 'undefined' && OB.buf && laOng() && (OB.intro || OB.exit || OB.hold || OB.tau)) || (typeof OC !== 'undefined' && OC.buf && GIA().id === 'codoi' && (OC.intro || OC.exit || OC.hold)) || (typeof CB !== 'undefined' && cbDangLe() && (CB.hold || buocGia() && buocGia()[1] <= 3 || CB_LICH[CB.i][0] === 'xegia')) || (typeof CU !== 'undefined' && cuDangLe() && (CU.hold || buocGia() && buocGia()[1] <= 4 || (CU_LICH[CU.i] || [''])[0] === 'xegia')) || !!S.cat; }
 const VAN_OB_AO = new Audio('van-ong-thayao.mp3?v=1'); VAN_OB_AO.preload = 'auto';
 function obVanAo() { // văn "Hội thánh hát" lúc hầu dâng thay khăn áo cho Ông, hết văn mới múa hèo
   if (OB.van2) return; OB.van2 = true; OB.van2Xong = false; S.volTarget = 0;
@@ -1790,7 +1799,7 @@ function drawBinh(t) {
   if (B && bt < .45) S.hv = 1; else if (B && bt < 1.3) S.hv = 0; else S.hv = S.hv == null ? k : (k < S.hv - .3 ? k : S.hv + (k - S.hv) * .08);
   // ghi chú dưới bình
   rr(8, 478, 150, 32, 9, 'rgba(30,8,6,.72)'); if (AUTO) { const r = Math.max(0, Math.ceil(45 - (S.autoT || 0))); text('Cô ban lộc sau ' + Math.floor(r / 60) + ':' + String(r % 60).padStart(2, '0'), 83, 489, 10.5, '#fff', { w: 700 }); text('cho các con nhang đang xem', 83, 503, 9.5, '#f2cf72', { f: SERIF, w: 700 }); }
-  else { text('Bình đầy ' + S.goal + ' tim', 83, 489, 10.5, '#fff', { w: 700 }); text((laOng() ? 'ông sẽ ban lộc' : 'cô sẽ phát lộc'), 83, 503, 10, '#f2cf72', { f: SERIF, w: 700 }); }
+  else { text('Bình đầy ' + S.goal + ' tim', 83, 489, 10.5, '#fff', { w: 700 }); text(fixXung(laOng() ? 'ông sẽ ban lộc' : 'cô sẽ phát lộc'), 83, 503, 10, '#f2cf72', { f: SERIF, w: 700 }); }
   // tim nhỏ rơi vào miệng bình khi có người thả tim
   (S.drops || []).forEach(d => { if (d.t < 0) return; const e = d.t / .6, x = d.sx + (cx - d.sx) * e, y = d.sy + (cy - sz * .38 - 34 - d.sy) * e - Math.sin(e * Math.PI) * 26;
     ctx.save(); ctx.translate(x, y); ctx.globalAlpha = 1 - e * .3; ctx.fillStyle = '#ff4f86'; heartP(9); ctx.fill(); ctx.restore(); });
@@ -1842,12 +1851,9 @@ const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = 192, Wd = 150, cx = X + Wd / 2, h = 176, BY = Y + 84, BH = h - 90, LH = 12.5;
+  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 240 : 192, Wd = 150, cx = X + Wd / 2, h = 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
-  text('Nhận lời ban khen của ' + xung(), cx, Y + 16, 11, '#f2cf72', { f: SERIF, w: 800 });
-  text('Bình luận', cx, Y + 36, 10.5, '#fff', { w: 700 }); text('hoặc chia sẻ live', cx, Y + 51, 10.5, '#fff', { w: 700 });
-  ctx.strokeStyle = 'rgba(230,181,82,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X + 14, Y + 63); ctx.lineTo(X + Wd - 14, Y + 63); ctx.stroke();
-  const g = GIA(), BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 75, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
+  const g = GIA(), BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
     (B[g.id] && B[g.id].length ? B[g.id] : (B.chung || [])).forEach((para, k) => { if (k) TICH.lines.push(''); wrapTxt('✦ ' + para, 134).forEach(l => TICH.lines.push(l)); });
     if (B['nguon_' + g.id] || B.nguon) { TICH.lines.push(''); ctx.font = `italic 600 9px ${SERIF}`; wrapTxt('Nguồn: ' + (B['nguon_' + g.id] || B.nguon), 134).forEach(l => TICH.lines.push('\u0001' + l)); }
@@ -2348,8 +2354,32 @@ function drawBuoc() { if (!BUOC_ON || S.cat) return; const cur = buocOng(); if (
   parts.forEach((p, i) => { if (i) { ctx.font = `700 11px ${SERIF}`; ctx.fillStyle = 'rgba(230,181,82,.55)'; ctx.fillText(sep, x, y0 + h / 2 + .5); x += ws; }
     const w1 = wd(p, i); ctx.fillStyle = i === cur ? '#ffd76a' : i < cur ? 'rgba(246,233,214,.45)' : 'rgba(246,233,214,.82)'; ctx.fillText(p, x, y0 + h / 2 + .5); x += w1; });
   ctx.restore(); }
+/* Thanh tiến trình các bước trong giá (anh Linh 14/11): dải sơn son thếp vàng, mỗi bước một đóa sen nhỏ */
+const BUOC_CU = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+const BUOC_CB = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước, bước hiện tại]
+  if (typeof CU !== 'undefined' && cuDangLe()) { const n = (CU_LICH[CU.i] || [''])[0];
+    const k = n === 'thinh' ? 0 : /^thayao/.test(n) ? 1 : /^(camhuong|chaylen|luilen)/.test(n) ? 2 : n === 'khaiquang' ? 3 : n === 'muaheo' ? 4 : n === 'vengoi' ? 5 : /^(tungloc|banloc)/.test(n) ? 6 : 7; return [BUOC_CU, k]; }
+  if (typeof CB !== 'undefined' && cbDangLe()) { const n = (CB_LICH[CB.i] || [''])[0];
+    const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
+  return null; }
+function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
+function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 190, h = 40, cy = y0 + 14, dx = (x1 - x0 - 36) / (n - 1);
+  ctx.save(); const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, 'rgba(110,22,16,.9)'); g.addColorStop(1, 'rgba(48,8,6,.9)'); rr(x0, y0, x1 - x0, h, 8, g);
+  ctx.strokeStyle = 'rgba(230,181,82,.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, h, 8); ctx.stroke(); ctx.strokeStyle = 'rgba(230,181,82,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.roundRect(x0 + 3, y0 + 3, x1 - x0 - 6, h - 6, 6); ctx.stroke();
+  const px = i => x0 + 18 + i * dx;
+  ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(230,181,82,.3)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(n - 1), cy); ctx.stroke(); // dây lụa
+  if (k > 0) { const gl = ctx.createLinearGradient(px(0), 0, px(k), 0); gl.addColorStop(0, '#b8862e'); gl.addColorStop(1, '#ffd76a'); ctx.strokeStyle = gl; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(k), cy); ctx.stroke(); }
+  const pul = .5 + .5 * Math.sin(S.t * 3);
+  ds.forEach((ten, i) => { const x = px(i);
+    if (i === k) { const rg = ctx.createRadialGradient(x, cy, 2, x, cy, 15); rg.addColorStop(0, `rgba(255,215,106,${.55 + .3 * pul})`); rg.addColorStop(1, 'rgba(255,215,106,0)'); ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, cy, 15, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, cy, 8, 0, 7); ctx.fillStyle = '#9e1c14'; ctx.fill(); ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 1.6; ctx.stroke(); senNho(x, cy + 3, 6.5, '#ffe9a8', '#f2b84a'); }
+    else if (i < k) { ctx.beginPath(); ctx.arc(x, cy, 5, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill(); ctx.strokeStyle = '#fff2b0'; ctx.lineWidth = .8; ctx.stroke(); }
+    else { ctx.beginPath(); ctx.arc(x, cy, 4.5, 0, 7); ctx.fillStyle = 'rgba(40,8,6,.95)'; ctx.fill(); ctx.strokeStyle = 'rgba(230,181,82,.75)'; ctx.lineWidth = 1; ctx.stroke(); }
+    text(ten, x, y0 + 32, i === k ? 9.6 : 8.6, i === k ? '#ffd76a' : i < k ? 'rgba(246,220,150,.75)' : 'rgba(246,233,214,.6)', { f: SERIF, w: i === k ? 800 : 600 }); });
+  ctx.restore(); }
 function drawGiaPill() {
-  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + (BUOC_ON && buocOng() >= 0 ? '' : ' · ' + GD_TEN[giaiDoan()]); drawBuoc(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
+  const c = S.chuyen, s = (c && c.t >= CG.thinh ? 'Giá ' + c.toTen : 'Giá ' + GIA().ten) + (BUOC_ON && buocOng() >= 0 || buocGia() ? '' : ' · ' + GD_TEN[giaiDoan()]); drawBuoc(); drawTienTrinh(); ctx.font = `700 12px ${SERIF}`; const w = ctx.measureText(s).width + 34;
   rr(270 - w / 2, 160, w, 24, 12, 'rgba(142,33,28,.88)'); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(270 - w / 2, 160, w, 24, 12); ctx.stroke();
   text('🌸 ' + s, 270, 172.5, 12, '#f6dc96', { f: SERIF, w: 700 });
 }
