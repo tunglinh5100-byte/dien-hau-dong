@@ -7,7 +7,7 @@ window.BANG_TIN = {
   // Bài: "Thực hành nghi lễ tín ngưỡng thờ Mẫu Tam phủ của người Việt" - nhandan.vn/trinh-dien-thuc-hanh-nghi-le-tin-nguong-tho-mau-tam-phu-cua-nguoi-viet-post864851.html
   chung: [
     'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
-    'Tín ngưỡng thờ Mẫu Tam phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
+    'Tín ngưỡng thờ Mẫu Tam Tứ Phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
     'Các Thánh Mẫu và các vị thần trong điện thờ có nguồn gốc không chỉ từ người Kinh mà còn từ các dân tộc Mường, Tày, Nùng, Dao',
     'Nghi lễ lên đồng hội tụ nhiều yếu tố văn hóa dân gian: trang phục, âm nhạc, múa và hát chầu văn',
   ],
@@ -40,7 +40,7 @@ window.BANG_TIN = {
     'Các vị Thánh thuộc hệ thống Tứ phủ, trong đó Mẫu Liễu Hạnh ở vị trí trung tâm. Nghi lễ hầu đồng có các giá hầu nam thần và nữ thần',
     'Âm nhạc chầu văn là phần cốt lõi của nghi lễ hầu đồng',
     'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
-    'Tín ngưỡng thờ Mẫu Tam phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
+    'Tín ngưỡng thờ Mẫu Tam Tứ Phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
   ],
   // Cô Bơ: chưa tìm được bài Nhân Dân nên để trống, bảng sẽ hiện mục "chung"
   cobo: [],
