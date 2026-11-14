@@ -406,7 +406,7 @@ const CV = {}; let cvErr = false;
 const CV_HOLD = document.createElement('div'); CV_HOLD.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;overflow:hidden;opacity:.01;pointer-events:none;z-index:-1';
 // 14/11 anh Linh báo trang giật, tải không nổi trên điện thoại: chỉ tải video của giá đang hầu và giá kế tiếp, không tải cả ~100MB lúc mở trang
 const VHOAN = []; function vHoan(v, src, gia) { v._src = src; v._gia = gia; v._pre = v.preload; v.preload = 'none'; VHOAN.push(v); }
-function napVideo() { let a = '', b = ''; try { a = GIA().id; b = nextGiaId(); } catch (e) { return; }
+function napVideo() { if (window.__dangTai) return; let a = '', b = ''; try { a = GIA().id; b = nextGiaId(); } catch (e) { return; }
   VHOAN.forEach(v => { if (v._gia === a) { if (!v.getAttribute('src')) v.src = v._src; if (v.preload !== v._pre) v.preload = v._pre; } else if (v._gia === b && !v.getAttribute('src')) { v.preload = 'none'; v.src = v._src; } }); }
 setInterval(napVideo, 1000);
 document.body.appendChild(CV_HOLD);
@@ -2409,12 +2409,12 @@ function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước,
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
 function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
-function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 150, h = 64, cy = y0 + 36, dx = (x1 - x0 - 44) / (n - 1); // 14/11: gộp tên giá vào khung tiến trình cho gọn
+function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 146, h = 80, cy = y0 + 47, /* 14/11 anh Linh: tên bước so le trên dưới */ dx = (x1 - x0 - 64) / (n - 1); // 14/11: gộp tên giá vào khung tiến trình cho gọn
   ctx.save(); const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, 'rgba(110,22,16,.9)'); g.addColorStop(1, 'rgba(48,8,6,.9)'); rr(x0, y0, x1 - x0, h, 8, g);
   ctx.strokeStyle = 'rgba(230,181,82,.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, h, 8); ctx.stroke(); ctx.strokeStyle = 'rgba(230,181,82,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.roundRect(x0 + 3, y0 + 3, x1 - x0 - 6, h - 6, 6); ctx.stroke();
   const c0 = S.chuyen, tg = 'Giá ' + (c0 && c0.t >= CG.thinh ? c0.toTen : GIA().ten); text('❀  ' + tg + '  ❀', W / 2, y0 + 14, 12.5, '#f6dc96', { f: SERIF, w: 800 });
   ctx.strokeStyle = 'rgba(230,181,82,.4)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x0 + 40, y0 + 24); ctx.lineTo(x1 - 40, y0 + 24); ctx.stroke();
-  const px = i => x0 + 22 + i * dx;
+  const px = i => x0 + 32 + i * dx;
   ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(230,181,82,.3)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(n - 1), cy); ctx.stroke(); // dây lụa
   if (k > 0) { const gl = ctx.createLinearGradient(px(0), 0, px(k), 0); gl.addColorStop(0, '#b8862e'); gl.addColorStop(1, '#ffd76a'); ctx.strokeStyle = gl; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(px(0), cy); ctx.lineTo(px(k), cy); ctx.stroke(); }
   const pul = .5 + .5 * Math.sin(S.t * 5.5); // 14/11 anh Linh: bước đang chạy nhấp nháy rõ
@@ -2423,7 +2423,7 @@ function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = 
       ctx.beginPath(); ctx.arc(x, cy, 8, 0, 7); ctx.fillStyle = '#9e1c14'; ctx.fill(); ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 1.6; ctx.stroke(); senNho(x, cy + 3, 6.5, '#ffe9a8', '#f2b84a'); }
     else if (i < k) { ctx.beginPath(); ctx.arc(x, cy, 5, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill(); ctx.strokeStyle = '#fff2b0'; ctx.lineWidth = .8; ctx.stroke(); }
     else { ctx.beginPath(); ctx.arc(x, cy, 4.5, 0, 7); ctx.fillStyle = 'rgba(40,8,6,.95)'; ctx.fill(); ctx.strokeStyle = 'rgba(230,181,82,.75)'; ctx.lineWidth = 1; ctx.stroke(); }
-    text(ten, x, y0 + 53, i === k ? 9 : 8.4, i === k ? `rgba(255,${200 + 40 * pul | 0},${90 + 120 * pul | 0},${.55 + .45 * pul})` : i < k ? 'rgba(246,220,150,.75)' : 'rgba(246,233,214,.6)', { f: SERIF, w: i === k ? 800 : 600 }); });
+    text(ten, x, i % 2 ? y0 + 31 : y0 + 67, i === k ? 9.6 : 8.8, i === k ? `rgba(255,${200 + 40 * pul | 0},${90 + 120 * pul | 0},${.55 + .45 * pul})` : i < k ? 'rgba(246,220,150,.75)' : 'rgba(246,233,214,.6)', { f: SERIF, w: i === k ? 800 : 600 }); });
   ctx.restore(); }
 function drawGiaPill() {
   if (buocGia()) { drawBuoc(); drawTienTrinh(); return; }
@@ -2450,10 +2450,25 @@ function capNhatGiaInfo() {
 setInterval(capNhatGiaInfo, 500);
 // ---------- Loop ----------
 let last = performance.now();
+/* 14/11 anh Linh: tải hết video trước, hiện tiến độ, xong mới có nút "Bắt đầu canh đàn" (máy live). ?cho=0 để vào luôn */
+let BATDAU = /[?&]cho=0/.test(location.search);
+(function choTai() { if (BATDAU) return; window.__dangTai = true;
+  const ov = document.createElement('div'); ov.id = 'choTai'; ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 40%,#4a1610,#140604 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#f6dc96;font-family:"Noto Serif",Georgia,serif;text-align:center;padding:24px';
+  ov.innerHTML = '<div style="font-size:28px;font-weight:800;letter-spacing:.5px">Điện hầu online</div><div id="ctTxt" style="font-size:16px;color:#f6e9d6">Đang tải video các giá…</div><div style="width:min(420px,80vw);height:14px;border:1px solid #e6b552;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.4)"><div id="ctBar" style="height:100%;width:0;background:linear-gradient(90deg,#b8862e,#ffd76a)"></div></div><div id="ctMb" style="font-size:13px;color:#e6b552"></div><button id="ctGo" disabled style="margin-top:8px;font:800 20px \'Noto Serif\',Georgia,serif;padding:14px 34px;border-radius:30px;border:2px solid #e6b552;background:#8e211c;color:#fff2c4;opacity:.45;cursor:pointer">🪷 Bắt đầu canh đàn</button><a id="ctSkip" href="#" style="font-size:12px;color:rgba(246,233,214,.6)">Vào luôn, không chờ tải (dùng khi sửa trên điện thoại)</a>';
+  document.body.appendChild(ov);
+  const im = setInterval(() => { if (BATDAU) return clearInterval(im); try { [CB.au, CU.au, VAN_AU, bgm].forEach(a => { if (a && !a.paused) a.pause(); }); } catch (e) {} }, 200); // đang tải: im tiếng
+  const go = () => { BATDAU = true; window.__dangTai = false; try { if (GIA().id === 'chaube') cbReset(); else if (GIA().id === 'caube') cuReset(); } catch (e) {} try { napVideo(); } catch (e) {} last = performance.now(); ov.remove(); try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} };
+  document.getElementById('ctGo').onclick = go; document.getElementById('ctSkip').onclick = (e) => { e.preventDefault(); go(); };
+  setTimeout(() => { const vs = [...CV_HOLD.querySelectorAll('video')]; const ds = vs.map(v => ({ v, url: v._src || v.getAttribute('src') })).filter(x => x.url && !/^blob:/.test(x.url));
+    let xong = 0, byt = 0, loi = 0; const tong = ds.length, txt = document.getElementById('ctTxt'), bar = document.getElementById('ctBar'), mb = document.getElementById('ctMb'), btn = document.getElementById('ctGo');
+    const ve = () => { if (!txt) return; bar.style.width = (tong ? 100 * xong / tong : 100) + '%'; txt.textContent = xong < tong ? 'Đang tải video các giá: ' + xong + '/' + tong : (loi ? 'Đã tải xong (' + loi + ' video lỗi, sẽ tải lại khi phát)' : 'Đã tải xong tất cả ' + tong + ' video'); mb.textContent = (byt / 1e6).toFixed(1) + ' MB'; if (xong >= tong) { btn.disabled = false; btn.style.opacity = 1; } };
+    let i = 0; const chay = async () => { while (i < ds.length && !BATDAU) { const d = ds[i++]; try { const r = await fetch(d.url); const rd = r.body.getReader(), ch = []; for (;;) { const { done, value } = await rd.read(); if (done) break; ch.push(value); byt += value.length; ve(); } if (!BATDAU) { d.v._src = URL.createObjectURL(new Blob(ch, { type: 'video/mp4' })); d.v.src = d.v._src; d.v.preload = 'auto'; } } catch (e) { loi++; } xong++; ve(); } };
+    ve(); for (let k = 0; k < 4; k++) chay(); }, 300); })();
 const FMIN = NHE ? 40 : LIVE1 ? 31 : 0; // live: giới hạn 30 khung/giây (nhe=1: 25) cho nhẹ máy
 let lastRun = performance.now(), errN = 0;
 function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung không làm đứng hình cả trang
   requestAnimationFrame(frame);
+  if (!BATDAU) { last = now; return; } // chờ tải xong, anh bấm Bắt đầu canh đàn
   if (FMIN && now - last < FMIN) return;
   lastRun = performance.now();
   try { frame1(now); } catch (e) { if (errN++ < 20) console.error('frame', e); last = now; }
