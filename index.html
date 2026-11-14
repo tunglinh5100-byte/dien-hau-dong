@@ -2375,7 +2375,7 @@ function drawHelpers(t) {
 }
 /* Dải "đang ở bước nào" của giá hầu (đang thử: chỉ hiện khi link có ?buoc=1, chỉ giá Ông) */
 const BUOC_ON = /[?&]buoc=1/.test(location.search);
-const BUOC_ONG = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ban lộc', 'Xe giá'];
+const BUOC_ONG = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ban lộc', 'Xe giá'];
 function buocOng() { if (!(typeof OB !== 'undefined' && OB.buf && laOng()) || S.chuyen) return -1;
   if (OB.exit || OB.hold) return 6; if (OB.intro) return OB.cur === 'thayao' ? 1 : 0;
   if (OB.tau) return obKhaiQuang() ? 3 : 2; return S.ob && S.ob.ph === 'ngoi' ? 5 : 4; }
@@ -2389,9 +2389,9 @@ function drawBuoc() { if (!BUOC_ON || S.cat) return; const cur = buocOng(); if (
     const w1 = wd(p, i); ctx.fillStyle = i === cur ? '#ffd76a' : i < cur ? 'rgba(246,233,214,.45)' : 'rgba(246,233,214,.82)'; ctx.fillText(p, x, y0 + h / 2 + .5); x += w1; });
   ctx.restore(); }
 /* Thanh tiến trình các bước trong giá (anh Linh 14/11): dải sơn son thếp vàng, mỗi bước một đóa sen nhỏ */
-const BUOC_CU = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
-const BUOC_CO = ['Thỉnh', 'Thay khăn áo', 'Múa', 'Phát lộc', 'Xe giá'];
-const BUOC_CB = ['Thỉnh', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+const BUOC_CU = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+const BUOC_CO = ['Thỉnh mời', 'Thay khăn áo', 'Múa', 'Phát lộc', 'Xe giá'];
+const BUOC_CB = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
 function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước, bước hiện tại]
   if (typeof CU !== 'undefined' && cuDangLe()) { const n = (CU_LICH[CU.i] || [''])[0];
     const k = n === 'thinh' || n === 'tungkhan' ? 0 : /^thayao/.test(n) ? 1 : /^(camhuong|chaylen|luilen)/.test(n) ? 2 : n === 'khaiquang' ? 3 : n === 'muaheo' ? 4 : n === 'vengoi' ? 5 : /^(tungloc|banloc)/.test(n) ? 6 : 7; return [BUOC_CU, k]; }
