@@ -144,7 +144,7 @@ const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').repla
 
 // ---------- State ----------
 const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: [], comments: [], floats: [], money: [], likes: 0, goal: 100, goalHits: 0, merit: {},
-  banner: null, viewers: 0, auto: true, sound: false, danceSpecial: 0, throwT: 0, giving: 0, glow: 0 };
+  banner: null, viewers: 0, auto: !/[?&]sim=0/.test(location.search), /* /tn: sim=0 tắt hẳn giả lập ngay từ đầu (anh Linh 14/11) */ sound: false, danceSpecial: 0, throwT: 0, giving: 0, glow: 0 };
 (function buildSeats() { // scattered, no rows: rejection sampling with min spacing
   const pts = [];
   const zones = [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
@@ -885,11 +885,11 @@ const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú 
   ['camhuong6', 'tau', 70.33, 77.47, 'camhuong', 'vua', ''],
   ['chaylen6', 'tau', 77.47, 82.05, 'chaylen', 'vua', ''],
   ['khaiquang', 'khai', 0, 53, 'khaiquang', 'lap', ''], // anh Linh 14/11: khai quang đứng im giữa sập
-  ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoidi', '', null, null, 3.0], // clip 08 v2 chậm 30%; chỉ lần đầu quỳ, các vòng sau lặp từ giây 3 (sau đoạn quỳ)
+  ['muaheo', 'heo', 0, 79, 'muaheo', 'ngoidi', '', null, null, 3.8], // clip 08 v2 chậm 30%; chỉ lần đầu quỳ (giây 0,5–3,6), các vòng sau lặp từ giây 3,8
   ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 3.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
-  ['tungloc', 'loc', 0, 95, 'tungtien', 'lap', '', [[6.8, 'tien'], [14.84, 'tien'], [22.88, 'tien'], [30.92, 'tien'], [38.96, 'tien'], [47.0, 'tien'], [55.04, 'tien'], [63.08, 'tien'], [71.12, 'tien'], [79.16, 'tien'], [87.2, 'tien']]], // 14/11: clip 10 v2, tung tiền ở giây 6,8 mỗi vòng clip 8,04s
-  ['banloc', 'banloc', 0, 56, 'tungtien', 'lap', '', [[6.8, 'tien'], [14.84, 'tien'], [22.88, 'tien'], [30.92, 'tien'], [38.96, 'tien'], [47.0, 'tien']]], // 14/11: clip 11 v2 Tú gửi trùng clip 10, tạm dùng clip 10
-  ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[6.8, 'qua'], [14.84, 'qua'], [22.88, 'qua'], [30.92, 'qua'], [38.96, 'qua'], [47.0, 'qua'], [55.04, 'qua'], [63.08, 'qua'], [71.12, 'qua'], [79.16, 'qua'], [87.2, 'qua'], [95.24, 'qua'], [103.28, 'qua'], [111.32, 'qua'], [119.36, 'qua'], [127.4, 'qua'], [135.44, 'qua'], [143.48, 'qua'], [151.52, 'qua'], [159.56, 'qua'], [167.6, 'qua'], [175.64, 'qua'], [183.68, 'qua']]], // 14/11: clip 12 v2, tung kẹo ở giây 6,8 mỗi vòng
+  ['tungloc', 'loc', 0, 95, 'tungtien', 'lap', '', [[6.1, 'tien'], [14.14, 'tien'], [22.18, 'tien'], [30.22, 'tien'], [38.26, 'tien'], [46.3, 'tien'], [54.34, 'tien'], [62.38, 'tien'], [70.42, 'tien'], [78.46, 'tien'], [86.5, 'tien']]], // 14/11 anh Linh: clip mới của Tú, Cậu quay ra tung lộc cho con nhang (giây 6,1 mỗi vòng)
+  ['banloc', 'banloc', 0, 56, 'tungtien', 'lap', '', [[6.1, 'tien'], [14.14, 'tien'], [22.18, 'tien'], [30.22, 'tien'], [38.26, 'tien'], [46.3, 'tien'], [54.34, 'tien']]], // clip 11 ban lộc Tú gửi vẫn trùng clip 10: tạm dùng clip 10
+  ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[5.9, 'qua'], [13.94, 'qua'], [21.98, 'qua'], [30.02, 'qua'], [38.06, 'qua'], [46.1, 'qua'], [54.14, 'qua'], [62.18, 'qua'], [70.22, 'qua'], [78.26, 'qua'], [86.3, 'qua'], [94.34, 'qua'], [102.38, 'qua'], [110.42, 'qua'], [118.46, 'qua'], [126.5, 'qua'], [134.54, 'qua'], [142.58, 'qua'], [150.62, 'qua'], [158.66, 'qua'], [166.7, 'qua'], [174.74, 'qua'], [182.78, 'qua']]], // clip 12 mới, tung kẹo giây 5,9 mỗi vòng
   ['segia0', 'segia', 0, 42, 'ngoinghe', 'lap', ''], // nghe văn se giá: Cậu ngồi quay lưng lắc lư
   ['xegia', 'segia', 42, 57.05, 'segia', 'vua', '']];  // 18:09 (giây 44 nhạc se giá) Cậu trùm khăn se giá – clip 13 của Tú
 const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
@@ -899,12 +899,12 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinhlap' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=12'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=13'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
-const CU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 472], tungkeo: [86, 270, 470], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
+const CU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
 const CU_TO = +(new URLSearchParams(location.search).get('to') || 1.3); function cuPhong(n) { return (/^(thinh|thinhlap|tungkhan)$/.test(n) ? 1 : 1.13) * CU_TO; } // 14/11 10:26 anh Linh: nhân vật to như giá đang hầu trên /g (?to= để thử cỡ) // anh Linh 14/11: Cậu nhỏ hơn các giá khác -> phóng 1,13 (thỉnh có khăn trùm đã to sẵn)
-const CU_DAU = { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 176, tungkeo: 178, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
+const CU_DAU = { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 170, tungkeo: 172, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
 function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc * cuPhong(n), top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
@@ -2651,7 +2651,8 @@ buildCfgPanel(); napNhacGia();
   if (Q.get('live') === '1') {
     document.body.classList.add('livemode');
     if (Q.get('rot') === '1') document.body.classList.add('rot'); // khung ngang của LIVE Studio: xoay 90° để dùng hết điểm ảnh, LIVE Studio xoay lại
-    if (Q.get('sim') === '0' || Q.get('sim') === '1') setTimeout(() => { const bA = document.getElementById('bAuto'); if (bA && bA.classList.contains('on') !== (Q.get('sim') === '1')) bA.click(); }, 300);
+    if (Q.get('sim') === '1') setTimeout(() => { const bA = document.getElementById('bAuto'); if (bA && !bA.classList.contains('on')) bA.click(); }, 300);
+    if (Q.get('sim') === '0') { const bA = document.getElementById('bAuto'); if (bA) { bA.classList.remove('on'); bA.textContent = 'Giả lập: tắt'; } }
     setTimeout(() => { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click();
     }, 1500);
   }
