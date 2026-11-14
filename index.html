@@ -709,7 +709,7 @@ function obTf() { const n = OB.shown || OB.cur; if (n === 'ngoi' || n === 'dung'
 function nghiLe() { return (typeof OB !== 'undefined' && OB.buf && laOng() && (OB.intro || OB.exit || OB.hold || OB.tau)) || (typeof OC !== 'undefined' && OC.buf && GIA().id === 'codoi' && (OC.intro || OC.exit || OC.hold)) || (typeof CB !== 'undefined' && cbDangLe() && (CB.hold || buocGia() && buocGia()[1] <= 3 || CB_LICH[CB.i][0] === 'xegia')) || (typeof CU !== 'undefined' && cuDangLe() && (CU.hold || buocGia() && buocGia()[1] <= 4 || (CU_LICH[CU.i] || [''])[0] === 'xegia')) || !!S.cat; }
 const VAN_OB_AO = new Audio('van-ong-thayao.mp3?v=1'); VAN_OB_AO.preload = 'auto';
 function obVanAo() { // văn "Hội thánh hát" lúc hầu dâng thay khăn áo cho Ông, hết văn mới múa hèo
-  if (OB.van2) return; OB.van2 = true; OB.van2Xong = false; S.volTarget = 0;
+  if (OB.van2) return; OB.van2 = true; OB.van2Xong = false; S.volTarget = 0; try { VAN_AU.pause(); } catch (e) {} // dứt văn thỉnh trước, không chồng
   const xong = () => { if (OB.van2Xong) return; OB.van2Xong = true; if (!OB.v.tauhuong) obNhac(); };
   try { VAN_OB_AO.muted = !S.sound; VAN_OB_AO.currentTime = 0; VAN_OB_AO.onended = xong; const pr = VAN_OB_AO.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) { xong(); }
   clearTimeout(OB.van2T); OB.van2T = setTimeout(xong, ((VAN_OB_AO.duration || 48) + 4) * 1000); }
@@ -748,7 +748,7 @@ function ocStep(dt) {
   else if (OC.exit) { if (!OC.cur) ocPlay('ngoi'); }
   else if (OC.intro) { if (!OC.cur) ocPlay('thinh');
     if (!OC.vanBat && !(OC.vanRetry > performance.now())) { OC.vanBat = true; OC.vanXong = false; const vg = vanCua({ id: 'codoi' }); S.volTarget = 0; S.banner = { text: 'Cung văn thỉnh giá Cô Đôi Thượng Ngàn', t: 0, life: 3.5 };
-      if (vg) { let lan = VAN_LAP; const xong = () => { if (OC.vanXong) return; OC.vanXong = true; try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OC.intro) lap(); else xong(); }, () => { OC.vanBat = false; OC.vanRetry = performance.now() + 1500; }); lap(); clearTimeout(OC.vanT); OC.vanT = setTimeout(() => { if (!VAN_AU.paused || OC.vanBat) xong(); }, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OC.vanXong = true; }
+      if (vg) { let lan = VAN_LAP; const xong = () => { if (OC.vanXong) return; OC.vanXong = true; try { VAN_AU.pause(); } catch (e) {} try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; }; const lap = () => phatVan(vg.thinh, vg.se, () => { if (--lan > 0 && OC.intro) lap(); else xong(); }, () => { OC.vanBat = false; OC.vanRetry = performance.now() + 1500; }); lap(); clearTimeout(OC.vanT); OC.vanT = setTimeout(() => { if (!VAN_AU.paused || OC.vanBat) xong(); }, (vg.se - vg.thinh) * VAN_LAP * 1000 + 8000); } else OC.vanXong = true; }
     if (!OC.vanXong) { S.volTarget = 0; try { bgm.volume = 0; } catch (e) {} }
     if (OC.cur === 'thinh' && !OC.vanXong) { const tv = OC.v.thinh; if (tv && tv.currentTime > 4.3) { try { tv.currentTime = .6; } catch (e) {} } } } // giơ tay số 2 theo văn thỉnh, hết văn mới tung khăn
   const v = OC.v[OC.cur]; OC.st += dt;
