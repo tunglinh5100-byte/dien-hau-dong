@@ -867,16 +867,26 @@ const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: '
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
   ['thinh', 'thinh', 0, 25, 'thinh', 'vua', ''],
   ['thayao', 'thayao', 0, 10, 'thayao', 'vua', ''], // hầu dâng thay áo
-  ['thayao2', 'thayao', 10, 125.05, 'ngoinghe', 'lap', ''], // thay áo xong: Cậu ngồi quay lưng lắc lư nghe văn (đoạn đầu clip se giá, quay xuôi rồi ngược)
-  ['camhuong', 'tau', 0, 6, 'camhuong', 'vua', ''], // 14/11: clip 03 v3 của Tú – Cậu quay lưng, quỳ nhận hương từ hầu dâng quỳ
-  ['chaylen', 'tau', 6, 10, 'chaylen', 'vua', ''], // clip 04 v3
-  ['luilen0', 'tau', 10.0, 20.29, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen1', 'tau', 20.29, 30.59, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen2', 'tau', 30.59, 40.88, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen3', 'tau', 40.88, 51.17, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen4', 'tau', 51.17, 61.46, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen5', 'tau', 61.46, 71.76, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
-  ['luilen6', 'tau', 71.76, 82.05, 'luilen', 'vua', ''], // clip 05 v2: quỳ dâng hương, đứng lùi, lên quỳ vái
+  ['thayao2', 'thayao', 10, 15, 'ngoinghe', 'lap', ''], // anh Linh 14/11: thay áo xong ngồi 5 giây rồi vào tấu hương
+  // tấu hương: clip 03 v3 + 04 v3 của Tú (Cậu quay lưng, hầu dâng QUỲ) luân phiên; bỏ clip 05 v2 vì hầu dâng đứng
+  ['camhuong', 'tau', 0.0, 5.47, 'camhuong', 'vua', ''],
+  ['chaylen', 'tau', 5.47, 9.12, 'chaylen', 'vua', ''],
+  ['camhuong1', 'tau', 9.12, 14.59, 'camhuong', 'vua', ''],
+  ['chaylen1', 'tau', 14.59, 18.23, 'chaylen', 'vua', ''],
+  ['camhuong2', 'tau', 18.23, 23.7, 'camhuong', 'vua', ''],
+  ['chaylen2', 'tau', 23.7, 27.35, 'chaylen', 'vua', ''],
+  ['camhuong3', 'tau', 27.35, 32.82, 'camhuong', 'vua', ''],
+  ['chaylen3', 'tau', 32.82, 36.47, 'chaylen', 'vua', ''],
+  ['camhuong4', 'tau', 36.47, 41.94, 'camhuong', 'vua', ''],
+  ['chaylen4', 'tau', 41.94, 45.58, 'chaylen', 'vua', ''],
+  ['camhuong5', 'tau', 45.58, 51.05, 'camhuong', 'vua', ''],
+  ['chaylen5', 'tau', 51.05, 54.7, 'chaylen', 'vua', ''],
+  ['camhuong6', 'tau', 54.7, 60.17, 'camhuong', 'vua', ''],
+  ['chaylen6', 'tau', 60.17, 63.82, 'chaylen', 'vua', ''],
+  ['camhuong7', 'tau', 63.82, 69.29, 'camhuong', 'vua', ''],
+  ['chaylen7', 'tau', 69.29, 72.93, 'chaylen', 'vua', ''],
+  ['camhuong8', 'tau', 72.93, 78.4, 'camhuong', 'vua', ''],
+  ['chaylen8', 'tau', 78.4, 82.05, 'chaylen', 'vua', ''],
   ['khaiquang', 'khai', 0, 53, 'khaiquang', 'di', ''],
   ['muaheo', 'heo', 0, 79, 'muaheo', 'di', ''], // 14/11: clip 08 v2 của Tú, múa hèo quay lưng lên ban công đồng
   ['vengoi', 'antoa', 0, 126, 'antoa', 'ngoi', '', null, null, 3.0], // 14/11: clip 09 v2, Cậu quỳ quay lưng uống rượu, 1 hầu dâng
@@ -895,8 +905,10 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
     v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=10'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
+const CU_DEM = { thinh: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 472], tungkeo: [86, 270, 470], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
+function cuPhong(n) { return n === 'thinh' ? 1 : 1.13; } // anh Linh 14/11: Cậu nhỏ hơn các giá khác -> phóng 1,13 (thỉnh có khăn trùm đã to sẵn)
 const CU_DAU = { thinh: 162, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 176, tungkeo: 178, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
-function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc, top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
+function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc * cuPhong(n), top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
@@ -968,7 +980,13 @@ let cuLastNow = performance.now();
 function cuDraw(t, x, y, sc) {
   const now = performance.now(), dt = Math.min(.1, (now - cuLastNow) / 1000); cuLastNow = now;
   if (!cuStep(dt)) return false;
-  const k = CV_K * sc, tf = CU_TF[CU.shown || CU.cur] || [1, 0, 0]; ctx.save(); ctx.translate(x, y); const fl = CU.fl == null ? 1 : CU.fl; ctx.scale(k * (Math.abs(fl) < .08 ? .08 * Math.sign(fl || 1) : fl), k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  const n = CU.shown || CU.cur, k = CV_K * sc * cuPhong(n), tf = CU_TF[n] || [1, 0, 0], fl = CU.fl == null ? 1 : CU.fl, fx = k * (Math.abs(fl) < .08 ? .08 * Math.sign(fl || 1) : fl);
+  const de = CU_DEM[n]; if (de) { // thảm ngồi dưới Cậu (anh Linh 14/11: Cậu ngồi thì phải có thảm)
+    const xl = x + fx * (tf[1] + tf[0] * de[0] - CV_FX), xr = x + fx * (tf[1] + tf[0] * de[1] - CV_FX), yb = y + k * (tf[2] + tf[0] * de[2] - CV_FY), cx = (xl + xr) / 2, hw = Math.abs(xr - xl) / 2 + 10, hh = Math.max(7, hw * .2);
+    ctx.save(); ctx.fillStyle = 'rgba(20,6,4,.35)'; ctx.beginPath(); ctx.ellipse(cx, yb + hh * .55, hw * 1.04, hh * 1.05, 0, 0, 7); ctx.fill();
+    const g = ctx.createLinearGradient(0, yb - hh, 0, yb + hh); g.addColorStop(0, '#b3262a'); g.addColorStop(1, '#6d1014'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx, yb, hw, hh, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 2; ctx.stroke(); ctx.strokeStyle = 'rgba(242,207,114,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(cx, yb, hw - 6, hh - 3, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
 function obDraw(t, x, y, sc) {
@@ -1859,7 +1877,7 @@ const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 228 : 192, Wd = 150, cx = X + Wd / 2, h = 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
+  const tt = !!buocGia(), X = GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 237 : 192, Wd = 150, cx = X + Wd / 2, h = tt ? 145 : 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
   const g = GIA(), BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
@@ -1976,7 +1994,7 @@ function drawOverlay(t) {
   // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
   const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
   drawBangPhai();
-  { const up = typeof buocGia === 'function' && buocGia() ? -128 : 0; ctx.save(); ctx.translate(0, up); drawBinh(t); ctx.restore(); } // 14/11 anh Linh: bình tim lên trên, ngay dưới khung tiến trình
+  { const up = typeof buocGia === 'function' && buocGia() ? -128 : 0; if (up && !S.chuyen) panel(8, 237, 150, 145); ctx.save(); ctx.translate(0, up); drawBinh(t); ctx.restore(); } // khung bình tim cùng cỡ, cùng hàng với bảng sự tích // 14/11 anh Linh: bình tim lên trên, ngay dưới khung tiến trình
   if (S.timBan) { const b = S.timBan, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1);
     rr(8, 516, 150, 46, 10, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(8, 516, 150, 46, 10); ctx.stroke();
     text(laOng() ? '☕ Ly cà phê đã đầy' : (!S.auto && !S.real && GIA().id === 'codoi') ? '✿ Cô ban lộc' : '♥ Bình đã đầy ' + S.goal + ' tim', 83, 532, 12, '#fff6d6', { f: SERIF, w: 800 }); text((laOng() ? 'ông ban lộc cho các con nhang' : 'cô phát lộc cho các con nhang'), 83, 550, 9.5, '#f6dc96', { f: SERIF, w: 700 }); ctx.restore(); }
