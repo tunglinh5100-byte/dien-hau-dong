@@ -720,7 +720,7 @@ function obTauXong() { if (OB.cur !== 'tauhuong') return; OB.tau = false; S.ob.p
 function obNhac() { try { napNhacGia(); if (S.sound) musStart(); } catch (e) {} S.volTarget = .85; } // vào nhạc múa hèo
 let obLastNow = performance.now();
 // ---------- Cô Đôi nghi lễ bằng video thật: thỉnh (giơ tay số 2 theo văn, tung khăn), thay khăn áo, đứng dậy; xe giá: ngồi xuống, vái, múa tay, trùm khăn ----------
-const OC = { v: {}, buf: null, cur: null, ok: false, lastT: -1, st: 0, intro: true, exit: false, hold: false, exitTo: null, vanBat: false, vanXong: false };
+const OC = { v: {}, buf: null, cur: null, ok: false, lastT: -1, st: 0, intro: true, exit: false, hold: false, exitTo: null, vanBat: false, vanXong: false }; window.__oc = () => OC;
 const OC_TF = {"thinh": [0.8722, 18.74, 74.13], "thayao": [0.9676, 1.53, 36.56], "dungday": [0.94, 8, 46], "ngoi": [0.94, 8, 46], "xegia": [0.937, 6.2, 45.35]};
 (function ocInit() {
   if (/[?&]oc=0/.test(location.search)) return;
@@ -732,6 +732,10 @@ const OC_TF = {"thinh": [0.8722, 18.74, 74.13], "thayao": [0.9676, 1.53, 36.56],
 })();
 function ocPlay(n) { if (!OC.v[n] || OC.cur === n) return; const old = OC.v[OC.cur]; if (old) try { old.pause(); } catch (e) {} OC.cur = n; OC.st = 0; const v = OC.v[n]; try { v.currentTime = 0; } catch (e) {} cvPlay(v); }
 function ocStep(dt) {
+  if (OC.buf && GIA().id === 'codoi' && !S.chuyen && !S.cat) { // 14/11 anh Linh: Cô Đôi múa hết 3 lượt nhạc hát văn (2:34 × 3) thì tự xe giá sang giá sau
+    if (OC.intro && !OC.vanXong) { OC.lapNhac = 0; OC.tPrev = null; OC.tuXe = false; }
+    else if (!OC.exit && !OC.hold && !OC.tuXe && !bgm.paused && /^data:audio/.test(String(bgm.src))) { const ct = bgm.currentTime; if (OC.tPrev != null && ct + 5 < OC.tPrev) OC.lapNhac = (OC.lapNhac || 0) + 1; OC.tPrev = ct;
+      if ((OC.lapNhac || 0) >= 3) { OC.tuXe = true; try { lenhPha('hoicung'); } catch (e) {} } } }
   if (!OC.buf || GIA().id !== 'codoi' || S.chuyen || !(OC.intro || OC.exit || OC.hold)) { const v = OC.v[OC.cur]; if (v && !v.paused) try { v.pause(); } catch (e) {} if (!(OC.intro || OC.exit || OC.hold)) { OC.cur = null; OC.ok = false; } return false; }
   CO.giving = null; CO.giveT = Math.max(CO.giveT || 0, 6); S.loc = null;
   { const k = Math.min(1, dt * 4); CO.x += (CARPET.cx - CO.x) * k; CO.y += (CARPET.cy - 4 - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y; }
