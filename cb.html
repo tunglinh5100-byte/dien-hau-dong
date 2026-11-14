@@ -2468,7 +2468,8 @@ const FMIN = NHE ? 40 : LIVE1 ? 31 : 0; // live: giới hạn 30 khung/giây (nh
 let lastRun = performance.now(), errN = 0;
 function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung không làm đứng hình cả trang
   requestAnimationFrame(frame);
-  if (!BATDAU) { last = now; return; } // chờ tải xong, anh bấm Bắt đầu canh đàn
+  if (!BATDAU) { last = now; return; }
+  try { const g = GIA().id; if (g !== 'caube' && CU.au && !CU.au.paused) CU.au.pause(); if (g !== 'chaube' && CB.au && !CB.au.paused) CB.au.pause(); } catch (e) {} // 14/11: hết giá thì tắt hẳn nhạc giá đó, không lẫn sang giá sau // chờ tải xong, anh bấm Bắt đầu canh đàn
   if (FMIN && now - last < FMIN) return;
   lastRun = performance.now();
   try { frame1(now); } catch (e) { if (errN++ < 20) console.error('frame', e); last = now; }
