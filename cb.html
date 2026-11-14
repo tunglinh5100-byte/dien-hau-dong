@@ -245,13 +245,11 @@ function drawBg(t) {
   const fg = ctx.createLinearGradient(0, 680, 0, H); fg.addColorStop(0, 'rgba(40,16,10,.15)'); fg.addColorStop(1, 'rgba(20,8,5,.35)'); ctx.fillStyle = fg; ctx.fillRect(0, 680, W, H - 680);
   if (BG.complete && BG.naturalWidth) ctx.drawImage(BG, 0, 0, 540, 692);
   if (!NHANG && BG.complete && BG.naturalWidth) { // anh Linh 14/11: bỏ nền gạch, thảm sập hầu kéo dài xuống hết màn hình (phần gần máy quay giãn ra theo phối cảnh)
-    const ky = BG.naturalHeight / 692, Y0 = 618; ctx.drawImage(BG, 0, 0, BG.naturalWidth, Y0 * ky, 0, 0, 540, Y0); // ảnh tới hết mép thảm, bỏ bậc gỗ và nền gạch
-    const wg = ctx.createLinearGradient(0, Y0, 0, 880); wg.addColorStop(0, '#4a1a10'); wg.addColorStop(.35, '#5e2414'); wg.addColorStop(1, '#3a120a'); ctx.fillStyle = wg; ctx.fillRect(-60, Y0, W + 120, 880 - Y0); // mặt sập gỗ sơn son
-    ctx.save(); ctx.beginPath(); ctx.rect(-60, Y0, W + 120, 880 - Y0); ctx.clip(); const VX = 270, VY = 330; // ván sập chạy về phía ban (phối cảnh)
-    for (let i = -14; i <= 14; i++) { const xb = 270 + i * 46; ctx.beginPath(); ctx.moveTo(VX + (xb - VX) * (Y0 - VY) / (880 - VY), Y0); ctx.lineTo(xb, 880); ctx.strokeStyle = 'rgba(20,4,2,.35)'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.beginPath(); ctx.moveTo(VX + (xb - VX) * (Y0 - VY) / (880 - VY) + .8, Y0); ctx.lineTo(xb + 1.5, 880); ctx.strokeStyle = 'rgba(255,170,110,.07)'; ctx.lineWidth = 1; ctx.stroke(); }
-    const sh = ctx.createRadialGradient(270, Y0 + 30, 10, 270, Y0 + 60, 300); sh.addColorStop(0, 'rgba(255,190,120,.16)'); sh.addColorStop(1, 'rgba(255,190,120,0)'); ctx.fillStyle = sh; ctx.fillRect(-60, Y0, W + 120, 880 - Y0); // ánh nến phản trên mặt sơn
-    const bd = ctx.createLinearGradient(0, Y0, 0, Y0 + 14); bd.addColorStop(0, 'rgba(10,2,1,.55)'); bd.addColorStop(1, 'rgba(10,2,1,0)'); ctx.fillStyle = bd; ctx.fillRect(-60, Y0, W + 120, 14); ctx.restore(); // bóng mép thảm
-    const sv = ctx.createLinearGradient(0, 0, W, 0); sv.addColorStop(0, 'rgba(20,6,4,.4)'); sv.addColorStop(.16, 'rgba(20,6,4,0)'); sv.addColorStop(.84, 'rgba(20,6,4,0)'); sv.addColorStop(1, 'rgba(20,6,4,.4)'); ctx.fillStyle = sv; ctx.fillRect(-60, Y0, W + 120, 880 - Y0);
+    // 14/11 anh Linh: giữ nguyên ảnh gốc (cả thảm và bậc gỗ sập), chỉ nối thân sập gỗ xuống tới đáy màn hình
+    const Y0 = 690, wg = ctx.createLinearGradient(0, Y0, 0, 880); wg.addColorStop(0, '#42241b'); wg.addColorStop(.25, '#3a1d15'); wg.addColorStop(1, '#22100b'); ctx.fillStyle = wg; ctx.fillRect(-60, Y0, W + 120, 880 - Y0);
+    ctx.save(); for (let y = Y0 + 6; y < 880; y += 7 + (y % 5)) { ctx.globalAlpha = .1 + (y % 3) * .04; ctx.strokeStyle = y % 2 ? '#6a3b2a' : '#1a0a06'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-60, y); for (let x = -60; x <= W + 60; x += 40) ctx.lineTo(x, y + Math.sin(x * .02 + y) * 1.2); ctx.stroke(); } ctx.restore(); // vân gỗ
+    const sv = ctx.createLinearGradient(0, 0, W, 0); sv.addColorStop(0, 'rgba(10,3,2,.35)'); sv.addColorStop(.2, 'rgba(10,3,2,0)'); sv.addColorStop(.8, 'rgba(10,3,2,0)'); sv.addColorStop(1, 'rgba(10,3,2,.35)'); ctx.fillStyle = sv; ctx.fillRect(-60, Y0, W + 120, 880 - Y0);
+    if (BG.complete && BG.naturalWidth) { const ky = BG.naturalHeight / 692; ctx.drawImage(BG, 0, 676 * ky, BG.naturalWidth, 16 * ky, 0, 676, 540, 16); } // mép dưới bậc ảnh gốc phủ lên chỗ nối
   } else {
   // soften the seam
   const sg = ctx.createLinearGradient(0, 668, 0, 700); sg.addColorStop(0, 'rgba(176,122,94,0)'); sg.addColorStop(1, 'rgba(168,115,90,1)'); ctx.fillStyle = sg; ctx.fillRect(0, 668, W, 32); }
@@ -1518,7 +1516,7 @@ function updKhen(dt) { if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 5) KHE
 function drawKhen() {
   const k = KHEN.cur; if (!k) return; const a = Math.min(1, k.t / .2, (5 - k.t) / .3), sc = depthScale(CO.y) * 1.02;
   const nm = k.name.length > 18 ? k.name.slice(0, 17) + '…' : k.name;
-  const parts = (k.cau || 'Ta ban khen cho [tên]').split('[tên]');
+  const parts = fixXung(k.cau || 'Ta ban khen cho [tên]').split('[tên]');
   const dau = parts[0].replace(/[,\s]+$/, '').trim(), sau = (parts[1] || '').replace(/^[,\s]+/, '').trim();
   ctx.save(); ctx.globalAlpha = Math.max(0, a);
   ctx.font = `800 14px ${SERIF}`; const w1 = ctx.measureText(nm).width; ctx.font = `700 10.5px ${SERIF}`; const w2 = ctx.measureText(dau).width; ctx.font = `700 12px ${SERIF}`; const w3 = sau ? ctx.measureText(sau).width : 0;
