@@ -854,7 +854,7 @@ function cbDraw(t, x, y, sc) {
 
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CU_TF = {"thinh": [1.0, -5, 94], "thayao": [0.8, 31.6, 133], "camhuong": [0.9, 2.5, 58.5], "chaylen": [0.9, -5.6, 58.5], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
+const CU_TF = {"thinh": [1.0, -5, 28], "thayao": [0.8, 31.6, 133], "camhuong": [0.9, 2.5, 58.5], "chaylen": [0.9, -5.6, 58.5], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
 const CU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
 const CU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
@@ -883,7 +883,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=6'; CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; v.src = 'cu-' + n + '.mp4?v=7'; CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
@@ -2453,6 +2453,7 @@ window.__hdOb = { OB, obPlay, nghiLe, S: () => S, bgm: () => bgm, van: () => VAN
 window.__hdDbg = () => JSON.stringify({ ch: S.chuyen ? +S.chuyen.t.toFixed(1) : null, gia: GIA().id, cur: OB.cur, oc: OC.cur, cat: !!S.cat, ok: OB.ok });
 function camUpd(dt) {
   ddUpd(dt);
+  if (!NHANG) { CAM.P = 0; DD.z = DD.tz = 1; DD.cx = DD.fx = DD.tfx = W / 2; DD.cy = DD.fy = DD.tfy = H / 2; return; } // anh Linh: góc máy cố định, không lia, không zoom
   const camDung = (laOng() && typeof OB !== 'undefined' && OB.buf && OB.tau) || (typeof CB !== 'undefined' && cbDangLe() && CB_LICH[CB.i] && CB_LICH[CB.i][0] === 'vengoi') || (typeof CU !== 'undefined' && cuDangLe() && CU_LICH[CU.i] && CU_LICH[CU.i][0] === 'vengoi'); // Chầu Bé ngồi ngự tửu: máy quay đứng yên // Ông tấu hương, khai quang: máy quay đứng yên
   if (!CAM_ON || !CAM.on || CAM.tat || camDung) { CAM.P += (0 - CAM.P) * Math.min(1, dt * 2); return; }
   CAM.t += dt; const T = CAM.T, u = CAM.t % T, e = k => k * k * (3 - 2 * k);
@@ -2460,7 +2461,7 @@ function camUpd(dt) {
   CAM.P = CAM.A * (2 * v - 1);
 }
 const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
-const ZM = 1.6, ZFY = 455; // không con nhang: phóng to vào sập hầu cho cô đồng rõ nhất (điểm y=470 ra giữa màn)
+const _q = new URLSearchParams(location.search), ZM = +(_q.get('zm') || 1.0), ZFY = +(_q.get('zfy') || 410); // không con nhang: phóng vào sập hầu (zm = độ phóng, zfy = điểm ra giữa màn)
 function camBase() { const sc = CAM.S * DD.z; if (!NHANG) { ctx.translate(W / 2, H / 2); ctx.scale(ZM, ZM); ctx.translate(-W / 2, -ZFY); } ctx.translate(W / 2, H / 2); ctx.scale(sc, sc); ctx.translate(-DD.cx, -DD.cy); }
 function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
 function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
