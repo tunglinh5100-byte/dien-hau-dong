@@ -132,7 +132,7 @@ const MUSIC_SRC = "data:audio/mp4;base64,AAAAHGZ0eXBNNEEgAAACAE00QSBpc29taXNvMgA
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const W = 540, H = 960;
 // 15/11 anh Linh: khung hình phẳng (khung thẳng, viền vàng): trên là nền đen đặt thanh tiến trình, khung cảnh đền như cũ, cắt sát mép thảm; lộc bay vượt khỏi khung ra ngoài như màn LED 3D. ?khung=1 bật (link /tn), ?khung=0 tắt
-const KH = { on: /[?&]khung=1/.test(location.search), TY: 172, BY: 758, dy: 20 };
+const KH = { on: /[?&]khung=1/.test(location.search), BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
 const UI = '"Be Vietnam Pro", system-ui, sans-serif', SERIF = '"Noto Serif", Georgia, serif';
@@ -928,7 +928,7 @@ function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id =
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
 function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + '?v=2'; CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
-function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
+function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L[7] && L[7][0] ? L[7][0][1] : null; CU.kbPrev = null; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
   if (!clip) { const o = CU.v[CU.cur]; if (o) try { o.pause(); } catch (e) {} CU.chu = chu; return; }
@@ -942,6 +942,7 @@ function cuHet() { // xe giá xong: giữ dáng trùm khăn, màn chuyển sang 
   S.cat = { t: 0, id, ten: g.ten || '', cu: !coVideoGia(id) }; }
 function cuXeGia(id) { CU.exitTo = id; const xi = CU_LICH.findIndex(l => l[0] === 'xegia'); if (CU.i < xi) cuVao(xi); }
 function cuCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
+  if (KH.on && CU.cur === 'tungtien' && !CU.cueClip) { CU.kLast = k; return; } // khung phẳng: lộc bay ra đúng lúc tay tung trong clip (bám giây clip, không bám nhạc) – nhạc chỉ báo loại lộc
   if (k === 'tien') { muaTien(220); } // clip tung tiền chạy vòng, mốc tung đã khớp giây 6,8 mỗi vòng
   else if (k === 'keo' || !CU.v[k === 'qua' ? 'tungqua' : 'tunghoa']) { muaHoaQua(170, k); }
   else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CU.cueClip = c; const v = CU.v[c]; if (v) { v.loop = false; v.playbackRate = 1; } cuPlay(c, 0); setTimeout(() => { if (cuDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
@@ -975,6 +976,7 @@ function cuStep(dt) {
     else if (L[0] === 'tungkhan') { if (v && (v.ended || (v.duration && v.currentTime >= v.duration - .06)) || CU.st > 12) cuTiep(); }
     else {
       const tg = L[8]; if (tg && v && !CU.cueClip) { const ct = v.currentTime, pt = CU.tgPrev == null ? ct : CU.tgPrev; if ((pt < tg[0] && ct >= tg[0]) || (ct < pt - 1 && ct >= tg[0])) { if (tg[1] === 'tien') muaTien(220); else muaHoaQua(170, tg[1]); } CU.tgPrev = ct; }
+      if (KH.on && v && CU.cur === 'tungtien' && !CU.cueClip) { const ct = v.currentTime, pt = CU.kbPrev == null ? ct : CU.kbPrev; if (pt < 6.5 && ct >= 6.5) { const k = CU.kLast || 'tien'; cuBayRa(() => k === 'qua' ? pick(['img:qua', 'img:qua', 'fruit']) : k === 'hoa' ? pick(['img:hoa-hong', 'img:hoa-hong', 'flower']) : k === 'keo' ? 'img:keo-mut' : 'tien'); } CU.kbPrev = ct; } else CU.kbPrev = null;
       const cues = L[7] || []; while (CU.cue < cues.length && CU.t >= cues[CU.cue][0]) { cuCue(cues[CU.cue][1]); CU.cue++; }
       if (CU.cueClip && v && (v.ended || (v.duration && v.currentTime >= v.duration - .06))) { CU.cueClip = null; const b = CU.v[clip]; if (b) b.loop = true; cuPlay(clip, 0); }
       if (kieu === 'xuyen' && v && CU.xy) { const X = CU.xy, ct = v.currentTime; // đi trái → quay qua lưng → (soi gương) đi phải → quay → đi trái
@@ -1003,7 +1005,7 @@ function cuDraw(t, x, y, sc) {
     ctx.fillStyle = 'rgba(20,6,4,.35)'; ctx.fillRect(cx - bw, by - 1, bw * 2, 5);
     const g = ctx.createLinearGradient(0, ty, 0, by); g.addColorStop(0, '#e9b93a'); g.addColorStop(1, '#c8901c'); quad(0); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#8a5a10'; ctx.lineWidth = 1.5; ctx.stroke();
     quad(6); ctx.strokeStyle = 'rgba(160,40,20,.75)'; ctx.lineWidth = 1.6; ctx.stroke(); quad(9); ctx.strokeStyle = 'rgba(255,236,170,.6)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#c8901c'; ctx.fillRect(cx - bw, by, bw * 2, 4); ctx.restore(); }
-  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); CU.mat = ctx.getTransform(); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
 function obDraw(t, x, y, sc) {
@@ -1307,12 +1309,17 @@ function drawSen(x, y, s, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot
   circ(0, 0, 2, '#f6d35a'); ctx.restore(); }
 const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new Image(); im.src = 'loc-' + n + '.png?v=1'; LOC_IMG[n] = im; }); // ảnh lộc từ kho đạo cụ (Tú tách nền xanh) – dùng chung mọi giá
 // ---------- 15/11 khung phẳng: che ngoài khung, viền vàng, lộc bay ra khỏi khung ----------
-function khMask(T0) { ctx.save(); ctx.setTransform(T0); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, KH.TY); ctx.fillRect(0, KH.BY, W, H - KH.BY);
-  const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#9a6a22'); g.addColorStop(.5, '#ffe08a'); g.addColorStop(1, '#9a6a22'); ctx.fillStyle = g; ctx.fillRect(0, KH.TY - 3, W, 3); ctx.fillRect(0, KH.BY, W, 3); ctx.restore(); }
+function khMask(T0) { ctx.save(); ctx.setTransform(T0); const B = KH.BY, R = KH.R; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.roundRect(0, -R * 2, W, B + R * 2, R); ctx.fillStyle = '#000'; ctx.fill('evenodd');
+  const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#9a6a22'); g.addColorStop(.5, '#ffe08a'); g.addColorStop(1, '#9a6a22'); ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(1.5, -R * 2, W - 3, B + R * 2 + 1.5, R); ctx.stroke(); ctx.restore(); }
 function khTay() { const id = GIA().id; let x = CO.x + 22, y = CO.y - 120; if (id === 'caube') { x = CO.x + 30; y = CO.y - 110; } else if (id === 'codoi') { x = CO.x - 10; y = CO.y - 150; } return camMap(x, y); }
+function cuDiem(px, py) { // điểm trong clip Cậu (toạ độ 720x1280) -> toạ độ màn hình, kèm tỉ lệ
+  if (!CU.mat || !KH.T0) return null; const P = CU.mat.transformPoint(new DOMPoint(px * CV_W / 720, py * CV_H / 1280)), I = KH.T0.inverse(), Q = I.transformPoint(P); return [Q.x, Q.y, Math.hypot(CU.mat.a, CU.mat.b) / Math.hypot(KH.T0.a, KH.T0.b) * CV_W / 720]; }
+function cuBayRa(loai) { // 15/11 anh Linh: Cậu tung tiền như demo 3D – tờ tiền trong clip (giây 6,6 vòng tung) bay tiếp ra khỏi khung, khớp chỗ, khớp cỡ
+  S.bayRa = S.bayRa || []; const tr = (CU.v.tungtien && CU.v.tungtien.playbackRate) || 1;
+  for (let i = 0; i < 16; i++) { const k = loai(), px = rnd(250, 420), py = rnd(520, 640); S.bayRa.push({ kind: k, cu: [px, py], t: -rnd(0, .18) / tr, dur: rnd(.75, 1.1), ex: rnd(-50, W + 50), ey: rnd(KH.BY + 40, H + 90), r0: rnd(-.6, .6), vr: rnd(-4, 4), s1: k === 'tien' ? rnd(3.6, 5) : rnd(2.6, 3.6), up: rnd(10, 30), w0: 120 }); } }
 function bayRa(n, loai) { const [sx, sy] = khTay(); S.bayRa = S.bayRa || [];
   for (let i = 0; i < n; i++) { const k = loai(); S.bayRa.push({ kind: k, sx: sx + rnd(-12, 12), sy: sy + rnd(-10, 10), ex: rnd(-60, W + 60), ey: rnd(KH.BY + 30, H + 90), t: -rnd(0, 3.2), dur: rnd(1, 1.5), r0: rnd(-.7, .7), vr: rnd(-4.5, 4.5), s1: k === 'tien' ? rnd(3.2, 4.6) : rnd(2.4, 3.4), up: rnd(30, 70) }); } }
-function drawBayRa() { (S.bayRa || []).forEach(b => { if (b.t < 0) return; const u = clamp(b.t / b.dur, 0, 1), e = u * u, x = b.sx + (b.ex - b.sx) * u, y = b.sy - b.up * Math.sin(Math.PI * Math.min(u * 1.6, 1)) * (1 - e) + (b.ey - b.sy) * e, z = .55 + (b.s1 - .55) * e;
+function drawBayRa() { (S.bayRa || []).forEach(b => { if (b.t < 0) return; if (b.cu && b.sx == null) { const d = cuDiem(b.cu[0], b.cu[1]); if (!d) { b.t = b.dur; return; } b.sx = d[0]; b.sy = d[1]; b.s0 = b.w0 * d[2] / (b.kind === 'tien' ? 36 : 48); } const u = clamp(b.t / b.dur, 0, 1), e = u * u, x = b.sx + (b.ex - b.sx) * u, y = b.sy - b.up * Math.sin(Math.PI * Math.min(u * 1.6, 1)) * (1 - e) + (b.ey - b.sy) * e, s0 = b.s0 || .55, z = s0 + (b.s1 - s0) * e;
   ctx.save(); ctx.translate(x, y); ctx.rotate(b.r0 + b.vr * u);
   if (u > .2) { ctx.save(); ctx.globalAlpha = .35 * e; ctx.translate(6 * z, 8 * z); ctx.fillStyle = '#000'; ctx.filter = 'blur(' + Math.max(1, 3 * z) + 'px)'; ctx.beginPath(); ctx.ellipse(0, 0, (b.kind === 'tien' ? 17 : 10) * z, (b.kind === 'tien' ? 8 : 10) * z, 0, 0, 7); ctx.fill(); ctx.restore(); }
   if (b.kind === 'tien') note(0, 0, z, 5, Math.cos(b.t * 7) < 0 ? -1 : 1); else drawItem(b.kind, 0, 0, z * .9);
@@ -2427,7 +2434,7 @@ function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước,
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
 function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
-function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = KH.on ? 84 : 146, h = 80, cy = y0 + 47, /* 14/11 anh Linh: tên bước so le trên dưới */ dx = (x1 - x0 - 64) / (n - 1); // 14/11: gộp tên giá vào khung tiến trình cho gọn
+function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 146, h = 80, cy = y0 + 47, /* 14/11 anh Linh: tên bước so le trên dưới */ dx = (x1 - x0 - 64) / (n - 1); // 14/11: gộp tên giá vào khung tiến trình cho gọn
   ctx.save(); const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, 'rgba(110,22,16,.9)'); g.addColorStop(1, 'rgba(48,8,6,.9)'); rr(x0, y0, x1 - x0, h, 8, g);
   ctx.strokeStyle = 'rgba(230,181,82,.85)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, h, 8); ctx.stroke(); ctx.strokeStyle = 'rgba(230,181,82,.35)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.roundRect(x0 + 3, y0 + 3, x1 - x0 - 6, h - 6, 6); ctx.stroke();
   const c0 = S.chuyen, tg = 'Giá ' + (c0 && c0.t >= CG.thinh ? c0.toTen : GIA().ten); text('❀  ' + tg + '  ❀', W / 2, y0 + 14, 12.5, '#f6dc96', { f: SERIF, w: 800 });
@@ -2470,7 +2477,7 @@ setInterval(capNhatGiaInfo, 500);
 let last = performance.now();
 /* 14/11 anh Linh: tải hết video trước, hiện tiến độ, xong mới có nút "Bắt đầu canh đàn" (máy live). ?cho=0 để vào luôn */
 let BATDAU = /[?&]cho=0/.test(location.search);
-{ const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (this.tagName !== 'VIDEO' && (!BATDAU || (typeof S !== 'undefined' && S.ket && typeof KET_AU !== 'undefined' && this !== KET_AU))) { /* màn chờ, hoặc đang màn kết: chỉ cho nhạc kết */ try { this.pause(); } catch (e) {} return Promise.resolve(); } return _play.apply(this, arguments); }; } // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
+{ const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (this.tagName !== 'VIDEO' && (!BATDAU || (typeof S !== 'undefined' && S.ket && typeof KET_AU !== 'undefined' && this !== KET_AU))) { /* màn chờ, hoặc đang màn kết: chỉ cho nhạc kết */ try { this.pause(); } catch (e) {} const pr = Promise.reject(new DOMException('cho bat dau', 'NotAllowedError')); pr.catch(() => {}); return pr; } return _play.apply(this, arguments); }; } // 15/11: báo lỗi (không giả vờ đã phát) để văn thỉnh tự phát lại sau khi bấm bắt đầu // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
 window.addEventListener('pagehide', () => { document.querySelectorAll('audio,video').forEach(a => { try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {} }); }); // tải lại trang: tắt hẳn tiếng cũ
 /* 14/11 anh Linh: khoảng lặng (xe giá, giữa hai lượt văn, chuyển giá) lấp bằng nhạc nền nhỏ */
 const NEN = new Audio(MUSIC_SRC); NEN.loop = true; NEN.volume = 0; NEN.preload = 'auto'; let nenIm = 0, nenLast = 0;
@@ -2517,7 +2524,7 @@ function frame1(now) {
     /* cung văn tạm ẩn: anh Linh cho làm lại, sẽ ngồi bên phải sập hầu */
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
     if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng()) TAY.forEach(p => drawPerson(p, t)); if (NHANG) front.forEach(p => drawPerson(p, t));
-    if (KH.on) khMask(T0); if (NHANG) drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
+    if (KH.on) { KH.T0 = T0; khMask(T0); } if (NHANG) drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
     /* 14/11 anh Linh: bỏ nhãn Thế Hoàn */ drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
   } finally { camShift(-1); }
   ctx.restore();
