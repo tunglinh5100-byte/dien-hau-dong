@@ -409,7 +409,7 @@ const CV = {}; let cvErr = false;
 const CV_HOLD = document.createElement('div'); CV_HOLD.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;overflow:hidden;opacity:.01;pointer-events:none;z-index:-1';
 // 14/11 anh Linh báo trang giật, tải không nổi trên điện thoại: chỉ tải video của giá đang hầu và giá kế tiếp, không tải cả ~100MB lúc mở trang
 const VHOAN = []; function vHoan(v, src, gia) { v._src = src; v._gia = gia; v._pre = v.preload; v.preload = 'none'; VHOAN.push(v); }
-function napVideo() { if (window.__dangTai) return; let a = '', b = ''; try { a = GIA().id; b = nextGiaId(); } catch (e) { return; }
+function napVideo() { if (window.__dangTai || MOBI) return; /* điện thoại: gắn nguồn khi phát (cvPlay) */ let a = '', b = ''; try { a = GIA().id; b = nextGiaId(); } catch (e) { return; }
   VHOAN.forEach(v => { if (v._gia === a) { if (!v.getAttribute('src')) v.src = v._src; if (v.preload !== v._pre) v.preload = v._pre; } else if (v._gia === b && !v.getAttribute('src')) { v.preload = 'none'; v.src = v._src; } }); }
 setInterval(napVideo, 1000);
 document.body.appendChild(CV_HOLD);
@@ -492,7 +492,13 @@ const CVS = { xf: 0, tv: null, mode: 'dance', di: 0, cur: 0, fade: 0, pending: f
 // 15/11: iPhone (nhất là chế độ Nguồn điện thấp) chặn video tự chạy, kể cả video tắt tiếng: cô đồng đứng im một hình. Mở khoá từng video ngay trong lần chạm (bấm Bắt đầu / chạm màn hình)
 function videoDangDung(v) { try { return [CB.v[CB.cur], CB.v[CB.cueClip], CU.v[CU.cur], CU.v[CU.cueClip], OB.v[OB.cur], OC.v[OC.cur]].includes(v); } catch (e) { return false; } }
 function moKhoaVideo() { document.querySelectorAll('video').forEach(v => { if (v.__mo) return; const dung = videoDangDung(v) || !v.paused; try { const p = v.play(); v.__mo = 1; if (p && p.catch) p.catch(() => { v.__mo = 0; }); if (!dung) v.pause(); } catch (e) { v.__mo = 0; } }); }
-function cvPlay(v) { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+// 15/11 20:09 anh Linh quay iPhone: video "đang chạy" mà đứng hình ở 0,0 / 1,3 giây (readyState 2). iPhone chỉ giải mã được vài video cùng lúc; trang nạp sẵn ~60 clip nên các clip sau bị đói bộ giải mã.
+// Trên điện thoại: chỉ giữ nguồn cho video đang phát, các video khác nhả nguồn (vẫn giữ bản đã tải trong bộ nhớ đệm), đến lượt mới gắn lại.
+const MOBI = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+function cvGiai(keep) { if (!MOBI) return; document.querySelectorAll('video').forEach(x => { if (x === keep || !x.paused || !x.getAttribute('src')) return; if (!x._src) x._src = x.getAttribute('src'); try { x.removeAttribute('src'); x.load(); } catch (e) {} }); }
+if (MOBI) setInterval(() => { try { if (BATDAU) cvGiai(null); } catch (e) {} }, 3000);
+function cvPlay(v) { if (MOBI && v && !v.getAttribute('src') && v._src) { try { v.preload = 'auto'; v.src = v._src; if (v.__want) { const w = v.__want; v.addEventListener('loadedmetadata', () => { try { v.currentTime = w; } catch (e) {} }, { once: true }); } } catch (e) {} } try { cvGiai(v); } catch (e) {} cvPlay0(v); }
+function cvPlay0(v) { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cvDanceV() { return CVS.walk ? CVW : CV[CV_DANCE[CVS.di]]; }
 ['pointerdown', 'touchstart', 'click'].forEach(ev => document.addEventListener(ev, () => { const v = cvDanceV(); if (CVS.mode === 'dance') cvPlay(v); cvUnlock(); }, { passive: true }));
 function cvGrab(v, into) { cvGrabInto(v, CVB[into]); }
@@ -808,7 +814,7 @@ const CB_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
 })();
 function cbDangLe() { return typeof CB !== 'undefined' && !!CB.buf && GIA().id === 'chaube'; }
 function cbReset() { if (!CB.buf) return; CB.i = 0; CB.t = 0; CB.lap = 0; CB.cue = 0; CB.cueClip = null; CB.exitTo = null; CB.hold = false; CB.xong = false; CB.auKey = null; CB.cur = null; CB.ok = false; try { CB.au.pause(); } catch (e) {} cbVao(0); }
-function cbPlay(n, from) { const v = CB.v[n]; if (!v) return; if (CB.cur !== n) { const old = CB.v[CB.cur]; if (old) try { old.pause(); } catch (e) {} CB.cur = n; } CB.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
+function cbPlay(n, from) { const v = CB.v[n]; if (!v) return; if (CB.cur !== n) { const old = CB.v[CB.cur]; if (old) try { old.pause(); } catch (e) {} CB.cur = n; } CB.st = 0; v.__want = from || 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
 function cbAuPlay(key, at) { const a = CB.au; if (!a) return; try { if (CB.auKey !== key) { a.src = CB_AU[key] + '?v=1'; CB.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cbVao(i) { const L = CB_LICH[i]; if (!L) return; CB.i = i; CB.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CB.cue = 0; CB.cueClip = null; CB.t = L[2]; CB.lap = 0; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
@@ -932,7 +938,7 @@ const CU_DAU = { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe
 function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc * cuPhong(n), top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
-function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
+function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; v.__want = from || 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
 function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + '?v=2'; CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L[7] && L[7][0] ? L[7][0][1] : null; CU.kbPrev = null; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
@@ -2535,7 +2541,7 @@ function nenLap(now) { const dt = Math.min(.1, (now - (nenLast || now)) / 1000);
   setTimeout(() => { const vs = [...CV_HOLD.querySelectorAll('video')]; const ds = vs.map(v => ({ v, url: v._src || v.getAttribute('src') })).filter(x => x.url && !/^blob:/.test(x.url));
     let xong = 0, byt = 0, loi = 0; const tong = ds.length, txt = document.getElementById('ctTxt'), bar = document.getElementById('ctBar'), mb = document.getElementById('ctMb'), btn = document.getElementById('ctGo');
     const ve = () => { if (!txt) return; bar.style.width = (tong ? 100 * xong / tong : 100) + '%'; txt.textContent = xong < tong ? 'Đang tải video các giá: ' + xong + '/' + tong : (loi ? 'Đã tải xong (' + loi + ' video lỗi, sẽ tải lại khi phát)' : 'Đã tải xong tất cả ' + tong + ' video'); mb.textContent = (byt / 1e6).toFixed(1) + ' MB'; if (xong >= tong) { btn.disabled = false; btn.style.opacity = 1; const dt_ = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); if (dt_ && !ve.dem) { ve.dem = -1; txt.textContent = 'Đã tải xong · chạm nút Bắt đầu để có tiếng và hình chạy (điện thoại)'; } /* 15/11: điện thoại phải chạm thì mới cho phát tiếng, video */ if (!ve.dem && !/[?&]tu=0/.test(location.search)) { ve.dem = 3; const dm = setInterval(() => { if (BATDAU) return clearInterval(dm); if (ve.dem <= 0) { clearInterval(dm); go(); return; } txt.textContent = 'Đã tải xong · tự bắt đầu canh đàn sau ' + ve.dem + ' giây'; ve.dem--; }, 1000); } } }; // 14/11 anh Linh: F5 không cần bấm, tải xong tự bắt đầu
-    let i = 0; const chay = async () => { while (i < ds.length && !BATDAU) { const d = ds[i++]; try { let cc = null; try { cc = await caches.open('dienhau-video'); } catch (e) {} const daCo = cc && await cc.match(d.url); const r = daCo || await fetch(d.url); if (cc && !daCo && r.ok) { try { await cc.put(d.url, r.clone()); } catch (e) {} } const rd = r.body.getReader(), ch = []; for (;;) { const { done, value } = await rd.read(); if (done) break; ch.push(value); byt += value.length; ve(); } if (!BATDAU) { d.v._src = URL.createObjectURL(new Blob(ch, { type: 'video/mp4' })); d.v.src = d.v._src; d.v.preload = 'auto'; } } catch (e) { loi++; } xong++; ve(); } };
+    let i = 0; const chay = async () => { while (i < ds.length && !BATDAU) { const d = ds[i++]; try { let cc = null; try { cc = await caches.open('dienhau-video'); } catch (e) {} const daCo = cc && await cc.match(d.url); const r = daCo || await fetch(d.url); if (cc && !daCo && r.ok) { try { await cc.put(d.url, r.clone()); } catch (e) {} } const rd = r.body.getReader(), ch = []; for (;;) { const { done, value } = await rd.read(); if (done) break; ch.push(value); byt += value.length; ve(); } if (!BATDAU) { d.v._src = URL.createObjectURL(new Blob(ch, { type: 'video/mp4' })); if (!MOBI) d.v.src = d.v._src; d.v.preload = 'auto'; } } catch (e) { loi++; } xong++; ve(); } };
     ve(); for (let k = 0; k < 4; k++) chay(); }, 300); })();
 const FMIN = NHE ? 40 : LIVE1 ? 31 : 0; // live: giới hạn 30 khung/giây (nhe=1: 25) cho nhẹ máy
 let lastRun = performance.now(), errN = 0;
@@ -2544,6 +2550,7 @@ function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung khôn
   if (!BATDAU) { last = now; return; }
   try { nenLap(now); } catch (e) {}
   try { const g = GIA().id; if (g !== 'caube' && CU.au && !CU.au.paused) CU.au.pause(); if (g !== 'chaube' && CB.au && !CB.au.paused) CB.au.pause(); } catch (e) {} // 14/11: hết giá thì tắt hẳn nhạc giá đó, không lẫn sang giá sau // chờ tải xong, anh bấm Bắt đầu canh đàn
+  try { if (GIA().id !== 'codoi' || OC.intro || OC.exit || OC.hold || S.chuyen) [...CV_DANCE.map(n => CV[n]), ...Object.values(CVF), CVW].forEach(v => { if (v && !v.paused) v.pause(); }); } catch (e) {} // 15/11: video múa Cô Đôi cũ không chạy ngầm ở giá khác (iPhone thiếu bộ giải mã)
   if (FMIN && now - last < FMIN) return;
   lastRun = performance.now();
   try { frame1(now); } catch (e) { if (errN++ < 20) console.error('frame', e); last = now; }
@@ -2559,7 +2566,7 @@ function drawDbg() { if (!DBG) return; const vv = v => v ? (v.paused ? 'P' : '�
     if (g === 'caube') l.push('CU ' + ((CU_LICH[CU.i] || [''])[0]) + ' t' + CU.t.toFixed(1) + ' clip ' + CU.cur + ' ' + vv(CU.v[CU.cur]) + ' | au ' + CU.auKey + ' ' + vv(CU.au));
     if (g === 'ongbay') l.push('OB ' + OB.cur + ' ' + vv(OB.v[OB.cur]));
     if (g === 'codoi') l.push('OC ' + OC.cur + ' ' + vv(OC.v[OC.cur]));
-    l.push('bgm ' + vv(bgm) + ' van ' + vv(VAN_AU) + ' nen ' + vv(NEN)); if (DBG_ERR) l.push('lỗi: ' + DBG_ERR); } catch (e) { l.push('dbg ' + e.message); }
+    l.push('vsrc ' + [...document.querySelectorAll('video')].filter(x => x.getAttribute('src')).length + ' mobi ' + (MOBI ? 1 : 0)); l.push('bgm ' + vv(bgm) + ' van ' + vv(VAN_AU) + ' nen ' + vv(NEN)); if (DBG_ERR) l.push('lỗi: ' + DBG_ERR); } catch (e) { l.push('dbg ' + e.message); }
   ctx.save(); ctx.font = '10px monospace'; ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(0, 0, W, 14 * l.length + 6); ctx.fillStyle = '#7fff7f'; l.forEach((s, i) => ctx.fillText(s, 4, 13 + i * 14)); ctx.restore(); }
 function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); quanNhac(dt); const t = S.t;
