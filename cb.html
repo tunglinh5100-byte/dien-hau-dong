@@ -489,6 +489,9 @@ const CVB = [0, 1].map(() => { const c = document.createElement('canvas'); c.wid
 const CV_TMP = document.createElement('canvas'); CV_TMP.width = CV_W; CV_TMP.height = CV_H * 2;
 const cvTmpCtx = CV_TMP.getContext('2d', { willReadFrequently: true });
 const CVS = { xf: 0, tv: null, mode: 'dance', di: 0, cur: 0, fade: 0, pending: false, lastT: -1, lastV: null, ok: false, prevT: 0, tt: 0, img: 'dung' };
+// 15/11: iPhone (nhất là chế độ Nguồn điện thấp) chặn video tự chạy, kể cả video tắt tiếng: cô đồng đứng im một hình. Mở khoá từng video ngay trong lần chạm (bấm Bắt đầu / chạm màn hình)
+function videoDangDung(v) { try { return [CB.v[CB.cur], CB.v[CB.cueClip], CU.v[CU.cur], CU.v[CU.cueClip], OB.v[OB.cur], OC.v[OC.cur]].includes(v); } catch (e) { return false; } }
+function moKhoaVideo() { document.querySelectorAll('video').forEach(v => { if (v.__mo) return; const dung = videoDangDung(v) || !v.paused; try { const p = v.play(); v.__mo = 1; if (p && p.catch) p.catch(() => { v.__mo = 0; }); if (!dung) v.pause(); } catch (e) { v.__mo = 0; } }); }
 function cvPlay(v) { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cvDanceV() { return CVS.walk ? CVW : CV[CV_DANCE[CVS.di]]; }
 ['pointerdown', 'touchstart', 'click'].forEach(ev => document.addEventListener(ev, () => { const v = cvDanceV(); if (CVS.mode === 'dance') cvPlay(v); cvUnlock(); }, { passive: true }));
@@ -2494,7 +2497,7 @@ function nenLap(now) { const dt = Math.min(.1, (now - (nenLast || now)) / 1000);
   ov.innerHTML = '<div style="max-width:min(560px,90vw);font-size:15px;line-height:1.55;color:#f6e9d6"><div style="font-size:17px;font-weight:800;color:#ffd76a">Live diễn xướng tái hiện các giá hầu bằng AI</div><div>Thời gian: hằng ngày 11h30</div><div style="margin-top:8px;font-weight:700;color:#ffb38a">KHÔNG nhận quà<br>KHÔNG nhận xem bói<br>KHÔNG tương tác về các vấn đề tâm linh</div><div style="margin-top:8px;font-style:italic;color:rgba(246,233,214,.85)">Tôi làm công ty về SmartLocker IoT ADELA, yêu thích Đạo Mẫu và công nghệ nên kết hợp cả hai, để mọi người biết tới tín ngưỡng thờ Mẫu nhiều hơn.</div><div style="margin-top:12px;padding:8px 14px;border:1px solid #e6b552;border-radius:20px;display:inline-block;color:#fff2c4">🎧 Mời quý vị đeo tai nghe để nghe văn hầu rõ và hay hơn</div></div><div id="ctTxt" style="font-size:16px;color:#f6e9d6">Đang tải video các giá…</div><div style="width:min(420px,80vw);height:14px;border:1px solid #e6b552;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.4)"><div id="ctBar" style="height:100%;width:0;background:linear-gradient(90deg,#b8862e,#ffd76a)"></div></div><div id="ctMb" style="font-size:13px;color:#e6b552"></div><button id="ctGo" disabled style="margin-top:8px;font:800 20px \'Noto Serif\',Georgia,serif;padding:14px 34px;border-radius:30px;border:2px solid #e6b552;background:#8e211c;color:#fff2c4;opacity:.45;cursor:pointer">🪷 Bắt đầu canh đàn</button><a id="ctSkip" href="#" style="font-size:12px;color:rgba(246,233,214,.6)">Vào luôn, không chờ tải (dùng khi sửa trên điện thoại)</a>';
   document.body.appendChild(ov);
   const im = setInterval(() => { if (BATDAU) return clearInterval(im); try { [CB.au, CU.au, VAN_AU, bgm].forEach(a => { if (a && !a.paused) a.pause(); }); } catch (e) {} }, 200); // đang tải: im tiếng
-  const go = () => { BATDAU = true; window.__dangTai = false; try { if (GIA().id === 'chaube') cbReset(); else if (GIA().id === 'caube') cuReset(); } catch (e) {} try { napVideo(); } catch (e) {} last = performance.now(); ov.remove(); try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} };
+  const go = () => { BATDAU = true; try { moKhoaVideo(); } catch (e) {} window.__dangTai = false; try { if (GIA().id === 'chaube') cbReset(); else if (GIA().id === 'caube') cuReset(); } catch (e) {} try { napVideo(); } catch (e) {} last = performance.now(); ov.remove(); try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} };
   document.getElementById('ctGo').onclick = go; document.getElementById('ctSkip').onclick = (e) => { e.preventDefault(); go(); };
   setTimeout(() => { const vs = [...CV_HOLD.querySelectorAll('video')]; const ds = vs.map(v => ({ v, url: v._src || v.getAttribute('src') })).filter(x => x.url && !/^blob:/.test(x.url));
     let xong = 0, byt = 0, loi = 0; const tong = ds.length, txt = document.getElementById('ctTxt'), bar = document.getElementById('ctBar'), mb = document.getElementById('ctMb'), btn = document.getElementById('ctGo');
@@ -2515,6 +2518,16 @@ function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung khôn
 // dự phòng: nếu trình duyệt trong LIVE Studio ngừng gọi requestAnimationFrame thì tự vẽ bằng hẹn giờ
 setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRun = n; try { frame1(n); } catch (e) { last = n; } } }, 50);
 const NHANG = new URLSearchParams(location.search).get('nhang') === '1'; // anh Linh 14/11 (thử): bỏ hết con nhang, bục, đệm; chỉ còn sập hầu và cô đồng. Thêm ?nhang=1 để hiện lại
+const DBG = /[?&]dbg=1/.test(location.search); let DBG_ERR = ''; let DBG_N = 0; try { DBG_N = +(sessionStorage.getItem('hd_lan') || 0) + 1; sessionStorage.setItem('hd_lan', DBG_N); } catch (e) {}
+window.addEventListener('error', e => { DBG_ERR = String(e.message || e).slice(0, 80); });
+function drawDbg() { if (!DBG) return; const vv = v => v ? (v.paused ? 'P' : '▶') + v.readyState + ' ' + (v.currentTime || 0).toFixed(1) + (v.error ? ' E' + v.error.code : '') : '-'; let l = [];
+  try { const g = GIA().id; l.push('giá ' + g + ' · tải lần ' + DBG_N + ' · bắt đầu ' + (BATDAU ? 1 : 0) + ' · iOSvol ' + (IOS_VOL ? 1 : 0));
+    if (g === 'chaube') l.push('CB ' + ((CB_LICH[CB.i] || [''])[0]) + ' t' + CB.t.toFixed(1) + ' lap' + CB.lap + ' clip ' + CB.cur + ' ' + vv(CB.v[CB.cur]) + ' | au ' + CB.auKey + ' ' + vv(CB.au));
+    if (g === 'caube') l.push('CU ' + ((CU_LICH[CU.i] || [''])[0]) + ' t' + CU.t.toFixed(1) + ' clip ' + CU.cur + ' ' + vv(CU.v[CU.cur]) + ' | au ' + CU.auKey + ' ' + vv(CU.au));
+    if (g === 'ongbay') l.push('OB ' + OB.cur + ' ' + vv(OB.v[OB.cur]));
+    if (g === 'codoi') l.push('OC ' + OC.cur + ' ' + vv(OC.v[OC.cur]));
+    l.push('bgm ' + vv(bgm) + ' van ' + vv(VAN_AU) + ' nen ' + vv(NEN)); if (DBG_ERR) l.push('lỗi: ' + DBG_ERR); } catch (e) { l.push('dbg ' + e.message); }
+  ctx.save(); ctx.font = '10px monospace'; ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(0, 0, W, 14 * l.length + 6); ctx.fillStyle = '#7fff7f'; l.forEach((s, i) => ctx.fillText(s, 4, 13 + i * 14)); ctx.restore(); }
 function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); quanNhac(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H); const T0 = ctx.getTransform();
@@ -2533,6 +2546,7 @@ function frame1(now) {
   if (KH.on) { drawBayRa(); khCanhBao(); }
   if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } drawOverlay(t); drawGiaPill(); drawLoiVan(t); drawKet(); // màn kết chương trình phủ lên trên cùng
   if (CAPDO) drawCapDo(t);
+  drawDbg();
 }
 // ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
 const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
@@ -2576,7 +2590,7 @@ function ddUpd(dt) {
 window.__hdDD = ddSet;
 // trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
 (function amMoKhoa() {
-  const mo = () => { try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { [[bgm, () => !nhacPhai()], [VAN_AU, () => !VAN_STOP], [VAN_OB_AO, () => !(OB.van2 && !OB.van2Xong)], [KET_AU, () => !S.ket]].forEach(([a, im]) => { if (a.dataset.moi || !a.paused || !im()) return; a.dataset.moi = '1'; const m = a.muted; a.muted = true; try { const p = a.play(); if (p && p.then) p.then(() => { if (im()) a.pause(); a.muted = m; }).catch(() => { a.muted = m; delete a.dataset.moi; }); } catch (e) { a.muted = m; } }); if (nhacPhai()) setTimeout(musStart, 60); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
+  const mo = () => { try { if (BATDAU) moKhoaVideo(); } catch (e) {} try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { [[bgm, () => !nhacPhai()], [VAN_AU, () => !VAN_STOP], [VAN_OB_AO, () => !(OB.van2 && !OB.van2Xong)], [KET_AU, () => !S.ket]].forEach(([a, im]) => { if (a.dataset.moi || !a.paused || !im()) return; a.dataset.moi = '1'; const m = a.muted; a.muted = true; try { const p = a.play(); if (p && p.then) p.then(() => { if (im()) a.pause(); a.muted = m; }).catch(() => { a.muted = m; delete a.dataset.moi; }); } catch (e) { a.muted = m; } }); if (nhacPhai()) setTimeout(musStart, 60); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, mo, { passive: true }));
   setInterval(() => { const chan = S.sound && bgm.paused && VAN_AU.paused && !nghiLe(); if (chan) { if (!S.banner || !/Bấm chuột/.test(S.banner.text)) S.banner = { text: '🔇 Bấm chuột 1 lần vào màn hình để bật âm thanh', t: 0, life: 2.6 }; } }, 2500);
 })();
