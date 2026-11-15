@@ -923,7 +923,7 @@ const CU_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cu-' + n + '.mp4?v=16f2', 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cu-' + n + '.mp4?v=16f3', 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 const CU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
