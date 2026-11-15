@@ -795,7 +795,7 @@ const CB_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CB_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cb-' + n + '.mp4?v=' + (n === 'baisai' || n === 'muamoi' ? 4 : 3), 'chaube'); CV_HOLD.appendChild(v); CB.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cb-' + n + '.mp4?v=' + (n === 'baisai' || n === 'muamoi' ? 4 : n === 'thayao' ? 5 : 3), 'chaube'); CV_HOLD.appendChild(v); CB.v[n] = v; });
   CB.au = new Audio(); CB.au.preload = 'auto';
 })();
 function cbDangLe() { return typeof CB !== 'undefined' && !!CB.buf && GIA().id === 'chaube'; }
