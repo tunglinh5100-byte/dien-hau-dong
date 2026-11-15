@@ -2452,6 +2452,8 @@ setInterval(capNhatGiaInfo, 500);
 let last = performance.now();
 /* 14/11 anh Linh: tải hết video trước, hiện tiến độ, xong mới có nút "Bắt đầu canh đàn" (máy live). ?cho=0 để vào luôn */
 let BATDAU = /[?&]cho=0/.test(location.search);
+{ const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (!BATDAU && this.tagName !== 'VIDEO') { try { this.pause(); } catch (e) {} return Promise.resolve(); } return _play.apply(this, arguments); }; } // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
+window.addEventListener('pagehide', () => { document.querySelectorAll('audio,video').forEach(a => { try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {} }); }); // tải lại trang: tắt hẳn tiếng cũ
 /* 14/11 anh Linh: khoảng lặng (xe giá, giữa hai lượt văn, chuyển giá) lấp bằng nhạc nền nhỏ */
 const NEN = new Audio(MUSIC_SRC); NEN.loop = true; NEN.volume = 0; NEN.preload = 'auto'; let nenIm = 0, nenLast = 0;
 function nenLap(now) { const dt = Math.min(.1, (now - (nenLast || now)) / 1000); nenLast = now; if (!S.sound || S.ket) { if (!NEN.paused) NEN.pause(); return; }
