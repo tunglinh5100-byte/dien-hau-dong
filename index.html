@@ -1913,7 +1913,7 @@ function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích g
   ctx.restore();
 }
 /* ---------- Kết chương trình: bấm "Kết thúc" ở trang điều khiển → nhạc văn kết (Hội đã tan rồi…), giữa màn hình hiện giới thiệu tín ngưỡng thờ Mẫu cuộn lên cuộn xuống ---------- */
-const KET_AU = new Audio('nhac-ket.mp3?v=1'); KET_AU.preload = 'none'; // 14/11: không tải sẵn 4,5MB lúc mở trang
+const KET_AU = new Audio('nhac-ket.mp3?v=1'); KET_AU.preload = 'auto'; // 14/11: không tải sẵn 4,5MB lúc mở trang
 /* Trích nguyên văn Báo Nhân Dân (đặt trong ngoặc kép, ghi rõ bài, ngày, đường dẫn). "…" là đoạn trích chưa hết câu. */
 const KET_TRICH = [
   { q: ['Thực hành Tín ngưỡng thờ Mẫu Tam phủ của người Việt là Di sản văn hóa phi vật thể đại diện của nhân loại.',
@@ -1928,7 +1928,7 @@ const KET_TRICH = [
 function ketDong() { const L = [['h', 'Tín ngưỡng thờ Mẫu Tam Tứ Phủ']];
   KET_TRICH.forEach(k => { k.q.forEach(x => L.push(['p', '“' + x + '”'])); L.push(['n', '— ' + k.c]); L.push(['u', k.u]); }); return L; }
 function ketThuc() { if (S.ket) { S.ket = null; try { KET_AU.pause(); } catch (e) {} S.banner = { text: 'Tiếp tục chương trình', t: 0, life: 3 }; return; }
-  S.ket = { t: 0 }; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); VAN_OB_AO.pause(); bgm.pause(); } catch (e) {}
+  S.ket = { t: 0 }; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); VAN_OB_AO.pause(); bgm.pause(); } catch (e) {} try { CB.au.pause(); CU.au.pause(); NEN.pause(); } catch (e) {} // 14/11: tắt cả nhạc giá Chầu Bé, Cậu Bé
   try { KET_AU.currentTime = 0; KET_AU.muted = !S.sound; const p = KET_AU.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.min(.1, (now - ketLast) / 1000); ketLast = now; const K = S.ket; if (!K) return; K.t += dt; const a = Math.min(1, K.t / 1.5);
   ctx.save(); ctx.globalAlpha = a * .78; ctx.fillStyle = '#120806'; ctx.fillRect(0, 0, 540, 960); ctx.globalAlpha = a;
@@ -2452,7 +2452,7 @@ setInterval(capNhatGiaInfo, 500);
 let last = performance.now();
 /* 14/11 anh Linh: tải hết video trước, hiện tiến độ, xong mới có nút "Bắt đầu canh đàn" (máy live). ?cho=0 để vào luôn */
 let BATDAU = /[?&]cho=0/.test(location.search);
-{ const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (!BATDAU && this.tagName !== 'VIDEO') { try { this.pause(); } catch (e) {} return Promise.resolve(); } return _play.apply(this, arguments); }; } // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
+{ const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (this.tagName !== 'VIDEO' && (!BATDAU || (typeof S !== 'undefined' && S.ket && typeof KET_AU !== 'undefined' && this !== KET_AU))) { /* màn chờ, hoặc đang màn kết: chỉ cho nhạc kết */ try { this.pause(); } catch (e) {} return Promise.resolve(); } return _play.apply(this, arguments); }; } // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
 window.addEventListener('pagehide', () => { document.querySelectorAll('audio,video').forEach(a => { try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {} }); }); // tải lại trang: tắt hẳn tiếng cũ
 /* 14/11 anh Linh: khoảng lặng (xe giá, giữa hai lượt văn, chuyển giá) lấp bằng nhạc nền nhỏ */
 const NEN = new Audio(MUSIC_SRC); NEN.loop = true; NEN.volume = 0; NEN.preload = 'auto'; let nenIm = 0, nenLast = 0;
