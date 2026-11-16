@@ -698,39 +698,41 @@ function txt(s, x, y, size, color, align, weight) {
 }
 
 
-const HY = 108; // dưới thanh tên kênh / người xem của TikTok
+// Vùng an toàn trên điện thoại: TikTok che ~15% phía trên (tên kênh, huy hiệu),
+// và màn hình điện thoại dài hơn 9:16 nên bị cắt ~10% mỗi bên trái/phải.
+const HY = 152, SX = 58, SW = W - 2 * SX;
 function drawHeader() {
-  txt('🏓 PICKLEBALL LIVE', 16, 20, 16, '#fff', 'left', 900);
-  txt(`Trận #${G.matchNo} · chạm ${G.target} điểm là thắng`, W - 16, 20, 12, '#9fb0c2', 'right', 600);
-  txt(EU.ok ? `● @${EU.user} · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? `○ @${EU.user || '?'} · ${EU.err || 'đang kết nối…'}` : '○ chưa có key Euler'), W - 16, 40, 11, EU.ok ? '#3ddc84' : '#ff8a8a', 'right', 800);
+  txt('🏓 PICKLEBALL LIVE', W / 2, 18, 15, '#fff', 'center', 900);
+  txt(EU.ok ? `● @${EU.user} · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? `○ @${EU.user || '?'} · ${EU.err || 'đang kết nối…'}` : '○ chưa có key Euler'), W / 2, 38, 12, EU.ok ? '#3ddc84' : '#ff8a8a', 'center', 800);
+  txt(`Trận #${G.matchNo} · chạm ${G.target} điểm là thắng`, W / 2, 56, 11, '#9fb0c2', 'center', 600);
   for (const t of [0, 1]) {
-    const x = t === 0 ? 8 : W / 2 + 4, w = W / 2 - 12, y = HY;
-    ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(x, y, w, 74, 12); ctx.fill();
-    ctx.fillStyle = TEAM[t].color; rr(x, y, 7, 74, 3); ctx.fill();
-    txt(TEAM[t].name + (G.serving === t ? ' 🟡' : ''), x + 16, y + 15, 13, TEAM[t].color, 'left', 900);
-    txt(String(G.score[t]), x + w - 12, y + 40, 46, '#fff', 'right', 900);
+    const w = SW / 2 - 3, x = t === 0 ? SX : SX + SW / 2 + 3, y = HY;
+    ctx.fillStyle = 'rgba(8,12,18,.9)'; rr(x, y, w, 66, 10); ctx.fill();
+    ctx.fillStyle = TEAM[t].color; rr(x, y, 6, 66, 3); ctx.fill();
+    txt(TEAM[t].name + (G.serving === t ? ' 🟡' : ''), x + 13, y + 13, 12, TEAM[t].color, 'left', 900);
+    txt(String(G.score[t]), x + w - 9, y + 36, 40, '#fff', 'right', 900);
     const ps = G.players.filter(p => p.team === t).sort((a, b) => a.side - b.side);
-    ps.forEach((p, i) => { let n = (p.bot ? '🤖 ' : '') + p.name; ctx.font = '700 15px system-ui,sans-serif'; while (ctx.measureText(n).width > w - 80 && n.length > 3) n = n.slice(0, -1);
+    ps.forEach((p, i) => { let n = (p.bot ? '🤖 ' : '') + p.name; ctx.font = '800 14px system-ui,sans-serif'; while (ctx.measureText(n).width > w - 58 && n.length > 3) n = n.slice(0, -1);
       const on = G.active === p && Math.floor(performance.now() / 250) % 2 === 0;
-      txt(n, x + 16, y + 38 + i * 21, 15, on ? '#ffd43b' : '#f2f6fa', 'left', 800); });
+      txt(n, x + 13, y + 33 + i * 19, 14, on ? '#ffd43b' : '#f2f6fa', 'left', 800); });
   }
 }
 // Bảng hướng dẫn luôn hiện, chữ to, nằm trong vùng người xem điện thoại nhìn thấy
 function drawGuide() {
-  const y = HY + 82;
-  ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(8, y, W - 16, 62, 12); ctx.fill();
-  const keys = [['a', 'Drive'], ['s', 'Drop'], ['d', 'Dink'], ['x', 'Lob'], ['z', 'Đập']], cw = (W - 28) / 5;
+  const y = HY + 72;
+  ctx.fillStyle = 'rgba(8,12,18,.9)'; rr(SX, y, SW, 58, 10); ctx.fill();
+  const keys = [['a', 'Drive'], ['s', 'Drop'], ['d', 'Dink'], ['x', 'Lob'], ['z', 'Đập']], cw = SW / 5;
   keys.forEach(([k, n], i) => {
-    const cx = 14 + i * cw + cw / 2;
-    ctx.fillStyle = k === 'z' ? '#ff3b3b' : '#f0b429'; rr(cx - 46, y + 7, 30, 30, 7); ctx.fill();
-    txt(k, cx - 31, y + 23, 22, '#111', 'center', 900);
-    txt(n, cx - 10, y + 23, 17, '#fff', 'left', 900);
+    const x0 = SX + i * cw + 5;
+    ctx.fillStyle = k === 'z' ? '#ff3b3b' : '#f0b429'; rr(x0, y + 6, 24, 26, 6); ctx.fill();
+    txt(k, x0 + 12, y + 20, 19, '#111', 'center', 900);
+    txt(n, x0 + 28, y + 20, 14.5, '#fff', 'left', 900);
   });
-  txt('Bình luận "giữ chỗ" để vào chơi · Tặng quà được ưu tiên', W / 2, y + 50, 13.5, '#ffd43b', 'center', 800);
+  txt('Bình luận "giữ chỗ" để chơi · Tặng quà được ưu tiên', W / 2, y + 45, 12.5, '#ffd43b', 'center', 800);
 }
 
 function drawQueue() {
-  const w = 150, x = W - w - 6, y = HY + 238, n = Math.min(8, G.queue.length);
+  const w = 142, x = SX + SW - w, y = HY + 218, n = Math.min(8, G.queue.length);
   const h = 30 + Math.max(1, n) * 21 + (G.queue.length > 8 ? 16 : 0);
   ctx.fillStyle = 'rgba(8,12,18,.78)'; rr(x, y, w, h, 10); ctx.fill();
   ctx.strokeStyle = '#f0b429'; ctx.lineWidth = 1.5; rr(x, y, w, h, 10); ctx.stroke();
@@ -775,34 +777,35 @@ function drawComments() {
 
 
 function drawBottom() {
-  const y = HY + 152, h = 78, blink = Math.floor(performance.now() / 260) % 2 === 0;
+  const y = HY + 136, h = 74, blink = Math.floor(performance.now() / 260) % 2 === 0, X = SX, Wd = SW;
   if (G.phase === 'decide' && G.active) {
     const p = G.active, d = G.dec;
-    ctx.fillStyle = blink ? 'rgba(254,44,85,.95)' : 'rgba(255,190,30,.95)'; rr(8, y, W - 16, h, 14); ctx.fill();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; rr(8, y, W - 16, h, 14); ctx.stroke();
-    const pulse = 1 + 0.06 * Math.sin(performance.now() / 90);
-    let nm = p.name.toUpperCase(); ctx.font = '900 28px system-ui,sans-serif'; while (ctx.measureText('🎯 ' + nm + ' ĐÁNH!').width > W - 120 && nm.length > 3) nm = nm.slice(0, -1);
-    ctx.save(); ctx.translate(22, y + 27); ctx.scale(pulse, pulse);
-    ctx.font = '900 28px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.55)';
-    ctx.strokeText('🎯 ' + nm + ' ĐÁNH!', 0, 0); ctx.fillStyle = blink ? '#fff' : '#111'; ctx.fillText('🎯 ' + nm + ' ĐÁNH!', 0, 0); ctx.restore();
+    ctx.fillStyle = blink ? 'rgba(254,44,85,.96)' : 'rgba(255,190,30,.96)'; rr(X, y, Wd, h, 12); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; rr(X, y, Wd, h, 12); ctx.stroke();
+    const pulse = 1 + 0.05 * Math.sin(performance.now() / 90);
+    let nm = p.name.toUpperCase(); ctx.font = '900 24px system-ui,sans-serif'; while (ctx.measureText(nm + ' ĐÁNH!').width > Wd - 92 && nm.length > 3) nm = nm.slice(0, -1);
+    ctx.save(); ctx.translate(X + 12, y + 25); ctx.scale(pulse, pulse);
+    ctx.font = '900 24px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.5)';
+    ctx.strokeText(nm + ' ĐÁNH!', 0, 0); ctx.fillStyle = blink ? '#fff' : '#111'; ctx.fillText(nm + ' ĐÁNH!', 0, 0); ctx.restore();
     const inc = G.rally.incoming;
-    const incTxt = { serve: 'giao bóng', dink: 'DINK thấp', drop: 'DROP rơi kitchen', drive: 'DRIVE nhanh', lob: 'LOB cao → được ĐẬP (z)', smash: 'ĐẬP mạnh' }[inc] || '';
-    txt(`Bóng tới: ${incTxt}${d.human ? '' : ' · 🤖 bot'}`, 22, y + 60, 15, blink ? '#fff' : '#111', 'left', 800);
+    const incTxt = { serve: 'giao bóng', dink: 'DINK thấp', drop: 'DROP rơi kitchen', drive: 'DRIVE nhanh', lob: 'LOB cao → đập được (z)', smash: 'ĐẬP mạnh' }[inc] || '';
+    txt(`Bóng tới: ${incTxt}${d.human ? '' : ' · 🤖'}`, X + 12, y + 56, 14, blink ? '#fff' : '#111', 'left', 800);
     const sec = Math.max(0, Math.ceil(d.left));
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(W - 50, y + h / 2, 32, 0, Math.PI * 2); ctx.fill();
-    txt(String(sec), W - 50, y + h / 2 + 2, 34, '#ffd43b', 'center', 900);
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(X + Wd - 38, y + h / 2, 29, 0, Math.PI * 2); ctx.fill();
+    txt(String(sec), X + Wd - 38, y + h / 2 + 2, 30, '#ffd43b', 'center', 900);
   } else if (G.phase === 'callup' && G.callup) {
     const cu = G.callup;
-    ctx.fillStyle = blink ? 'rgba(240,180,41,.97)' : 'rgba(255,220,90,.97)'; rr(8, y, W - 16, h, 14); ctx.fill();
-    txt('📣 MỜI VÀO SÂN — bình luận "có"', 22, y + 20, 20, '#111', 'left', 900);
-    const names = cu.list.length ? cu.list.map(c => (c.ok ? '✅ ' : '⏳ ') + c.name).join('  ') : 'Không còn ai chờ → bot vào thay';
-    txt(names, 22, y + 52, 17, '#111', 'left', 900);
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(W - 50, y + h / 2, 30, 0, Math.PI * 2); ctx.fill();
-    txt(String(Math.max(0, Math.ceil(cu.left))), W - 50, y + h / 2 + 2, 30, '#f0b429', 'center', 900);
+    ctx.fillStyle = blink ? 'rgba(240,180,41,.97)' : 'rgba(255,220,90,.97)'; rr(X, y, Wd, h, 12); ctx.fill();
+    txt('📣 MỜI VÀO SÂN – bình luận "có"', X + 12, y + 20, 17, '#111', 'left', 900);
+    let names = cu.list.length ? cu.list.map(c => (c.ok ? '✅' : '⏳') + c.name).join(' ') : 'Hết người chờ → bot vào thay';
+    ctx.font = '900 15px system-ui,sans-serif'; while (ctx.measureText(names).width > Wd - 84 && names.length > 4) names = names.slice(0, -1);
+    txt(names, X + 12, y + 52, 15, '#111', 'left', 900);
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(X + Wd - 36, y + h / 2, 27, 0, Math.PI * 2); ctx.fill();
+    txt(String(Math.max(0, Math.ceil(cu.left))), X + Wd - 36, y + h / 2 + 2, 27, '#f0b429', 'center', 900);
   } else if (G.phase === 'lobby') {
-    ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(8, y, W - 16, h, 14); ctx.fill();
-    txt(G.lobbyT != null ? `Trận mới bắt đầu sau ${Math.ceil(G.lobbyT)}s` : '🏓 SÂN ĐANG TRỐNG', W / 2, y + 26, 24, '#fff', 'center', 900);
-    txt(G.lobbyT != null ? `Còn ${Math.max(0, 4 - G.queue.length)} chỗ – bình luận "giữ chỗ"` : 'Bình luận "giữ chỗ" để vào chơi', W / 2, y + 58, 18, blink ? '#ffd43b' : '#fff', 'center', 900);
+    ctx.fillStyle = 'rgba(8,12,18,.9)'; rr(X, y, Wd, h, 12); ctx.fill();
+    txt(G.lobbyT != null ? `Trận mới sau ${Math.ceil(G.lobbyT)}s` : '🏓 SÂN ĐANG TRỐNG', W / 2, y + 24, 22, '#fff', 'center', 900);
+    txt(G.lobbyT != null ? `Còn ${Math.max(0, 4 - G.queue.length)} chỗ – bình luận "giữ chỗ"` : 'Bình luận "giữ chỗ" để vào chơi', W / 2, y + 54, 16, blink ? '#ffd43b' : '#fff', 'center', 900);
   }
 }
 
@@ -810,10 +813,10 @@ function drawBanner() {
   const b = G.banner; if (!b) return;
   const a = Math.min(1, b.t * 5);
   ctx.globalAlpha = a;
-  ctx.fillStyle = 'rgba(8,12,18,.88)'; rr(30, 440 - 52, W - 60, 104, 18); ctx.fill();
-  ctx.strokeStyle = b.color; ctx.lineWidth = 3; rr(30, 440 - 52, W - 60, 104, 18); ctx.stroke();
+  ctx.fillStyle = 'rgba(8,12,18,.88)'; rr(SX, 440 - 52, SW, 104, 16); ctx.fill();
+  ctx.strokeStyle = b.color; ctx.lineWidth = 3; rr(SX, 440 - 52, SW, 104, 16); ctx.stroke();
   let fs = 24; ctx.font = `900 ${fs}px system-ui,sans-serif`;
-  while (ctx.measureText(b.text).width > W - 90 && fs > 14) { fs--; ctx.font = `900 ${fs}px system-ui,sans-serif`; }
+  while (ctx.measureText(b.text).width > SW - 24 && fs > 13) { fs--; ctx.font = `900 ${fs}px system-ui,sans-serif`; }
   txt(b.text, W / 2, 440 - 14, fs, '#fff', 'center', 900);
   txt(b.sub, W / 2, 440 + 22, 18, b.color, 'center', 800);
   ctx.globalAlpha = 1;
@@ -1048,15 +1051,15 @@ function drawCelebrate() {
   }
   ctx.globalAlpha = 1;
   const pop = 1 + Math.sin(G.t * 6) * 0.04;
-  ctx.save(); ctx.translate(W / 2, HY + 210); ctx.scale(pop, pop);
-  ctx.font = '900 40px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.save(); ctx.translate(W / 2, HY + 175); ctx.scale(pop, pop);
+  ctx.font = '900 32px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.lineWidth = 8; ctx.strokeStyle = '#000'; ctx.strokeText(`🏆 ${TEAM[c.team].name} THẮNG`, 0, 0);
   ctx.fillStyle = TEAM[c.team].color; ctx.fillText(`🏆 ${TEAM[c.team].name} THẮNG`, 0, 0);
   ctx.font = '900 30px system-ui,sans-serif'; ctx.strokeText(`${c.score[0]} – ${c.score[1]}`, 0, 44); ctx.fillStyle = '#fff'; ctx.fillText(`${c.score[0]} – ${c.score[1]}`, 0, 44);
   ctx.restore();
-  drawDancer(W / 2 - 120, 650, c.team, c.names[0] || '', 0);
-  drawDancer(W / 2 + 120, 650, c.team, c.names[1] || '', 1.6);
-  txt(`Trận tiếp theo sau ${Math.max(0, Math.ceil(7 - G.t))}s`, W / 2, HY + 290, 16, '#fff', 'center', 800);
+  drawDancer(W / 2 - 95, 620, c.team, c.names[0] || '', 0);
+  drawDancer(W / 2 + 95, 620, c.team, c.names[1] || '', 1.6);
+  txt(`Trận tiếp theo sau ${Math.max(0, Math.ceil(7 - G.t))}s`, W / 2, HY + 255, 16, '#fff', 'center', 800);
 }
 
 function draw() {
@@ -1076,10 +1079,10 @@ function draw() {
     const s = '🎥 GÓC NHÌN: ' + CAM.who.name.toUpperCase();
     ctx.font = '800 12px system-ui,sans-serif';
     const w = ctx.measureText(s).width + 16;
-    ctx.fillStyle = 'rgba(254,44,85,.85)'; rr(10, HY + 238, w, 22, 11); ctx.fill();
-    txt(s, 18, HY + 249, 12, '#fff', 'left', 800);
+    ctx.fillStyle = 'rgba(254,44,85,.85)'; rr(SX, HY + 218, w, 22, 11); ctx.fill();
+    txt(s, SX + 8, HY + 229, 12, '#fff', 'left', 800);
   }
-  if (G.phase === 'serve') txt(`${G.server.name} chuẩn bị giao…`, W / 2, HY + 190, 20, '#fff', 'center', 900);
+  if (G.phase === 'serve') txt(`${G.server.name} chuẩn bị giao…`, W / 2, HY + 175, 20, '#fff', 'center', 900);
   drawSmash();
   drawBanner();
   drawCelebrate();
