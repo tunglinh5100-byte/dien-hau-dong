@@ -1328,22 +1328,31 @@ function khTay() { const id = GIA().id; let x = CO.x + 22, y = CO.y - 120; if (i
 function matDiem(mat, bx, by) { if (!mat || !KH.T0) return null; const P = mat.transformPoint(new DOMPoint(bx, by)), Q = KH.T0.inverse().transformPoint(P); return [Q.x, Q.y, Math.hypot(mat.a, mat.b) / Math.hypot(KH.T0.a, KH.T0.b)]; } // điểm trong khung clip 360x640 -> màn hình
 const LOC_KIND = { tien: () => 'tien', hoa: () => 'img:hoa-hong', qua: () => 'img:qua', keo: () => 'img:keo-mut' };
 // 15/11: lộc bay ra khỏi khung đúng lúc tay tung trong clip: [giây trong clip, x, y (khung 360x640), loại lộc]
-const NEM = { cb: { tungtien: [3.85, 285, 245, 'tien'], tunghoa: [3.85, 300, 255, 'hoa'], tungqua: [3.85, 300, 255, 'qua'] }, cu: { tungkeo: [6.0, 180, 270, 'keo'] }, ob: { loc: [2.6, 270, 372, 'tien'] } };
-function nemDongBo(ctl, ten, mat, v, kindOver) { const N = NEM[ctl] && NEM[ctl][ten]; if (!KH.on || !N || !v) return; const key = '__nem_' + ctl, ct = v.currentTime, pt = v[key] == null ? ct : v[key]; v[key] = ct;
-  if (pt < N[0] && ct >= N[0]) { const d = matDiem(mat, N[1], N[2]); if (!d) return; const kind = kindOver || N[3]; S.bayRa = S.bayRa || [];
-    for (let i = 0; i < 16; i++) S.bayRa.push({ kind: LOC_KIND[kind] ? LOC_KIND[kind]() : 'tien', sx: d[0] + rnd(-14, 14), sy: d[1] + rnd(-12, 12), s0: 55 * d[2] / (kind === 'tien' ? 36 : 48), t: -rnd(0, .2), dur: rnd(.8, 1.15), ex: rnd(-50, W + 50), ey: rnd(KH.BY + 40, H + 90), r0: rnd(-.6, .6), vr: rnd(-4, 4), s1: kind === 'tien' ? rnd(3.6, 5) : rnd(2.6, 3.6), up: rnd(10, 40) }); } }
+// 16/11 anh Linh: mỗi lần tay tung trong clip là một đợt lộc; lộc bay nối đuôi thành một hàng uốn lượn, to dần ra phía người xem, rồi bay vào một điểm ở nền đen bên dưới, hiện "+500.000"
+// [giây trong clip, x, y (khung 360x640), loại lộc] – đo từ từng khung hình clip của Tú
+const NEM = { cb: { tungtien: [[3.8, 285, 300, 'tien'], [5.5, 335, 215, 'tien'], [6.7, 318, 240, 'tien'], [7.45, 315, 200, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungkeo: [[6.0, 180, 270, 'keo']] }, ob: { loc: [[2.6, 270, 372, 'tien']] } };
+const KH_DICH = () => [W / 2, KH.BY + 66]; // điểm lộc bay vào (nền đen dưới khung)
+const LOC_CONG = { tien: '+500.000', hoa: '+ Lộc hoa', qua: '+ Lộc quả', keo: '+ Lộc kẹo' };
+function bayChuoi(kind, sx, sy, s0, cu) { S.bayRa = S.bayRa || []; const side = Math.random() < .5 ? -1 : 1, n = kind === 'tien' ? 8 : 7, A = rnd(75, 105), sc = rnd(.55, .7);
+  for (let i = 0; i < n; i++) S.bayRa.push({ kind: kind === 'tien' ? 'tien' : LOC_KIND[kind] ? LOC_KIND[kind]() : kind, loai: kind, sx, sy, s0: s0 || .6, cu, t: -i * .16, dur: 1.7, side, A, sc, dau: i === 0, cuoi: i === n - 1, r0: rnd(-.3, .3) }); }
+function nemDongBo(ctl, ten, mat, v, kindOver) { const L = NEM[ctl] && NEM[ctl][ten]; if (!KH.on || !L || !v) return; const key = '__nem_' + ctl, ct = v.currentTime, pt = v[key] == null ? ct : v[key]; v[key] = ct;
+  L.forEach(N => { if ((pt < N[0] && ct >= N[0]) || (ct < pt - 1 && ct >= N[0] && N[0] < .3)) { const d = matDiem(mat, N[1], N[2]); if (!d) return; const kind = kindOver || N[3]; bayChuoi(kind, d[0], d[1], 55 * d[2] / (kind === 'tien' ? 36 : 48)); } }); }
 function cuDiem(px, py) { // điểm trong clip Cậu (toạ độ 720x1280) -> toạ độ màn hình, kèm tỉ lệ
   if (!CU.mat || !KH.T0) return null; const P = CU.mat.transformPoint(new DOMPoint(px * CV_W / 720, py * CV_H / 1280)), I = KH.T0.inverse(), Q = I.transformPoint(P); return [Q.x, Q.y, Math.hypot(CU.mat.a, CU.mat.b) / Math.hypot(KH.T0.a, KH.T0.b) * CV_W / 720]; }
-function cuBayRa(loai) { // 15/11 anh Linh: Cậu tung tiền như demo 3D – tờ tiền trong clip (giây 6,6 vòng tung) bay tiếp ra khỏi khung, khớp chỗ, khớp cỡ
-  S.bayRa = S.bayRa || []; const tr = (CU.v.tungtien && CU.v.tungtien.playbackRate) || 1;
-  for (let i = 0; i < 16; i++) { const k = loai(), px = rnd(250, 420), py = rnd(520, 640); S.bayRa.push({ kind: k, cu: [px, py], t: -rnd(0, .18) / tr, dur: rnd(.75, 1.1), ex: rnd(-50, W + 50), ey: rnd(KH.BY + 40, H + 90), r0: rnd(-.6, .6), vr: rnd(-4, 4), s1: k === 'tien' ? rnd(3.6, 5) : rnd(2.6, 3.6), up: rnd(10, 30), w0: 120 }); } }
-function bayRa(n, loai) { const [sx, sy] = khTay(); S.bayRa = S.bayRa || [];
-  for (let i = 0; i < n; i++) { const k = loai(); S.bayRa.push({ kind: k, sx: sx + rnd(-12, 12), sy: sy + rnd(-10, 10), ex: rnd(-60, W + 60), ey: rnd(KH.BY + 30, H + 90), t: -rnd(0, 3.2), dur: rnd(1, 1.5), r0: rnd(-.7, .7), vr: rnd(-4.5, 4.5), s1: k === 'tien' ? rnd(3.2, 4.6) : rnd(2.4, 3.4), up: rnd(30, 70) }); } }
-function drawBayRa() { (S.bayRa || []).forEach(b => { if (b.t < 0) return; if (b.cu && b.sx == null) { const d = cuDiem(b.cu[0], b.cu[1]); if (!d) { b.t = b.dur; return; } b.sx = d[0]; b.sy = d[1]; b.s0 = b.w0 * d[2] / (b.kind === 'tien' ? 36 : 48); } const u = clamp(b.t / b.dur, 0, 1), e = u * u, x = b.sx + (b.ex - b.sx) * u, y = b.sy - b.up * Math.sin(Math.PI * Math.min(u * 1.6, 1)) * (1 - e) + (b.ey - b.sy) * e, s0 = b.s0 || .55, z = s0 + (b.s1 - s0) * e;
-  ctx.save(); ctx.translate(x, y); ctx.rotate(b.r0 + b.vr * u);
-  if (u > .2) { ctx.save(); ctx.globalAlpha = .35 * e; ctx.translate(6 * z, 8 * z); ctx.fillStyle = '#000'; ctx.filter = 'blur(' + Math.max(1, 3 * z) + 'px)'; ctx.beginPath(); ctx.ellipse(0, 0, (b.kind === 'tien' ? 17 : 10) * z, (b.kind === 'tien' ? 8 : 10) * z, 0, 0, 7); ctx.fill(); ctx.restore(); }
-  if (b.kind === 'tien') note(0, 0, z, 5, Math.cos(b.t * 7) < 0 ? -1 : 1); else drawItem(b.kind, 0, 0, z * .9);
-  ctx.restore(); }); }
+function cuBayRa(loai) { const k0 = loai(), kind = k0 === 'tien' ? 'tien' : /qua/.test(k0) ? 'qua' : /hoa/.test(k0) ? 'hoa' : /keo/.test(k0) ? 'keo' : 'tien'; const d = cuDiem(335, 580); if (!d) return; bayChuoi(kind, d[0], d[1], 120 * d[2] / (kind === 'tien' ? 36 : 48)); } // Cậu tung tiền: tờ tiền trong clip bay tiếp ra khỏi khung
+function bayRa(n, loai) { const [sx, sy] = khTay(); const k0 = loai(), kind = k0 === 'tien' ? 'tien' : /qua|fruit|peach/.test(k0) ? 'qua' : /hoa|flower/.test(k0) ? 'hoa' : /keo/.test(k0) ? 'keo' : 'tien'; bayChuoi(kind, sx, sy, .6); }
+function drawBayRa() { const [px, py] = KH_DICH(); S.congLoc = (S.congLoc || []).filter(c => c.t < .62);
+  (S.bayRa || []).forEach(b => { if (b.t < 0) return; const u = clamp(b.t / b.dur, 0, 1), e = u * u * (3 - 2 * u);
+    // đường bay: từ tay đi chéo xuống, uốn lượn hai bên (hình chữ S), cuối cùng thu vào điểm đích
+    const bx = b.sx + (px - b.sx) * e, by = b.sy + (py - b.sy) * e - 70 * Math.sin(Math.PI * Math.min(1, u * 1.4)) * (1 - u), off = b.side * b.A * Math.sin(u * Math.PI * 3) * (1 - u * .85) * 1.3;
+    const x = bx + off, y = by, z = (b.s0 * (1 - u) + .35 * u + 2.4 * b.sc * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), 1.3)) * (b.kind === 'tien' ? 1 : .8);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(b.r0 + Math.cos(u * Math.PI * 3) * .55 * b.side); ctx.globalAlpha = u > .92 ? (1 - u) / .08 : 1;
+    if (u > .1 && u < .9) { ctx.save(); ctx.globalAlpha *= .3; ctx.translate(6 * z, 9 * z); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(0, 0, (b.kind === 'tien' ? 17 : 10) * z, (b.kind === 'tien' ? 8 : 10) * z, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    if (b.kind === 'tien') note(0, 0, z, 5, Math.cos(b.t * 6) < 0 ? -1 : 1); else drawItem(b.kind, 0, 0, z * .9); ctx.restore();
+    if (u >= 1 && !b.toi) { b.toi = true; S.congLoc.push({ t: 0, s: LOC_CONG[b.loai] || '+500.000', x: px + ((S.congN = (S.congN || 0) + 1) % 2 ? -42 : 42) }); } });
+  // điểm đích: vầng sáng vàng, chữ +500.000 bay lên
+  const dang = (S.bayRa || []).some(b => b.t > 0) || S.congLoc.length; if (dang) { ctx.save(); const g = ctx.createRadialGradient(px, py, 2, px, py, 46); g.addColorStop(0, 'rgba(255,226,140,.75)'); g.addColorStop(1, 'rgba(255,200,80,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, 46, 0, 7); ctx.fill(); ctx.restore(); }
+  S.congLoc.forEach(c => { c.t += 1 / 60; const a = c.t < .1 ? c.t / .1 : 1 - Math.max(0, c.t - .32) / .3; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `900 19px ${SERIF}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(60,20,0,.9)'; ctx.textAlign = 'center'; const yy = py - 6 - c.t * 100; ctx.strokeText(c.s, c.x, yy); ctx.fillStyle = '#ffe08a'; ctx.fillText(c.s, c.x, yy); ctx.restore(); }); }
 function khCanhBao() { const b = typeof buocGia === 'function' ? buocGia() : null; if (!b) return; const ten = b[0][b[1]] || ''; if (!(/tửu/i.test(ten) || (laOng() && /lộc/i.test(ten)))) return;
   const y = KH.BY + 10, s = '⚠ Sử dụng rượu bia, thuốc lá có chừng mực · Trẻ em dưới 18 tuổi không nên sử dụng'; ctx.save(); ctx.font = `700 10.5px ${SERIF}`; const w = Math.min(W - 16, ctx.measureText(s).width + 24);
   rr(W / 2 - w / 2, y, w, 24, 8, 'rgba(70,10,6,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(W / 2 - w / 2, y, w, 24, 8); ctx.stroke(); text(s, W / 2, y + 12.5, 10.5, '#ffe19a', { f: SERIF, w: 700 }); ctx.restore(); }
@@ -1367,7 +1376,7 @@ function drawItem(kind, x, y, s) {
 }
 const ITEM_NAME = { sen: 'bông sen', note: 'tờ 500.000', flower: 'bông hoa', fruit: 'quả cam', peach: 'quả đào' };
 function updFlying(dt) {
-  S.bayRa = (S.bayRa || []).filter(b => (b.t += dt) < b.dur);
+  S.bayRa = (S.bayRa || []).filter(b => (b.t += dt) < b.dur + .06);
   S.locDat = (S.locDat || []).filter(d => (d.t += dt) < 7.5);
   S.muaHQ = (S.muaHQ || []).filter(m => { m.t += dt; if (m.t < m.delay) return true; m.x += (m.vx + Math.sin(m.t * 2 + m.rot) * 25) * dt; m.y += m.vy * dt; m.rot += m.vr * dt; if (m.y >= m.gy) { S.locDat.push({ kind: m.kind, x: m.x, y: m.gy, s: m.s, r: rnd(-.6, .6), t: 0 }); return false; } return true; });
   S.flying.forEach(f => { f.t += dt; if (f.t >= f.dur && !f.done) { f.done = true; if (f.onDone) f.onDone(); const p = f.p; if (p && S.people.includes(p)) { p.carry = f.kind; p.pose = 'raise'; p.poseT = 3; p.bubble = { s: 'Con xin ' + xung(), t: S.t }; S.floats.push({ x: p.x, y: p.y - 56, s: p.name + ' được ' + xung() + ' ban ' + ITEM_NAME[f.kind], c: '#f6dc96', t: 0, life: 2.4 }); setTimeout(() => { if (p.carry === f.kind) p.carry = null; }, 5000); wave(3); } } });
