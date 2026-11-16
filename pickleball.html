@@ -389,16 +389,23 @@ const norm = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '
 const playing = name => G.players.find(p => !p.bot && p.name === name);
 function sortQueue() { G.queue.sort((a, b) => b.gift - a.gift || a.t - b.t); }
 function qRank(name) { return G.queue.findIndex(q => q.name === name) + 1; }
+// "giữ chỗ" ở bất kỳ đâu trong bình luận, gõ sai dấu/thiếu cách/viết tắt đều nhận
+function wantsJoin(n) {
+  const t = n.replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(), nos = t.replace(/ /g, '');
+  return /giu ?ch|giu ?tro|du ?cho|dư ?cho|giu ?c?ho/.test(t) || /giucho|giuchoo|giuchon/.test(nos) ||
+    /(^| )(gc|join|dk|dang ky|vao choi|cho choi|xin choi|muon choi|choi voi|cho vao|xep hang)( |$)/.test(t);
+}
 function joinQueue(name) {
   if (playing(name) || G.queue.some(q => q.name === name) || (G.callup && G.callup.list.some(c => c.name === name))) return;
   G.queue.push({ name, gift: 0, t: performance.now() }); sortQueue();
   addComment('📋', `${name} vào hàng chờ #${qRank(name)}`, 'sys');
+  banner(`✅ ${name} đã giữ chỗ`, `Hàng chờ #${qRank(name)}`, '#f0b429'); EU.joins = (EU.joins || 0) + 1;
 }
 function onComment(name, text) {
   G.lastSeen[name] = performance.now();
   addComment(name, text);
   const n = norm(text);
-  if (n.startsWith('giu cho') || n === 'giucho') joinQueue(name);
+  if (wantsJoin(n)) joinQueue(name);
   if (G.callup) { const c = G.callup.list.find(c => c.name === name); if (c && !c.ok) { c.ok = true; addComment('✅', `${name} đã vào sân`, 'sys'); } }
   const pl = playing(name); if (pl) pl.missed = 0;
   const r = G.active;
@@ -432,7 +439,7 @@ function enterLobby() {
 function beginCallup() {
   const taken = new Set(G.players.map(p => p.team + '-' + p.side));
   const free = SLOTS.filter(s => !taken.has(s[0] + '-' + s[1]));
-  const list = G.queue.splice(0, free.length).map(q => ({ name: q.name, ok: (performance.now() - (G.lastSeen[q.name] || -1e9)) < 20000 }));
+  const list = G.queue.splice(0, free.length).map(q => ({ name: q.name, ok: (performance.now() - (G.lastSeen[q.name] || -1e9)) < 180000 }));
   G.callup = { list, free, left: 15 };
   G.phase = 'callup';
   if (list.length) addComment('📣', `Mời ${list.map(c => c.name).join(', ')} vào sân – bình luận "có"`, 'sys');
@@ -566,7 +573,7 @@ function update(dt) {
   }
   for (const c of G.callouts) c.t += dt;
   G.callouts = G.callouts.filter(c => c.t < 1.3);
-  if (G.banner) G.banner.t += dt;
+  if (G.banner) { G.banner.t += dt; if (G.phase !== 'point' && G.banner.t > 2.6) G.banner = null; }
   updateCam(dt);
   if (G.smashFx) { G.smashFx.t += dt; if (G.smashFx.t > 1.6) G.smashFx = null; }
 
@@ -607,7 +614,7 @@ function update(dt) {
       cu.list = cu.list.filter(c => c.ok);
       const need = cu.free.length - cu.list.length;
       if (need > 0 && G.queue.length) {
-        const more = G.queue.splice(0, need).map(q => ({ name: q.name, ok: (performance.now() - (G.lastSeen[q.name] || -1e9)) < 20000 }));
+        const more = G.queue.splice(0, need).map(q => ({ name: q.name, ok: (performance.now() - (G.lastSeen[q.name] || -1e9)) < 180000 }));
         cu.list.push(...more); cu.left = 15;
         addComment('📣', `Mời tiếp ${more.map(c => c.name).join(', ')} – bình luận "có"`, 'sys');
       } else finishCallup();
@@ -641,7 +648,7 @@ function txt(s, x, y, size, color, align, weight) {
 function drawHeader() {
   txt('🏓 PICKLEBALL LIVE', 16, 22, 17, '#fff', 'left', 900);
   txt(`Trận #${G.matchNo} · tới ${G.target} điểm`, W - 16, 22, 13, '#9fb0c2', 'right', 600);
-  txt(EU.ok ? '● LIVE' : (LS.get('hd_live_key') ? '○ đang kết nối…' : '○ chưa có key Euler'), W - 16, 136, 10.5, EU.ok ? '#3ddc84' : '#6f8090', 'right', 700);
+  txt(EU.ok ? `● LIVE · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? '○ đang kết nối…' : '○ chưa có key Euler'), W - 16, 136, 10.5, EU.ok ? '#3ddc84' : '#6f8090', 'right', 700);
   for (const t of [0, 1]) {
     const x = t === 0 ? 12 : W / 2 + 6, w = W / 2 - 18, y = 40;
     ctx.fillStyle = 'rgba(255,255,255,.06)'; rr(x, y, w, 82, 12); ctx.fill();
@@ -1062,7 +1069,7 @@ function handleEv(type, d) {
   const name = nameOf(d); if (!name) return;
   const nm = String(name).slice(0, 24), t = String(type || '').toLowerCase();
   try { window.__hdLv.ev(nm, d, t); } catch (e) {}
-  if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c) onComment(nm, c); }
+  if (t.includes('chat')) { const c = d.comment || d.content || ''; EU.chats = (EU.chats || 0) + 1; if (c) onComment(nm, c); }
   else if (t.includes('gift')) {
     const g = d.gift || d.giftDetails || {}, gt = d.giftType != null ? d.giftType : g.giftType;
     if (gt === 1 && d.repeatEnd !== undefined && !d.repeatEnd) return; // combo: chỉ tính gói cuối
