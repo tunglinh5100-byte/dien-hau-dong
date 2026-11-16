@@ -132,7 +132,7 @@ const MUSIC_SRC = "data:audio/mp4;base64,AAAAHGZ0eXBNNEEgAAACAE00QSBpc29taXNvMgA
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const W = 540, H = 960;
 // 15/11 anh Linh: khung hình phẳng (khung thẳng, viền vàng): trên là nền đen đặt thanh tiến trình, khung cảnh đền như cũ, cắt sát mép thảm; lộc bay vượt khỏi khung ra ngoài như màn LED 3D. ?khung=1 bật (link /tn), ?khung=0 tắt
-const KH = { on: /[?&]khung=1/.test(location.search), BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
+const KH = { on: !/[?&]khung=0/.test(location.search), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
 const UI = '"Be Vietnam Pro", system-ui, sans-serif', SERIF = '"Noto Serif", Georgia, serif';
@@ -496,7 +496,7 @@ function moKhoaVideo() { document.querySelectorAll('video').forEach(v => { if (v
 // Trên điện thoại: chỉ giữ nguồn cho video đang phát, các video khác nhả nguồn (vẫn giữ bản đã tải trong bộ nhớ đệm), đến lượt mới gắn lại.
 const MOBI = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 function cvGiai(keep) { if (!MOBI) return; document.querySelectorAll('video').forEach(x => { if (x === keep || !x.paused || !x.getAttribute('src')) return; if (!x._src) x._src = x.getAttribute('src'); try { x.removeAttribute('src'); x.load(); } catch (e) {} }); }
-if (MOBI) setInterval(() => { try { if (BATDAU) cvGiai(null); } catch (e) {} }, 3000);
+if (MOBI) setInterval(() => { try { if (BATDAU) cvGiai(null); const v = videoDangDung && [CB.v[CB.cueClip || CB.cur], CU.v[CU.cueClip || CU.cur], OB.v[OB.cur], OC.v[OC.cur]].find(x => x && x.paused && !x.ended && x.readyState < 2); window.__chamT = v ? performance.now() : 0; } catch (e) {} }, 3000);
 function cvPlay(v) { if (MOBI && v && !v.getAttribute('src') && v._src) { try { v.preload = 'auto'; v.src = v._src; if (v.__want) { const w = v.__want; v.addEventListener('loadedmetadata', () => { try { v.currentTime = w; } catch (e) {} }, { once: true }); } } catch (e) {} } try { cvGiai(v); } catch (e) {} cvPlay0(v); }
 function cvPlay0(v) { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cvDanceV() { return CVS.walk ? CVW : CV[CV_DANCE[CVS.di]]; }
@@ -1598,7 +1598,7 @@ function noiKhen(name, cau) {
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
-function updKhen(dt) { if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 5) KHEN.cur = null; } if (!KHEN.cur && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
+function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 5) { KHEN.cur = null; KHEN.nghi = 6; } } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
 function dauHinh() { const id = GIA().id; let c = null;
@@ -2587,6 +2587,7 @@ function frame1(now) {
   drawOverlay(t); if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } /* 15/11: lời ban khen vẽ sau cùng các bảng, không bị che */ drawGiaPill(); drawLoiVan(t); drawKet(); // màn kết chương trình phủ lên trên cùng
   if (CAPDO) drawCapDo(t);
   drawDbg();
+  if (window.__chamT && performance.now() - window.__chamT < 3200) { ctx.save(); ctx.font = `800 13px ${SERIF}`; const s = '👆 Chạm màn hình để hình tiếp tục chạy', w = ctx.measureText(s).width + 36; rr(W / 2 - w / 2, 640, w, 36, 18, 'rgba(142,33,28,.95)'); text(s, W / 2, 658, 13, '#ffe39a', { f: SERIF, w: 800 }); ctx.restore(); }
 }
 // ---------- Camera quay vòng trái ↔ phải quanh cô (không zoom ra vào), thị sai theo chiều sâu cho thấy rõ 3D ----------
 const CAM_ON = new URLSearchParams(location.search).get('cam') !== '0';
