@@ -904,7 +904,7 @@ const OM_LICH = [ // [tên bước, nhạc, từ giây, đến giây, clip, ki�
   ['xegia', 'segia', 0, 23, 'segia', 'vua', '']];
 const BUOC_OM = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa cờ', 'Ngâm thơ', 'Ngự tửu', 'Phát lộc', 'Xe giá'];
 const OM_RATE = { tauhuong: .8 };
-const OM_TF = {"thinh": [0.85, 25.0, 165.1], "thayao": [0.85, 25.0, 165.1], "tauhuong": [0.95, 10.8, 112.9], "khaiquang": [1.0, -16.0, 77.0], "muaco": [0.966, -19.1, 50.8], "ngamtho": [0.805, 38.7, 121.3], "uongruou": [0.893, 53.0, 129.6], "nghevan": [0.721, 48.2, 182.6], "phatloc": [0.912, 11.1, 130.0], "segia": [0.711, 49.3, 199.7]}; const OM_DEM = {"uongruou": [50, 235, 510], "nghevan": [44, 319, 558], "phatloc": [62, 300, 499], "segia": [75, 278, 542]}; const OM_PHONG = {}; const OM_NEM = [[6.6, 165, 284, 'tien']]; // vị trí, cỡ từng clip (đo từ khung hình): [tỉ lệ, dịch x, dịch y]
+const OM_TF = {"thinh": [1.0, -5, 28], "thayao": [1.0, -7.0, 157.0], "tauhuong": [0.95, 10.8, 112.9], "khaiquang": [1.0, -16.0, 77.0], "muaco": [0.966, -19.1, 50.8], "ngamtho": [0.805, 38.7, 121.3], "uongruou": [0.893, 53.0, 129.6], "nghevan": [0.721, 48.2, 182.6], "phatloc": [0.912, 11.1, 130.0], "segia": [0.711, 49.3, 199.7]}; const OM_DEM = {"uongruou": [50, 235, 510], "nghevan": [44, 319, 558], "phatloc": [62, 300, 499], "segia": [75, 278, 542], "thinh": [79, 281, 548], "thayao": [108, 262, 428]}; const OM_PHONG = {}; const OM_NEM = [[6.6, 165, 284, 'tien']]; // vị trí, cỡ từng clip (đo từ khung hình): [tỉ lệ, dịch x, dịch y]
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
 const CU_TF = OMU ? OM_TF : {"thinh": [1.0, -5, 28], "thinhlap": [1.0, -5, 28], "tungkhan": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
 const CU_AU = OMU ? OM_AU : { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
@@ -945,7 +945,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (OMU ? 'om/om-' + n + '.mp4?v=1' : 'cu-' + n + '.mp4?v=16f3'), 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (OMU ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=2') : 'cu-' + n + '.mp4?v=16f3'), 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 const CU_DEM = OMU ? OM_DEM : { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
@@ -1031,9 +1031,13 @@ function cuDraw(t, x, y, sc) {
   const de = CU_DEM[n]; if (de) { // thảm ngồi dưới Cậu (anh Linh 14/11: Cậu ngồi thì phải có thảm)
     const xl = x + fx * (tf[1] + tf[0] * de[0] - CV_FX), xr = x + fx * (tf[1] + tf[0] * de[1] - CV_FX), yb = y + k * (tf[2] + tf[0] * de[2] - CV_FY), cx = (xl + xr) / 2, hw = Math.abs(xr - xl) / 2 + 10, hh = Math.max(7, hw * .2);
     ctx.save(); const tw = hw * .92, bw = hw * 1.08, ty = yb - hh * 1.1, by = yb + hh * .9, quad = (o) => { ctx.beginPath(); ctx.moveTo(cx - tw + o, ty + o * .5); ctx.lineTo(cx + tw - o, ty + o * .5); ctx.lineTo(cx + bw - o, by - o * .5); ctx.lineTo(cx - bw + o, by - o * .5); ctx.closePath(); }; // anh Linh 14/11: thảm ngồi vuông, màu vàng (nhìn phối cảnh)
-    ctx.fillStyle = 'rgba(20,6,4,.35)'; ctx.fillRect(cx - bw, by - 1, bw * 2, 5);
-    const g = ctx.createLinearGradient(0, ty, 0, by); g.addColorStop(0, '#e9b93a'); g.addColorStop(1, '#c8901c'); quad(0); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#8a5a10'; ctx.lineWidth = 1.5; ctx.stroke();
-    quad(6); ctx.strokeStyle = 'rgba(160,40,20,.75)'; ctx.lineWidth = 1.6; ctx.stroke(); quad(9); ctx.strokeStyle = 'rgba(255,236,170,.6)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = '#c8901c'; ctx.fillRect(cx - bw, by, bw * 2, 4); ctx.restore(); }
+    // 16/11 anh Linh: đệm đỏ viền hoa văn vàng, thành dày, như đệm giá Ông Hoàng Bảy
+    const th = Math.max(6, hh * .75); ctx.fillStyle = 'rgba(20,6,4,.4)'; ctx.fillRect(cx - bw - 2, by + th - 1, bw * 2 + 4, 5);
+    const sg = ctx.createLinearGradient(0, by, 0, by + th); sg.addColorStop(0, '#b3261c'); sg.addColorStop(1, '#6e130d'); ctx.fillStyle = sg; ctx.fillRect(cx - bw, by, bw * 2, th);
+    ctx.fillStyle = '#d9a440'; ctx.fillRect(cx - bw, by + th * .38, bw * 2, Math.max(1.5, th * .14)); ctx.fillStyle = '#f2cf72'; for (let xx = cx - bw + 3; xx < cx + bw - 2; xx += 5) ctx.fillRect(xx, by + th * .78, 2, 1.4);
+    const g = ctx.createLinearGradient(0, ty, 0, by); g.addColorStop(0, '#d23a2c'); g.addColorStop(1, '#a4241a'); quad(0); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#5e120c'; ctx.lineWidth = 1.2; ctx.stroke();
+    quad(2.5); ctx.strokeStyle = '#e2b250'; ctx.lineWidth = Math.max(2.5, hw * .07); ctx.stroke(); quad(2.5 + Math.max(2.5, hw * .07)); ctx.strokeStyle = 'rgba(255,226,140,.55)'; ctx.lineWidth = 1; ctx.stroke();
+    quad(2.5); ctx.save(); ctx.clip(); ctx.restore(); ctx.strokeStyle = 'rgba(150,30,20,.7)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); quad(2.5); ctx.stroke(); ctx.setLineDash([]); ctx.restore(); }
   ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); CU.mat = ctx.getTransform(); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
