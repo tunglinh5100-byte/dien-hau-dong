@@ -1587,6 +1587,7 @@ function chonLoi(loai) { const ong = laOng(), B = ong ? LOI_BAN_ONG : LOI_BAN, K
 function khen(name, loai, uu) { if (uu == null) return; /* 15/11 anh Linh: chỉ ban khen người thật, tương tác thật (gọi từ kết nối live), ưu tiên: tặng quà 4 > chia sẻ live 3 > 3 bình luận 2 > thả 100 tim 1 */ if (!name || String(name).startsWith('​')) return; loai = loai || 'chung'; if (KHEN.cur && KHEN.cur.name === name) return;
   const cu = KHEN.q.find(x => x.name === name); if (cu && cu.uu >= uu) return; KHEN.q = KHEN.q.filter(x => x.name !== name); KHEN.q.push({ name, loai, uu, t: S.t }); if (KHEN.q.length > 12) { KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); KHEN.q.shift(); } }
 window.__hdKhen = (n, l, u) => khen(n, l, u);
+if (/[?&]khenthu=1/.test(location.search)) { const ds = [['Nguyễn Lan Anh', 'big', 4], ['Minh Thư', 'share', 3], ['Hoàng Nam', 'chung', 2], ['Thu Hà', 'chung', 1]]; let i = 0; setInterval(() => { if (typeof BATDAU !== 'undefined' && BATDAU) { const d = ds[i++ % ds.length]; khen(d[0], d[1], d[2]); } }, 8000); } // 16/11: ?khenthu=1 chỉ để xem thử lời ban khen khi chưa live (tên giả, không dùng khi live)
 // ---------- Cô nói "Ta ban khen cho …" (giọng đọc tiếng Việt có sẵn trên máy) ----------
 let VOL_KHEN = .8; try { const v = parseFloat(localStorage.getItem('hd_vol_khen')); if (v >= .05 && v <= 1) VOL_KHEN = v; } catch (e) {}
 let NOI_BAT = false; /* anh Linh: tắt hẳn giọng đọc "Ta ban khen…" ở cả hai giá, chỉ hiện chữ và nhạc văn */
