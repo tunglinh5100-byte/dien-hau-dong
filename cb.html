@@ -176,8 +176,8 @@ function goTo(p, pts, then) { p.wp = pts.slice(); p.state = 'walk'; p.after = th
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
-  const id = typeof GIA === 'function' ? GIA().id : ''; if (id !== 'chaube' && id !== 'caube' || typeof s !== 'string') return s;
-  const X = id === 'caube' ? (typeof OMU !== 'undefined' && OMU ? 'Ông' : 'Cậu') : 'Chầu', x = X.toLowerCase();
+  const id = typeof GIA === 'function' ? GIA().id : ''; if (id !== 'chaube' && !laCU(id) || typeof s !== 'string') return s;
+  const X = id === 'ongmuoi' ? 'Ông' : id === 'caube' ? 'Cậu' : 'Chầu', x = X.toLowerCase();
   return s.replace(/(^|[^\p{L}])(Cô|cô|CÔ)(?![\p{L}])(?!\s+đồng)/gu, (m, a, c) => a + (c === 'cô' ? x : c === 'CÔ' ? X.toUpperCase() : X)); }
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
 function float(x, y, s, c) { S.floats.push({ x, y, s: fixXung(s), c, t: 0, life: 2 }); }
@@ -827,7 +827,7 @@ function cbHet() { // xe giá xong: giữ dáng trùm khăn, màn chuyển sang 
   const id = CB.exitTo || nextGiaId(); if (id === 'chaube') { setTimeout(() => cbReset(), 2500); return; } const g = GIA_DS.list.find(x => x.id === id) || {};
   S.cat = { t: 0, id, ten: g.ten || '', cu: !coVideoGia(id) }; }
 function cbXeGia(id) { CB.exitTo = id; const xi = CB_LICH.findIndex(l => l[0] === 'xegia'); if (CB.i < xi) cbVao(xi); }
-function coVideoGia(id) { return (id === 'ongbay' && OB.buf) || (id === 'codoi' && OC.buf) || (id === 'chaube' && CB.buf) || (id === 'caube' && typeof CU !== 'undefined' && CU.buf); }
+function coVideoGia(id) { return (id === 'ongbay' && OB.buf) || (id === 'codoi' && OC.buf) || (id === 'chaube' && CB.buf) || (laCU(id) && typeof CU !== 'undefined' && CU.buf); }
 function cbCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
   if (k === 'tien') { if (!KH.on) muaTien(220); if (CB.cur === 'tungtien') cbPlay('tungtien', 0); }
   else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CB.cueClip = c; const v = CB.v[c]; if (v) { v.loop = false; v.playbackRate = 1; } cbPlay(c, 0); if (!KH.on) setTimeout(() => { if (cbDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
@@ -890,7 +890,8 @@ function cbDraw(t, x, y, sc) {
 
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 // ---------- 16/11 thử nghiệm giá Ông Hoàng Mười (?om=1, link /om): dùng chung bộ máy giá Cậu Bé, thay clip Tú, nhạc văn Quỳnh, kịch bản Quỳnh ----------
-const OMU = /[?&]om=1/.test(location.search);
+const OMU_THU = /[?&]om=1/.test(location.search); let OMU = OMU_THU; // 16/11 chiều: Ông Hoàng Mười ghép vào /g (giá thứ 5), dùng chung bộ máy giá Cậu Bé; OMU = đang ngự giá Ông Mười
+function laCU(id) { return id === 'caube' || id === 'ongmuoi'; }
 const OM_AU_V = 2; const OM_AU = { thinh: 'om/om_01_van_thinh.mp3', thayao: 'om/om_02_nhac_thay-khan-ao.mp3', tau: 'om/om_03_nhac_tau-huong.mp3', khai: 'om/om_04_nhac_khai-quang.mp3', muaco: 'om/om_05_nhac_mua-co.mp3', tho: 'om/om_05b_nhac_ngam-tho.mp3', tuu: 'om/om_06_van_nghe-van.mp3', nghe: 'om/om_06b_van_nghe-van-2.mp3', loc: 'om/om_07_van_phat-loc.mp3', segia: 'om/om_08_van_se-gia.mp3' };
 const OM_LICH = [ // [tên bước, nhạc, từ giây, đến giây, clip, kiểu]
   ['thinh', 'thinh', 0, 17, 'thinh', 'lap', ''], ['tungkhan', 'thayao', 0, 5.4, 'tungkhan', 'vua', ''], // thỉnh, tung khăn: clip Cậu Bé (anh Linh: giống nhau, chỉ khác nhạc)
@@ -906,10 +907,10 @@ const BUOC_OM = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang
 const OM_RATE = { tauhuong: .85 };
 const OM_TF = {"thinh": [1.0, -5, 28], "thayao": [0.85, 20.0, 160.0], "tauhuong": [0.95, -2.5, 89.0], "khaiquang": [1.0, -26.0, 59.0], "muaco": [0.966, -19.1, 50.8], "ngamtho": [0.805, 38.7, 121.3], "uongruou": [0.893, 53.0, 129.6], "nghevan": [0.721, 48.2, 182.6], "phatloc": [0.72, 48.4, 176.0], "segia": [0.711, 49.3, 199.7], "tungkhan": [1.0, -5, 28]}; const OM_DEM = {"uongruou": [50, 235, 510], "nghevan": [44, 319, 558], "phatloc": [55, 300, 568], "segia": [75, 278, 542], "thinh": [79, 281, 548], "tungkhan": [79, 281, 548]}; const OM_PHONG = {}; const OM_NEM = [[3.0, 340, 310, 'tien'], [5.4, 320, 338, 'tien']]; // clip phát lộc 11:11 của Tú: Ông quay ra trao tiền 2 lần rồi quay lại
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
-const CU_TF = OMU ? OM_TF : {"thinh": [1.0, -5, 28], "thinhlap": [1.0, -5, 28], "tungkhan": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
-const CU_AU = OMU ? OM_AU : { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
+const CAU_TF = {"thinh": [1.0, -5, 28], "thinhlap": [1.0, -5, 28], "tungkhan": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
+const CAU_AU = { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
 /* trình tự theo kịch bản Quỳnh (cột nhạc văn): [tên, file nhạc, từ giây, đến giây, clip, kiểu, chữ hiện] ; kiểu: lap = lặp clip, di = lặp clip và đi xuyến qua lại trên sập, xuyen = clip Tú quay người thật (đi trái, quay qua lưng, đi phải), vai = chỉ lấy đoạn quay lưng vái lên ban công đồng, vua = kéo chậm clip cho vừa đoạn nhạc, giu = hết clip giữ dáng cuối, ngoi = hết clip lặp đoạn ngồi */
-const CU_LICH = OMU ? OM_LICH : [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
+const CAU_LICH = [ // theo kịch bản Quỳnh (cột nhạc văn) và clip Tú đã làm; [8] = [giây trong clip lúc tung, 'tien'|'qua'] để mưa lộc đúng lúc tay tung
   ['thinh', 'thinh', 0, 25, 'thinhlap', 'lap', ''], // anh Linh 14/11: suốt văn thỉnh Cậu trùm khăn đỏ lắc lư
   ['tungkhan', 'thayao', 0, 5.4, 'tungkhan', 'vua', ''], // thỉnh xong mới tung khăn – nhạc thay khăn áo vào luôn từ lúc tung khăn
   ['thayao', 'thayao', 5.4, 15.4, 'thayao', 'vua', ''], // hầu dâng thay áo
@@ -937,23 +938,27 @@ const CU_LICH = OMU ? OM_LICH : [ // theo kịch bản Quỳnh (cột nhạc vă
   ['tungloc2', 'keo', 0, 188, 'tungkeo', 'lap', '', [[5.9, 'keo'], [13.94, 'keo'], [21.98, 'keo'], [30.02, 'keo'], [38.06, 'keo'], [46.1, 'keo'], [54.14, 'keo'], [62.18, 'keo'], [70.22, 'keo'], [78.26, 'keo'], [86.3, 'keo'], [94.34, 'keo'], [102.38, 'keo'], [110.42, 'keo'], [118.46, 'keo'], [126.5, 'keo'], [134.54, 'keo'], [142.58, 'keo'], [150.62, 'keo'], [158.66, 'keo'], [166.7, 'keo'], [174.74, 'keo'], [182.78, 'keo']]], // clip 12 mới, tung kẹo giây 5,9 mỗi vòng
   ['segia0', 'segia', 0, 42, 'ngoinghe', 'lap', ''], // nghe văn se giá: Cậu ngồi quay lưng lắc lư
   ['xegia', 'segia', 42, 57.05, 'segia', 'vua', '']];  // 18:09 (giây 44 nhạc se giá) Cậu trùm khăn se giá – clip 13 của Tú
-const CU_RATE = OMU ? OM_RATE : { ngoinghe: .45, antoa: .5, muaheo: .7 }; // 14/11 anh Linh: chậm lại bằng tốc độ phát (không nội suy khung hình, giữ hình nét)
+const CAU_RATE = { ngoinghe: .45, antoa: .5, muaheo: .7 }; // 14/11 anh Linh: chậm lại bằng tốc độ phát (không nội suy khung hình, giữ hình nét)
 const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
 (function cuInit() {
   if (/[?&]cb=0/.test(location.search)) return;
-  CU.buf = document.createElement('canvas'); CU.buf.width = CV_W; CU.buf.height = CV_H;
-  Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
+  CU.buf = document.createElement('canvas'); CU.buf.width = CV_W; CU.buf.height = CV_H; CU.vCau = {}; CU.vOm = {};
+  [false, true].forEach(om => { const tf = om ? OM_TF : CAU_TF, dich = om ? CU.vOm : CU.vCau; if (OMU_THU && !om) return;
+    Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (OMU ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : (n === 'muaco' || n === 'ngamtho') ? 'om/om-' + n + '.mp4?v=3' : 'om/om-' + n + '.mp4?v=5') : 'cu-' + n + '.mp4?v=16f3'), 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + ((n === 'muaco' || n === 'ngamtho') ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+  CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
-const CU_DEM = OMU ? OM_DEM : { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
+const CAU_DEM = { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
 const CU_TO = +(new URLSearchParams(location.search).get('to') || 1.3); function cuPhong(n) { if (OMU) return (OM_PHONG[n] || 1) * CU_TO; return (/^(thinh|thinhlap|tungkhan)$/.test(n) ? 1 : /^(khaiquang|muaheo)$/.test(n) ? .9 : 1.13) * CU_TO; } // đứng (khai quang, múa hèo): nhỏ hơn chút cho đầu không lấp sau bảng // 14/11 10:26 anh Linh: nhân vật to như giá đang hầu trên /g (?to= để thử cỡ) // anh Linh 14/11: Cậu nhỏ hơn các giá khác -> phóng 1,13 (thỉnh có khăn trùm đã to sẵn)
-const CU_DAU = OMU ? {} : { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 170, tungkeo: 172, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
+const CAU_DAU = { thinh: 162, thinhlap: 162, tungkhan: 140, thayao: 144, ngoinghe: 121, segia: 121, muaheo: 95, heolung: 153, antoa: 226, tungtien: 170, tungkeo: 172, camhuong: 203, chaylen: 153, luilen: 148, khaiquang: 120 }; // đỉnh đầu Cậu trong khung clip 360x640
+let CU_TF = CAU_TF, CU_AU = CAU_AU, CU_LICH = CAU_LICH, CU_RATE = CAU_RATE, CU_DEM = CAU_DEM, CU_DAU = CAU_DAU;
+function cuCfg(om) { if (om === OMU && CU.v === (om ? CU.vOm : CU.vCau)) return; const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} OMU = om; CU_TF = om ? OM_TF : CAU_TF; CU_AU = om ? OM_AU : CAU_AU; CU_LICH = om ? OM_LICH : CAU_LICH; CU_RATE = om ? OM_RATE : CAU_RATE; CU_DEM = om ? OM_DEM : CAU_DEM; CU_DAU = om ? {} : CAU_DAU; BUOC_CU = om ? BUOC_OM : BUOC_CAU; CU.v = om ? CU.vOm : CU.vCau; CU.cur = null; CU.ok = false; CU.auKey = null; try { CU.au.pause(); } catch (e) {} }
 function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], k = CV_K * sc * cuPhong(n), top = CU_DAU[n] != null ? CU_DAU[n] : 150; return [CO.x, CO.y + k * (tf[2] + tf[0] * top - CV_FY)]; } // toạ độ đỉnh đầu Cậu (thế giới)
-function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
-function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
+function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && laCU(GIA().id); }
+function cuReset() { if (!CU.buf) return; cuCfg(GIA().id === 'ongmuoi'); CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; v.__want = from || 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
 function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + (OMU ? '?v=' + OM_AU_V : '?v=2'); CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L[7] && L[7][0] ? L[7][0][1] : null; CU.kbPrev = null; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
@@ -966,7 +971,7 @@ function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L
 function cuTiep() { if (CU.i + 1 < CU_LICH.length) { cuVao(CU.i + 1); return; } cuHet(); }
 function cuHet() { // xe giá xong: giữ dáng trùm khăn, màn chuyển sang giá tiếp
   if (CU.hold) return; CU.hold = true; try { CU.au.pause(); } catch (e) {} const v = CU.v[CU.cur]; if (v) try { v.pause(); } catch (e) {}
-  const id = CU.exitTo || nextGiaId(); if (id === 'caube') { setTimeout(() => cuReset(), 2500); return; } const g = GIA_DS.list.find(x => x.id === id) || {};
+  const id = CU.exitTo || nextGiaId(); if (id === GIA().id) { setTimeout(() => cuReset(), 2500); return; } const g = GIA_DS.list.find(x => x.id === id) || {};
   S.cat = { t: 0, id, ten: g.ten || '', cu: !coVideoGia(id) }; }
 function cuXeGia(id) { CU.exitTo = id; const xi = CU_LICH.findIndex(l => l[0] === 'xegia'); if (CU.i < xi) cuVao(xi); }
 function cuCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
@@ -988,6 +993,7 @@ function cuViTri(dt) {
   const k = Math.min(1, dt * sp); CO.x += (tx - CO.x) * k; CO.y += (ty - CO.y) * k; CO.tx = CO.x; CO.ty = CO.y;
   CU.fl = (CU.fl == null ? CU.dir : CU.fl) + (CU.dir - (CU.fl == null ? CU.dir : CU.fl)) * Math.min(1, dt * 7); }
 function cuStep(dt) {
+  if (cuDangLe() && (GIA().id === 'ongmuoi') !== OMU) { cuCfg(GIA().id === 'ongmuoi'); CU.i = 0; CU.hold = false; }
   if (!cuDangLe() || S.chuyen) { const v = CU.v[CU.cur]; if (v && !v.paused) try { v.pause(); } catch (e) {} if (CU.au && !CU.au.paused && !cuDangLe()) try { CU.au.pause(); } catch (e) {} return false; }
   if (!CU.cur && !CU.hold) cuVao(CU.i || 0);
   CO.giving = null; CO.giveT = Math.max(CO.giveT || 0, 6); S.loc = null; S.locQ = false;
@@ -1056,7 +1062,7 @@ function drawCo(t) {
   if (laOng() && obDraw(t, x, y, sc)) return;
   if (GIA().id === 'codoi' && ocDraw(t, x, y, sc)) return;
   if (GIA().id === 'chaube' && cbDraw(t, x, y, sc)) return;
-  if (GIA().id === 'caube' && cuDraw(t, x, y, sc)) return;
+  if (laCU(GIA().id) && cuDraw(t, x, y, sc)) return;
   if (GIA().id === 'codoi' && !(CO.sit > .05) && coVideoReady()) { drawCoVideo(t, x, y, sc); return; }
   // turning: squash through the side when switching between back and diagonal-front
   const turn = Math.abs(CO.down - .5) * 2; // 1 at ends, 0 mid-turn
@@ -1344,7 +1350,7 @@ const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new
 // ---------- 15/11 khung phẳng: che ngoài khung, viền vàng, lộc bay ra khỏi khung ----------
 function khMask(T0) { ctx.save(); ctx.setTransform(T0); const B = KH.BY, R = KH.R; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.roundRect(0, -R * 2, W, B + R * 2, R); ctx.fillStyle = '#000'; ctx.fill('evenodd');
   const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#9a6a22'); g.addColorStop(.5, '#ffe08a'); g.addColorStop(1, '#9a6a22'); ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(1.5, -R * 2, W - 3, B + R * 2 + 1.5, R); ctx.stroke(); ctx.restore(); }
-function khTay() { const id = GIA().id; let x = CO.x + 22, y = CO.y - 120; if (id === 'caube') { x = CO.x + 30; y = CO.y - 110; } else if (id === 'codoi') { x = CO.x - 10; y = CO.y - 150; } return camMap(x, y); }
+function khTay() { const id = GIA().id; let x = CO.x + 22, y = CO.y - 120; if (laCU(id)) { x = CO.x + 30; y = CO.y - 110; } else if (id === 'codoi') { x = CO.x - 10; y = CO.y - 150; } return camMap(x, y); }
 function matDiem(mat, bx, by) { if (!mat || !KH.T0) return null; const P = mat.transformPoint(new DOMPoint(bx, by)), Q = KH.T0.inverse().transformPoint(P); return [Q.x, Q.y, Math.hypot(mat.a, mat.b) / Math.hypot(KH.T0.a, KH.T0.b)]; } // điểm trong khung clip 360x640 -> màn hình
 const LOC_KIND = { tien: () => 'tien', hoa: () => 'img:hoa-hong', qua: () => 'img:qua', keo: () => 'img:keo-mut' };
 // 15/11: lộc bay ra khỏi khung đúng lúc tay tung trong clip: [giây trong clip, x, y (khung 360x640), loại lộc]
@@ -1355,7 +1361,7 @@ function vaiDongBo(ctl, ten, v) { const L = VAI_TG[ctl] && VAI_TG[ctl][ten]; if 
   L.forEach(t0 => { if ((pt < t0 && ct >= t0)) { if (!S.sound) return; const a = CHIENG[CHIENG_I++ % CHIENG.length]; try { a.currentTime = 0; a.volume = 1; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } }); }
 // 16/11 anh Linh: mỗi lần tay tung trong clip là một đợt lộc; lộc bay nối đuôi thành một hàng uốn lượn, to dần ra phía người xem, rồi bay vào một điểm ở nền đen bên dưới, hiện "+500.000"
 // [giây trong clip, x, y (khung 360x640), loại lộc] – đo từ từng khung hình clip của Tú
-const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], ...(typeof OMU !== 'undefined' && OMU ? { phatloc: OM_NEM } : {}) }, ob: { loc: [[2.6, 270, 372, 'tien']] } };
+const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], phatloc: OM_NEM }, ob: { loc: [[2.6, 270, 372, 'tien']] } };
 const KH_DICH = () => [W / 2, H - 70]; // điểm lộc bay vào (nền đen dưới khung)
 const LOC_CONG = { tien: '+500.000', hoa: '+1', qua: '+1', keo: '+1' }; // 16/11: lộc không phải tiền thì +1
 const LOI_LOC = { tien: 'Ta ban cho con [tên] tiền bạc đầy kho', hoa: 'Ta ban cho con [tên] lộc hoa tươi thắm', qua: 'Ta ban cho con [tên] lộc quả ngọt lành', keo: 'Ta ban cho con [tên] lộc ngọt bình an' };
@@ -1482,8 +1488,9 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   let luu = null, cu = null; try { luu = JSON.parse(localStorage.getItem('hd_gia_live4') || 'null'); } catch (e) {} try { cu = JSON.parse(localStorage.getItem('hd_gia_codoi') || 'null'); } catch (e) {}
   const it = (luu && luu.items) || {};
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
-  const ds = [Object.assign(CHAU_BE, { id: 'chaube', hang: 'co' }), Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), { id: 'caube', ten: OMU ? 'Ông Hoàng Mười' : 'Cậu Bé Bản Đền', hang: 'cau', ao: '#1f7a4e', vay: '#f3efe6', khan: '#1f7a4e', vienKhan: '#e8c040', dai: '#d6457f', congCu: 'quat', tim: 'tien', coNhac: false }] /* 14/11 anh Linh: Chầu Bé → Ông Hoàng Bảy → Cô Đôi → Cậu Bé */; /* link thử: thêm Chầu Bé Bắc Lệ */ // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
-  if (OMU) ds.splice(0, ds.length - 1); /* 16/11: link thử Ông Hoàng Mười chỉ chạy một giá */
+  const ds = [Object.assign(CHAU_BE, { id: 'chaube', hang: 'co' }), Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), { id: 'caube', ten: 'Cậu Bé Bản Đền', hang: 'cau', ao: '#1f7a4e', vay: '#f3efe6', khan: '#1f7a4e', vienKhan: '#e8c040', dai: '#d6457f', congCu: 'quat', tim: 'tien', coNhac: false }] /* 14/11 anh Linh: Chầu Bé → Ông Hoàng Bảy → Cô Đôi → Cậu Bé */; /* link thử: thêm Chầu Bé Bắc Lệ */ // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
+  ds.push({ id: 'ongmuoi', ten: 'Ông Hoàng Mười', hang: 'cau', ao: '#e2b53a', vay: '#e2b53a', khan: '#d9a520', vienKhan: '#c62a22', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 16/11 chiều anh Linh: ghép giá Ông Hoàng Mười sau Cậu Bé */
+  if (OMU_THU) ds.splice(0, ds.length - 1); /* link thử /om-thu: chỉ một giá */
   const qg = new URLSearchParams(location.search).get('gia'); // ?gia=cobo|codoi|ongbay: mở thẳng giá đó
   const qd = new URLSearchParams(location.search).get('dau'); /* ?dau=codoi|ongbay: mở giá đó trước, vẫn chuyển giá được */ GIA_DS = { active: ds.some(g => g.id === qg) ? qg : ds.some(g => g.id === qd) ? qd : ds[0].id, list: ds }; /* 14/11 anh Linh: mở trang luôn bắt đầu từ giá đầu tiên (Chầu Bé), không nhớ giá đang dở */ if (qd) { /* 15/11: cả /tn cũng xoá ?dau khỏi địa chỉ, F5 luôn bắt đầu từ Chầu Bé */ try { const u = new URL(location.href); u.searchParams.delete('dau'); history.replaceState(null, '', u); } catch (e) {} } /* link /g: bỏ ?dau khỏi thanh địa chỉ, F5 luôn về Chầu Bé */ window.KHOA_GIA = ds.some(g => g.id === qg) ? qg : null; try { napVideo(); } catch (e) {} } // ?gia=...: máy này chỉ live đúng giá đó, không chuyển giá
 // phát đoạn văn trong file van36.mp3 (văn thỉnh, xe loan) — nhạc giá tạm nhỏ lại
@@ -1500,7 +1507,7 @@ function giaDur() { const g = GIA(); return g.hang === 'mau' ? 75 : 360; }
 function GIA() { if (typeof S !== 'undefined' && S.chuyen && S.chuyen.look) return S.chuyen.look; return GIA_DS.list.find(g => g.id === GIA_DS.active) || GIA_DS.list[0] || GIA_MAC_DINH; }
 function luuGia() { try { const items = {}; GIA_DS.list.forEach(g => { items[g.id] = g; }); localStorage.setItem('hd_gia_live4', JSON.stringify({ active: GIA_DS.active, items })); } catch (e) {} }
 function laOng() { const c = typeof S !== 'undefined' && S.chuyen; if (c && c.t >= CG.thinh) return c.toId === 'ongbay'; return GIA().id === 'ongbay'; } // từ lúc thỉnh: con nhang xưng theo giá đang thỉnh
-function xung() { return laOng() ? 'ông' : GIA().id === 'chaube' ? 'Chầu' : GIA().id === 'caube' ? 'Cậu' : 'cô'; }
+function xung() { return laOng() ? 'ông' : GIA().id === 'chaube' ? 'Chầu' : GIA().id === 'caube' ? 'Cậu' : GIA().id === 'ongmuoi' ? 'Ông' : 'cô'; }
 function ongNgoi() { return laOng() && S.ob && S.ob.ph === 'ngoi' && !S.loc; }
 // nhạc văn của từng giá lưu trong IndexedDB (file âm thanh anh chọn)
 function idb() { return new Promise((ok, no) => { try { const r = indexedDB.open('hau-dong', 1); r.onupgradeneeded = () => r.result.createObjectStore('nhac'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } }); }
@@ -1642,7 +1649,7 @@ function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
 function dauHinh() { const id = GIA().id; let c = null;
-  if (id === 'chaube' && typeof CB !== 'undefined' && CB.ok && CB.buf) c = CB; else if (id === 'caube' && typeof CU !== 'undefined' && CU.ok && CU.buf) c = CU; else if (id === 'ongbay' && typeof OB !== 'undefined' && OB.ok && OB.buf) c = OB; else if (id === 'codoi' && typeof OC !== 'undefined' && OC.ok && OC.cur && OC.buf) c = OC;
+  if (id === 'chaube' && typeof CB !== 'undefined' && CB.ok && CB.buf) c = CB; else if (laCU(id) && typeof CU !== 'undefined' && CU.ok && CU.buf) c = CU; else if (id === 'ongbay' && typeof OB !== 'undefined' && OB.ok && OB.buf) c = OB; else if (id === 'codoi' && typeof OC !== 'undefined' && OC.ok && OC.cur && OC.buf) c = OC;
   if (!c || !c.mat || !KH.T0) return null; const now = performance.now(); if (now - DAU.t < 250 && DAU.c === c && DAU.r) return DAU.r; DAU.t = now; DAU.c = c;
   try { if (!DAU.cv) { DAU.cv = document.createElement('canvas'); DAU.cv.width = 45; DAU.cv.height = 80; } const g = DAU.cv.getContext('2d', { willReadFrequently: true }); g.clearRect(0, 0, 45, 80); g.drawImage(c.buf, 0, 0, 45, 80); const d = g.getImageData(0, 0, 45, 80).data;
     let ty = -1, by = -1; for (let y = 0; y < 80; y++) { let n = 0; for (let x = 0; x < 45; x++) if (d[(y * 45 + x) * 4 + 3] > 100) n++; if (n >= 2) { if (ty < 0) ty = y; by = y; } } if (ty < 0) return DAU.r = null;
@@ -1660,13 +1667,13 @@ function drawKhen() {
     if (tip > top + h + 2) { const tx = clamp(dh[0], x - w / 2 + 16, x + w / 2 - 16); ctx.beginPath(); ctx.moveTo(tx - 7, top + h - 1); ctx.lineTo(tx, Math.min(tip, top + h + 9)); ctx.lineTo(tx + 7, top + h - 1); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill(); }
     text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); { ctx.save(); ctx.shadowColor = 'rgba(255,215,90,.95)'; ctx.shadowBlur = 10; text(nm, x, top + 31, 16, '#ffe9a0', { f: SERIF, w: 900 }); ctx.restore(); ctx.font = `900 16px ${SERIF}`; const nw = Math.min(w - 20, ctx.measureText(nm).width); ctx.fillStyle = 'rgba(255,215,90,.8)'; ctx.fillRect(x - nw / 2, top + 40, nw, 1.5); } /* 16/11: làm nổi tên người được ban khen */ if (sau) text(sau, x, top + 52, 12, '#f6dc96', { f: SERIF, w: 700 });
     ctx.restore(); return; }
-  const dau0 = GIA().id === 'caube' && typeof CU !== 'undefined' && CU.buf ? cuDauY(sc) : null; // Cậu: khung lời ban khen sát đầu, đi theo Cậu như đang nói
+  const dau0 = laCU(GIA().id) && typeof CU !== 'undefined' && CU.buf ? cuDauY(sc) : null; // Cậu: khung lời ban khen sát đầu, đi theo Cậu như đang nói
   if (dau0) { const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(dau0[0], w / 2 + SAFE_X, W - SAFE_X - w / 2), tip = dau0[1] - 4, top = tip - 10 - h;
     rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
     const tx = clamp(dau0[0], x - w / 2 + 16, x + w / 2 - 16); ctx.beginPath(); ctx.moveTo(tx - 7, top + h - 1); ctx.lineTo(dau0[0], tip); ctx.lineTo(tx + 7, top + h - 1); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
     text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 }); if (sau) text(sau, x, top + 49, 12, '#f6dc96', { f: SERIF, w: 700 });
     ctx.restore(); return; }
-  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, w / 2 + SAFE_X, (GIA().id === 'chaube' || GIA().id === 'caube' ? W - SAFE_X - 185 : 540 - SAFE_X) - w / 2) /* Chầu Bé: không đè lên bảng sự tích bên phải */, y = CO.y - (GIA().id === 'caube' ? 300 : GIA().id === 'chaube' && CB.buf ? (CB_LICH[CB.i] && ['vengoi', 'banloc', 'xegia', 'thinh', 'tungkhan', 'thayao'].includes(CB_LICH[CB.i][0]) ? 252 : 300) : GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 200 : 232) * sc, /* 14/11: Ông ngồi – khung sát đầu, không bật lên góc */ /* phóng to sập thì đẩy khung lên cao theo */ /* Chầu Bé: khung ban khen cao qua đầu, không che mặt chầu */ top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
+  const w = Math.max(w1, w2, w3, 110) + 30, h = sau ? 62 : 44, x = clamp(CO.x, w / 2 + SAFE_X, (GIA().id === 'chaube' || laCU(GIA().id) ? W - SAFE_X - 185 : 540 - SAFE_X) - w / 2) /* Chầu Bé: không đè lên bảng sự tích bên phải */, y = CO.y - (laCU(GIA().id) ? 300 : GIA().id === 'chaube' && CB.buf ? (CB_LICH[CB.i] && ['vengoi', 'banloc', 'xegia', 'thinh', 'tungkhan', 'thayao'].includes(CB_LICH[CB.i][0]) ? 252 : 300) : GIA().id === 'codoi' && coBufOk && !coVidErr ? 286 : laOng() && OB.buf ? 200 : 232) * sc, /* 14/11: Ông ngồi – khung sát đầu, không bật lên góc */ /* phóng to sập thì đẩy khung lên cao theo */ /* Chầu Bé: khung ban khen cao qua đầu, không che mặt chầu */ top = y + 18 - h; /* Ông: khung ban khen đặt cao hơn đầu ông */
   rr(x - w / 2, top, w, h, 12, 'rgba(142,33,28,.96)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 7, y + 17); ctx.lineTo(x, y + 27); ctx.lineTo(x + 7, y + 17); ctx.fillStyle = 'rgba(142,33,28,.96)'; ctx.fill();
   text(dau, x, top + 13, 10.5, '#f2cf72', { f: SERIF, w: 700 }); text(nm, x, top + 31, 14, '#fff6d6', { f: SERIF, w: 800 });
@@ -2000,9 +2007,9 @@ const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const tt = !!buocGia(), X = tt || GIA().id === 'chaube' || GIA().id === 'caube' ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 237 : 192, Wd = 150, cx = X + Wd / 2, h = tt ? 145 : 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
+  const tt = !!buocGia(), X = tt || GIA().id === 'chaube' || laCU(GIA().id) ? W - 2 * SAFE_X - 150 - 8 : 8, Y = tt ? 237 : 192, Wd = 150, cx = X + Wd / 2, h = tt ? 145 : 128, BY = Y + 26, BH = h - 32, LH = 12.5; // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
-  const g0 = GIA(), g = { id: OMU && g0.id === 'caube' ? 'ongmuoi' : g0.id, ten: g0.ten }, BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam Tứ Phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
+  const g0 = GIA(), g = { id: g0.id, ten: g0.ten }, BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam Tứ Phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + 14, ctx.measureText(ten).width > 136 ? 8.6 : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id) { const B = window.BANG_TIN || {}; ctx.font = `600 9.5px ${UI}`; TICH.lines = [];
     (B[g.id] && B[g.id].length ? B[g.id] : (B.chung || [])).forEach((para, k) => { if (k) TICH.lines.push(''); wrapTxt('✦ ' + para, 134).forEach(l => TICH.lines.push(l)); });
     if (B['nguon_' + g.id] || B.nguon) { TICH.lines.push(''); ctx.font = `italic 600 9px ${SERIF}`; wrapTxt('Nguồn: ' + (B['nguon_' + g.id] || B.nguon), 134).forEach(l => TICH.lines.push('\u0001' + l)); }
@@ -2122,7 +2129,7 @@ function drawOverlay(t) {
     rr(8, 516, 150, 46, 10, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(8, 516, 150, 46, 10); ctx.stroke();
     text(laOng() ? '☕ Ly cà phê đã đầy' : (!S.auto && !S.real && GIA().id === 'codoi') ? '✿ Cô ban lộc' : '♥ Bình đã đầy ' + S.goal + ' tim', 83, 532, 12, '#fff6d6', { f: SERIF, w: 800 }); text((laOng() ? 'ông ban lộc cho các con nhang' : 'cô phát lộc cho các con nhang'), 83, 550, 9.5, '#f6dc96', { f: SERIF, w: 700 }); ctx.restore(); }
   ctx.restore();
-  if (S.banner && GIA().id !== 'chaube' && GIA().id !== 'caube') { const b = S.banner, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `800 13px ${SERIF}`; const w = Math.min(500, ctx.measureText(b.text).width + 40);
+  if (S.banner && GIA().id !== 'chaube' && !laCU(GIA().id)) { const b = S.banner, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `800 13px ${SERIF}`; const w = Math.min(500, ctx.measureText(b.text).width + 40);
     const by = typeof buocGia === 'function' && buocGia() ? 392 : 346; /* 14/11: có thanh tiến trình thì dòng chữ xuống dưới hai bảng, không đè */ rr(270 - w / 2, by, w, 34, 17, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(270 - w / 2, by, w, 34, 17); ctx.stroke(); text(b.text, 270, by + 18, 13, '#f6dc96', { f: SERIF, w: 800 }); ctx.restore(); }
 }
 
@@ -2426,7 +2433,7 @@ function nhacPhai() { // true: phải có nhạc giá; false: phải im; null: �
   if (S.chuyen) return null;
   const id = GIA().id;
   if (id === 'chaube' && typeof CB !== 'undefined' && CB.buf) return false;
-  if (id === 'caube' && typeof CU !== 'undefined' && CU.buf) return false; // Cậu Bé: chưa có nhạc văn, im // Chầu Bé: nhạc văn riêng theo kịch bản (CB.au), nhạc giá chung im
+  if (laCU(id) && typeof CU !== 'undefined' && CU.buf) return false; // Cậu Bé: chưa có nhạc văn, im // Chầu Bé: nhạc văn riêng theo kịch bản (CB.au), nhạc giá chung im
   if (id === 'codoi' && typeof OC !== 'undefined' && OC.buf) { if (OC.exit || OC.hold) return false; if (OC.intro && !OC.vanXong) return false; }
   if (id === 'ongbay' && typeof OB !== 'undefined' && OB.buf) { if (OB.intro || OB.exit || OB.hold) return false; if (OB.tau && (OB.cur !== 'tauhuong' || OB.tauCho)) return false; }
   return true;
@@ -2505,7 +2512,8 @@ function drawBuoc() { if (!BUOC_ON || S.cat) return; const cur = buocOng(); if (
     const w1 = wd(p, i); ctx.fillStyle = i === cur ? '#ffd76a' : i < cur ? 'rgba(246,233,214,.45)' : 'rgba(246,233,214,.82)'; ctx.fillText(p, x, y0 + h / 2 + .5); x += w1; });
   ctx.restore(); }
 /* Thanh tiến trình các bước trong giá (anh Linh 14/11): dải sơn son thếp vàng, mỗi bước một đóa sen nhỏ */
-const BUOC_CU = OMU ? BUOC_OM : ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+const BUOC_CAU = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa hèo', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
+let BUOC_CU = OMU ? BUOC_OM : BUOC_CAU;
 const BUOC_CO = ['Thỉnh mời', 'Thay khăn áo', 'Múa', 'Phát lộc', 'Xe giá'];
 const BUOC_CB = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Múa', 'Tung lộc', 'Ngự tửu', 'Ban lộc', 'Xe giá'];
 function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước, bước hiện tại]
@@ -2577,9 +2585,9 @@ function nenLap(now) { const dt = Math.min(.1, (now - (nenLast || now)) / 1000);
   ov.innerHTML = '<div style="max-width:min(560px,90vw);font-size:15px;line-height:1.55;color:#f6e9d6"><div style="font-size:17px;font-weight:800;color:#ffd76a">Live diễn xướng tái hiện các giá hầu bằng AI</div><div>Thời gian: hằng ngày 11h30</div><div style="margin-top:8px;font-weight:700;color:#ffb38a">KHÔNG nhận quà<br>KHÔNG nhận xem bói<br>KHÔNG tương tác về các vấn đề tâm linh</div><div style="margin-top:8px;font-style:italic;color:rgba(246,233,214,.85)">Tôi làm công ty về SmartLocker IoT ADELA, yêu thích Đạo Mẫu và công nghệ nên kết hợp cả hai, để mọi người biết tới tín ngưỡng thờ Mẫu nhiều hơn.</div><div style="margin-top:12px;padding:8px 14px;border:1px solid #e6b552;border-radius:20px;display:inline-block;color:#fff2c4">🎧 Mời quý vị đeo tai nghe để nghe văn hầu rõ và hay hơn</div></div><div id="ctTxt" style="font-size:16px;color:#f6e9d6">Đang tải video các giá…</div><div style="width:min(420px,80vw);height:14px;border:1px solid #e6b552;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.4)"><div id="ctBar" style="height:100%;width:0;background:linear-gradient(90deg,#b8862e,#ffd76a)"></div></div><div id="ctMb" style="font-size:13px;color:#e6b552"></div><button id="ctGo" disabled style="margin-top:8px;font:800 20px \'Noto Serif\',Georgia,serif;padding:14px 34px;border-radius:30px;border:2px solid #e6b552;background:#8e211c;color:#fff2c4;opacity:.45;cursor:pointer">🪷 Bắt đầu canh đàn</button><a id="ctSkip" href="#" style="font-size:12px;color:rgba(246,233,214,.6)">Vào luôn, không chờ tải (dùng khi sửa trên điện thoại)</a>';
   document.body.appendChild(ov);
   const im = setInterval(() => { if (BATDAU) return clearInterval(im); try { [CB.au, CU.au, VAN_AU, bgm].forEach(a => { if (a && !a.paused) a.pause(); }); } catch (e) {} }, 200); // đang tải: im tiếng
-  const go = () => { BATDAU = true; window.__dangTai = false; try { if (GIA().id === 'chaube') cbReset(); else if (GIA().id === 'caube') cuReset(); } catch (e) {} try { napVideo(); } catch (e) {} last = performance.now(); ov.remove(); try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} };
+  const go = () => { BATDAU = true; window.__dangTai = false; try { if (GIA().id === 'chaube') cbReset(); else if (laCU(GIA().id)) cuReset(); } catch (e) {} try { napVideo(); } catch (e) {} last = performance.now(); ov.remove(); try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} };
   document.getElementById('ctGo').onclick = go; document.getElementById('ctSkip').onclick = (e) => { e.preventDefault(); go(); };
-  setTimeout(() => { const vs = [...CV_HOLD.querySelectorAll('video')]; const ds = vs.filter(v => !OMU || v._gia === 'caube').map(v => ({ v, url: v._src || v.getAttribute('src') })).filter(x => x.url && !/^blob:/.test(x.url)); /* link thử Ông Hoàng Mười: chỉ tải clip giá này */
+  setTimeout(() => { const vs = [...CV_HOLD.querySelectorAll('video')]; const ds = vs.filter(v => !OMU_THU || v._gia === 'ongmuoi').map(v => ({ v, url: v._src || v.getAttribute('src') })).filter(x => x.url && !/^blob:/.test(x.url)); /* link thử Ông Hoàng Mười: chỉ tải clip giá này */
     let xong = 0, byt = 0, loi = 0; const tong = ds.length, txt = document.getElementById('ctTxt'), bar = document.getElementById('ctBar'), mb = document.getElementById('ctMb'), btn = document.getElementById('ctGo');
     const ve = () => { if (!txt) return; bar.style.width = (tong ? 100 * xong / tong : 100) + '%'; txt.textContent = xong < tong ? 'Đang tải video các giá: ' + xong + '/' + tong : (loi ? 'Đã tải xong (' + loi + ' video lỗi, sẽ tải lại khi phát)' : 'Đã tải xong tất cả ' + tong + ' video'); mb.textContent = (byt / 1e6).toFixed(1) + ' MB'; if (xong >= tong) { btn.disabled = false; btn.style.opacity = 1; const dt_ = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); if (dt_ && !ve.dem) { ve.dem = -1; txt.textContent = 'Đã tải xong · chạm nút Bắt đầu để có tiếng và hình chạy (điện thoại)'; } /* 15/11: điện thoại phải chạm thì mới cho phát tiếng, video */ if (!ve.dem && !/[?&]tu=0/.test(location.search)) { ve.dem = 3; const dm = setInterval(() => { if (BATDAU) return clearInterval(dm); if (ve.dem <= 0) { clearInterval(dm); go(); return; } txt.textContent = 'Đã tải xong · tự bắt đầu canh đàn sau ' + ve.dem + ' giây'; ve.dem--; }, 1000); } } }; // 14/11 anh Linh: F5 không cần bấm, tải xong tự bắt đầu
     let i = 0; const chay = async () => { while (i < ds.length && !BATDAU) { const d = ds[i++]; try { let cc = null; try { cc = await caches.open('dienhau-video'); } catch (e) {} const daCo = cc && await cc.match(d.url); const r = daCo || await fetch(d.url); if (cc && !daCo && r.ok) { try { await cc.put(d.url, r.clone()); } catch (e) {} } const rd = r.body.getReader(), ch = []; for (;;) { const { done, value } = await rd.read(); if (done) break; ch.push(value); byt += value.length; ve(); } if (!BATDAU) { d.v._src = URL.createObjectURL(new Blob(ch, { type: 'video/mp4' })); if (!MOBI) d.v.src = d.v._src; d.v.preload = 'auto'; } } catch (e) { loi++; } xong++; ve(); } };
@@ -2590,7 +2598,7 @@ function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung khôn
   requestAnimationFrame(frame);
   if (!BATDAU) { last = now; return; }
   try { nenLap(now); } catch (e) {}
-  try { const g = GIA().id; if (g !== 'caube' && CU.au && !CU.au.paused) CU.au.pause(); if (g !== 'chaube' && CB.au && !CB.au.paused) CB.au.pause(); } catch (e) {} // 14/11: hết giá thì tắt hẳn nhạc giá đó, không lẫn sang giá sau // chờ tải xong, anh bấm Bắt đầu canh đàn
+  try { const g = GIA().id; if (!laCU(g) && CU.au && !CU.au.paused) CU.au.pause(); if (g !== 'chaube' && CB.au && !CB.au.paused) CB.au.pause(); } catch (e) {} // 14/11: hết giá thì tắt hẳn nhạc giá đó, không lẫn sang giá sau // chờ tải xong, anh bấm Bắt đầu canh đàn
   try { if (GIA().id !== 'codoi' || OC.intro || OC.exit || OC.hold || S.chuyen) [...CV_DANCE.map(n => CV[n]), ...Object.values(CVF), CVW].forEach(v => { if (v && !v.paused) v.pause(); }); } catch (e) {} // 15/11: video múa Cô Đôi cũ không chạy ngầm ở giá khác (iPhone thiếu bộ giải mã)
   if (FMIN && now - last < FMIN) return;
   lastRun = performance.now();
@@ -2604,7 +2612,7 @@ window.addEventListener('error', e => { DBG_ERR = String(e.message || e).slice(0
 function drawDbg() { if (!DBG) return; const vv = v => v ? (v.paused ? 'P' : '▶') + v.readyState + ' ' + (v.currentTime || 0).toFixed(1) + (v.error ? ' E' + v.error.code : '') : '-'; let l = [];
   try { const g = GIA().id; l.push('giá ' + g + ' · tải lần ' + DBG_N + ' · bắt đầu ' + (BATDAU ? 1 : 0) + ' · iOSvol ' + (IOS_VOL ? 1 : 0));
     if (g === 'chaube') l.push('CB ' + ((CB_LICH[CB.i] || [''])[0]) + ' t' + CB.t.toFixed(1) + ' lap' + CB.lap + ' clip ' + CB.cur + ' ' + vv(CB.v[CB.cur]) + ' | au ' + CB.auKey + ' ' + vv(CB.au));
-    if (g === 'caube') l.push('CU ' + ((CU_LICH[CU.i] || [''])[0]) + ' t' + CU.t.toFixed(1) + ' clip ' + CU.cur + ' ' + vv(CU.v[CU.cur]) + ' | au ' + CU.auKey + ' ' + vv(CU.au));
+    if (laCU(g)) l.push('CU ' + ((CU_LICH[CU.i] || [''])[0]) + ' t' + CU.t.toFixed(1) + ' clip ' + CU.cur + ' ' + vv(CU.v[CU.cur]) + ' | au ' + CU.auKey + ' ' + vv(CU.au));
     if (g === 'ongbay') l.push('OB ' + OB.cur + ' ' + vv(OB.v[OB.cur]));
     if (g === 'codoi') l.push('OC ' + OC.cur + ' ' + vv(OC.v[OC.cur]));
     l.push('vsrc ' + [...document.querySelectorAll('video')].filter(x => x.getAttribute('src')).length + ' mobi ' + (MOBI ? 1 : 0)); l.push('bgm ' + vv(bgm) + ' van ' + vv(VAN_AU) + ' nen ' + vv(NEN)); if (DBG_ERR) l.push('lỗi: ' + DBG_ERR); } catch (e) { l.push('dbg ' + e.message); }
@@ -2672,7 +2680,7 @@ function ddUpd(dt) {
 window.__hdDD = ddSet;
 // trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
 (function amMoKhoa() {
-  const mo = () => { try { if (BATDAU) { [CB.au, CU.au].forEach(a => { if (a && a.paused && a.src && !a.ended && ((a === CB.au && cbDangLe()) || (a === CU.au && GIA().id === 'caube'))) { const p = a.play(); if (p && p.catch) p.catch(() => {}); } }); [CB.v[CB.cur], CU.v[CU.cur], OB.v[OB.cur], OC.v[OC.cur]].forEach(v => { if (v && v.paused && !v.ended) cvPlay(v); }); } } catch (e) {} /* 15/11: chạm màn hình thì phát lại nhạc giá, clip đang dở (iPhone chặn tự phát) */ try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { [[bgm, () => !nhacPhai()], [VAN_AU, () => !VAN_STOP], [VAN_OB_AO, () => !(OB.van2 && !OB.van2Xong)], [KET_AU, () => !S.ket]].forEach(([a, im]) => { if (a.dataset.moi || !a.paused || !im()) return; a.dataset.moi = '1'; const m = a.muted; a.muted = true; try { const p = a.play(); if (p && p.then) p.then(() => { if (im()) a.pause(); a.muted = m; }).catch(() => { a.muted = m; delete a.dataset.moi; }); } catch (e) { a.muted = m; } }); if (nhacPhai()) setTimeout(musStart, 60); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
+  const mo = () => { try { if (BATDAU) { [CB.au, CU.au].forEach(a => { if (a && a.paused && a.src && !a.ended && ((a === CB.au && cbDangLe()) || (a === CU.au && laCU(GIA().id)))) { const p = a.play(); if (p && p.catch) p.catch(() => {}); } }); [CB.v[CB.cur], CU.v[CU.cur], OB.v[OB.cur], OC.v[OC.cur]].forEach(v => { if (v && v.paused && !v.ended) cvPlay(v); }); } } catch (e) {} /* 15/11: chạm màn hình thì phát lại nhạc giá, clip đang dở (iPhone chặn tự phát) */ try { acGet(); if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} if (S.sound) { [[bgm, () => !nhacPhai()], [VAN_AU, () => !VAN_STOP], [VAN_OB_AO, () => !(OB.van2 && !OB.van2Xong)], [KET_AU, () => !S.ket]].forEach(([a, im]) => { if (a.dataset.moi || !a.paused || !im()) return; a.dataset.moi = '1'; const m = a.muted; a.muted = true; try { const p = a.play(); if (p && p.then) p.then(() => { if (im()) a.pause(); a.muted = m; }).catch(() => { a.muted = m; delete a.dataset.moi; }); } catch (e) { a.muted = m; } }); if (nhacPhai()) setTimeout(musStart, 60); if (VAN_STOP && VAN_AU.paused) { try { VAN_AU.play().catch(() => {}); } catch (e) {} } try { if (OB.van2 && !OB.van2Xong && VAN_OB_AO.paused) VAN_OB_AO.play().catch(() => {}); } catch (e) {} } };
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, mo, { passive: true }));
   setInterval(() => { const chan = S.sound && bgm.paused && VAN_AU.paused && !nghiLe(); if (chan) { if (!S.banner || !/Bấm chuột/.test(S.banner.text)) S.banner = { text: '🔇 Bấm chuột 1 lần vào màn hình để bật âm thanh', t: 0, life: 2.6 }; } }, 2500);
 })();
@@ -2757,7 +2765,7 @@ function lenhPha(w) { if (w === 'ket') { ketThuc(); return; } if (window.KHOA_GI
     if (laOng()) { if (S.ob.ph !== 'ngoi' && !(typeof OB !== 'undefined' && OB.buf && (OB.intro || OB.tau))) { S.ob.ph = 'ngoi'; S.ob.t = 0; chuyenNhacOng(); } S.obCall = (S.obCall || 0) + 3; S.banner = { text: 'Ông Bảy ngự · hút thuốc, uống cà phê · gọi con nhang lên nhận lộc', t: 0, life: 5 }; }
     else { S.phaLoc = true; S.coT = 0; S.locEnd = -1e9; S.banner = { text: 'Văn phát lộc · ' + (GIA().id === 'cobo' ? 'Cô Bơ' : 'Cô Đôi') + ' tung lộc cho con nhang', t: 0, life: 5 }; if (!S.loc && !CO.giving) tungLoc(); else S.locQ = true; }
     wave(12); capNhatGiaInfo(); } }
-function doiGia(id) { if (GIA_DS.active === id) return; GIA_DS.active = id; try { napVideo(); } catch (e) {} if (id === 'chaube' && typeof CB !== 'undefined') cbReset(); if (id === 'caube' && typeof CU !== 'undefined') cuReset(); S.ob = { ph: 'mua', t: 0 }; S.ccOverride = null; S.poll = null; luuGia(); napNhacGia(); S.loc = null; S.banner = { text: 'Giá ' + GIA().ten + ' ngự đồng', t: 0, life: 4 }; wave(10); capNhatGiaInfo(); const cs = document.getElementById('cfg'); if (cs && !cs.hidden) { cs.hidden = true; } }
+function doiGia(id) { if (GIA_DS.active === id) return; GIA_DS.active = id; try { napVideo(); } catch (e) {} if (id === 'chaube' && typeof CB !== 'undefined') cbReset(); if (laCU(id) && typeof CU !== 'undefined') cuReset(); S.ob = { ph: 'mua', t: 0 }; S.ccOverride = null; S.poll = null; luuGia(); napNhacGia(); S.loc = null; S.banner = { text: 'Giá ' + GIA().ten + ' ngự đồng', t: 0, life: 4 }; wave(10); capNhatGiaInfo(); const cs = document.getElementById('cfg'); if (cs && !cs.hidden) { cs.hidden = true; } }
 document.getElementById('bGiaCo').addEventListener('click', () => lenhPha('co'));
 document.getElementById('bGiaOng').addEventListener('click', () => lenhPha('ong'));
 document.getElementById('bOngNgoi').addEventListener('click', () => { if (!laOng()) return; S.ob.ph = S.ob.ph === 'mua' ? 'ngoi' : 'mua'; S.ob.t = 0; chuyenNhacOng(); capNhatGiaInfo(); });
