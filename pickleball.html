@@ -103,6 +103,9 @@ button{font-family:inherit;cursor:pointer}
       <input id="ek" class="tpi" type="password" placeholder="API key EulerStream" autocomplete="off">
       <button id="etest" class="tb" type="button" style="padding:9px">Kiểm tra key</button>
       <small id="eres" style="color:#9fb0c2">Chỉ nhập một lần, máy tự nhớ (dùng chung với trang hầu đồng).</small>
+      <button id="ecopy" class="tb" type="button" style="padding:9px;background:#fe2c55">📋 Copy link cho TikTok LIVE Studio</button>
+      <small style="color:#9fb0c2">LIVE Studio không bấm được nút, nên dùng link này (đã kèm kênh + key, tự mở phiên). Đừng gửi link này cho người ngoài.</small>
+      <input id="elink" class="tpi" readonly hidden>
     </div>
   </div>
 </div>
@@ -638,7 +641,7 @@ function txt(s, x, y, size, color, align, weight) {
 function drawHeader() {
   txt('🏓 PICKLEBALL LIVE', 16, 22, 17, '#fff', 'left', 900);
   txt(`Trận #${G.matchNo} · tới ${G.target} điểm`, W - 16, 22, 13, '#9fb0c2', 'right', 600);
-  txt(EU.ok ? '● LIVE' : '○ chưa kết nối', W - 16, 136, 10.5, EU.ok ? '#3ddc84' : '#6f8090', 'right', 700);
+  txt(EU.ok ? '● LIVE' : (LS.get('hd_live_key') ? '○ đang kết nối…' : '○ chưa có key Euler'), W - 16, 136, 10.5, EU.ok ? '#3ddc84' : '#6f8090', 'right', 700);
   for (const t of [0, 1]) {
     const x = t === 0 ? 12 : W / 2 + 6, w = W / 2 - 18, y = 40;
     ctx.fillStyle = 'rgba(255,255,255,.06)'; rr(x, y, w, 82, 12); ctx.fill();
@@ -1092,16 +1095,36 @@ document.getElementById('etest').addEventListener('click', () => {
   t.onclose = (e) => { eres.textContent = ({ 4401: '❌ API key không đúng.', 4403: '❌ Gói Euler không cho phép.', 4404: '✅ Key đúng. Kênh @' + u + ' chưa live, lên live là tự kết nối.', 4429: '⚠️ Quá số kết nối của gói, thử lại sau.' })[e.code] || ('⚠️ Chưa rõ (mã ' + e.code + ').'); };
   setTimeout(() => { if (eres.textContent === 'Đang kiểm tra…') done('⚠️ Không có phản hồi, kiểm tra mạng.'); }, 15000);
 });
-document.getElementById('go').addEventListener('click', () => {
-  LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim());
-  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+document.getElementById('ecopy').addEventListener('click', () => {
+  const u = iu.value.trim().replace(/^@/, ''), k = ik.value.trim();
+  if (!u || !k) { eres.textContent = 'Anh nhập tên kênh và API key trước nhé.'; return; }
+  const url = location.href.split(/[?#]/)[0].replace(/pickleball\.html$/, '').replace(/\/pb\/?$/, '/') + 'pb/?live=1&u=' + encodeURIComponent(u) + '&k=' + encodeURIComponent(k);
+  const el = document.getElementById('elink'); el.hidden = false; el.value = url; el.select();
+  const ok = () => { eres.textContent = '✅ Đã copy. Vào LIVE Studio → Thêm nguồn → Liên kết, dán link này, khung dọc 1080×1920.'; };
+  try { navigator.clipboard.writeText(url).then(ok, () => { document.execCommand('copy'); ok(); }); } catch (e) { try { document.execCommand('copy'); ok(); } catch (x) { eres.textContent = 'Anh copy link trong ô bên dưới nhé.'; } }
+});
+let started = false;
+function startLive(user) {
+  if (started) return; started = true;
+  try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) {}
   document.getElementById('start').classList.add('hide');
   ctl.classList.add('hide'); fit();
-  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); }); } catch (e) {}
-  try { const de = document.documentElement; (de.requestFullscreen || de.webkitRequestFullscreen || (() => {})).call(de); } catch (e) {}
   addComment('📢', 'Phiên live đã mở – bình luận "giữ chỗ" để vào chơi', 'sys');
   enterLobby();
   eulerConnect();
+}
+// ?live=1&u=kenh&k=key : mở thẳng phiên live (dùng cho TikTok LIVE Studio – nguồn Liên kết)
+const QS = new URLSearchParams(location.search);
+if (QS.get('u')) LS.set('hd_live_user', QS.get('u'));
+if (QS.get('k')) LS.set('hd_live_key', QS.get('k'));
+if (QS.get('live') === '1') { try { history.replaceState(null, '', location.pathname + '?live=1'); } catch (e) {} setTimeout(startLive, 300); }
+document.getElementById('go').addEventListener('click', () => {
+  LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim());
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  if (started) return;
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); }); } catch (e) {}
+  try { const de = document.documentElement; (de.requestFullscreen || de.webkitRequestFullscreen || (() => {})).call(de); } catch (e) {}
+  startLive();
 });
 // H hoặc chạm 2 lần: mở/ẩn ô thử
 const togCtl = () => { ctl.classList.toggle('hide'); fit(); };
