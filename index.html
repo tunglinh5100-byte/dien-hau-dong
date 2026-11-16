@@ -1610,7 +1610,7 @@ function noiKhen(name, cau) {
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
-function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 6; } } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
+function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 0; } /* 16/11 9:21: không nghỉ giữa các lần ban khen */ } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
 function dauHinh() { const id = GIA().id; let c = null;
