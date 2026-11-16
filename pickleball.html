@@ -648,7 +648,7 @@ function txt(s, x, y, size, color, align, weight) {
 function drawHeader() {
   txt('🏓 PICKLEBALL LIVE', 16, 22, 17, '#fff', 'left', 900);
   txt(`Trận #${G.matchNo} · tới ${G.target} điểm`, W - 16, 22, 13, '#9fb0c2', 'right', 600);
-  txt(EU.ok ? `● LIVE · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? '○ đang kết nối…' : '○ chưa có key Euler'), W - 16, 136, 10.5, EU.ok ? '#3ddc84' : '#6f8090', 'right', 700);
+  txt(EU.ok ? `● @${EU.user} · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? `○ @${EU.user || '?'} · ${EU.err || 'đang kết nối…'}` : '○ chưa có key Euler'), W - 16, 136, 11, EU.ok ? '#3ddc84' : '#ff8a8a', 'right', 800);
   for (const t of [0, 1]) {
     const x = t === 0 ? 12 : W / 2 + 6, w = W / 2 - 18, y = 40;
     ctx.fillStyle = 'rgba(255,255,255,.06)'; rr(x, y, w, 82, 12); ctx.fill();
@@ -1082,10 +1082,11 @@ function eulerConnect() {
   const u = LS.get('hd_live_user').replace(/^@/, '').trim(), k = LS.get('hd_live_key').trim();
   if (!u || !k) return;
   try { EU.ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k) + '&features.bundleEvents=true'); } catch (e) { setTimeout(eulerConnect, 10000); return; }
-  EU.ws.onopen = () => { EU.retry = 0; EU.ok = true; };
+  EU.user = u; EU.err = '';
+  EU.ws.onopen = () => { EU.retry = 0; EU.ok = true; EU.err = ''; };
   EU.ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
     (Array.isArray(j.messages) ? j.messages : [j]).forEach(m => { const type = m.type || m.event || m.name; let d = m.data || null; if (!d && m.json) { try { d = JSON.parse(m.json); } catch (e) {} } if (type) handleEv(type, d || m); }); };
-  EU.ws.onclose = (e) => { EU.ok = false; EU.ws = null; if (e.code === 4401 || e.code === 4403) return; EU.retry++; setTimeout(eulerConnect, Math.min(30, 5 * EU.retry) * 1000); };
+  EU.ws.onclose = (e) => { EU.ok = false; EU.ws = null; EU.err = ({ 4401: 'key Euler sai', 4403: 'gói Euler không cho phép', 4404: '@' + u + ' chưa live', 4429: 'quá số kết nối của gói Euler' })[e.code] || ('mất kết nối, mã ' + e.code); if (e.code === 4401 || e.code === 4403) return; EU.retry++; setTimeout(eulerConnect, Math.min(30, 5 * EU.retry) * 1000); };
   EU.ws.onerror = () => {};
 }
 const iu = document.getElementById('eu'), ik = document.getElementById('ek'), cfgEl = document.getElementById('cfg'), eres = document.getElementById('eres');
