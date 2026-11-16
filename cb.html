@@ -891,20 +891,20 @@ function cbDraw(t, x, y, sc) {
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 // ---------- 16/11 thử nghiệm giá Ông Hoàng Mười (?om=1, link /om): dùng chung bộ máy giá Cậu Bé, thay clip Tú, nhạc văn Quỳnh, kịch bản Quỳnh ----------
 const OMU = /[?&]om=1/.test(location.search);
-const OM_AU = { thinh: 'om/om_01_van_thinh.mp3', thayao: 'om/om_02_nhac_thay-khan-ao.mp3', tau: 'om/om_03_nhac_tau-huong.mp3', khai: 'om/om_04_nhac_khai-quang.mp3', muaco: 'om/om_05_nhac_mua-co.mp3', tho: 'om/om_05b_nhac_ngam-tho.mp3', tuu: 'om/om_06_van_nghe-van.mp3', nghe: 'om/om_06b_van_nghe-van-2.mp3', loc: 'om/om_07_van_phat-loc.mp3', segia: 'om/om_08_van_se-gia.mp3' };
+const OM_AU_V = 2; const OM_AU = { thinh: 'om/om_01_van_thinh.mp3', thayao: 'om/om_02_nhac_thay-khan-ao.mp3', tau: 'om/om_03_nhac_tau-huong.mp3', khai: 'om/om_04_nhac_khai-quang.mp3', muaco: 'om/om_05_nhac_mua-co.mp3', tho: 'om/om_05b_nhac_ngam-tho.mp3', tuu: 'om/om_06_van_nghe-van.mp3', nghe: 'om/om_06b_van_nghe-van-2.mp3', loc: 'om/om_07_van_phat-loc.mp3', segia: 'om/om_08_van_se-gia.mp3' };
 const OM_LICH = [ // [tên bước, nhạc, từ giây, đến giây, clip, kiểu]
   ['thinh', 'thinh', 0, 17, 'thinh', 'lap', ''], ['tungkhan', 'thayao', 0, 5.4, 'tungkhan', 'vua', ''], // thỉnh, tung khăn: clip Cậu Bé (anh Linh: giống nhau, chỉ khác nhạc)
   ['thayao', 'thayao', 5.4, 25.4, 'thayao', 'vua', ''], ['thayao2', 'thayao', 25.4, 76, 'nghevan', 'lap', ''],
   ['tauhuong', 'tau', 0, 78, 'tauhuong', 'lap', ''],
-  ['khaiquang', 'khai', 0, 37, 'khaiquang', 'lap', ''],
+  ['khaiquang', 'khai', 0, 76, 'khaiquang', 'lap', ''],
   ['muaco', 'muaco', 0, 78, 'muaco', 'lap', ''],
-  ['ngamtho', 'tho', 0, 60, 'ngamtho', 'di', ''], // 16/11 anh Linh: ngâm thơ còn 1 phút, đi sang trái sang phải khoan thai
-  ['ngutuu', 'tuu', 0, 106, 'uongruou', 'lap', ''], ['nghevan', 'nghe', 0, 290, 'nghevan', 'lap', ''],
-  ['phatloc', 'loc', 0, 425, 'phatloc', 'lap', ''],
+  ['ngamtho', 'tho', 0, 95, 'ngamtho', 'di', ''], // 16/11 anh Linh: ngâm thơ còn 1 phút, đi sang trái sang phải khoan thai
+  ['ngutuu', 'tuu', 0, 92, 'uongruou', 'lap', ''], ['nghevan', 'nghe', 0, 163, 'nghevan', 'lap', ''],
+  ['phatloc', 'loc', 0, 241, 'phatloc', 'lap', ''],
   ['xegia', 'segia', 0, 23, 'segia', 'vua', '']];
 const BUOC_OM = ['Thỉnh mời', 'Thay khăn áo', 'Tấu hương', 'Khai quang', 'Múa cờ', 'Ngâm thơ', 'Ngự tửu', 'Phát lộc', 'Xe giá'];
-const OM_RATE = { tauhuong: .8 };
-const OM_TF = {"thinh": [1.0, -5, 28], "thayao": [1.0, -7.0, 157.0], "tauhuong": [0.95, 10.8, 112.9], "khaiquang": [1.0, -16.0, 77.0], "muaco": [0.966, -19.1, 50.8], "ngamtho": [0.805, 38.7, 121.3], "uongruou": [0.893, 53.0, 129.6], "nghevan": [0.721, 48.2, 182.6], "phatloc": [0.912, 11.1, 130.0], "segia": [0.711, 49.3, 199.7], "tungkhan": [1.0, -5, 28]}; const OM_DEM = {"uongruou": [50, 235, 510], "nghevan": [44, 319, 558], "phatloc": [62, 300, 499], "segia": [75, 278, 542], "thinh": [79, 281, 548], "thayao": [108, 262, 428], "tungkhan": [79, 281, 548]}; const OM_PHONG = {}; const OM_NEM = [[6.6, 120, 330, 'tien']]; // vị trí, cỡ từng clip (đo từ khung hình): [tỉ lệ, dịch x, dịch y]
+const OM_RATE = { tauhuong: .85 };
+const OM_TF = {"thinh": [1.0, -5, 28], "thayao": [0.85, 20.0, 160.0], "tauhuong": [0.95, -2.5, 89.0], "khaiquang": [1.0, -26.0, 59.0], "muaco": [0.966, -19.1, 50.8], "ngamtho": [0.805, 38.7, 121.3], "uongruou": [0.893, 53.0, 129.6], "nghevan": [0.721, 48.2, 182.6], "phatloc": [0.95, 3.2, 120.5], "segia": [0.711, 49.3, 199.7], "tungkhan": [1.0, -5, 28]}; const OM_DEM = {"uongruou": [50, 235, 510], "nghevan": [44, 319, 558], "phatloc": [62, 300, 489], "segia": [75, 278, 542], "thinh": [79, 281, 548], "tungkhan": [79, 281, 548]}; const OM_PHONG = {}; const OM_NEM = [[5.6, 295, 398, 'tien']]; // clip phát lộc mới của Tú: Ông quay ra, chìa tiền (phát xuôi rồi ngược) // vị trí, cỡ từng clip (đo từ khung hình): [tỉ lệ, dịch x, dịch y]
 const CU = { dir: 1, pha: 0, v: {}, au: null, buf: null, cur: null, ok: false, lastT: -1, st: 0, i: 0, t: 0, lap: 0, auKey: null, cue: 0, cueClip: null, exitTo: null, hold: false, xong: false, banT: 0 };
 const CU_TF = OMU ? OM_TF : {"thinh": [1.0, -5, 28], "thinhlap": [1.0, -5, 28], "tungkhan": [1.0, -5, 28], "thayao": [0.85, 25, 121], "muaheo": [0.82, 30.4, 125], "antoa": [0.95, 17.5, 74], "tungtien": [1.0, -3, 103], "tungkeo": [1.0, -1, 103], "camhuong": [0.95, 17.5, 74], "chaylen": [0.95, 17.5, 74], "luilen": [0.9, -11, 58.5], "khaiquang": [0.9, 11.5, 59.4], "heolung": [0.9, 9.0, 59.4], "ngoinghe": [1.0, 0, 167], "segia": [1.0, 0, 167]}; // anh Linh 14/11: Cậu luôn quay mặt lên ban công đồng (lưng về máy quay); các clip quay mặt ra (múa hèo, an tọa, phát lộc, ban lộc, phát kẹo) tạm thay bằng đoạn quay lưng trong khi chờ Tú làm lại
 const CU_AU = OMU ? OM_AU : { thinh: 'cu-nhac-thinh.mp3', thayao: 'cu-nhac-thayao.mp3', tau: 'cu-nhac-tau.mp3', khai: 'cu-nhac-khai.mp3', heo: 'cu-nhac-heo.mp3', antoa: 'cu-nhac-antoa.mp3', loc: 'cu-nhac-loc.mp3', banloc: 'cu-nhac-banloc.mp3', keo: 'cu-nhac-keo.mp3', segia: 'cu-nhac-segia.mp3' }; // nhạc văn Quỳnh (cbbd_01…13)
@@ -945,7 +945,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CU_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (OMU ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : (n === 'muaco' || n === 'ngamtho') ? 'om/om-' + n + '.mp4?v=3' : 'om/om-' + n + '.mp4?v=2') : 'cu-' + n + '.mp4?v=16f3'), 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (OMU ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : (n === 'muaco' || n === 'ngamtho') ? 'om/om-' + n + '.mp4?v=3' : 'om/om-' + n + '.mp4?v=4') : 'cu-' + n + '.mp4?v=16f3'), 'caube'); CV_HOLD.appendChild(v); CU.v[n] = v; });
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
 const CU_DEM = OMU ? OM_DEM : { thinh: [79, 281, 548], thinhlap: [79, 281, 548], tungkhan: [79, 281, 548], thayao: [66, 294, 538], ngoinghe: [87, 281, 410], segia: [87, 281, 410], tungtien: [86, 271, 482], tungkeo: [86, 270, 482], antoa: [109, 254, 530], camhuong: [124, 254, 530], chaylen: [124, 254, 530] }; // mép trái, mép phải, đáy người Cậu khi ngồi/quỳ (px clip) -> đặt thảm ngồi
@@ -955,7 +955,7 @@ function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], 
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && GIA().id === 'caube'; }
 function cuReset() { if (!CU.buf) return; CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; v.__want = from || 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
-function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + (OMU ? '?v=1' : '?v=2'); CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+function cuAuPlay(key, at) { const a = CU.au; if (!a) return; try { if (CU.auKey !== key) { a.src = CU_AU[key] + (OMU ? '?v=' + OM_AU_V : '?v=2'); CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = .9; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L[7] && L[7][0] ? L[7][0][1] : null; CU.kbPrev = null; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
@@ -1349,7 +1349,7 @@ function matDiem(mat, bx, by) { if (!mat || !KH.T0) return null; const P = mat.t
 const LOC_KIND = { tien: () => 'tien', hoa: () => 'img:hoa-hong', qua: () => 'img:qua', keo: () => 'img:keo-mut' };
 // 15/11: lộc bay ra khỏi khung đúng lúc tay tung trong clip: [giây trong clip, x, y (khung 360x640), loại lộc]
 // 16/11 anh Linh: mỗi lần cô cậu đồng vái hương thì 1 tiếng chiêng, 3 tiếng trống (đo lúc cúi đầu sâu nhất trong clip)
-const VAI_TG = { cu: { tauhuong: [5.6] } }; // 16/11 10:50 anh Linh: chỉ giá Ông Hoàng Mười (clip tấu hương chỉ có ở link /om-thu)
+const VAI_TG = { cu: { tauhuong: [5.7] } }; // 16/11 10:50 anh Linh: chỉ giá Ông Hoàng Mười (clip tấu hương chỉ có ở link /om-thu)
 const CHIENG = []; window.__chieng = () => CHIENG_I; for (let i = 0; i < 3; i++) { const a = new Audio('chieng-trong.mp3?v=1'); a.preload = 'auto'; CHIENG.push(a); } let CHIENG_I = 0;
 function vaiDongBo(ctl, ten, v) { const L = VAI_TG[ctl] && VAI_TG[ctl][ten]; if (!L || !v) return; const key = '__vai_' + ctl, ct = v.currentTime, pt = v[key] == null ? ct : v[key]; v[key] = ct;
   L.forEach(t0 => { if ((pt < t0 && ct >= t0)) { if (!S.sound) return; const a = CHIENG[CHIENG_I++ % CHIENG.length]; try { a.currentTime = 0; a.volume = 1; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } }); }
