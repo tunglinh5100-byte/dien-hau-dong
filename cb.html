@@ -1349,7 +1349,7 @@ function matDiem(mat, bx, by) { if (!mat || !KH.T0) return null; const P = mat.t
 const LOC_KIND = { tien: () => 'tien', hoa: () => 'img:hoa-hong', qua: () => 'img:qua', keo: () => 'img:keo-mut' };
 // 15/11: lộc bay ra khỏi khung đúng lúc tay tung trong clip: [giây trong clip, x, y (khung 360x640), loại lộc]
 // 16/11 anh Linh: mỗi lần cô cậu đồng vái hương thì 1 tiếng chiêng, 3 tiếng trống (đo lúc cúi đầu sâu nhất trong clip)
-const VAI_TG = { cb: { vaihuong: [1.4] }, cu: { camhuong: [1.9], chaylen: [1.9], tauhuong: [5.6] } };
+const VAI_TG = { cu: { tauhuong: [5.6] } }; // 16/11 10:50 anh Linh: chỉ giá Ông Hoàng Mười (clip tấu hương chỉ có ở link /om-thu)
 const CHIENG = []; window.__chieng = () => CHIENG_I; for (let i = 0; i < 3; i++) { const a = new Audio('chieng-trong.mp3?v=1'); a.preload = 'auto'; CHIENG.push(a); } let CHIENG_I = 0;
 function vaiDongBo(ctl, ten, v) { const L = VAI_TG[ctl] && VAI_TG[ctl][ten]; if (!L || !v) return; const key = '__vai_' + ctl, ct = v.currentTime, pt = v[key] == null ? ct : v[key]; v[key] = ct;
   L.forEach(t0 => { if ((pt < t0 && ct >= t0)) { if (!S.sound) return; const a = CHIENG[CHIENG_I++ % CHIENG.length]; try { a.currentTime = 0; a.volume = 1; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } }); }
