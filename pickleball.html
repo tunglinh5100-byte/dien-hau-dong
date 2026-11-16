@@ -64,6 +64,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="tiny">
       <label><input type="checkbox" id="lag" checked> Trễ như TikTok (~2s)</label>
       <button class="lnk" id="tptog">🧪 Thử người xem khác</button>
+      <button class="lnk" id="endbtn" style="color:#ff8a8a">⏹ Kết thúc trận</button>
       <button class="lnk" id="hidectl">Ẩn nút (xem như màn live)</button>
     </div>
     <div id="tp" class="hide">
@@ -486,8 +487,31 @@ function toBot(p, msg) {
   p.subFor = p.name; p.bot = true; p.name = 'Bot thay ' + p.subFor;
   addComment('🤖', msg, 'sys'); callout(p, '🤖 BOT VÀO THAY', '#f0b429');
   if (G.active === p && G.dec) { G.dec.human = false; G.dec.botAt = Math.max(0, G.dec.left - 1); ctl.classList.remove('turn'); }
+  if (!G.players.some(q => !q.bot)) setTimeout(() => endMatch('Không còn người thật trên sân'), 0);
 }
 function enterLobby() { G.players = []; goLobby(); }
+// Kết thúc trận ngay (chủ live gõ "end" / "kết thúc", hoặc khi trên sân không còn người thật)
+const PLAYING = ['serve', 'flight', 'decide', 'point', 'callup'];
+function endMatch(why) {
+  if (!PLAYING.includes(G.phase)) return;
+  if (G.callup) { G.queue.unshift(...G.callup.list.map(c => ({ name: c.name, gift: 0, t: 0 }))); G.callup = null; }
+  const out = G.players.filter(p => !p.bot).map(p => p.name);
+  if (out.length) addComment('📋', `${out.join(', ')} rời sân – bình luận "giữ chỗ" để chơi tiếp`, 'sys');
+  G.players = [];
+  G.smashFx = null; ctl.classList.remove('turn');
+  banner('⏹ KẾT THÚC TRẬN', why || 'Chờ người chơi mới', '#ff8a8a');
+  addComment('⏹', why || 'Chủ live đã kết thúc trận', 'sys');
+  goLobby();
+}
+function isHostCmd(d, text) {
+  const u = (d && (d.user || (d.common && d.common.user))) || d || {};
+  const id = String(u.uniqueId || d.uniqueId || '').toLowerCase().replace(/^@/, '');
+  const owner = LS.get('hd_live_user').toLowerCase().replace(/^@/, '').trim();
+  const admins = (LS.get('pb_admin') || '').toLowerCase().split(/[ ,]+/).map(x => x.replace(/^@/, '')).filter(Boolean);
+  if (!id || !(id === owner || admins.includes(id))) return false;
+  const n = norm(text).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  return /^(end|endgame|end game|stop|ket thuc|ket thuc tran|het tran|dung tran|dung)$/.test(n);
+}
 // Chờ trong sảnh: giữ người đang đứng trên sân (đội thắng / người đã xác nhận), đủ 4 người thật mới đấu.
 function goLobby() {
   G.phase = 'lobby'; G.ball = null; G.active = null; G.lobbyT = null; G.lastAvail = 0; G.forceBots = false;
@@ -674,8 +698,7 @@ function update(dt) {
     G.lastAvail = avail;
   } else if (G.phase === 'callup') {
     const cu = G.callup; cu.left -= dt;
-    if (cu.list.every(c => c.ok)) finishCallup();
-    else if (cu.left <= 0) {
+    if (cu.left <= 0) { // luôn chờ đủ 15 giây để người được mời kịp thấy và chuẩn bị
       const gone = cu.list.filter(c => !c.ok);
       if (gone.length) addComment('🚪', `${gone.map(c => c.name).join(', ')} vắng mặt → mất lượt`, 'sys');
       cu.list = cu.list.filter(c => c.ok);
@@ -1123,6 +1146,7 @@ function sendComment(v, who) {
   lagged(() => onComment(who, v));
 }
 const tpName = () => (document.getElementById('tpName').value.trim() || 'Khách');
+document.getElementById('endbtn').addEventListener('click', () => endMatch());
 document.getElementById('tptog').addEventListener('click', () => { document.getElementById('tp').classList.toggle('hide'); fit(); });
 document.getElementById('tpSend').addEventListener('click', () => { const i = document.getElementById('tpCmt'); sendComment(i.value, tpName()); i.value = ''; });
 document.getElementById('tpCmt').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendComment(e.target.value, tpName()); e.target.value = ''; } });
@@ -1151,7 +1175,7 @@ function handleEv(type, d) {
   const name = nameOf(d); if (!name) return;
   const nm = String(name).slice(0, 24), t = String(type || '').toLowerCase();
   try { window.__hdLv.ev(nm, d, t); } catch (e) {}
-  if (t.includes('chat')) { const c = d.comment || d.content || ''; EU.chats = (EU.chats || 0) + 1; if (c) onComment(nm, c); }
+  if (t.includes('chat')) { const c = d.comment || d.content || ''; EU.chats = (EU.chats || 0) + 1; if (c && isHostCmd(d, c)) return endMatch(); if (c) onComment(nm, c); }
   else if (t.includes('gift')) {
     const g = d.gift || d.giftDetails || {}, gt = d.giftType != null ? d.giftType : g.giftType;
     if (gt === 1 && d.repeatEnd !== undefined && !d.repeatEnd) return; // combo: chỉ tính gói cuối
@@ -1208,6 +1232,7 @@ function startLive(user) {
 const QS = new URLSearchParams(location.search);
 if (QS.get('u')) LS.set('hd_live_user', QS.get('u'));
 if (QS.get('k')) LS.set('hd_live_key', QS.get('k'));
+if (QS.get('ad')) LS.set('pb_admin', QS.get('ad'));
 if (QS.get('live') === '1') { try { history.replaceState(null, '', location.pathname + '?live=1'); } catch (e) {} setTimeout(startLive, 300); }
 document.getElementById('go').addEventListener('click', () => {
   LS.set('hd_live_user', iu.value.trim()); LS.set('hd_live_key', ik.value.trim());
