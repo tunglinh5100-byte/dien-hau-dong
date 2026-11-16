@@ -94,8 +94,6 @@ button{font-family:inherit;cursor:pointer}
     </div>
     <div class="lbl">Đếm ngược mỗi cú (lượt đầu → về sau)</div>
     <div class="opt" id="optTime"><button data-v="0">20 → 10s</button><button data-v="1" class="sel">15 → 8s</button><button data-v="2">10 → 6s</button></div>
-    <div class="lbl">Chơi tới</div>
-    <div class="opt" id="optPts"><button data-v="5">5 điểm</button><button data-v="7" class="sel">7 điểm</button><button data-v="11">11 điểm</button></div>
     <button class="big" id="go">▶ Mở phiên live</button>
     <button class="lnk" id="cfgTog" type="button" style="margin-top:10px;font-size:14px">Cài đặt kênh (EulerStream)</button>
     <div id="cfg" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
@@ -180,6 +178,61 @@ function beep(f, d = 0.07, type = 'sine', v = 0.12) {
     const n = AC.currentTime; g.gain.exponentialRampToValueAtTime(0.0001, n + d);
     o.start(n); o.stop(n + d);
   } catch (e) {}
+}
+// ---- nhạc nền sôi động (tự tạo, không bản quyền) + tiếng reo hò + nhạc tiếc nuối ----
+let MUS = null;
+function noiseBuf() { if (noiseBuf.b) return noiseBuf.b; const b = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; return (noiseBuf.b = b); }
+function musicStart() {
+  if (!AC || MUS) return;
+  const out = AC.createGain(); out.gain.value = 0.22; out.connect(AC.destination);
+  const mf = m => 440 * Math.pow(2, (m - 69) / 12), BEAT = 60 / 118;
+  const CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], RT = [45, 41, 36, 43];
+  const MEL = [76, 74, 72, 74, 76, 79, 76, 74, 72, 69, 72, 74, 76, 74, 72, 67];
+  const env = (g, t, a, p, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(p, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
+  const tone = (type, f, t, a, p, d, lp) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; env(g, t, a, p, d);
+    if (lp) { const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl); fl.connect(g); } else o.connect(g); g.connect(out); o.start(t); o.stop(t + a + d + 0.05); };
+  const kick = t => { const o = AC.createOscillator(), g = AC.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.15); env(g, t, 0.004, 0.5, 0.25); o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.3); };
+  const nz = (t, f, type, p, d) => { const n = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); n.buffer = noiseBuf(); fl.type = type; fl.frequency.value = f; env(g, t, 0.002, p, d); n.connect(fl); fl.connect(g); g.connect(out); n.start(t, Math.random()); n.stop(t + d + 0.05); };
+  let next = AC.currentTime + 0.1, step = 0;
+  MUS = { out, iv: setInterval(() => {
+    while (next < AC.currentTime + 0.4) {
+      const t = next, b = step % 16, bar = Math.floor(step / 16) % 4;
+      if (b % 4 === 0) kick(t);
+      if (b === 4 || b === 12) nz(t, 1800, 'bandpass', 0.18, 0.12);
+      if (b % 2 === 0) nz(t, 8000, 'highpass', 0.05, 0.04);
+      if (b % 4 === 2) tone('sawtooth', mf(RT[bar]), t, 0.01, 0.12, BEAT * 0.45, 600);
+      if (b === 0 || b === 6 || b === 10) CH[bar].forEach(m => tone('square', mf(m), t, 0.01, 0.025, BEAT * 0.3, 2200));
+      if (b % 2 === 0) { const m = MEL[(b / 2 + bar * 2) % 16]; if ((step >> 1) % 3 !== 2) tone('triangle', mf(m), t, 0.01, 0.06, BEAT * 0.4); }
+      next += BEAT / 4; step++;
+    }
+  }, 100) };
+}
+function duck(sec) { if (!MUS) return; const g = MUS.out.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0.06, t + 0.15); g.setValueAtTime(0.06, t + sec); g.linearRampToValueAtTime(0.22, t + sec + 0.8); }
+function sfxCheer(big) {
+  if (!AC) return; duck(2.6); const t = AC.currentTime, out = AC.createGain(); out.gain.value = big ? 0.5 : 0.38; out.connect(AC.destination);
+  // tiếng "ồ" của khán giả: nhiều giọng nguyên âm "o" lệch cao độ
+  for (let i = 0; i < 14; i++) {
+    const o = AC.createOscillator(), f1 = AC.createBiquadFilter(), f2 = AC.createBiquadFilter(), g = AC.createGain();
+    const f0 = rand(150, 320); o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * 0.85, t); o.frequency.linearRampToValueAtTime(f0 * 1.12, t + 0.5); o.frequency.linearRampToValueAtTime(f0, t + 1.6);
+    f1.type = 'bandpass'; f1.frequency.value = 520; f1.Q.value = 4; f2.type = 'bandpass'; f2.frequency.value = 900; f2.Q.value = 5;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.25 + Math.random() * 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.8 + Math.random() * 0.4);
+    o.connect(f1); o.connect(f2); f1.connect(g); f2.connect(g); g.connect(out); o.start(t); o.stop(t + 2.4);
+  }
+  // tiếng hò + vỗ tay
+  const n = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); n.buffer = noiseBuf(); fl.type = 'bandpass'; fl.frequency.value = 1200; fl.Q.value = 0.6;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6); n.connect(fl); fl.connect(g); g.connect(out); n.start(t); n.stop(t + 2.7);
+  for (let i = 0; i < (big ? 60 : 36); i++) { const c = AC.createBufferSource(), cf = AC.createBiquadFilter(), cg = AC.createGain(), ct = t + 0.2 + Math.random() * 2.2;
+    c.buffer = noiseBuf(); cf.type = 'bandpass'; cf.frequency.value = rand(1500, 3000); cf.Q.value = 1.5; cg.gain.setValueAtTime(0.0001, ct); cg.gain.exponentialRampToValueAtTime(0.12, ct + 0.003); cg.gain.exponentialRampToValueAtTime(0.0001, ct + 0.05);
+    c.connect(cf); cf.connect(cg); cg.connect(out); c.start(ct, Math.random()); c.stop(ct + 0.07); }
+}
+function sfxSad() {
+  if (!AC) return; duck(2.8); const t0 = AC.currentTime, out = AC.createGain(); out.gain.value = 0.32; out.connect(AC.destination);
+  const notes = [[392, 0, 0.42], [370, 0.48, 0.42], [349, 0.96, 0.42], [330, 1.44, 1.3]]; // "oa oa oa oaaa" kiểu kèn trombone
+  notes.forEach(([f, dt, d], i) => { const o = AC.createOscillator(), fl = AC.createBiquadFilter(), g = AC.createGain(), t = t0 + dt; o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t);
+    if (i === 3) { const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = 6; lg.gain.value = 7; lfo.connect(lg); lg.connect(o.frequency); lfo.start(t + 0.2); lfo.stop(t + d); o.frequency.linearRampToValueAtTime(f * 0.94, t + d); }
+    fl.type = 'lowpass'; fl.frequency.setValueAtTime(400, t); fl.frequency.linearRampToValueAtTime(1300, t + 0.12); fl.frequency.linearRampToValueAtTime(500, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.05); g.gain.setValueAtTime(0.3, t + d - 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(fl); fl.connect(g); g.connect(out); o.start(t); o.stop(t + d + 0.05); });
 }
 const sfxHit = s => beep(s === 'smash' ? 260 : s === 'drive' ? 520 : 680, 0.06, 'square', 0.08);
 
@@ -338,8 +391,9 @@ function arrive() {
   const b = G.ball;
   if (b.outcome === 'ok') return startDecide(b.receiver);
   const h = b.hitter;
-  if (b.outcome === 'net') return endPoint(1 - h.team, `${h.name} đánh vào lưới!`);
-  if (b.outcome === 'out') return endPoint(1 - h.team, `${h.name} đánh ra ngoài!`);
+  if (b.outcome === 'net') { sfxSad(); return endPoint(1 - h.team, `${h.name} đánh vào lưới!`); }
+  if (b.outcome === 'out') { sfxSad(); return endPoint(1 - h.team, `${h.name} đánh ra ngoài!`); }
+  sfxCheer(b.shot === 'smash');
   const msg = { lob: 'LOB QUA ĐẦU! Không với tới', dink: 'DINK HIỂM! Không kịp lên lưới', drop: 'DROP CHUẨN! Bóng chết trong kitchen', drive: 'DRIVE QUÁ NHANH!', smash: 'ĐẬP ĂN ĐIỂM! 💥', serve: 'ACE! Giao bóng ăn điểm' }[b.shot];
   endPoint(h.team, msg);
 }
@@ -380,8 +434,7 @@ function endPoint(w, msg) {
   G.phase = 'point'; G.t = 0; G.active = null;
   ctl.classList.remove('turn');
   const s = G.score;
-  G.matchOver = s[w] >= G.target && s[w] - s[1 - w] >= 2;
-  beep(w === 0 ? 990 : 330, 0.18, 'triangle', 0.12);
+  G.matchOver = s[w] >= G.target; // ai chạm 7 điểm trước là thắng
 }
 
 // ---------- viewers / queue / matches ----------
@@ -481,9 +534,9 @@ function camPreset(mode, p) {
   if (mode === 'pov' && p) {
     const fd = p.team === 0 ? -1 : 1;           // hướng nhìn về phía lưới
     const side = fd === -1 ? 1 : -1;
-    return { x: p.x + 40 * side, y: p.y - fd * 220, z: 130, pitch: 12 * DEG, fd, focal: 620, cy: 470, who: p };
+    return { x: p.x + 40 * side, y: p.y - fd * 220, z: 130, pitch: 12 * DEG, fd, focal: 620, cy: 560, who: p };
   }
-  return { x: W / 2, y: 1150, z: 460, pitch: 33 * DEG, fd: -1, focal: 620, cy: 470, who: null };
+  return { x: W / 2, y: 1150, z: 460, pitch: 33 * DEG, fd: -1, focal: 600, cy: 545, who: null };
 }
 const CAM = Object.assign({}, camPreset('over'));
 let camFlash = 0;
@@ -645,24 +698,39 @@ function txt(s, x, y, size, color, align, weight) {
 }
 
 
+const HY = 108; // dưới thanh tên kênh / người xem của TikTok
 function drawHeader() {
-  txt('🏓 PICKLEBALL LIVE', 16, 22, 17, '#fff', 'left', 900);
-  txt(`Trận #${G.matchNo} · tới ${G.target} điểm`, W - 16, 22, 13, '#9fb0c2', 'right', 600);
-  txt(EU.ok ? `● @${EU.user} · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? `○ @${EU.user || '?'} · ${EU.err || 'đang kết nối…'}` : '○ chưa có key Euler'), W - 16, 136, 11, EU.ok ? '#3ddc84' : '#ff8a8a', 'right', 800);
+  txt('🏓 PICKLEBALL LIVE', 16, 20, 16, '#fff', 'left', 900);
+  txt(`Trận #${G.matchNo} · chạm ${G.target} điểm là thắng`, W - 16, 20, 12, '#9fb0c2', 'right', 600);
+  txt(EU.ok ? `● @${EU.user} · ${EU.chats || 0} bình luận` : (LS.get('hd_live_key') ? `○ @${EU.user || '?'} · ${EU.err || 'đang kết nối…'}` : '○ chưa có key Euler'), W - 16, 40, 11, EU.ok ? '#3ddc84' : '#ff8a8a', 'right', 800);
   for (const t of [0, 1]) {
-    const x = t === 0 ? 12 : W / 2 + 6, w = W / 2 - 18, y = 40;
-    ctx.fillStyle = 'rgba(255,255,255,.06)'; rr(x, y, w, 82, 12); ctx.fill();
-    ctx.fillStyle = TEAM[t].color; rr(x, y, 6, 82, 3); ctx.fill();
-    txt(TEAM[t].name + (G.serving === t ? '  🟡' : ''), x + 16, y + 18, 13, TEAM[t].color, 'left', 800);
-    txt(String(G.score[t]), x + w - 14, y + 44, 44, '#fff', 'right', 900);
+    const x = t === 0 ? 8 : W / 2 + 4, w = W / 2 - 12, y = HY;
+    ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(x, y, w, 74, 12); ctx.fill();
+    ctx.fillStyle = TEAM[t].color; rr(x, y, 7, 74, 3); ctx.fill();
+    txt(TEAM[t].name + (G.serving === t ? ' 🟡' : ''), x + 16, y + 15, 13, TEAM[t].color, 'left', 900);
+    txt(String(G.score[t]), x + w - 12, y + 40, 46, '#fff', 'right', 900);
     const ps = G.players.filter(p => p.team === t).sort((a, b) => a.side - b.side);
-    ps.forEach((p, i) => txt((p.bot ? '🤖 ' : '') + p.name, x + 16, y + 42 + i * 20, 14, '#e6edf5', 'left', 600));
+    ps.forEach((p, i) => { let n = (p.bot ? '🤖 ' : '') + p.name; ctx.font = '700 15px system-ui,sans-serif'; while (ctx.measureText(n).width > w - 80 && n.length > 3) n = n.slice(0, -1);
+      const on = G.active === p && Math.floor(performance.now() / 250) % 2 === 0;
+      txt(n, x + 16, y + 38 + i * 21, 15, on ? '#ffd43b' : '#f2f6fa', 'left', 800); });
   }
-  txt('🟡 = đang giao', W / 2, 136, 11, '#6f8090', 'center', 500);
+}
+// Bảng hướng dẫn luôn hiện, chữ to, nằm trong vùng người xem điện thoại nhìn thấy
+function drawGuide() {
+  const y = HY + 82;
+  ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(8, y, W - 16, 62, 12); ctx.fill();
+  const keys = [['a', 'Drive'], ['s', 'Drop'], ['d', 'Dink'], ['x', 'Lob'], ['z', 'Đập']], cw = (W - 28) / 5;
+  keys.forEach(([k, n], i) => {
+    const cx = 14 + i * cw + cw / 2;
+    ctx.fillStyle = k === 'z' ? '#ff3b3b' : '#f0b429'; rr(cx - 46, y + 7, 30, 30, 7); ctx.fill();
+    txt(k, cx - 31, y + 23, 22, '#111', 'center', 900);
+    txt(n, cx - 10, y + 23, 17, '#fff', 'left', 900);
+  });
+  txt('Bình luận "giữ chỗ" để vào chơi · Tặng quà được ưu tiên', W / 2, y + 50, 13.5, '#ffd43b', 'center', 800);
 }
 
 function drawQueue() {
-  const w = 150, x = W - w - 6, y = 150, n = Math.min(8, G.queue.length);
+  const w = 150, x = W - w - 6, y = HY + 238, n = Math.min(8, G.queue.length);
   const h = 30 + Math.max(1, n) * 21 + (G.queue.length > 8 ? 16 : 0);
   ctx.fillStyle = 'rgba(8,12,18,.78)'; rr(x, y, w, h, 10); ctx.fill();
   ctx.strokeStyle = '#f0b429'; ctx.lineWidth = 1.5; rr(x, y, w, h, 10); ctx.stroke();
@@ -707,37 +775,34 @@ function drawComments() {
 
 
 function drawBottom() {
-  const y = 862;
+  const y = HY + 152, h = 78, blink = Math.floor(performance.now() / 260) % 2 === 0;
   if (G.phase === 'decide' && G.active) {
     const p = G.active, d = G.dec;
-    ctx.fillStyle = 'rgba(254,44,85,.92)'; rr(10, y - 18, W - 20, 104, 16); ctx.fill();
-    txt(`🎯 ${p.name.toUpperCase()} — CHỌN CÚ ĐÁNH`, 24, y + 4, 19, '#fff', 'left', 900);
-    if (d.human) txt(`lượt ${d.turnNo} · ${d.total}s`, W - 100, y + 4, 11, '#ffe3ea', 'right', 700);
+    ctx.fillStyle = blink ? 'rgba(254,44,85,.95)' : 'rgba(255,190,30,.95)'; rr(8, y, W - 16, h, 14); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; rr(8, y, W - 16, h, 14); ctx.stroke();
+    const pulse = 1 + 0.06 * Math.sin(performance.now() / 90);
+    let nm = p.name.toUpperCase(); ctx.font = '900 28px system-ui,sans-serif'; while (ctx.measureText('🎯 ' + nm + ' ĐÁNH!').width > W - 120 && nm.length > 3) nm = nm.slice(0, -1);
+    ctx.save(); ctx.translate(22, y + 27); ctx.scale(pulse, pulse);
+    ctx.font = '900 28px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.55)';
+    ctx.strokeText('🎯 ' + nm + ' ĐÁNH!', 0, 0); ctx.fillStyle = blink ? '#fff' : '#111'; ctx.fillText('🎯 ' + nm + ' ĐÁNH!', 0, 0); ctx.restore();
     const inc = G.rally.incoming;
-    const incTxt = { serve: 'giao bóng', dink: 'DINK thấp', drop: 'DROP rơi kitchen', drive: 'DRIVE nhanh', lob: 'LOB cao ⬆ → được ĐẬP', smash: 'ĐẬP mạnh' }[inc] || '';
-    txt(`Bóng tới: ${incTxt}${G.rally.ranBack ? ' (phải chạy lùi)' : ''}`, 24, y + 30, 13, '#ffe3ea', 'left', 600);
-    txt('Bình luận:  a Drive · s Drop · d Dink · x Lob · z Đập', 24, y + 56, 14, '#fff', 'left', 800);
+    const incTxt = { serve: 'giao bóng', dink: 'DINK thấp', drop: 'DROP rơi kitchen', drive: 'DRIVE nhanh', lob: 'LOB cao → được ĐẬP (z)', smash: 'ĐẬP mạnh' }[inc] || '';
+    txt(`Bóng tới: ${incTxt}${d.human ? '' : ' · 🤖 bot'}`, 22, y + 60, 15, blink ? '#fff' : '#111', 'left', 800);
     const sec = Math.max(0, Math.ceil(d.left));
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(W - 58, y + 34, 32, 0, Math.PI * 2); ctx.fill();
-    txt(String(sec), W - 58, y + 36, 34, '#fe2c55', 'center', 900);
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(W - 50, y + h / 2, 32, 0, Math.PI * 2); ctx.fill();
+    txt(String(sec), W - 50, y + h / 2 + 2, 34, '#ffd43b', 'center', 900);
   } else if (G.phase === 'callup' && G.callup) {
     const cu = G.callup;
-    ctx.fillStyle = 'rgba(240,180,41,.95)'; rr(10, y - 18, W - 20, 104, 16); ctx.fill();
-    txt('📣 MỜI VÀO SÂN — bình luận "có"', 24, y + 4, 18, '#111', 'left', 900);
-    const names = cu.list.length ? cu.list.map(c => (c.ok ? '✅ ' : '⏳ ') + c.name).join('   ') : 'Không còn ai chờ → bot vào thay';
-    txt(names, 24, y + 34, 15, '#111', 'left', 800);
-    txt('Không trả lời trong 15 giây → mất lượt', 24, y + 60, 12.5, '#3b2a00', 'left', 600);
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(W - 58, y + 34, 30, 0, Math.PI * 2); ctx.fill();
-    txt(String(Math.max(0, Math.ceil(cu.left))), W - 58, y + 36, 30, '#f0b429', 'center', 900);
-  } else {
-    ctx.fillStyle = 'rgba(255,255,255,.08)'; rr(10, y - 18, W - 20, 104, 16); ctx.fill();
-    if (G.phase === 'lobby') {
-      txt(G.lobbyT != null ? `Trận mới bắt đầu sau ${Math.ceil(G.lobbyT)}s · còn ${Math.max(0, 4 - G.queue.length)} chỗ` : 'Đang chờ người chơi…', W / 2, y + 4, 16, '#fff', 'center', 800);
-    } else if (G.phase === 'celebrate') {
-      txt(`Trận tiếp theo sau ${Math.max(0, Math.ceil(7 - G.t))}s`, W / 2, y + 4, 16, '#fff', 'center', 800);
-    } else txt('Muốn chơi? Bình luận "giữ chỗ" · Tặng quà để được ưu tiên', W / 2, y + 4, 14.5, '#fff', 'center', 700);
-    txt('Tới lượt: bình luận 1 chữ  a · s · d · z · x', W / 2, y + 32, 14, '#cfd8e3', 'center', 600);
-    txt('a Drive · s Drop · d Dink · x Lob · z Đập', W / 2, y + 56, 13, '#8a97a6', 'center', 500);
+    ctx.fillStyle = blink ? 'rgba(240,180,41,.97)' : 'rgba(255,220,90,.97)'; rr(8, y, W - 16, h, 14); ctx.fill();
+    txt('📣 MỜI VÀO SÂN — bình luận "có"', 22, y + 20, 20, '#111', 'left', 900);
+    const names = cu.list.length ? cu.list.map(c => (c.ok ? '✅ ' : '⏳ ') + c.name).join('  ') : 'Không còn ai chờ → bot vào thay';
+    txt(names, 22, y + 52, 17, '#111', 'left', 900);
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(W - 50, y + h / 2, 30, 0, Math.PI * 2); ctx.fill();
+    txt(String(Math.max(0, Math.ceil(cu.left))), W - 50, y + h / 2 + 2, 30, '#f0b429', 'center', 900);
+  } else if (G.phase === 'lobby') {
+    ctx.fillStyle = 'rgba(8,12,18,.86)'; rr(8, y, W - 16, h, 14); ctx.fill();
+    txt(G.lobbyT != null ? `Trận mới bắt đầu sau ${Math.ceil(G.lobbyT)}s` : '🏓 SÂN ĐANG TRỐNG', W / 2, y + 26, 24, '#fff', 'center', 900);
+    txt(G.lobbyT != null ? `Còn ${Math.max(0, 4 - G.queue.length)} chỗ – bình luận "giữ chỗ"` : 'Bình luận "giữ chỗ" để vào chơi', W / 2, y + 58, 18, blink ? '#ffd43b' : '#fff', 'center', 900);
   }
 }
 
@@ -745,12 +810,12 @@ function drawBanner() {
   const b = G.banner; if (!b) return;
   const a = Math.min(1, b.t * 5);
   ctx.globalAlpha = a;
-  ctx.fillStyle = 'rgba(8,12,18,.88)'; rr(30, 300 - 52, W - 60, 104, 18); ctx.fill();
-  ctx.strokeStyle = b.color; ctx.lineWidth = 3; rr(30, 300 - 52, W - 60, 104, 18); ctx.stroke();
+  ctx.fillStyle = 'rgba(8,12,18,.88)'; rr(30, 440 - 52, W - 60, 104, 18); ctx.fill();
+  ctx.strokeStyle = b.color; ctx.lineWidth = 3; rr(30, 440 - 52, W - 60, 104, 18); ctx.stroke();
   let fs = 24; ctx.font = `900 ${fs}px system-ui,sans-serif`;
   while (ctx.measureText(b.text).width > W - 90 && fs > 14) { fs--; ctx.font = `900 ${fs}px system-ui,sans-serif`; }
-  txt(b.text, W / 2, 300 - 14, fs, '#fff', 'center', 900);
-  txt(b.sub, W / 2, 300 + 22, 18, b.color, 'center', 800);
+  txt(b.text, W / 2, 440 - 14, fs, '#fff', 'center', 900);
+  txt(b.sub, W / 2, 440 + 22, 18, b.color, 'center', 800);
   ctx.globalAlpha = 1;
 }
 
@@ -869,8 +934,9 @@ function drawPerson(p) {
   const label = p.fan ? p.name : (p.bot ? '🤖 ' : '') + p.name;
   ctx.font = `700 ${fs}px system-ui,sans-serif`;
   const lw = ctx.measureText(label).width + 12, ly = at(104) - fs / 2;
-  ctx.fillStyle = 'rgba(0,0,0,.6)'; rr(X - lw / 2, ly - fs * 0.7, lw, fs * 1.4, fs * 0.7); ctx.fill();
-  txt(label, X, ly, fs, '#fff', 'center', 700);
+  const hot = G.active === p && G.phase === 'decide', fl = hot && Math.floor(performance.now() / 250) % 2 === 0;
+  ctx.fillStyle = hot ? (fl ? '#ffd43b' : '#fe2c55') : 'rgba(0,0,0,.6)'; rr(X - lw / 2, ly - fs * 0.7, lw, fs * 1.4, fs * 0.7); ctx.fill();
+  txt(label, X, ly, fs, fl ? '#111' : '#fff', 'center', hot ? 900 : 700);
   if (G.phase === 'decide' && G.active && p.team < 2 && p.team !== G.active.team) {
     const [t, c] = moveTag(p);
     const tw = (ctx.measureText(t).width || 60) + 14, ty = ly - fs * 1.6;
@@ -925,7 +991,7 @@ function drawSmash() {
   const t = f.t, life = 1 - t / 1.6;
   // red flash + radial burst
   ctx.fillStyle = `rgba(255,40,40,${Math.max(0, 0.45 - t) })`; ctx.fillRect(0, 0, W, H);
-  const cx = W / 2, cy = 400;
+  const cx = W / 2, cy = 470;
   ctx.save(); ctx.translate(cx, cy);
   ctx.globalAlpha = Math.max(0, life);
   for (let i = 0; i < 16; i++) {
@@ -948,7 +1014,7 @@ function drawSmash() {
 
 function drawDancer(x, y, team, name, ph) {
   const t = performance.now() / 1000, col = TEAM[team].color, dark = TEAM[team].dark;
-  const b = Math.abs(Math.sin(t * 5 + ph)) * 26, sc = 2.1;
+  const b = Math.abs(Math.sin(t * 5 + ph)) * 22, sc = 1.8;
   ctx.save(); ctx.translate(x, y - b); ctx.scale(sc, sc);
   const sw = Math.sin(t * 9 + ph);
   ctx.lineCap = 'round';
@@ -982,14 +1048,15 @@ function drawCelebrate() {
   }
   ctx.globalAlpha = 1;
   const pop = 1 + Math.sin(G.t * 6) * 0.04;
-  ctx.save(); ctx.translate(W / 2, 470); ctx.scale(pop, pop);
+  ctx.save(); ctx.translate(W / 2, HY + 210); ctx.scale(pop, pop);
   ctx.font = '900 40px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.lineWidth = 8; ctx.strokeStyle = '#000'; ctx.strokeText(`🏆 ${TEAM[c.team].name} THẮNG`, 0, 0);
   ctx.fillStyle = TEAM[c.team].color; ctx.fillText(`🏆 ${TEAM[c.team].name} THẮNG`, 0, 0);
   ctx.font = '900 30px system-ui,sans-serif'; ctx.strokeText(`${c.score[0]} – ${c.score[1]}`, 0, 44); ctx.fillStyle = '#fff'; ctx.fillText(`${c.score[0]} – ${c.score[1]}`, 0, 44);
   ctx.restore();
-  drawDancer(W / 2 - 120, 770, c.team, c.names[0] || '', 0);
-  drawDancer(W / 2 + 120, 770, c.team, c.names[1] || '', 1.6);
+  drawDancer(W / 2 - 120, 650, c.team, c.names[0] || '', 0);
+  drawDancer(W / 2 + 120, 650, c.team, c.names[1] || '', 1.6);
+  txt(`Trận tiếp theo sau ${Math.max(0, Math.ceil(7 - G.t))}s`, W / 2, HY + 290, 16, '#fff', 'center', 800);
 }
 
 function draw() {
@@ -998,28 +1065,24 @@ function draw() {
   if (sf && sf.t < 0.9) { const m = 18 * (1 - sf.t / 0.9); ctx.translate((Math.random() - 0.5) * m, (Math.random() - 0.5) * m); }
   drawWorld();
   ctx.restore();
-  const hg = ctx.createLinearGradient(0, 0, 0, 150);
-  hg.addColorStop(0, 'rgba(10,17,24,.97)'); hg.addColorStop(1, 'rgba(10,17,24,.55)');
-  ctx.fillStyle = hg; ctx.fillRect(0, 0, W, 145);
+  const hg = ctx.createLinearGradient(0, 0, 0, HY);
+  hg.addColorStop(0, 'rgba(10,17,24,.97)'); hg.addColorStop(1, 'rgba(10,17,24,.4)');
+  ctx.fillStyle = hg; ctx.fillRect(0, 0, W, HY);
   drawHeader();
+  drawGuide();
   drawQueue();
   drawComments();
   if (CAM.who && G.phase !== 'serve' && G.phase !== 'celebrate') {
     const s = '🎥 GÓC NHÌN: ' + CAM.who.name.toUpperCase();
     ctx.font = '800 12px system-ui,sans-serif';
     const w = ctx.measureText(s).width + 16;
-    ctx.fillStyle = 'rgba(254,44,85,.85)'; rr(10, 150, w, 22, 11); ctx.fill();
-    txt(s, 18, 161, 12, '#fff', 'left', 800);
+    ctx.fillStyle = 'rgba(254,44,85,.85)'; rr(10, HY + 238, w, 22, 11); ctx.fill();
+    txt(s, 18, HY + 249, 12, '#fff', 'left', 800);
   }
-  if (G.phase === 'serve') txt(`${G.server.name} chuẩn bị giao…`, W / 2, 200, 18, '#fff', 'center', 800);
+  if (G.phase === 'serve') txt(`${G.server.name} chuẩn bị giao…`, W / 2, HY + 190, 20, '#fff', 'center', 900);
   drawSmash();
   drawBanner();
   drawCelebrate();
-  if (G.phase === 'lobby' && !G.queue.length) {
-    ctx.fillStyle = 'rgba(8,12,18,.8)'; rr(40, 380, W - 80, 120, 18); ctx.fill();
-    txt('🏓 SÂN ĐANG TRỐNG', W / 2, 418, 26, '#fff', 'center', 900);
-    txt('Bình luận "giữ chỗ" để vào chơi', W / 2, 462, 18, '#f0b429', 'center', 800);
-  }
   if (G.phase !== 'celebrate') drawBottom();
 }
 
@@ -1058,7 +1121,6 @@ function optGroup(id, cb) {
   }));
 }
 optGroup('optTime', v => G.timing = v);
-optGroup('optPts', v => G.target = v);
 // ---------- Người xem thật qua EulerStream ----------
 const LS = { get: k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 const EU = { ok: false, ws: null, retry: 0 };
@@ -1115,6 +1177,7 @@ let started = false;
 function startLive(user) {
   if (started) return; started = true;
   try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) {}
+  musicStart();
   document.getElementById('start').classList.add('hide');
   ctl.classList.add('hide'); fit();
   addComment('📢', 'Phiên live đã mở – bình luận "giữ chỗ" để vào chơi', 'sys');
@@ -1140,6 +1203,7 @@ document.addEventListener('keydown', e => { if ((e.key === 'h' || e.key === 'H')
 let lastTap = 0;
 cv.addEventListener('touchend', () => { const n = Date.now(); if (n - lastTap < 350) togCtl(); lastTap = n; }, { passive: true });
 cv.addEventListener('dblclick', togCtl);
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { try { if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {} }, { passive: true }));
 
 
 fit();
