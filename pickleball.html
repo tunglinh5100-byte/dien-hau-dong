@@ -87,7 +87,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="rules">
       <b>Vào chơi:</b> bình luận <b>giữ chỗ</b> → lên bảng hàng chờ và đứng ở khán đài. Phải ở lại phiên live, ai rời là bị loại.<br>
       <b>Cướp lượt:</b> tặng quà, quà càng to càng được xếp lên trước.<br>
-      <b>Trước mỗi trận:</b> người được mời phải bình luận <b>có</b> trong 15 giây, không thì mất lượt. Thiếu người thì bot vào đủ 4.<br>
+      <b>Trước mỗi trận:</b> người được mời phải bình luận <b>có</b> trong 15 giây, không thì mất lượt. Đủ 4 người thật là đấu ngay; chờ 90 giây không thêm ai và có từ 2 người trở lên thì bot vào cho đủ.<br>
       <b>Đánh:</b> tới lượt ai, camera ra sau lưng người đó. Bình luận 1 chữ: <b>a</b> Drive · <b>s</b> Drop · <b>d</b> Dink · <b>x</b> Lob · <b>z</b> Đập. Bình luận xong là đánh luôn.<br>
       Mấy lượt đầu được nhiều giây, quen rồi giảm dần. Đang đánh mà rời live hoặc bỏ lượt 2 lần → bot đánh thay.<br><br>
       Phím <b>H</b> (hoặc chạm 2 lần) để mở/ẩn ô thử bình luận bên dưới màn hình.
@@ -137,12 +137,12 @@ const TEAM = [
   { name: 'KHÁN GIẢ', color: '#b9a6ff', dark: '#4b3d7a' }
 ];
 const SHOT = {
-  dink:  { name: 'DINK',  dur: 1.25, peak: 38,  num: 1 },
-  drive: { name: 'DRIVE', dur: 0.62, peak: 20,  num: 2 },
-  lob:   { name: 'LOB',   dur: 1.7,  peak: 175, num: 3 },
-  smash: { name: 'ĐẬP',   dur: 0.42, peak: 6,   num: 4 },
-  drop:  { name: 'DROP',  dur: 1.4,  peak: 75,  num: 5 },
-  serve: { name: 'GIAO',  dur: 1.0,  peak: 55,  num: 0 }
+  dink:  { name: 'DINK',  dur: 0.95, peak: 38,  num: 1 },
+  drive: { name: 'DRIVE', dur: 0.5,  peak: 20,  num: 2 },
+  lob:   { name: 'LOB',   dur: 1.25, peak: 175, num: 3 },
+  smash: { name: 'ĐẬP',   dur: 0.36, peak: 6,   num: 4 },
+  drop:  { name: 'DROP',  dur: 1.05, peak: 75,  num: 5 },
+  serve: { name: 'GIAO',  dur: 0.8,  peak: 55,  num: 0 }
 };
 const KEY2SHOT = { a: 'drive', s: 'drop', d: 'dink', x: 'lob', z: 'smash' };
 const SHOT2KEY = { drive: 'a', drop: 's', dink: 'd', lob: 'x', smash: 'z' };
@@ -159,7 +159,7 @@ const G = {
   ball: null, rally: { incoming: null, ranBack: false },
   active: null, dec: null, banner: null, callouts: [], comments: [],
   queue: [], turns: {}, lastSeen: {}, timing: 1, lobbyT: null, callup: null, cel: null, fw: [],
-  target: 7, matchNo: 0, matchOver: false, rallyLen: 0, botN: 0
+  target: 3, forceBots: false, lastAvail: 0, matchNo: 0, matchOver: false, rallyLen: 0, botN: 0
 };
 
 function mkP(name, team, side, bot) {
@@ -300,7 +300,8 @@ function choiceText(c) { return c.auto ? 'd' : SHOT2KEY[c.shot]; }
 
 function parseComment(txt) {
   const s = txt.trim().toLowerCase();
-  if (s.length === 1 && KEY2SHOT[s]) return { shot: KEY2SHOT[s], dir: -1 };
+  const m = s.match(/^([asdxz])\1*[^a-z0-9]*$/); // a, A, aa, a!, "a " ...
+  if (m) return { shot: KEY2SHOT[m[1]], dir: -1 };
   const words = [['dink', 'dink'], ['drive', 'drive'], ['lob', 'lob'], ['drop', 'drop'], ['đập', 'smash'], ['dap', 'smash'], ['smash', 'smash']];
   for (const [w, sh] of words) if (s.startsWith(w)) return { shot: sh, dir: -1 };
   return null;
@@ -409,7 +410,7 @@ function startDecide(r) {
   G.phase = 'decide'; G.active = r;
   const human = !r.bot;
   const total = timeFor(r);
-  G.dec = { left: total, total, human, turnNo: G.turns[r.name] || 0, botAt: total - rand(1.0, 3.2), silent: false, lastTick: 99 };
+  G.dec = { left: total, total, human, turnNo: G.turns[r.name] || 0, botAt: total - rand(0.6, 1.6), silent: false, lastTick: 99 };
   if (human && r.name === ME) {
     ctl.classList.add('turn');
     try { navigator.vibrate && navigator.vibrate(60); } catch (e) {}
@@ -434,7 +435,7 @@ function endPoint(w, msg) {
   G.phase = 'point'; G.t = 0; G.active = null;
   ctl.classList.remove('turn');
   const s = G.score;
-  G.matchOver = s[w] >= G.target; // ai chạm 7 điểm trước là thắng
+  G.matchOver = s[w] >= G.target; // ai chạm 3 điểm trước là thắng
 }
 
 // ---------- viewers / queue / matches ----------
@@ -486,9 +487,13 @@ function toBot(p, msg) {
   addComment('🤖', msg, 'sys'); callout(p, '🤖 BOT VÀO THAY', '#f0b429');
   if (G.active === p && G.dec) { G.dec.human = false; G.dec.botAt = Math.max(0, G.dec.left - 1); ctl.classList.remove('turn'); }
 }
-function enterLobby() {
-  G.phase = 'lobby'; G.players = []; G.ball = null; G.active = null; G.lobbyT = null;
+function enterLobby() { G.players = []; goLobby(); }
+// Chờ trong sảnh: giữ người đang đứng trên sân (đội thắng / người đã xác nhận), đủ 4 người thật mới đấu.
+function goLobby() {
+  G.phase = 'lobby'; G.ball = null; G.active = null; G.lobbyT = null; G.lastAvail = 0; G.forceBots = false;
+  for (const p of G.players) { p.pos = 'base'; p.tx = p.x = SIDEX[p.side]; p.ty = p.y = Y(p.team, BASE_STAND); }
 }
+const realOnCourt = () => G.players.filter(p => !p.bot).length;
 function beginCallup() {
   const taken = new Set(G.players.map(p => p.team + '-' + p.side));
   const free = SLOTS.filter(s => !taken.has(s[0] + '-' + s[1]));
@@ -500,12 +505,19 @@ function beginCallup() {
 function finishCallup() {
   const cu = G.callup; G.callup = null;
   const oks = cu.list.filter(c => c.ok);
-  if (!oks.length && !G.players.some(p => !p.bot)) { addComment('📢', 'Chưa có ai vào sân – bình luận "giữ chỗ" để chơi', 'sys'); return enterLobby(); }
+  const real = realOnCourt() + oks.length;
+  if (real < 4 && !(G.forceBots && real >= 2)) {
+    // chưa đủ người thật: người đã xác nhận đứng sẵn trên sân, quay lại chờ thêm
+    cu.free.slice(0, oks.length).forEach(([team, side], i) => G.players.push(mkP(oks[i].name, team, side, false)));
+    if (!G.players.length) addComment('📢', 'Chưa có ai vào sân – bình luận "giữ chỗ" để chơi', 'sys');
+    return goLobby();
+  }
   cu.free.forEach(([team, side], i) => {
     const c = oks[i];
     const p = c ? mkP(c.name, team, side, false) : mkP('Bot ' + (++G.botN), team, side, true);
     G.players.push(p);
   });
+  G.forceBots = false;
   G.score = [0, 0]; G.serving = Math.random() < 0.5 ? 0 : 1; G.matchNo++; G.matchOver = false;
   const nm = t => G.players.filter(p => p.team === t).map(p => p.name).join(' & ');
   addComment('🏓', `Trận #${G.matchNo}: ${nm(0)} vs ${nm(1)}`, 'sys');
@@ -524,8 +536,7 @@ function afterCelebrate() {
   const losers = G.players.filter(p => p.team !== w && !p.bot).map(p => p.name);
   if (losers.length) addComment('📋', `${losers.join(' & ')} xuống sân – bình luận "giữ chỗ" để xếp hàng lại`, 'sys');
   G.players = G.players.filter(p => p.team === w && !p.bot);
-  if (!G.players.length && !G.queue.length) return enterLobby();
-  beginCallup();
+  goLobby();
 }
 
 // ---------- 3D camera ----------
@@ -616,7 +627,7 @@ function ring3(x, y, r, col, w, frac) {
 // ---------- update ----------
 function update(dt) {
   let ts = 1;
-  if (G.phase === 'flight' && G.ball && G.ball.outcome === 'ok' && G.ball.t / G.ball.dur > 0.7) ts = 0.35;
+  if (G.phase === 'flight' && G.ball && G.ball.outcome === 'ok' && G.ball.t / G.ball.dur > 0.8) ts = 0.6;
 
   for (const p of G.players) {
     const sp = (p.spd || 300) * dt * (G.phase === 'decide' ? 0.08 : ts);
@@ -632,7 +643,7 @@ function update(dt) {
 
   if (G.phase === 'serve') {
     G.t += dt;
-    if (G.t > 1.2) hit(G.server, 'serve', -1, { receiver: G.serveRecv });
+    if (G.t > 0.7) hit(G.server, 'serve', -1, { receiver: G.serveRecv });
   } else if (G.phase === 'flight') {
     G.ball.t += dt * ts;
     if (G.ball.t >= G.ball.dur) { G.ball.t = G.ball.dur; arrive(); }
@@ -653,11 +664,14 @@ function update(dt) {
       doChoice(r, c, true);
     }
   } else if (G.phase === 'lobby') {
-    if (G.queue.length) {
-      if (G.lobbyT == null) G.lobbyT = 12;
+    const avail = realOnCourt() + G.queue.length;
+    if (avail >= 4) { G.forceBots = false; beginCallup(); }
+    else if (avail >= 2) {
+      if (G.lobbyT == null || avail > G.lastAvail) G.lobbyT = 90; // có người mới vào thì chờ lại 90s
       G.lobbyT -= dt;
-      if (G.queue.length >= 4 || G.lobbyT <= 0) beginCallup();
+      if (G.lobbyT <= 0) { G.forceBots = true; beginCallup(); }
     } else G.lobbyT = null;
+    G.lastAvail = avail;
   } else if (G.phase === 'callup') {
     const cu = G.callup; cu.left -= dt;
     if (cu.list.every(c => c.ok)) finishCallup();
@@ -685,7 +699,7 @@ function update(dt) {
     if (G.t > 7) afterCelebrate();
   } else if (G.phase === 'point') {
     G.t += dt;
-    if (G.t > 2.4) { G.banner = null; if (G.matchOver) startCelebrate(); else startPoint(); }
+    if (G.t > 1.7) { G.banner = null; if (G.matchOver) startCelebrate(); else startPoint(); }
   }
 }
 
@@ -804,8 +818,11 @@ function drawBottom() {
     txt(String(Math.max(0, Math.ceil(cu.left))), X + Wd - 36, y + h / 2 + 2, 27, '#f0b429', 'center', 900);
   } else if (G.phase === 'lobby') {
     ctx.fillStyle = 'rgba(8,12,18,.9)'; rr(X, y, Wd, h, 12); ctx.fill();
-    txt(G.lobbyT != null ? `Trận mới sau ${Math.ceil(G.lobbyT)}s` : '🏓 SÂN ĐANG TRỐNG', W / 2, y + 24, 22, '#fff', 'center', 900);
-    txt(G.lobbyT != null ? `Còn ${Math.max(0, 4 - G.queue.length)} chỗ – bình luận "giữ chỗ"` : 'Bình luận "giữ chỗ" để vào chơi', W / 2, y + 54, 16, blink ? '#ffd43b' : '#fff', 'center', 900);
+    const avail = realOnCourt() + G.queue.length, miss = Math.max(0, 4 - avail);
+    const l1 = avail === 0 ? '🏓 SÂN ĐANG TRỐNG' : `Đang có ${avail}/4 người – thiếu ${miss}`;
+    const l2 = avail === 0 ? 'Bình luận "giữ chỗ" để vào chơi' : avail === 1 ? 'Bình luận "giữ chỗ" – đủ 4 người là đấu ngay' : `Đủ 4 là đấu ngay · ${Math.ceil(G.lobbyT || 90)}s nữa bot vào thay`;
+    txt(l1, W / 2, y + 24, 21, '#fff', 'center', 900);
+    txt(l2, W / 2, y + 54, 15, blink ? '#ffd43b' : '#fff', 'center', 900);
   }
 }
 
@@ -1146,7 +1163,7 @@ function handleEv(type, d) {
 function eulerConnect() {
   const u = LS.get('hd_live_user').replace(/^@/, '').trim(), k = LS.get('hd_live_key').trim();
   if (!u || !k) return;
-  try { EU.ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k) + '&features.bundleEvents=true'); } catch (e) { setTimeout(eulerConnect, 10000); return; }
+  try { EU.ws = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(u) + '&apiKey=' + encodeURIComponent(k)); } catch (e) { setTimeout(eulerConnect, 10000); return; } // không gom sự kiện: bình luận tới ngay
   EU.user = u; EU.err = '';
   EU.ws.onopen = () => { EU.retry = 0; EU.ok = true; EU.err = ''; };
   EU.ws.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
