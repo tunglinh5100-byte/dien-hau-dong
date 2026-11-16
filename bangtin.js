@@ -44,4 +44,11 @@ window.BANG_TIN = {
   ],
   // Cô Bơ: chưa tìm được bài Nhân Dân nên để trống, bảng sẽ hiện mục "chung"
   cobo: [],
+  // Ông Hoàng Mười (link thử /om-thu). Bài: "Đông đảo người dân cầu an tại hai ngôi đền thờ ông Hoàng Mười" - baovanhoa.vn
+  nguon_ongmuoi: 'Báo Văn Hóa (baovanhoa.vn)',
+  ongmuoi: [
+    'Theo tín ngưỡng Tứ Phủ, Ông Hoàng Mười được tôn là con thứ mười của Vua Cha Bát Hải Động Đình',
+    'Truyền thuyết kể Ông từng xuống trần gian, giúp dân khai hoang, chống lũ, phát triển nông nghiệp và nghề dệt',
+    'Ông được thờ ở Đền Củi (Đền Chợ Củi), xã Xuân Hồng, huyện Nghi Xuân, Hà Tĩnh, di tích quốc gia từ năm 1993, và Đền Ông Hoàng Mười ở huyện Hưng Nguyên, Nghệ An, hai bên bờ sông Lam',
+  ],
 };
