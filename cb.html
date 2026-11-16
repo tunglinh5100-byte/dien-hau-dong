@@ -952,7 +952,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'muaco' || n === 'uongruou' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
   CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
