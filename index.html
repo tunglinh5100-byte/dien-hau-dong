@@ -1996,16 +1996,30 @@ function drawLyCafe(t) {
 }
 function drawBangTT(t) { if (S.chuyen) return; const tt = !!buocGia(), X = 8, Y = tt ? 237 : 192, Wd = 150, h = tt ? 145 : 128, cx = X + Wd / 2; panel(X, Y, Wd, h);
   text('Tương tác để ngài ban khen', cx, Y + 14, 10, '#f2cf72', { f: SERIF, w: 800 }); ctx.strokeStyle = 'rgba(230,181,82,.45)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(X + 14, Y + 25); ctx.lineTo(X + Wd - 14, Y + 25); ctx.stroke();
-  const ds = [['↗', 'Chia sẻ live'], ['✎', 'Bình luận:\nHọ & quê quán'], ['♥', 'Thả tim hoan hỉ']], top = Y + 30, step = (h - 36) / 3;
+  const ds = [['↗', 'Chia sẻ live'], ['✎', 'Bình luận\nbất kỳ'], ['♥', 'Thả tim hoan hỉ']], top = Y + 30, step = (h - 36) / 3;
   ds.forEach(([ic, s], i) => { const y = top + step * (i + .5), nh = .5 + .5 * Math.sin(t * 2.2 - i * 1.1); ctx.save(); ctx.beginPath(); ctx.arc(X + 22, y, 10, 0, 7); ctx.fillStyle = `rgba(230,181,82,${.18 + .22 * nh})`; ctx.fill(); ctx.strokeStyle = 'rgba(230,181,82,.8)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
-    text(ic, X + 22, y + .5, 11, i === 2 ? '#ff6f97' : '#ffe39a', { w: 800 }); ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = `700 11.5px ${SERIF}`; ctx.fillStyle = '#fff6d6'; const ls = s.split('\n'); ls.forEach((l, j) => ctx.fillText(l, X + 38, y + .5 + (j - (ls.length - 1) / 2) * 13)); ctx.restore(); }); }
+    if (i === 2) { /* 16/11 anh Linh: tim luôn nhấp nháy gợi thả tim */ const bl = .5 + .5 * Math.sin(t * 8), pu = 1 + .22 * bl; ctx.save(); const gw = ctx.createRadialGradient(X + 22, y, 2, X + 22, y, 26); gw.addColorStop(0, `rgba(255,70,130,${.35 + .5 * bl})`); gw.addColorStop(1, 'rgba(255,70,130,0)'); ctx.fillStyle = gw; ctx.beginPath(); ctx.arc(X + 22, y, 26, 0, 7); ctx.fill();
+      ctx.translate(X + 22, y + 1); ctx.scale(pu, pu); ctx.fillStyle = bl > .5 ? '#ff3d7f' : '#ff9cbc'; heartP(15); ctx.fill(); ctx.restore(); } else
+    text(ic, X + 22, y + .5, 11, '#ffe39a', { w: 800 }); ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = `700 11.5px ${SERIF}`; ctx.fillStyle = '#fff6d6'; const ls = s.split('\n'); ls.forEach((l, j) => ctx.fillText(l, X + 38, y + .5 + (j - (ls.length - 1) / 2) * 13)); ctx.restore(); }); drawBoom(X + 22, top + step * 2.5); }
+function drawBoom(cx, cy) { /* 16/11 anh Linh: đủ 100 tim thì nổ BÙM ra từ trái tim */
+  const b = S.boom; if (!b) return; const e = S.t - b.t0; if (e > 1.8) { S.boom = null; return; }
+  ctx.save(); const a = Math.max(0, 1 - e / 1.8);
+  if (e < .25) { const fl = ctx.createRadialGradient(cx, cy, 0, cx, cy, 220 * (e / .25 + .2)); fl.addColorStop(0, 'rgba(255,240,250,.9)'); fl.addColorStop(1, 'rgba(255,60,130,0)'); ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(cx, cy, 240, 0, 7); ctx.fill(); }
+  for (let i = 0; i < 28; i++) { const g = i * 2.399, sp = 120 + (i * 37 % 90), x = cx + Math.cos(g) * sp * e, y = cy + Math.sin(g) * sp * e + 60 * e * e;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(g + e * 3); ctx.globalAlpha = a; ctx.fillStyle = i % 3 ? '#ff4f86' : '#ffd76a'; heartP(8 + (i % 4) * 3); ctx.fill(); ctx.restore(); }
+  const sc = e < .2 ? .4 + e / .2 * .9 : 1.3 - Math.min(.3, (e - .2) * .5), jx = (Math.random() - .5) * 8 * a, jy = (Math.random() - .5) * 8 * a;
+  ctx.translate(cx + 120 + jx, cy - 10 + jy); ctx.scale(sc, sc); ctx.rotate(-.12); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '900 46px system-ui,sans-serif'; ctx.lineWidth = 9; ctx.strokeStyle = '#3a0010'; ctx.strokeText('BÙM!', 0, 0);
+  const gr = ctx.createLinearGradient(0, -22, 0, 22); gr.addColorStop(0, '#fff36b'); gr.addColorStop(.5, '#ff8fb5'); gr.addColorStop(1, '#ff2b6a'); ctx.fillStyle = gr; ctx.fillText('BÙM!', 0, 0);
+  ctx.font = '900 16px system-ui,sans-serif'; ctx.lineWidth = 5; ctx.strokeText('💖 100 TIM 💖', 0, 34); ctx.fillStyle = '#fff'; ctx.fillText('💖 100 TIM 💖', 0, 34);
+  ctx.restore(); }
 function drawBinh(t) {
   if (S.chuyen) return; // xe loan, thỉnh, thay khăn áo: chưa hiện tim, cà phê
   if (laOng()) { drawLyCafe(t); return; }
   const AUTO = !S.auto && !S.real && GIA().id === 'codoi', B = S.burst, bt = B ? B.t : 99, k = AUTO ? Math.min(1, (S.autoT || 0) / 45) : (S.likes % S.goal) / S.goal, cx = 83, cy = 438, sz = 64;
   if (B && bt < .45) S.hv = 1; else if (B && bt < 1.3) S.hv = 0; else S.hv = S.hv == null ? k : (k < S.hv - .3 ? k : S.hv + (k - S.hv) * .08);
   // ghi chú dưới bình
-  rr(8, 478, 150, 32, 9, 'rgba(30,8,6,.72)'); if (AUTO) { const r = Math.max(0, Math.ceil(45 - (S.autoT || 0))); text('Cô ban lộc sau ' + Math.floor(r / 60) + ':' + String(r % 60).padStart(2, '0'), 83, 489, 10.5, '#fff', { w: 700 }); text('cho các con nhang đang xem', 83, 503, 9.5, '#f2cf72', { f: SERIF, w: 700 }); }
+  rr(8, 478, 150, 32, 9, Math.sin(t * 7) > 0 ? 'rgba(200,30,80,.85)' : 'rgba(30,8,6,.72)'); if (AUTO) { const r = Math.max(0, Math.ceil(45 - (S.autoT || 0))); text('Cô ban lộc sau ' + Math.floor(r / 60) + ':' + String(r % 60).padStart(2, '0'), 83, 489, 10.5, '#fff', { w: 700 }); text('cho các con nhang đang xem', 83, 503, 9.5, '#f2cf72', { f: SERIF, w: 700 }); }
   else { text('Bình đầy ' + S.goal + ' tim', 83, 489, 10.5, '#fff', { w: 700 }); text(fixXung(laOng() ? 'ông sẽ ban lộc' : 'cô sẽ phát lộc').replace(/^cậu/, 'Cậu').replace(/^chầu/, 'Chầu'), 83, 503, 10, '#f2cf72', { f: SERIF, w: 700 }); }
   // tim nhỏ rơi vào miệng bình khi có người thả tim
   (S.drops || []).forEach(d => { if (d.t < 0) return; const e = d.t / .6, x = d.sx + (cx - d.sx) * e, y = d.sy + (cy - sz * .38 - 34 - d.sy) * e - Math.sin(e * Math.PI) * 26;
@@ -2018,7 +2032,7 @@ function drawBinh(t) {
     if (B && bt >= 1.3 && bt < 1.75) { const e = (bt - 1.3) / .45; sc = .3 + e * .7 + Math.sin(e * Math.PI) * .25; }
     ctx.save(); ctx.translate(cx, cy + bob); ctx.rotate(sway); ctx.scale(sc * sx, sc * sy);
     // quầng sáng
-    const gl = ctx.createRadialGradient(0, 0, 8, 0, 0, sz * 1.15); gl.addColorStop(0, `rgba(255,80,140,${.42 + (B ? .4 : 0)})`); gl.addColorStop(1, 'rgba(255,80,140,0)'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, sz * 1.15, 0, 7); ctx.fill();
+    const gl = ctx.createRadialGradient(0, 0, 8, 0, 0, sz * 1.15); gl.addColorStop(0, `rgba(255,80,140,${.3 + .45 * (.5 + .5 * Math.sin(t * 7)) + (B ? .3 : 0)})`); /* 16/11: luôn nhấp nháy gợi thả tim */ gl.addColorStop(1, 'rgba(255,80,140,0)'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, sz * 1.15, 0, 7); ctx.fill();
     // cổ bình, vòng kim loại, nút bần
     const nTop = -sz * .38 - 24, nW = 15;
     ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(-nW / 2, nTop, nW, 28); ctx.strokeStyle = 'rgba(255,240,248,.85)'; ctx.lineWidth = 1.4; ctx.strokeRect(-nW / 2, nTop, nW, 28);
@@ -2277,7 +2291,7 @@ function update(dt) {
     const AUTO_T = 45; S.autoT = (S.autoT || 0) + dt;
     if (S.autoT >= AUTO_T && !S.loc && !CO.giving && !S.burst && S.t - (S.locEnd || -1e9) >= 12) { S.autoT = 0; S.autoN = (S.autoN || 0) + 1; S.autoKind = ['hoa', 'qua', 'tien'][(S.autoN - 1) % 3]; S.burst = { t: 0 }; } }
   else S.autoT = 0;
-  const hits = Math.floor(S.likes / S.goal); if (laOng()) { S.goalHits = hits; if (ongNgoi() && (S.cafe || 0) >= S.goal && !S.cafeFull) S.cafeFull = { t: 0 }; } else if (hits > S.goalHits && !S.chuyen) { S.goalHits = hits; S.burst = { t: 0 }; }
+  const hits = Math.floor(S.likes / S.goal); if (laOng()) { S.goalHits = hits; if (ongNgoi() && (S.cafe || 0) >= S.goal && !S.cafeFull) S.cafeFull = { t: 0 }; } else if (hits > S.goalHits && !S.chuyen) { S.goalHits = hits; S.burst = { t: 0 }; S.boom = { t0: S.t }; }
   updChuyenGia(dt);
 }
 
@@ -2855,7 +2869,7 @@ buildCfgPanel(); napNhacGia();
     const nm = String(name).slice(0, 24); seen.set(nm, H.S.t);
     const t = String(type || '').toLowerCase();
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
-    if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) { say(nm, c); const cn = String(c).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); /* 16/11 anh Linh: bình luận đúng cú pháp "Họ & quê quán" (vd "Họ Lê Tiền Giang") thì ban khen ngay theo tên nick TikTok */ if (/(^|[^a-z])(ho|dong ho)\s+[a-z]{1,8}([^a-z]|$)|que (o |quan )?[a-z]/.test(cn) && !(dem.hoT > H.S.t - 120)) { dem.hoT = H.S.t; K(nm, /lay co|lay thanh|con lay/.test(cn) ? 'lay' : 'chung', 3); } else if (++dem.bl % 3 === 0) K(nm, /lay co|lay thanh|con lay|lạy/i.test(c) ? 'lay' : 'chung', 2); } }
+    if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) { say(nm, c); const cn = String(c).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); /* 16/11 tối anh Linh: bỏ cú pháp 'Họ & quê quán' – cứ bình luận là được ban khen (mỗi người tối đa 1 lần/2 phút) */ if (!(dem.hoT > H.S.t - 120)) { dem.hoT = H.S.t; K(nm, /lay co|lay thanh|con lay/.test(cn) ? 'lay' : 'chung', 3); } } }
     else if (t.includes('like')) { const n = Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))); person(nm); like(n, nm); const truoc = dem.tim; dem.tim += n; if (Math.floor(dem.tim / 100) > Math.floor(truoc / 100)) K(nm, 'chung', 1); }
     else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); K(nm, dc >= 99 ? 'big' : 'hoa', 4); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) { shareLive(nm); K(nm, 'share', 3); } else follow(nm); }
