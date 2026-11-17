@@ -810,7 +810,7 @@ const CB_LAP = 2; // văn thỉnh hát 2 lượt (anh Linh)
   Object.keys(CB_TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = n === 'thinh' || n === 'tungkhan' ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cb-' + n + '.mp4?v=' + (n === 'baisai' || n === 'muamoi' ? 4 : n === 'thayao' ? 5 : 3) + 'f2', 'chaube'); CV_HOLD.appendChild(v); CB.v[n] = v; });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, 'cb-' + n + '.mp4?v=' + (n === 'vengoi' ? '6kf' : n === 'baisai' || n === 'muamoi' ? 4 : n === 'thayao' ? 5 : 3) + 'f2', 'chaube'); CV_HOLD.appendChild(v); CB.v[n] = v; });
   CB.au = new Audio(); CB.au.preload = 'auto';
 })();
 function cbDangLe() { return typeof CB !== 'undefined' && !!CB.buf && GIA().id === 'chaube'; }
@@ -929,8 +929,8 @@ const CC_LICH = [ // [bước, nhạc, từ giây, đến giây, clip (null = v�
   ['segia', 'segia', 0, 8, 'segia', 'vua', '', null, null, null, 'giu']];
 const BUOC_CC = ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa quạt', 'Nghe văn', 'Phát lộc', 'Xe giá'];
 const CC_BUOC_K = { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muaquat: 4, uongnuoc: 5, phatlixi: 6, phatloc: 6, segia: 7 };
-const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.566, 77.4, 224.4], phatlixi: [0.5, 91.4, 241.6], locqua: [0.5, 90.8, 241.3], segia: [0.53, 85.4, 217.4], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4], thayao: [0.716, 55.2, 159.5], dangnhang: [0.647, 41.1, 198.0], muaquat: [0.653, 53.9, 198.3] };
-const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 108, phatlixi: 88, locqua: 89, segia: 129, ngoi: 125, dung: 170, thayao: 176, dangnhang: 56, muaquat: 55 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
+const CC_TF = { thinh: [0.72, 44.6, 180.1], tungkhan: [0.72, 44.6, 180.1], /* 17/11 13h clip cchin_01 của Tú (Cô trùm khăn đỏ, tung khăn) */ vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.566, 77.4, 224.4], phatlixi: [0.5, 91.4, 241.6], locqua: [0.5, 90.8, 241.3], segia: [0.53, 85.4, 217.4], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4], thayao: [0.716, 55.2, 159.5], dangnhang: [0.647, 41.1, 198.0], muaquat: [0.653, 53.9, 198.3] };
+const CC_DEM = { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, CC_DAU = { thinh: 159, tungkhan: 159, vaihuong: 170, uongnuoc: 108, phatlixi: 88, locqua: 89, segia: 129, ngoi: 125, dung: 170, thayao: 176, dangnhang: 56, muaquat: 55 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
 const CC2 = { sway: 0 };
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
 function ccTu2D(dt) { // tư thế hình vẽ Cô Chín cho các đoạn chưa có clip
@@ -983,7 +983,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'cc/cc-' + n + '.mp4?v=3') : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? ('cc/cc-' + n + '.mp4?v=' + (n === 'thayao' ? '4kf' : 3)) : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=' + (n === 'antoa' || n === 'muaheo' ? '17kf' : '16f3')), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
   CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
@@ -2566,6 +2566,7 @@ function nhacDungGia() { const src = String(bgm.src), ong = /nhac-ong|van-ong/.t
 let NHAC_T = 0;
 function quanNhac(dt) {
   if (typeof CB !== 'undefined' && CB.au && !CB.au.paused && (!cbDangLe() || S.chuyen || S.cat)) try { CB.au.pause(); } catch (e) {}
+  if (!bgm.paused && ((typeof CU !== 'undefined' && CU.au && !CU.au.paused && !CU.au.muted) || (typeof CB !== 'undefined' && CB.au && !CB.au.paused && !CB.au.muted))) try { bgm.pause(); } catch (e) {} // 17/11 anh Linh: lẫn nhạc giá — văn riêng của giá đang hát thì nhạc chung phải im ngay, kể cả lúc đang chuyển giá
   const k = nhacPhai(); if (k === null) return;
   if (!k) { if (!bgm.paused) try { bgm.pause(); } catch (e) {} }
   else if (S.volTarget <= .05) { if (!bgm.paused && (IOS_VOL || bgm.volume < .03)) try { bgm.pause(); } catch (e) {} } // nhạc giá đang hạ về 0 (văn đang hát): dừng hẳn
