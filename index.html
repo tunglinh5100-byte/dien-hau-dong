@@ -1442,6 +1442,18 @@ function vaiDongBo(ctl, ten, v) { const L = VAI_TG[ctl] && VAI_TG[ctl][ten]; if 
 // [giây trong clip, x, y (khung 360x640), loại lộc] – đo từ từng khung hình clip của Tú
 const NEM_CC = { phatlixi: [[4.0, 290, 250, 'tien'], [12.0, 290, 250, 'tien']], locqua: [[4.0, 287, 325, 'qua'], [12.0, 287, 325, 'qua']] }; // Cô Chín trao lì xì, trao chanh khế ô mai (giây clip, toạ độ tay)
 const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], phatloc: OM_NEM }, ob: { loc: [[2.6, 270, 372, 'tien']] } }; Object.assign(NEM.cu, NEM_CC);
+/* 17/11 anh Linh: một hàng con nhang ngồi ngang sát mép dưới khung hình, tràn xuống nền đen (link thử /tn ?hang=1).
+   Người xem thật tương tác thì ngồi vào hàng, hiện tên nick; chỗ còn trống là con nhang giả lập (không tên, không bao giờ được ban khen) */
+const HANG = /[?&]hang=1/.test(location.search);
+const CN_IMG = {}; if (HANG) ['ngoi', 'vai', 'vo'].forEach(k => { const i = new Image(); i.src = 'cn/' + k + '.png?v=1'; CN_IMG[k] = i; });
+const HN = { slots: [], built: false }, HN_TINT = [null, '#b23a48', '#2f6db5', '#3d8b5a', '#7a4fa3', '#c07a2c', '#a83279', '#2b8a8a'];
+function hnBuild() { for (let i = 0; i < 8; i++) HN.slots.push({ name: null, real: false, t: -1e9, pose: 'ngoi', tint: HN_TINT[(i * 3) % HN_TINT.length], flip: i % 2 === 1, ph: i * 1.7, sc: .92 + ((i * 37) % 13) / 100, cache: {} }); HN.built = true; }
+function hnImg(sl, pose) { if (sl.cache[pose]) return sl.cache[pose]; const im = CN_IMG[pose]; if (!im || !im.complete || !im.naturalWidth) return null; const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0); if (sl.tint) { g.globalCompositeOperation = 'source-atop'; g.globalAlpha = .3; g.fillStyle = sl.tint; g.fillRect(0, 0, c.width, c.height); } sl.cache[pose] = c; return c; }
+window.__hangNhang = (name, loai) => { if (!HANG || !name) return; if (!HN.built) hnBuild(); let sl = HN.slots.find(x => x.name === name); if (!sl) { sl = HN.slots.find(x => !x.real) || HN.slots.slice().sort((a, b) => a.t - b.t)[0]; sl.name = name; sl.real = true; } sl.t = S.t; sl.pose = loai === 'qua' ? 'vai' : 'vo'; };
+function drawHangNhang(t) { if (!HANG) return; if (!HN.built) hnBuild(); const n = HN.slots.length, gap = W / n, base = KH.BY + 62;
+  HN.slots.forEach((sl, i) => { if (sl.real && S.t - sl.t > 600) { sl.real = false; sl.name = null; } const act = S.t - sl.t < 3.2, c = hnImg(sl, act ? sl.pose : 'ngoi') || hnImg(sl, 'ngoi'); if (!c) return;
+    const h = 92 * sl.sc, w = c.width * h / c.height, x = gap * (i + .5), bob = Math.sin(t * 1.3 + sl.ph) * 1.2; ctx.save(); ctx.translate(x, base + bob); if (sl.flip) ctx.scale(-1, 1); ctx.drawImage(c, -w / 2, -h, w, h); ctx.restore();
+    if (sl.real && sl.name) { let nm = sl.name; ctx.save(); ctx.font = `700 9.5px ${SERIF}`; while (ctx.measureText(nm).width > gap - 8 && nm.length > 2) nm = nm.slice(0, -1); if (nm !== sl.name) nm += '…'; const tw = ctx.measureText(nm).width + 8; rr(x - tw / 2, base + 3, tw, 14, 7, act ? 'rgba(200,40,60,.92)' : 'rgba(60,14,10,.88)'); text(nm, x, base + 10.5, 9.5, '#ffe39a', { f: SERIF, w: 700 }); ctx.restore(); } }); }
 const KH_DICH = () => [W / 2, H - 70]; // điểm lộc bay vào (nền đen dưới khung)
 const LOC_CONG = { tien: '+500.000', hoa: '+1', qua: '+1', keo: '+1' }; // 16/11: lộc không phải tiền thì +1
 const LOI_LOC = { tien: 'Ta ban cho con [tên] tiền bạc đầy kho', hoa: 'Ta ban cho con [tên] lộc hoa tươi thắm', qua: 'Ta ban cho con [tên] lộc quả ngọt lành', keo: 'Ta ban cho con [tên] lộc ngọt bình an' };
@@ -1469,7 +1481,7 @@ function drawBayRa() { const [px, py] = KH_DICH(); S.congLoc = (S.congLoc || [])
   S.sangLoc = Math.max(0, (S.sangLoc || 0) - .004); const sg = S.sangLoc; if (sg > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const R = 30 + 90 * sg, g = ctx.createRadialGradient(px, py, 2, px, py, R); g.addColorStop(0, `rgba(255,236,170,${.35 + .6 * sg})`); g.addColorStop(.4, `rgba(255,200,90,${.25 + .4 * sg})`); g.addColorStop(1, 'rgba(255,180,60,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill(); ctx.restore(); } // sáng tăng dần theo số lộc bay vào
   S.congLoc.forEach(c => { c.t += 1 / 60; const a = c.t < .1 ? c.t / .1 : 1 - Math.max(0, c.t - .32) / .3; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1); ctx.font = `900 19px ${SERIF}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(60,20,0,.9)'; ctx.textAlign = 'center'; const yy = py - 26 - c.t * 70; /* chữ +500.000 trôi xuống nền đen, không đè hình */ ctx.strokeText(c.s, c.x, yy); ctx.fillStyle = '#ffe08a'; ctx.fillText(c.s, c.x, yy); ctx.restore(); }); }
 function khCanhBao() { const b = typeof buocGia === 'function' ? buocGia() : null; if (!b) return; const ten = b[0][b[1]] || ''; if (!(/tửu/i.test(ten) || (laOng() && /lộc/i.test(ten)))) return;
-  const y = KH.BY + 10, s = '⚠ Sử dụng rượu bia, thuốc lá có chừng mực · Trẻ em dưới 18 tuổi không nên sử dụng'; ctx.save(); ctx.font = `700 10.5px ${SERIF}`; const w = Math.min(W - 16, ctx.measureText(s).width + 24);
+  const y = KH.BY + 10 + (HANG ? 84 : 0), s = '⚠ Sử dụng rượu bia, thuốc lá có chừng mực · Trẻ em dưới 18 tuổi không nên sử dụng'; ctx.save(); ctx.font = `700 10.5px ${SERIF}`; const w = Math.min(W - 16, ctx.measureText(s).width + 24);
   rr(W / 2 - w / 2, y, w, 24, 8, 'rgba(70,10,6,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(W / 2 - w / 2, y, w, 24, 8); ctx.stroke(); text(s, W / 2, y + 12.5, 10.5, '#ffe19a', { f: SERIF, w: 700 }); ctx.restore(); }
 function drawItem(kind, x, y, s) {
   if (kind === 'fruit' || kind === 'peach') kind = 'img:qua'; else if (kind === 'flower') kind = 'img:hoa-hong'; // 15/11 anh Linh: bỏ quả cam, hoa vẽ giả lập, chỉ dùng ảnh quả, hoa đã cung cấp
@@ -2745,7 +2757,7 @@ function frame1(now) {
     /* 14/11 anh Linh: bỏ nhãn Thế Hoàn */ drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
   } finally { camShift(-1); }
   ctx.restore();
-  if (KH.on) { drawBayRa(); khCanhBao(); }
+  if (KH.on) { drawHangNhang(t); drawBayRa(); khCanhBao(); }
   drawOverlay(t); if (!S.chuyen) { const m = camMap(CO.x, CO.y); ctx.save(); ctx.translate(m[0] - CO.x, m[1] - CO.y); drawKhen(); ctx.restore(); } /* 15/11: lời ban khen vẽ sau cùng các bảng, không bị che */ drawGiaPill(); drawLoiVan(t); drawKet(); // màn kết chương trình phủ lên trên cùng
   if (CAPDO) drawCapDo(t);
   drawDbg();
@@ -2911,6 +2923,7 @@ buildCfgPanel(); napNhacGia();
     const name = nameOf(d); if (!name) return;
     const nm = String(name).slice(0, 24); seen.set(nm, H.S.t);
     const t = String(type || '').toLowerCase();
+    try { if (window.__hangNhang) window.__hangNhang(nm, t.includes('gift') ? 'qua' : 'tt'); } catch (e) {} // 17/11: người xem thật vào ngồi hàng con nhang
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
     if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) { say(nm, c); const cn = String(c).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); /* 16/11 tối anh Linh: bỏ cú pháp 'Họ & quê quán' – cứ bình luận là được ban khen (mỗi người tối đa 1 lần/2 phút) */ if (!(dem.hoT > H.S.t - 120)) { dem.hoT = H.S.t; K(nm, /lay co|lay thanh|con lay/.test(cn) ? 'lay' : 'chung', 3); } } }
     else if (t.includes('like')) { const n = Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))); person(nm); like(n, nm); const truoc = dem.tim; dem.tim += n; if (Math.floor(dem.tim / 100) > Math.floor(truoc / 100)) K(nm, 'chung', 1); }
