@@ -51,11 +51,11 @@ window.BANG_TIN = {
     'Truyền thuyết kể Ông từng xuống trần gian, giúp dân khai hoang, chống lũ, phát triển nông nghiệp và nghề dệt',
     'Ông được thờ ở Đền Củi (Đền Chợ Củi), xã Xuân Hồng, huyện Nghi Xuân, Hà Tĩnh, di tích quốc gia từ năm 1993, và Đền Ông Hoàng Mười ở huyện Hưng Nguyên, Nghệ An, hai bên bờ sông Lam',
   ],
-  // Cô Chín Sòng Sơn. Bài: "Bỉm Sơn - một vùng di sản, danh thắng" - Báo Nhân Dân, 10/06/2025
-  nguon_cochin: 'Báo Nhân Dân, "Bỉm Sơn - một vùng di sản, danh thắng", 10/06/2025',
+  // Cô Chín Sòng Sơn (Cô Chín Giếng) — tích của Cô, không phải tích đền Sòng. 17/11 anh Linh sửa. Nguồn: Vietnam Airlines - cẩm nang du lịch "Đền Cô Chín Thanh Hóa"
+  nguon_cochin: 'Vietnam Airlines, cẩm nang du lịch "Đền Cô Chín Thanh Hóa"',
   cochin: [
-    'Đền Sòng Sơn (Bỉm Sơn, Thanh Hóa) từ lâu là chốn linh thiêng, thờ Thánh Mẫu Liễu Hạnh, vị thần giáng trần trừ ác, an dân',
-    'Gắn với đền Sòng là đền Chín Giếng, nơi thờ Cửu Thiên Huyền Nữ, được tích kể là con gái thứ chín của Ngọc Hoàng Thượng đế',
-    'Lễ hội Sòng Sơn - Ba Dội diễn ra từ 24 đến 26 tháng Hai âm lịch, có nghi thức rước Thánh Mẫu từ đền Sòng Sơn sang đền Chín Giếng',
+    'Tương truyền Cô Chín là Cửu Thiên Huyền Nữ, con gái thứ chín của Ngọc Hoàng, giáng trần làm cô gái bán nước bên cổng làng Ba Dội',
+    'Cô nổi tiếng giỏi xem bói, chữa bệnh, cứu giúp dân lành; dân làng thấy linh ứng nên lập đền thờ Cô ở Chín Giếng (Bỉm Sơn, Thanh Hóa)',
+    'Hằng năm có lễ rước Thánh Mẫu từ đền Sòng Sơn sang đền Cô Chín Giếng, tái hiện tích "chị đến thăm em"; tiệc chính của Cô là mùng 9 tháng 9 âm lịch',
   ],
 };
