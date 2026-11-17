@@ -929,8 +929,8 @@ const CC_LICH = [ // [bước, nhạc, từ giây, đến giây, clip (null = v�
   ['segia', 'segia', 0, 8, 'segia', 'vua', '', null, null, null, 'giu']];
 const BUOC_CC = ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa quạt', 'Nghe văn', 'Phát lộc', 'Xe giá'];
 const CC_BUOC_K = { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muaquat: 4, uongnuoc: 5, phatlixi: 6, phatloc: 6, segia: 7 };
-const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.64, 71.9, 208.4], phatlixi: [0.72, 86.0, 179.6], locqua: [0.72, 87.7, 180.4], segia: [0.69, 59.2, 211.7], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4], thayao: [0.716, 55.2, 159.5], dangnhang: [0.647, 41.1, 198.0], muaquat: [0.653, 53.9, 198.3] };
-const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 125, phatlixi: 152, locqua: 157, segia: 111, ngoi: 125, dung: 170, thayao: 176, dangnhang: 56, muaquat: 55 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
+const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.566, 77.4, 224.4], phatlixi: [0.5, 91.4, 241.6], locqua: [0.5, 90.8, 241.3], segia: [0.53, 85.4, 217.4], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4], thayao: [0.716, 55.2, 159.5], dangnhang: [0.647, 41.1, 198.0], muaquat: [0.653, 53.9, 198.3] };
+const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 108, phatlixi: 88, locqua: 89, segia: 129, ngoi: 125, dung: 170, thayao: 176, dangnhang: 56, muaquat: 55 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
 const CC2 = { sway: 0 };
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
 function ccTu2D(dt) { // tư thế hình vẽ Cô Chín cho các đoạn chưa có clip
@@ -983,7 +983,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'cc/cc-' + n + '.mp4?v=2') : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'cc/cc-' + n + '.mp4?v=3') : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
   CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
@@ -1442,7 +1442,7 @@ function vaiDongBo(ctl, ten, v) { const L = VAI_TG[ctl] && VAI_TG[ctl][ten]; if 
   L.forEach(t0 => { if ((pt < t0 && ct >= t0)) { if (!S.sound) return; const a = CHIENG[CHIENG_I++ % CHIENG.length]; try { a.currentTime = 0; a.volume = 1; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } }); }
 // 16/11 anh Linh: mỗi lần tay tung trong clip là một đợt lộc; lộc bay nối đuôi thành một hàng uốn lượn, to dần ra phía người xem, rồi bay vào một điểm ở nền đen bên dưới, hiện "+500.000"
 // [giây trong clip, x, y (khung 360x640), loại lộc] – đo từ từng khung hình clip của Tú
-const NEM_CC = { phatlixi: [[4.0, 290, 250, 'tien'], [12.0, 290, 250, 'tien']], locqua: [[4.0, 287, 325, 'qua'], [12.0, 287, 325, 'qua']] }; // Cô Chín trao lì xì, trao chanh khế ô mai (giây clip, toạ độ tay)
+const NEM_CC = { phatlixi: [[4.0, 330, 275, 'tien'], [12.0, 330, 275, 'tien']], locqua: [[4.0, 330, 280, 'qua'], [12.0, 330, 280, 'qua']] }; // Cô Chín trao lì xì, trao chanh khế ô mai (giây clip, toạ độ tay)
 const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], phatloc: OM_NEM }, ob: { loc: [[2.6, 270, 372, 'tien']] } }; Object.assign(NEM.cu, NEM_CC);
 /* 17/11 anh Linh: một hàng con nhang ngồi ngang sát mép dưới khung hình, tràn xuống nền đen (link thử /tn ?hang=1).
    Người xem thật tương tác thì ngồi vào hàng, hiện tên nick; chỗ còn trống là con nhang giả lập (không tên, không bao giờ được ban khen) */
