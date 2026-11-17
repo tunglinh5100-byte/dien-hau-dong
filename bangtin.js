@@ -51,4 +51,11 @@ window.BANG_TIN = {
     'Truyền thuyết kể Ông từng xuống trần gian, giúp dân khai hoang, chống lũ, phát triển nông nghiệp và nghề dệt',
     'Ông được thờ ở Đền Củi (Đền Chợ Củi), xã Xuân Hồng, huyện Nghi Xuân, Hà Tĩnh, di tích quốc gia từ năm 1993, và Đền Ông Hoàng Mười ở huyện Hưng Nguyên, Nghệ An, hai bên bờ sông Lam',
   ],
+  // Cô Chín Sòng Sơn. Bài: "Bỉm Sơn - một vùng di sản, danh thắng" - Báo Nhân Dân, 10/06/2025
+  nguon_cochin: 'Báo Nhân Dân, "Bỉm Sơn - một vùng di sản, danh thắng", 10/06/2025',
+  cochin: [
+    'Đền Sòng Sơn (Bỉm Sơn, Thanh Hóa) từ lâu là chốn linh thiêng, thờ Thánh Mẫu Liễu Hạnh, vị thần giáng trần trừ ác, an dân',
+    'Gắn với đền Sòng là đền Chín Giếng, nơi thờ Cửu Thiên Huyền Nữ, được tích kể là con gái thứ chín của Ngọc Hoàng Thượng đế',
+    'Lễ hội Sòng Sơn - Ba Dội diễn ra từ 24 đến 26 tháng Hai âm lịch, có nghi thức rước Thánh Mẫu từ đền Sòng Sơn sang đền Chín Giếng',
+  ],
 };
