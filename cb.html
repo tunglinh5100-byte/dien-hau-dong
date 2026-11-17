@@ -2971,25 +2971,44 @@ buildCfgPanel(); napNhacGia();
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
     if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) { say(nm, c); const cn = String(c).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); /* 16/11 tối anh Linh: bỏ cú pháp 'Họ & quê quán' – cứ bình luận là được ban khen (mỗi người tối đa 1 lần/2 phút) */ if (!(dem.hoT > H.S.t - 120)) { dem.hoT = H.S.t; K(nm, /lay co|lay thanh|con lay/.test(cn) ? 'lay' : 'chung', 3); } } }
     else if (t.includes('like')) { const n = Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))); person(nm); like(n, nm); const truoc = dem.tim; dem.tim += n; if (Math.floor(dem.tim / 100) > Math.floor(truoc / 100)) K(nm, 'chung', 1); }
-    else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && d.giftType === 1) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); K(nm, dc >= 99 ? 'big' : 'hoa', 4); }
+    else if (t.includes('gift')) { if (!d.repeatEnd && d.repeatEnd !== undefined && (d.giftType === 1 || (d.giftDetails && d.giftDetails.giftType === 1))) return; const g = d.gift || d.giftDetails || {}; const dc = +(g.diamondCount || d.diamondCount || 1); gift(nm, dc >= 99 ? 'big' : 'loc'); K(nm, dc >= 99 ? 'big' : 'hoa', 4); }
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) { shareLive(nm); K(nm, 'share', 3); } else follow(nm); }
     else if (t === 'share') { shareLive(nm); K(nm, 'share', 3); }
     else if (t === 'follow') follow(nm);
     else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm)) { person(nm); addComment(nm, 'đã vào phiên live'); } }
   }
   // ---- TikFinity (chạy trên cùng máy tính): tự kết nối, không cần API key ----
-  let tf = null, tfOk = false, tfTimer = null;
+  let tf = null, tfOk = false, tfTimer = null, euOk = false, euTimer = null;
   function tfConnect() {
     try { tf = new WebSocket('ws://localhost:21213/'); } catch (e) { tfTimer = setTimeout(tfConnect, 5000); return; }
     tf.onopen = () => { tfOk = true; H.S.real = true; setStat('TikFinity: đã kết nối ● · ' + seen.size + ' người đã tương tác'); };
     tf.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
-      const type = j.event || j.type, d = j.data || {}; if (type) handle(type, d);
+      if (euOk) return; /* 17/11 Euler đang nối thì bỏ TikFinity cho khỏi đếm 2 lần */ const type = j.event || j.type, d = j.data || {}; if (type) handle(type, d);
       setStat('TikFinity: đã kết nối ● · ' + seen.size + ' người đã tương tác'); };
     tf.onclose = () => { if (tfOk) setStat('TikFinity: mất kết nối, đang thử lại…'); tfOk = false; if (!ws) H.S.real = false; tf = null; clearTimeout(tfTimer); tfTimer = setTimeout(tfConnect, 5000); };
     tf.onerror = () => {};
   }
   tfConnect();
-  window.__hdTf = () => tfOk;
+  window.__hdTf = () => tfOk || euOk;
+  // ---- 17/11 tối anh Linh: Euler Stream (máy chủ trên mạng, không cần mở TikFinity). Khoá đưa qua link ?eu=…, trình duyệt tự nhớ; không ghi khoá vào mã trang ----
+  function euConnect() {
+    const Q = new URLSearchParams(location.search); let key = Q.get('eu') || '', kenh = Q.get('kenh') || '';
+    try { if (key) localStorage.setItem('hd_eu', key); else key = localStorage.getItem('hd_eu') || ''; if (kenh) localStorage.setItem('hd_kenh', kenh); else kenh = localStorage.getItem('hd_kenh') || ''; } catch (e) {}
+    if (!key || key === '0') return; kenh = (kenh || 'linhxiaocheng').replace(/^@/, '');
+    let eu; try { eu = new WebSocket('wss://ws.eulerstream.com?uniqueId=' + encodeURIComponent(kenh) + '&apiKey=' + encodeURIComponent(key)); } catch (e) { euTimer = setTimeout(euConnect, 15000); return; }
+    eu.onopen = () => setStat('Euler: đang nối kênh @' + kenh + '…');
+    eu.onmessage = (ev) => { let j; try { j = JSON.parse(ev.data); } catch (e) { return; }
+      (j.messages || []).forEach(m => { const type = m.type || '', d = m.data || {};
+        if (type === 'roomInfo' || type === 'tiktok.connect') { euOk = true; H.S.real = true; }
+        if (/^Webcast/.test(type)) { euOk = true; H.S.real = true; try { handle(type, d); } catch (e) {} } });
+      if (euOk) setStat('Euler: đã kết nối ● @' + kenh + ' · ' + seen.size + ' người đã tương tác'); };
+    eu.onclose = (e) => { const was = euOk; euOk = false; if (!tfOk) H.S.real = false;
+      const ly = { 4401: 'khoá Euler sai', 4403: 'khoá Euler không có quyền', 4404: 'kênh @' + kenh + ' chưa live', 4429: 'quá nhiều kết nối', 4005: 'phiên live đã kết thúc' }[e.code];
+      setStat('Euler: ' + (ly || (was ? 'mất kết nối' : 'chưa nối được')) + ', đang thử lại…' + (tfOk ? ' (TikFinity vẫn nối)' : ''));
+      clearTimeout(euTimer); if (e.code === 4401 || e.code === 4403) return; euTimer = setTimeout(euConnect, e.code === 4404 || e.code === 4005 ? 60000 : 8000); };
+    eu.onerror = () => {};
+  }
+  euConnect();
 })();
 
 // ---------- Chế độ live trên điện thoại: chỉ còn khung điện, phủ kín màn hình; chạm 2 lần để thoát ----------
