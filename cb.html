@@ -898,7 +898,7 @@ function cbDraw(t, x, y, sc) {
 // ---------- Cậu Bé Bản Đền (bản nháp, chép từ khung Chầu Bé) bằng video thật (Tú quay nền xanh, Quỳnh ghép nhạc văn): thỉnh, tung khăn, thay khăn áo, vái hương, bài sai, khai quang, múa mồi, tung lộc, về ngồi ngự tửu, ban lộc, xe giá ----------
 // ---------- 16/11 thử nghiệm giá Ông Hoàng Mười (?om=1, link /om): dùng chung bộ máy giá Cậu Bé, thay clip Tú, nhạc văn Quỳnh, kịch bản Quỳnh ----------
 const OMU_THU = /[?&]om=1/.test(location.search); let OMU = OMU_THU; // 16/11 chiều: Ông Hoàng Mười ghép vào /g (giá thứ 5), dùng chung bộ máy giá Cậu Bé; OMU = đang ngự giá Ông Mười
-const CC_THU = /[?&]cc=1/.test(location.search); let CUM = OMU_THU ? 'om' : 'cau'; // 17/11 giá Cô Chín (link thử /tn ?cc=1): dùng chung bộ máy giá Cậu Bé; CUM = 'cau' | 'om' | 'cc'
+const CC_THU = !/[?&]cc=0/.test(location.search); /* 17/11 15:58 anh Linh live /g không thấy Cô Chín (tab mở từ địa chỉ cũ thiếu ?cc=1): Cô Chín luôn bật, ?cc=0 để tắt */ let CUM = OMU_THU ? 'om' : 'cau'; // 17/11 giá Cô Chín (link thử /tn ?cc=1): dùng chung bộ máy giá Cậu Bé; CUM = 'cau' | 'om' | 'cc'
 function laCU(id) { return id === 'caube' || id === 'ongmuoi' || (id === 'cochin' && CC_THU); }
 function cuModeOf(id) { return id === 'ongmuoi' ? 'om' : id === 'cochin' ? 'cc' : 'cau'; }
 const OM_AU_V = 3; const OM_AU = { thinh: 'om/om_01_van_thinh.mp3', thayao: 'om/om_02_nhac_thay-khan-ao.mp3', tau: 'om/om_03_nhac_tau-huong.mp3', khai: 'om/om_04_nhac_khai-quang.mp3', muaco: 'om/om_05_nhac_mua-co.mp3', tho: 'om/om_05b_nhac_ngam-tho.mp3', tuu: 'om/om_06_van_nghe-van.mp3', nghe: 'om/om_06b_van_nghe-van-2.mp3', loc: 'om/om_07_van_phat-loc.mp3', segia: 'om/om_08_van_se-gia.mp3' };
@@ -1448,7 +1448,7 @@ const NEM_CC = { phatlixi: [[4.0, 330, 275, 'tien'], [12.0, 330, 275, 'tien']], 
 const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], phatloc: OM_NEM }, ob: { loc: [[2.6, 270, 372, 'tien']] } }; Object.assign(NEM.cu, NEM_CC);
 /* 17/11 anh Linh: một hàng con nhang ngồi ngang sát mép dưới khung hình, tràn xuống nền đen (link thử /tn ?hang=1).
    Người xem thật tương tác thì ngồi vào hàng, hiện tên nick; chỗ còn trống là con nhang giả lập (không tên, không bao giờ được ban khen) */
-const HANG = /[?&]hang=1/.test(location.search);
+const HANG = !/[?&]hang=0/.test(location.search); /* 17/11: hàng con nhang luôn bật, ?hang=0 để tắt */
 const CN_IMG = {}; if (HANG) ['ngoi', 'vo'].forEach(k => { const i = new Image(); i.src = 'cn/' + k + '.png?v=1'; CN_IMG[k] = i; });
 const HN = { slots: [], built: false }, HN_TINT = [null, '#b23a48', '#c07a2c', null, '#8a5a2b', '#a83c3c', null, '#c49a3c']; /* 17/11 anh Linh: bỏ màu xanh lá, tím (nhìn như ma) */
 function hnBuild() { for (let i = 0; i < 8; i++) HN.slots.push({ name: null, real: false, t: -1e9, pose: 'ngoi', tint: HN_TINT[(i * 3) % HN_TINT.length], flip: i >= 4, /* 17/11: ai cũng hướng lên ban Công Đồng ở giữa */ ph: i * 1.7, sc: .92 + ((i * 37) % 13) / 100, cache: {} }); HN.built = true; }
