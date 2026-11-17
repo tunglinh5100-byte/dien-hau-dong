@@ -51,6 +51,13 @@ window.BANG_TIN = {
     'Truyền thuyết kể Ông từng xuống trần gian, giúp dân khai hoang, chống lũ, phát triển nông nghiệp và nghề dệt',
     'Ông được thờ ở Đền Củi (Đền Chợ Củi), xã Xuân Hồng, huyện Nghi Xuân, Hà Tĩnh, di tích quốc gia từ năm 1993, và Đền Ông Hoàng Mười ở huyện Hưng Nguyên, Nghệ An, hai bên bờ sông Lam',
   ],
+  // Chầu Lục Cung Nương — 17/11. Nguồn: oancotam.com "Truyền thuyết về Chầu Lục Cung Nương", muahoabachhop.com "Sự tích Chầu Lục Cung Nương"
+  nguon_chaulu: 'oancotam.com, "Truyền thuyết về Chầu Lục Cung Nương"',
+  chaulu: [
+    'Tương truyền Chầu Lục Cung Nương là tiên nữ trên thiên đình, lỡ tay làm rơi chén ngọc nên bị đày xuống trần, giáng sinh vào nhà tù trưởng người Nùng ở xứ Lạng',
+    'Mãn hạn, Chầu được hiển thánh, trông coi núi rừng vùng Chín Tư (Hữu Lũng, Lạng Sơn), thương dân, giúp dân trồng trọt và ban lộc buôn bán',
+    'Đền chính của Chầu là Lục Cung Linh Từ (đền Chín Tư), xã Hòa Lạc, huyện Hữu Lũng, Lạng Sơn; tiệc chính là ngày 10 tháng 5 âm lịch'
+  ],
   // Cô Chín Sòng Sơn (Cô Chín Giếng) — tích của Cô, không phải tích đền Sòng. 17/11 anh Linh sửa. Nguồn: Vietnam Airlines - cẩm nang du lịch "Đền Cô Chín Thanh Hóa"
   nguon_cochin: 'Vietnam Airlines, cẩm nang du lịch "Đền Cô Chín Thanh Hóa"',
   cochin: [
