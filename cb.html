@@ -275,7 +275,9 @@ function flowerMotif(x, y, r, c1, c2) {
   try { if (laOng()) { rongMotif(x, y, r); return; } } catch (e) {} /* ông: hoa văn rồng thêu kim tuyến */ for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.ellipse(x + Math.cos(k * 1.26) * r * .6, y + Math.sin(k * 1.26) * r * .6, r * .55, r * .35, k * 1.26, 0, 6.28); ctx.fillStyle = k % 2 ? c1 : c2; ctx.fill(); } circ(x, y, r * .28, '#f4d47c'); }
 // Tiền polymer Việt Nam (vẽ cách điệu): màu đúng từng mệnh giá, ô cửa sổ trong suốt, chân dung, số mệnh giá
 const NOTES = [{ v: '10000', c: '#b98a3a' }, { v: '20000', c: '#3c74b5' }, { v: '50000', c: '#b05a8a' }, { v: '100000', c: '#4c9a58' }, { v: '200000', c: '#c0603c' }, { v: '500000', c: '#2f9bb5' }];
+function laCoChin() { try { return GIA().id === 'cochin'; } catch (e) { return false; } }
 function note(x, y, s, d, flip = 1) { // tờ 500.000 polymer (ảnh thật anh gửi)
+  try { const lx = typeof LOC_IMG !== 'undefined' && LOC_IMG.lixi; if (lx && lx.complete && lx.naturalWidth && laCoChin()) { ctx.save(); ctx.translate(x, y); ctx.scale(s * flip, s); ctx.drawImage(lx, -9, -11, 18, 22); ctx.restore(); return; } } catch (e) {} /* 17/11 anh Linh: Cô Chín phát lộc tiền bằng bao lì xì */
   if (!(N500.complete && N500.naturalWidth)) { rr(x - 18 * s, y - 8.5 * s, 36 * s, 17 * s, 1, '#2f9bb5'); return; }
   ctx.save(); ctx.translate(x, y); ctx.scale(s * flip, s); ctx.drawImage(N500, -18, -8.3, 36, 16.6);
   if (flip < 0) { ctx.fillStyle = 'rgba(40,120,140,.25)'; ctx.fillRect(-18, -8.3, 36, 16.6); }
@@ -1425,7 +1427,7 @@ function drawSong(t) { // sóng nước Thoải phủ trên thảm khi đủ tim
 function drawSen(x, y, s, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
   [[-1, '#e9e6dc'], [1, '#e9e6dc'], [-.45, '#f6f4ee'], [.45, '#f6f4ee'], [0, '#ffffff']].forEach(([k, c]) => { ctx.save(); ctx.rotate(k * .55); ctx.beginPath(); ctx.moveTo(0, 2); ctx.quadraticCurveTo(-4, -4, 0, -10); ctx.quadraticCurveTo(4, -4, 0, 2); ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = 'rgba(180,170,150,.6)'; ctx.lineWidth = .5; ctx.stroke(); ctx.restore(); });
   circ(0, 0, 2, '#f6d35a'); ctx.restore(); }
-const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new Image(); im.src = 'loc-' + n + '.png?v=1'; LOC_IMG[n] = im; }); // ảnh lộc từ kho đạo cụ (Tú tách nền xanh) – dùng chung mọi giá
+const LOC_IMG = {}; ['qua', 'hoa-hong', 'keo-mut'].forEach(n => { const im = new Image(); im.src = 'loc-' + n + '.png?v=1'; LOC_IMG[n] = im; }); ['chanh', 'lixi'].forEach(n => { const im = new Image(); im.src = 'loc/' + n + '.png?v=2'; LOC_IMG[n] = im; }); /* 17/11: ảnh Tú cho giá Cô Chín */ // ảnh lộc từ kho đạo cụ (Tú tách nền xanh) – dùng chung mọi giá
 // ---------- 15/11 khung phẳng: che ngoài khung, viền vàng, lộc bay ra khỏi khung ----------
 function khMask(T0) { ctx.save(); ctx.setTransform(T0); const B = KH.BY, R = KH.R; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.roundRect(0, -R * 2, W, B + R * 2, R); ctx.fillStyle = '#000'; ctx.fill('evenodd');
   const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#9a6a22'); g.addColorStop(.5, '#ffe08a'); g.addColorStop(1, '#9a6a22'); ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(1.5, -R * 2, W - 3, B + R * 2 + 1.5, R); ctx.stroke(); ctx.restore(); }
@@ -1485,7 +1487,8 @@ function khCanhBao() { const b = typeof buocGia === 'function' ? buocGia() : nul
   rr(W / 2 - w / 2, y, w, 24, 8, 'rgba(70,10,6,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(W / 2 - w / 2, y, w, 24, 8); ctx.stroke(); text(s, W / 2, y + 12.5, 10.5, '#ffe19a', { f: SERIF, w: 700 }); ctx.restore(); }
 function drawItem(kind, x, y, s) {
   if (kind === 'fruit' || kind === 'peach') kind = 'img:qua'; else if (kind === 'flower') kind = 'img:hoa-hong'; // 15/11 anh Linh: bỏ quả cam, hoa vẽ giả lập, chỉ dùng ảnh quả, hoa đã cung cấp
-  if (kind && kind.startsWith('img:')) { const im = LOC_IMG[kind.slice(4)]; if (im && im.complete && im.naturalWidth) { const h = (kind === 'img:keo-mut' ? 34 : 48) * s, w = h * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); return; } kind = kind === 'img:hoa-hong' ? 'flower' : 'fruit'; }
+  if (kind === 'img:qua' && laCoChin()) kind = 'img:chanh'; /* 17/11 11:28 anh Linh: lộc quả của Cô Chín là lát chanh */
+  if (kind && kind.startsWith('img:')) { const im = LOC_IMG[kind.slice(4)]; if (im && im.complete && im.naturalWidth) { const h = (kind === 'img:keo-mut' || kind === 'img:chanh' ? 34 : 48) * s, w = h * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); return; } kind = kind === 'img:hoa-hong' ? 'flower' : 'fruit'; }
   if (kind === 'sen') { drawSen(x, y, 1.1 * s, 0); return; }
   if (kind === 'note') { note(x, y, .7 * s, 5); return; }
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
