@@ -917,18 +917,18 @@ const OM_TF = {"thinh": [0.76, 37.8, 161.4], "thayao": [1.0, -8.4, 85.0], "tauhu
 const CC_AU = { thinh: 'cc/cchin_01_van_thinh.mp3', thayao: 'cc/cchin_02_nhac_thay-khan-ao.mp3', vai: 'cc/cchin_03_nhac_vai-huong.mp3', muaquat: 'cc/cchin_05_nhac_mua-quat.mp3', uong: 'cc/cchin_06_van_uong-nuoc.mp3', tien: 'cc/cchin_07_van_phat-loc-tien.mp3', khac: 'cc/cchin_08_van_phat-loc-khac.mp3', segia: 'cc/cchin_09_van_se-gia.mp3' };
 const CC_LICH = [ // [bước, nhạc, từ giây, đến giây, clip (null = vẽ hoạt hình), kiểu]
   ['thinh', 'thinh', 0, 11, 'thinh', 'lap', ''], ['tungkhan', 'thayao', 0, 5.4, 'tungkhan', 'vua', ''],
-  ['thayao', 'thayao', 5.4, 138, 'ngoi', 'lap', ''], // chờ clip cchin_02 của Tú: tạm dùng đoạn Cô ngồi quay lưng (đầu clip uống nước của Tú)
+  ['thayao', 'thayao', 5.4, 138, 'thayao', 'ngoi', '', null, null, 8.0], // 17/11 11:08 clip cchin_02 của Tú (đã cắt người hầu)
   ['vaihuong', 'vai', 0, 11, 'vaihuong', 'vua', ''],
-  ['dangnhang', 'vai', 11, 40, 'dung', 'di', ''], // clip cchin_04 Cô quay mặt ra -> chờ Tú làm lại; tạm dùng đoạn Cô đứng cầm quạt + hương (đầu clip vái hương), đi xuyến trái phải
-  ['muaquat', 'muaquat', 0, 109, 'dung', 'di', ''], // chờ clip cchin_05 của Tú: tạm dùng đoạn Cô đứng cầm quạt, đi xuyến
+  ['dangnhang', 'vai', 11, 40, 'dangnhang', 'lap', ''], // 17/11 11:08 clip cchin_04 mới của Tú (quay lưng)
+  ['muaquat', 'muaquat', 0, 109, 'muaquat', 'lap', ''], // 17/11 11:08 clip cchin_05 của Tú (đã cắt người đứng hầu)
   ['uongnuoc', 'uong', 0, 92, 'uongnuoc', 'lap', ''],
   ['phatlixi', 'tien', 0, 47, 'phatlixi', 'lap', ''],
   ['phatloc', 'khac', 0, 76, 'locqua', 'lap', ''],
   ['segia', 'segia', 0, 8, 'segia', 'vua', '', null, null, null, 'giu']];
 const BUOC_CC = ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa quạt', 'Nghe văn', 'Phát lộc', 'Xe giá'];
 const CC_BUOC_K = { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muaquat: 4, uongnuoc: 5, phatlixi: 6, phatloc: 6, segia: 7 };
-const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.64, 71.9, 208.4], phatlixi: [0.72, 86.0, 179.6], locqua: [0.72, 87.7, 180.4], segia: [0.69, 59.2, 211.7], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4] };
-const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 125, phatlixi: 152, locqua: 157, segia: 111, ngoi: 125, dung: 170 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
+const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.64, 71.9, 208.4], phatlixi: [0.72, 86.0, 179.6], locqua: [0.72, 87.7, 180.4], segia: [0.69, 59.2, 211.7], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4], thayao: [0.716, 55.2, 159.5], dangnhang: [0.647, 41.1, 198.0], muaquat: [0.653, 53.9, 198.3] };
+const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 125, phatlixi: 152, locqua: 157, segia: 111, ngoi: 125, dung: 170, thayao: 176, dangnhang: 56, muaquat: 55 }, CC_RATE = { ngoi: .6, dung: .6, uongnuoc: .7 }; /* 17/11 anh Linh: Cô nghe văn chậm 30% */
 const CC2 = { sway: 0 };
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
 function ccTu2D(dt) { // tư thế hình vẽ Cô Chín cho các đoạn chưa có clip
@@ -981,7 +981,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'cc/cc-' + n + '.mp4?v=1') : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, cc ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'cc/cc-' + n + '.mp4?v=2') : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=16f3'), cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
   CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
@@ -1449,7 +1449,7 @@ const CN_IMG = {}; if (HANG) ['ngoi', 'vo'].forEach(k => { const i = new Image()
 const HN = { slots: [], built: false }, HN_TINT = [null, '#b23a48', '#c07a2c', null, '#8a5a2b', '#a83c3c', null, '#c49a3c']; /* 17/11 anh Linh: bỏ màu xanh lá, tím (nhìn như ma) */
 function hnBuild() { for (let i = 0; i < 8; i++) HN.slots.push({ name: null, real: false, t: -1e9, pose: 'ngoi', tint: HN_TINT[(i * 3) % HN_TINT.length], flip: i >= 4, /* 17/11: ai cũng hướng lên ban Công Đồng ở giữa */ ph: i * 1.7, sc: .92 + ((i * 37) % 13) / 100, cache: {} }); HN.built = true; }
 function hnImg(sl, pose) { if (sl.cache[pose]) return sl.cache[pose]; const im = CN_IMG[pose]; if (!im || !im.complete || !im.naturalWidth) return null; const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0); if (sl.tint) { g.globalCompositeOperation = 'source-atop'; g.globalAlpha = .22; g.fillStyle = sl.tint; g.fillRect(0, 0, c.width, c.height); } sl.cache[pose] = c; return c; }
-window.__hangNhang = (name, loai) => { if (!HANG || !name) return; if (!HN.built) hnBuild(); let sl = HN.slots.find(x => x.name === name); if (!sl) { sl = HN.slots.find(x => !x.real) || HN.slots.slice().sort((a, b) => a.t - b.t)[0]; sl.name = name; sl.real = true; } sl.t = S.t; sl.pose = 'vo'; }; /* 17/11: bỏ tư thế vái nghiêng ngang, chỉ chắp tay / vỗ tay hướng lên ban */
+window.__hangNhang = (name, loai) => { if (!HANG || !name) return; if (!HN.built) hnBuild(); let sl = HN.slots.find(x => x.name === name); if (!sl) { if (loai !== 'share') return; sl = HN.slots.find(x => !x.real) || HN.slots.slice().sort((a, b) => a.t - b.t)[0]; sl.name = name; sl.real = true; } sl.t = S.t; sl.pose = 'vo'; }; /* 17/11: bỏ tư thế vái nghiêng ngang, chỉ chắp tay / vỗ tay hướng lên ban */
 function drawHangNhang(t) { if (!HANG) return; if (!HN.built) hnBuild(); const n = HN.slots.length, gap = W / n, base = KH.BY + 62;
   HN.slots.forEach((sl, i) => { if (sl.real && S.t - sl.t > 600) { sl.real = false; sl.name = null; } const act = S.t - sl.t < 3.2; let ps = act ? sl.pose : 'ngoi', c = hnImg(sl, ps); if (!c) { ps = 'ngoi'; c = hnImg(sl, ps); } if (!c) return; const fl = sl.flip !== (ps === 'vo'); /* 17/11 11:03: ảnh vỗ tay gốc quay trái nên lật lại, để bên trái đều quay sang phải */
     const h = 92 * sl.sc, w = c.width * h / c.height, x = gap * (i + .5), bob = Math.sin(t * 1.3 + sl.ph) * 1.2; ctx.save(); ctx.translate(x, base + bob); if (fl) ctx.scale(-1, 1); ctx.drawImage(c, -w / 2, -h, w, h); ctx.restore();
@@ -2923,7 +2923,7 @@ buildCfgPanel(); napNhacGia();
     const name = nameOf(d); if (!name) return;
     const nm = String(name).slice(0, 24); seen.set(nm, H.S.t);
     const t = String(type || '').toLowerCase();
-    try { if (window.__hangNhang) window.__hangNhang(nm, t.includes('gift') ? 'qua' : 'tt'); } catch (e) {} // 17/11: người xem thật vào ngồi hàng con nhang
+    try { if (window.__hangNhang) window.__hangNhang(nm, (t === 'share' || (t.includes('social') && /share/.test(JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase())) || (t.includes('social') && +d.action === 3)) ? 'share' : 'tt'); } catch (e) {} // 17/11 11:08 anh Linh: chỉ ai chia sẻ live mới vào ngồi hàng con nhang; đã ngồi thì tương tác khác -> vỗ tay
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
     if (window.__hdLv) window.__hdLv.ev(nm, d, t); if (t.includes('chat')) { const c = d.comment || d.content || ''; if (c && window.__hdLenh && window.__hdLenh(d, c)) return; if (c) { say(nm, c); const cn = String(c).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); /* 16/11 tối anh Linh: bỏ cú pháp 'Họ & quê quán' – cứ bình luận là được ban khen (mỗi người tối đa 1 lần/2 phút) */ if (!(dem.hoT > H.S.t - 120)) { dem.hoT = H.S.t; K(nm, /lay co|lay thanh|con lay/.test(cn) ? 'lay' : 'chung', 3); } } }
     else if (t.includes('like')) { const n = Math.max(1, Math.min(50, +(d.count || d.likeCount || 1))); person(nm); like(n, nm); const truoc = dem.tim; dem.tim += n; if (Math.floor(dem.tim / 100) > Math.floor(truoc / 100)) K(nm, 'chung', 1); }
