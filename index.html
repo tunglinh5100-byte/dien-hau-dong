@@ -917,18 +917,18 @@ const OM_TF = {"thinh": [0.76, 37.8, 161.4], "thayao": [1.0, -8.4, 85.0], "tauhu
 const CC_AU = { thinh: 'cc/cchin_01_van_thinh.mp3', thayao: 'cc/cchin_02_nhac_thay-khan-ao.mp3', vai: 'cc/cchin_03_nhac_vai-huong.mp3', muaquat: 'cc/cchin_05_nhac_mua-quat.mp3', uong: 'cc/cchin_06_van_uong-nuoc.mp3', tien: 'cc/cchin_07_van_phat-loc-tien.mp3', khac: 'cc/cchin_08_van_phat-loc-khac.mp3', segia: 'cc/cchin_09_van_se-gia.mp3' };
 const CC_LICH = [ // [bước, nhạc, từ giây, đến giây, clip (null = vẽ hoạt hình), kiểu]
   ['thinh', 'thinh', 0, 11, 'thinh', 'lap', ''], ['tungkhan', 'thayao', 0, 5.4, 'tungkhan', 'vua', ''],
-  ['thayao', 'thayao', 5.4, 138, null, '2d', ''], // chờ clip cchin_02 của Tú
+  ['thayao', 'thayao', 5.4, 138, 'ngoi', 'lap', ''], // chờ clip cchin_02 của Tú: tạm dùng đoạn Cô ngồi quay lưng (đầu clip uống nước của Tú)
   ['vaihuong', 'vai', 0, 11, 'vaihuong', 'vua', ''],
-  ['dangnhang', 'vai', 11, 40, null, '2d', ''], // clip cchin_04 Cô quay mặt ra -> chờ Tú làm lại, tạm vẽ
-  ['muaquat', 'muaquat', 0, 109, null, '2d', ''], // chờ clip cchin_05 của Tú
+  ['dangnhang', 'vai', 11, 40, 'dung', 'di', ''], // clip cchin_04 Cô quay mặt ra -> chờ Tú làm lại; tạm dùng đoạn Cô đứng cầm quạt + hương (đầu clip vái hương), đi xuyến trái phải
+  ['muaquat', 'muaquat', 0, 109, 'dung', 'di', ''], // chờ clip cchin_05 của Tú: tạm dùng đoạn Cô đứng cầm quạt, đi xuyến
   ['uongnuoc', 'uong', 0, 92, 'uongnuoc', 'lap', ''],
   ['phatlixi', 'tien', 0, 47, 'phatlixi', 'lap', ''],
   ['phatloc', 'khac', 0, 76, 'locqua', 'lap', ''],
   ['segia', 'segia', 0, 8, 'segia', 'vua', '', null, null, null, 'giu']];
 const BUOC_CC = ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa quạt', 'Nghe văn', 'Phát lộc', 'Xe giá'];
 const CC_BUOC_K = { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muaquat: 4, uongnuoc: 5, phatlixi: 6, phatloc: 6, segia: 7 };
-const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.64, 71.9, 208.4], phatlixi: [0.72, 86.0, 179.6], locqua: [0.72, 87.7, 180.4], segia: [0.69, 59.2, 211.7] };
-const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 125, phatlixi: 152, locqua: 157, segia: 111 }, CC_RATE = {};
+const CC_TF = { thinh: [0.76, 37.8, 161.4], tungkhan: [0.76, 37.8, 161.4], vaihuong: [0.87, 16.0, 87.4], uongnuoc: [0.64, 71.9, 208.4], phatlixi: [0.72, 86.0, 179.6], locqua: [0.72, 87.7, 180.4], segia: [0.69, 59.2, 211.7], ngoi: [0.64, 71.9, 208.4], dung: [0.87, 16.0, 87.4] };
+const CC_DEM = { thinh: [79, 281, 548], tungkhan: [79, 281, 548] }, CC_DAU = { vaihuong: 170, uongnuoc: 125, phatlixi: 152, locqua: 157, segia: 111, ngoi: 125, dung: 170 }, CC_RATE = { ngoi: .6, dung: .6 };
 const CC2 = { sway: 0 };
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
 function ccTu2D(dt) { // tư thế hình vẽ Cô Chín cho các đoạn chưa có clip
@@ -1570,7 +1570,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   const CO_BO = { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false };
   const ds = [Object.assign(CHAU_BE, { id: 'chaube', hang: 'co' }), Object.assign(ONG_BAY, it.ongbay || {}, { id: 'ongbay', hang: 'hoang', congCu: 'heo' }), Object.assign(CO_DOI, cu || {}, it.codoi || {}, { id: 'codoi', hang: 'co' }), { id: 'caube', ten: 'Cậu Bé Bản Đền', hang: 'cau', ao: '#1f7a4e', vay: '#f3efe6', khan: '#1f7a4e', vienKhan: '#e8c040', dai: '#d6457f', congCu: 'quat', tim: 'tien', coNhac: false }] /* 14/11 anh Linh: Chầu Bé → Ông Hoàng Bảy → Cô Đôi → Cậu Bé */; /* link thử: thêm Chầu Bé Bắc Lệ */ // Cô Bơ (CO_BO) tạm chưa dùng, anh chuẩn bị sau: thêm lại vào danh sách này
   ds.splice(2, 0, { id: 'ongmuoi', ten: 'Ông Hoàng Mười', hang: 'cau', ao: '#e2b53a', vay: '#e2b53a', khan: '#d9a520', vienKhan: '#c62a22', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 16/11 12:34 anh Linh: Ông Hoàng Mười ngay sau Ông Hoàng Bảy */
-  if (CC_THU) ds.push({ id: 'cochin', ten: 'Cô Chín Thượng Ngàn', hang: 'co', ao: '#ec6ea6', vay: '#ec6ea6', khan: '#2a2026', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 17/11 anh Linh: giá Cô Chín, link thử /tn */
+  if (CC_THU) ds.push({ id: 'cochin', ten: 'Cô Chín Sòng Sơn', hang: 'co', ao: '#ec6ea6', vay: '#ec6ea6', khan: '#2a2026', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 17/11 anh Linh: giá Cô Chín, link thử /tn */
   if (BO_THU) ds.push({ id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false, mat: 'buon' }); /* 16/11 anh Linh: giá Cô Bơ bản 2D, chỉ ở link thử /tn */
   { const q = new URLSearchParams(location.search).get('ds'); if (q) { const ids = q.split(',').map(x => x.trim()), sel = ids.map(id => ds.find(g => g.id === id)).filter(Boolean); if (sel.length) { ds.length = 0; ds.push(...sel); } } } /* ?ds=ongmuoi,caube: chỉ chạy các giá này theo thứ tự (link thử /tn) */
   if (OMU_THU) { const om = ds.find(g => g.id === 'ongmuoi'); ds.length = 0; ds.push(om); } /* link thử /om-thu: chỉ một giá */
