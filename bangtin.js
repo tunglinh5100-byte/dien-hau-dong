@@ -42,8 +42,13 @@ window.BANG_TIN = {
     'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
     'Tín ngưỡng thờ Mẫu Tam Tứ Phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
   ],
-  // Cô Bơ: chưa tìm được bài Nhân Dân nên để trống, bảng sẽ hiện mục "chung"
-  cobo: [],
+// Cô Bơ Thoải Cung (Cô Bơ Bông) — 17/11. Nguồn: VinWonders "Đền Cô Bơ Thanh Hóa"
+  nguon_cobo: 'VinWonders, "Đền Cô Bơ Thanh Hóa"',
+  cobo: [
+    'Tương truyền Cô Bơ là con gái Vua Thủy Tề, vâng lệnh cha xuống trần giúp đời, mãn hạn được xe loan rước về Thủy Cung',
+    'Dân gian tin Cô hay hiển linh ở ngã ba sông, phù hộ thuyền bè qua lại thuận buồm xuôi gió, nên giá Cô có điệu chèo thuyền',
+    'Cô còn được gọi là Cô Bơ Bông, Cô Bơ Thác Hàn; đền Cô ở bên sông Lèn, nơi sông Mã tách dòng, xã Tống Sơn, Thanh Hóa'
+  ],
   // Ông Hoàng Mười (link thử /om-thu). Bài: "Đông đảo người dân cầu an tại hai ngôi đền thờ ông Hoàng Mười" - baovanhoa.vn
   nguon_ongmuoi: 'Báo Văn Hóa (baovanhoa.vn)',
   ongmuoi: [
