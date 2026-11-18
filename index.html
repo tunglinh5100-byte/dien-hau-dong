@@ -1038,7 +1038,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     Object.keys(tf).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.style.cssText = 'width:2px;height:4px'; vHoan(v, bo ? (/^(thinh|tungkhan)$/.test(n) ? 'cc/cc-' + n + '.mp4?v=3' : 'bo/bo-' + n + '.mp4?v=1') : cl ? ('cl/cl-' + n + '.mp4?v=' + (n === 'thayao' ? 3 : 1)) : cc ? ('cc/cc-' + n + '.mp4?v=' + (n === 'thayao' ? '4kf' : 3)) : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=' + (n === 'antoa' || n === 'muaheo' ? '17kf' : '16f3')), bo ? 'cobo' : cl ? 'chaulu' : cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
+    v.style.cssText = 'width:2px;height:4px'; vHoan(v, bo ? (/^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'bo3/bo-' + n + '.mp4?v=1') : cl ? ('cl3/cl-' + n + '.mp4?v=' + (n === 'thayao' ? 3 : 1)) : cc ? ('cc3/cc-' + n + '.mp4?v=' + (n === 'thayao' ? '4kf' : 3)) : (om ? (n === 'thinh' ? 'cu-thinhlap.mp4?v=16f3' : n === 'tungkhan' ? 'cu-tungkhan.mp4?v=16f3' : 'om/om-' + n + '.mp4?v=' + (n === 'uongruou' ? 7 : n === 'muaco' ? 6 : n === 'ngamtho' ? 3 : 5)) : 'cu-' + n + '.mp4?v=' + (n === 'antoa' || n === 'muaheo' ? '17kf' : '16f3')), bo ? 'cobo' : cl ? 'chaulu' : cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
   CU.v = OMU ? CU.vOm : CU.vCau;
   CU.au = new Audio(); CU.au.preload = 'auto';
 })();
@@ -1723,12 +1723,16 @@ function hauDangDo(p, t) { // đồ trên tay hầu dâng
   ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, -2); ctx.lineTo(16, -9); ctx.stroke(); ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(4, -3); ctx.stroke(); // thanh kiếm
   ctx.restore(); }
 const CHIEU_IMG = new Image(); if (NH_MODE) CHIEU_IMG.src = 'chieu1.jpg?v=1';
+let CHIEU_C = null; // 11:30: vẽ sẵn chiếu theo góc nhìn vào một khung ảnh, mỗi khung hình chỉ dán 1 lần cho nhẹ máy
 function drawChieuTo() { // 18/11 11:14 anh Linh: 1 tấm chiếu cói đỏ, trải theo góc nhìn (xa hẹp, gần rộng)
   const y0 = 694, y1 = 1236, tl = -95, tr = 635, bl = -262, br = 802, I = CHIEU_IMG;
   if (!(I.complete && I.naturalWidth)) { ctx.fillStyle = '#d9c38a'; ctx.beginPath(); ctx.moveTo(tl, y0); ctx.lineTo(tr, y0); ctx.lineTo(br, y1); ctx.lineTo(bl, y1); ctx.fill(); return; }
-  const N = 90, iw = I.naturalWidth, ih = I.naturalHeight, f = v => (Math.pow(1.9, v) - 1) / .9; // hàng xa nén lại, hàng gần giãn ra
-  for (let k = 0; k < N; k++) { const a = k / N, b = (k + 1) / N, ya = y0 + (y1 - y0) * f(a), yb = y0 + (y1 - y0) * f(b), xl = tl + (bl - tl) * f(a), xr = tr + (br - tr) * f(a);
-    ctx.drawImage(I, 0, ih * a, iw, ih / N + .5, xl, ya, xr - xl, yb - ya + .8); } }
+  if (!CHIEU_C) { const c = document.createElement('canvas'); c.width = br - bl; c.height = y1 - y0; const g = c.getContext('2d');
+    const N = 90, iw = I.naturalWidth, ih = I.naturalHeight, f = v => (Math.pow(1.9, v) - 1) / .9; // hàng xa nén lại, hàng gần giãn ra
+    for (let k = 0; k < N; k++) { const a = k / N, b = (k + 1) / N, ya = (y1 - y0) * f(a), yb = (y1 - y0) * f(b), xl = tl + (bl - tl) * f(a) - bl, xr = tr + (br - tr) * f(a) - bl;
+      g.drawImage(I, 0, ih * a, iw, ih / N + .5, xl, ya, xr - xl, yb - ya + .8); }
+    CHIEU_C = c; }
+  ctx.drawImage(CHIEU_C, bl, y0); }
 function drawThamGoi(t) { // thảm đỏ sát bậc sập: chỉ con nhang được gọi tên mới lên ngồi nhận lộc
   const X = DEM.x, Y0 = DEM.y - 30, Y1 = DEM.y + 30; ctx.save(); ctx.beginPath(); ctx.moveTo(X - 80, Y0); ctx.lineTo(X + 80, Y0); ctx.lineTo(X + 90, Y1); ctx.lineTo(X - 90, Y1); ctx.closePath();
   const g = ctx.createLinearGradient(0, Y0, 0, Y1); g.addColorStop(0, '#b3261d'); g.addColorStop(1, '#8a1a12'); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#e8b84e'; ctx.lineWidth = 3; ctx.stroke();
