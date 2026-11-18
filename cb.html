@@ -137,7 +137,7 @@ const BG2 = new Image(); if (NH_MODE) BG2.src = 'nen-rong.jpg?v=1'; /* 18/11 8:2
 const BG2_K = .74, BG2_X = 270 - 550 * BG2_K, BG2_Y = 692 - 1012 * BG2_K, BG2_W = 1080 * BG2_K, BG2_H = 1920 * BG2_K; // tâm sập ở x=550 ảnh -> 270; mép dưới bậc sập (y=1012 ảnh) -> 692; máy quay vừa khít ảnh
 function veNen2() { if (!(BG2.complete && BG2.naturalWidth)) return; ctx.drawImage(BG2, BG2_X, BG2_Y, BG2_W, BG2_H); ctx.save(); ctx.translate(2 * BG2_X, 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 0, 0, 160, 1920, BG2_X, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); ctx.save(); ctx.translate(2 * (BG2_X + BG2_W), 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 920, 0, 160, 1920, BG2_X + BG2_W - 160 * BG2_K, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); } // hai mép soi gương để lia máy không hở
 const THAT = new Set(); window.__that = THAT; // tên người xem thật (từ TikFinity/Euler); con nhang giả lập không hiện tên
-const HAU_DANG = [[143, 518, 'Hầu dâng 1'], [401, 516, 'Hầu dâng 2'], [129, 580, 'Hầu dâng 3'], [440, 580, 'Hầu dâng 4']] /* 18/11 8:40 anh Linh chấm 4 góc sập */.map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#169b55', sex: 'nu', hairC: '#1c120c', x, y, seat: { x, y, s: .92, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
+const HAU_DANG = [[172, 525, 'Hầu dâng 1'], [428, 525, 'Hầu dâng 2'], [112, 598, 'Hầu dâng 3'], [510, 598, 'Hầu dâng 4']] /* 18/11 10:11 anh Linh: ngồi đúng 4 góc thảm sập (góc thảm trong ảnh), không lấn lên ban Công Đồng */.map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#169b55', sex: 'nu', hairC: '#1c120c', x, y, hx: x, hy: y, vai: i < 2 ? 'tren' : 'duoi', ben: i % 2 ? 1 : -1, seat: { x, y, s: i < 2 ? 1 : 1.12, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
 const KH = { on: !/[?&]khung=0/.test(location.search) && (!NH_MODE || /[?&]khung=1/.test(location.search)), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
@@ -1565,8 +1565,8 @@ function drawFlying() { (S.muaHQ || []).forEach(m => { if (m.t < m.delay) return
 function musician(x, y, kind, t) {
   ctx.save(); ctx.translate(x, y);
   // cross-legged base + body (dark jacket), facing right toward the carpet
-  ctx.beginPath(); ctx.ellipse(0, -3, 17, 6, 0, 0, 6.28); ctx.fillStyle = '#2a3346'; ctx.fill();
-  ctx.beginPath(); ctx.moveTo(-10, -4); ctx.quadraticCurveTo(-12, -24, -6, -32); ctx.lineTo(8, -32); ctx.quadraticCurveTo(12, -22, 10, -4); ctx.closePath(); ctx.fillStyle = kind === 'drum' ? '#3a3a3a' : kind === 'lute' ? '#1e1e24' : '#4a5a3a'; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, -3, 17, 6, 0, 0, 6.28); ctx.fillStyle = NH_MODE ? '#0f6e3c' : '#2a3346'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-10, -4); ctx.quadraticCurveTo(-12, -24, -6, -32); ctx.lineTo(8, -32); ctx.quadraticCurveTo(12, -22, 10, -4); ctx.closePath(); ctx.fillStyle = NH_MODE ? '#169b55' : kind === 'drum' ? '#3a3a3a' : kind === 'lute' ? '#1e1e24' : '#4a5a3a'; ctx.fill(); /* 18/11 anh Linh: cung văn mặc áo xanh ADELA */
   circ(1, -40, 7.5, '#e2b98f'); ctx.beginPath(); ctx.arc(0, -42, 7.8, 3.3, 6.1); ctx.fillStyle = '#1a1210'; ctx.fill();
   if (kind === 'drum') { // trống con + phách
     ctx.beginPath(); ctx.ellipse(16, -8, 9, 4, 0, 0, 6.28); ctx.fillStyle = '#e8d3a0'; ctx.fill(); rr(7, -8, 18, 7, 2, '#8a2a1a');
@@ -1642,6 +1642,25 @@ function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ng�
 function drawMaHang(t) { // 8:47 anh Linh: mã chỉ là ngựa, đầu quay lên ban Công Đồng, xếp 1 hàng ngang sát mép dưới màn hình (chừa lối đi giữa)
   [[-86, '#c62a22', '#e9b43a'], [-12, '#f4efe6', '#c62a22'], [62, '#e9b43a', '#2f6fb5'], [136, '#1c1c1c', '#c62a22'], [404, '#c62a22', '#2f9b5a'], [478, '#f4efe6', '#2f6fb5'], [552, '#e9b43a', '#c62a22'], [626, '#1c1c1c', '#e9b43a']]
     .forEach(([x, c, y2]) => { ctx.save(); ctx.translate(x, 1346); ctx.scale(1.55, 1.55); nguaSau(0, 0, c, y2); ctx.restore(); }); }
+function buocDangLe() { try { if (typeof CU !== 'undefined' && cuDangLe()) return (CU_LICH[CU.i] || [''])[0]; } catch (e) {} try { if (typeof CB !== 'undefined' && cbDangLe()) return (CB_LICH[CB.i] || [''])[0]; } catch (e) {} try { if (typeof OB !== 'undefined' && OB.buf && laOng()) return OB.cur || ''; } catch (e) {} try { if (typeof OC !== 'undefined' && OC.buf) return OC.cur || ''; } catch (e) {} return ''; }
+function hauDangUpd(t) { // 18/11 anh Linh: 2 hầu dâng trên thay khăn áo, chuẩn bị hương, binh khí; 2 hầu dâng dưới cầm quạt quạt mát cho cô cậu đồng
+  const b = buocDangLe(), thay = /thayao|tungkhan/.test(b) && !S.chuyen, dang = /vaihuong|tauhuong|dangnhang|khaiquang|camhuong|baisai/.test(b);
+  HAU_DANG.forEach(p => { let tx = p.hx, ty = p.hy; if (p.vai === 'tren' && thay) { tx = CO.x + p.ben * 46; ty = CO.y - 6; } // tiến vào hai bên cô đồng mặc áo
+    const k = Math.min(1, (S.dtLY || .016) * 2.2); p.x += (tx - p.x) * k; p.y += (ty - p.y) * k; p.seat.x = p.x; p.seat.y = p.y; p.dang = dang; p.thay = thay; }); }
+function hauDangDo(p, t) { // đồ trên tay hầu dâng
+  const s = p.seat.s, inx = p.ben * -1; ctx.save(); ctx.translate(p.x, p.y);
+  if (p.vai === 'duoi') { // quạt: đưa đều về phía cô đồng
+    const a = Math.sin(t * 4 + (p.ben > 0 ? 1.4 : 0)) * .55; ctx.translate(inx * 10 * s, -40 * s); ctx.rotate(inx * .5 + a); ctx.scale(s, s);
+    ctx.fillStyle = '#c62a22'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 20, -Math.PI * .85, -Math.PI * .15); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#ffe39a'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,227,154,.8)'; ctx.lineWidth = .7; for (let k = 0; k <= 6; k++) { const g = -Math.PI * .85 + k * Math.PI * .7 / 6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(g) * 20, Math.sin(g) * 20); ctx.stroke(); }
+    ctx.restore(); return; }
+  // hầu dâng trên: khay hương + kiếm; lúc dâng hương nâng khay ngang trán, lúc thay áo cầm áo khoác lên vai cô
+  if (p.thay) { ctx.translate(inx * 14 * s, -44 * s); ctx.scale(s, s); ctx.rotate(inx * .3); rr(-10, -4, 20, 12, 3, '#e9b43a'); ctx.strokeStyle = '#c62a22'; ctx.lineWidth = 1.5; ctx.strokeRect(-8, -2, 16, 8); ctx.restore(); return; }
+  const len = p.dang ? -58 : -18; ctx.translate(inx * 6 * s, len * s); ctx.scale(s, s);
+  rr(-14, -2, 28, 5, 2, '#b8862a'); ctx.fillStyle = '#7a1a12'; ctx.fillRect(-14, 3, 28, 2); // khay sơn son
+  ctx.strokeStyle = '#3f7a2a'; ctx.lineWidth = 1.4; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(-6 + k * 2, -1); ctx.lineTo(-8 + k * 3, -16); ctx.stroke(); circ(-8 + k * 3, -16.5, 1.3, '#ff7a2a'); } // 3 nén hương
+  ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, -2); ctx.lineTo(16, -9); ctx.stroke(); ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(4, -3); ctx.stroke(); // thanh kiếm
+  ctx.restore(); }
 function drawThamGoi(t) { // thảm (ô đen anh Linh đánh dấu): ngay trước bậc sập, con nhang được gọi tên lên ngồi
   const X = DEM.x; ctx.save(); ctx.beginPath(); ctx.moveTo(X - 78, 742); ctx.lineTo(X + 78, 742); ctx.lineTo(X + 88, 806); ctx.lineTo(X - 88, 806); ctx.closePath();
   const g = ctx.createLinearGradient(0, 742, 0, 806); g.addColorStop(0, '#b3261d'); g.addColorStop(1, '#8a1a12'); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#e8b84e'; ctx.lineWidth = 3; ctx.stroke();
@@ -2874,9 +2893,9 @@ function frame1(now) {
   camShift(1);
   try {
     /* cung văn tạm ẩn: anh Linh cho làm lại, sẽ ngồi bên phải sập hầu */
-    if (NH_MODE) { drawManhSan(t); HAU_DANG.forEach(p => { if (p.y < CO.y) drawPerson(p, t); }); }
+    if (NH_MODE) { drawManhSan(t); hauDangUpd(t); HAU_DANG.forEach(p => { if (p.y < CO.y) { drawPerson(p, t); hauDangDo(p, t); } }); }
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
-    if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng() && NHANG) TAY.forEach(p => drawPerson(p, t)); /* 15/11: không con nhang thì bỏ hai hầu dâng vẽ hoạt hình ở giá Ông */ if (NHANG) front.forEach(p => drawPerson(p, t)); if (NH_MODE) { HAU_DANG.forEach(p => { if (p.y >= CO.y) drawPerson(p, t); }); drawMaHang(t); }
+    if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng() && NHANG) TAY.forEach(p => drawPerson(p, t)); /* 15/11: không con nhang thì bỏ hai hầu dâng vẽ hoạt hình ở giá Ông */ if (NHANG) front.forEach(p => drawPerson(p, t)); if (NH_MODE) { HAU_DANG.forEach(p => { if (p.y >= CO.y) { drawPerson(p, t); hauDangDo(p, t); } }); drawMaHang(t); }
     if (KH.on) { KH.T0 = T0; khMask(T0); } if (NHANG) drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
     /* 14/11 anh Linh: bỏ nhãn Thế Hoàn */ drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
   } finally { camShift(-1); }
