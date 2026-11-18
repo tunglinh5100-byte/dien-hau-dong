@@ -157,13 +157,13 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   const pts = [];
   const zones = NH_MODE ? [[-80, 620, 838, 1214, 46], [-80, 620, 838, 1214, 46], [-80, 620, 838, 1214, 46]] : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < (NH_MODE ? 38 : 34) && tries++ < 9000) { /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
+  while (pts.length < (NH_MODE ? 50 : 34) && tries++ < 12000) { /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
     if (Math.abs(x - 270) < 34) continue; // lối đi giữa
     if (/[?&]hm=1/.test(location.search) && x < 40 && y < 900) continue; // chừa chỗ lầu hoá mã
-    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 72 : 52))) continue;
+    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 64 : 52))) continue;
     pts.push({ x, y, truoc: NH_MODE && y < 950, s: (NH_MODE ? 1.3 : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
   }
   S.seats = pts;
@@ -203,11 +203,11 @@ function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
 function float(x, y, s, c) { S.floats.push({ x, y, s: fixXung(s), c, t: 0, life: 2 }); }
 function say(name, msg) {
-  addComment(name, msg); const p = person(name), n = norm(msg); p.bl = (p.bl || 0) + 1; try { gameNghe(name, msg); } catch (e) {} p.bubble = { s: laOng() && /(^|\s)co(\s|$)|co oi|(^|\s)hu+|vo tay|hay qua|dep qua|xinh qua|mua deo/.test(n) ? pick(HU_ONG) : String(msg), t: S.t }; khen(name, /lay co|lay thanh|con lay/.test(n) ? 'lay' : 'chung');
+  addComment(name, msg); const p = person(name), n = norm(msg); p.bl = (p.bl || 0) + 1; try { gameNghe(name, msg); } catch (e) {} p.bubble = { s: NH_MODE ? String(msg) : laOng() && /(^|\s)co(\s|$)|co oi|(^|\s)hu+|vo tay|hay qua|dep qua|xinh qua|mua deo/.test(n) ? pick(HU_ONG) : String(msg), t: S.t, cmt: true }; /* 15:06 anh Linh: trên đầu chỉ hiện đúng lời người xem comment */ khen(name, /lay co|lay thanh|con lay/.test(n) ? 'lay' : 'chung');
   const tq = timTinh(msg); if (tq) { p.que = tq; S.tinh.add(tq); }
   if (/thap huong|thap nen huong|dang huong/.test(n)) { thapHuong(p); return; }
   if (/(^|\s)hu+|vo tay|hay qua/.test(n)) { hu(p); wave(4); }
-  else if (/lay co|lay thanh|con lay/.test(n)) { p.pose = 'bow'; p.poseT = 2.4; float(p.seat.x, p.seat.y - 46, (laOng() ? 'Lậy ông ạ' : 'Lạy cô ạ'), '#f6dc96'); }
+  else if (/lay co|lay thanh|con lay/.test(n)) { p.pose = 'bow'; p.poseT = 2.4; if (!NH_MODE) float(p.seat.x, p.seat.y - 46, (laOng() ? 'Lậy ông ạ' : 'Lạy cô ạ'), '#f6dc96'); }
   else if (/dep qua|xinh qua|dep the/.test(n)) { p.pose = laOng() ? 'bow' : 'cheer'; p.poseT = 1.8; for (let i = 0; i < 18; i++) S.particles.push({ x: rnd(180, 360), y: rnd(330, 380), vx: rnd(-20, 20), vy: rnd(20, 60), life: rnd(2, 3), t: 0, kind: 'petal', c: pick(['#f6b6c8', '#ec8fae', '#fff0f4']) }); float(270, 360, name + (laOng() ? ': Lậy ông' : ': Cô đẹp quá!'), '#ffd2e6'); }
   else if (/mua deo|mua dep|mua hay/.test(n)) { S.danceSpecial = 4; wave(10); S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .5) { q.pose = laOng() ? 'bow' : 'clap'; q.poseT = 3; } }); float(270, 360, (laOng() ? 'Ông múa hèo tạ lòng ' : 'Cô múa quạt tạ lòng ') + name, '#f6dc96'); }
 }
@@ -1568,7 +1568,7 @@ function updFlying(dt) {
   S.bayRa = (S.bayRa || []).filter(b => (b.t += dt) < b.dur + .06);
   S.locDat = (S.locDat || []).filter(d => { if (d.het == null) d.het = NH_MODE ? rnd(3, 5) : 6; return (d.t += dt) < d.het + 1.2; }); /* 18/11 11:09 anh Linh: lộc nằm trên chiếu 3-5 giây rồi mới biến mất */
   S.muaHQ = (S.muaHQ || []).filter(m => { m.t += dt; if (m.t < m.delay) return true; m.x += (m.vx + Math.sin(m.t * 2 + m.rot) * 25) * dt; m.y += m.vy * dt; m.rot += m.vr * dt; if (m.y >= m.gy) { S.locDat.push({ kind: m.kind, x: m.x, y: m.gy, s: m.s, r: rnd(-.6, .6), t: 0 }); return false; } return true; });
-  S.flying.forEach(f => { f.t += dt; if (f.t >= f.dur && !f.done) { f.done = true; if (f.onDone) f.onDone(); const p = f.p; if (p && S.people.includes(p)) { p.carry = f.kind; p.pose = 'raise'; p.poseT = 3; p.bubble = { s: 'Con xin ' + xung(), t: S.t }; S.floats.push({ x: p.x, y: p.y - 56, s: p.name + ' được ' + xung() + ' ban ' + ITEM_NAME[f.kind], c: '#f6dc96', t: 0, life: 2.4 }); setTimeout(() => { if (p.carry === f.kind) p.carry = null; }, 5000); wave(3); } } });
+  S.flying.forEach(f => { f.t += dt; if (f.t >= f.dur && !f.done) { f.done = true; if (f.onDone) f.onDone(); const p = f.p; if (p && S.people.includes(p)) { p.carry = f.kind; p.pose = 'raise'; p.poseT = 3; p.bubble = { s: 'Con xin ' + xung(), t: S.t }; if (!NH_MODE) S.floats.push({ x: p.x, y: p.y - 56, s: p.name + ' được ' + xung() + ' ban ' + ITEM_NAME[f.kind], c: '#f6dc96', t: 0, life: 2.4 }); setTimeout(() => { if (p.carry === f.kind) p.carry = null; }, 5000); wave(3); } } });
   S.flying = S.flying.filter(f => !f.done);
 }
 function drawFlying() { (S.muaHQ || []).forEach(m => { if (m.t < m.delay) return; ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.rot); drawItem(m.kind, 0, 0, m.s); ctx.restore(); }); S.flying.forEach(f => { if (f.an) return; const k = clamp(f.t / f.dur, 0, 1), x = f.x + (f.tx - f.x) * k, y = f.y + (f.ty - f.y) * k - Math.sin(k * Math.PI) * (f.thap ? 22 : 90); ctx.save(); ctx.translate(x, y); ctx.rotate(k * 6); drawItem(f.kind, 0, 0, 1.2 * (f.nho || 1)); ctx.restore(); }); }
@@ -1668,9 +1668,9 @@ const MA_DICH = [150, 732], MA = { gia: null, idx: null, ph: '', dat: null };
 function veMa(c, y2) { if (c === 'kieu') kieuSau(); else if (c === 'voi') voiSau(); else if (c === 'thuyen') thuyenSau(false); else if (c === 'thuyenchien') thuyenSau(true); else nguaSau(0, 0, c, y2); }
 function maSc(y) { return 1 + clamp((y - MA_DICH[1]) / (1346 - MA_DICH[1]), 0, 1) * .55; }
 function drawMaHang(t) { // mã xếp 1 hàng sát mép dưới; mã của giá đang ngự được hầu dâng 3, 4 bê lên cạnh thảm đỏ
-  const len = HM ? G.len || 0 : 0, Y = 1346 - 190 * len; // 18/11 14:20 anh Linh: lúc đố, cả hàng mã đi lên, đánh số 1, 2…
-  MA_HANG.forEach(([x, c, y2], i) => { if (MA.idx === i + 1 && (MA.ph === 'len' || MA.ph === 've' || MA.dat === i + 1 || MA.chay || MA.ph === 'hoa_mang')) return; ctx.save(); ctx.translate(x, Y); ctx.scale(1.55, 1.55); veMa(c, y2); ctx.restore();
-    if (len > .05) { ctx.save(); ctx.globalAlpha = len; ctx.beginPath(); ctx.arc(x, Y - 168, 17, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.strokeStyle = '#9c1c12'; ctx.lineWidth = 3; ctx.stroke(); text(String(i + 1), x, Y - 167, 19, '#9c1c12', { f: SERIF, w: 900 }); ctx.restore(); } }); }
+  const len = HM ? G.len || 0 : 0, Y = 1346 - (1346 - 815) * len, KS = 1.55 - .55 * len; // 15:06 anh Linh: hàng mã dâng lên tận chỗ thảm đỏ // 18/11 14:20 anh Linh: lúc đố, cả hàng mã đi lên, đánh số 1, 2…
+  MA_HANG.forEach(([x, c, y2], i) => { if (MA.idx === i + 1 && (MA.ph === 'len' || MA.ph === 've' || MA.dat === i + 1 || MA.chay || MA.ph === 'hoa_mang')) return; ctx.save(); ctx.translate(x, Y); ctx.scale(KS, KS); veMa(c, y2); ctx.restore();
+    if (len > .05) { const by = Y - 112 * KS; ctx.save(); ctx.globalAlpha = len; ctx.beginPath(); ctx.arc(x, by, 17, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.strokeStyle = '#9c1c12'; ctx.lineWidth = 3; ctx.stroke(); text(String(i + 1), x, by + 1, 19, '#9c1c12', { f: SERIF, w: 900 }); ctx.restore(); } }); }
 function veMaDat(t) { // mã đang được bê, hoặc đã đặt cạnh thảm đỏ thì cúi lạy cô cậu đồng
   if (HM) veLo(t); if (MA.idx && !MA.chay && (MA.carrier || MA.ph === 'hoa_mang')) { const [, c, y2] = MA_HANG[MA.idx - 1]; let x, y; if (MA.carrier) { y = MA.carrier.y - 34; x = MA.carrier.x - camOff(MA.carrier.y); } else { const a = HAU_DANG[2], b = HAU_DANG[3]; y = (a.y + b.y) / 2 - 4; x = (a.x + b.x) / 2 - camOff(y); } const k = maSc(y) * 1.1; ctx.save(); ctx.translate(x, y); ctx.scale(k, k); veMa(c, y2); ctx.restore(); return; }
   if (!MA.idx || MA.chay || !(MA.ph === 'len' || MA.ph === 've' || MA.dat === MA.idx)) return; const [, c, y2] = MA_HANG[MA.idx - 1]; let x = MA_DICH[0], y = MA_DICH[1], bow = 0;
@@ -1691,7 +1691,7 @@ function chuanHoa(s) { return String(s || '').toLowerCase().normalize('NFC').rep
 function khongDau(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
 function gameNghe(name, msg) { if (!HM || !G.ph) return; const m = chuanHoa(msg);
   if (G.ph === 'do' && !G.ans) { const so = (m.match(/(^|\D)(\d{1,2})(?!\d)/) || [])[2], kd = khongDau(m), ten = khongDau(MA_TEN[MA.idx - 1]);
-    if ((so && +so === MA.idx) || (!so && kd.includes(ten))) { G.ans = name; G.msg = { s: '✓ ' + name + ' đoán đúng nhanh nhất: mã số ' + MA.idx, t: 0 }; G.khenCho = { name, loai: 'chung', uu: 5, t: 0, cau: 'Ta ban khen cho [tên], đáp đúng mã số ' + MA.idx }; /* 14:54 anh Linh: chờ tới lúc phát lộc, ngự tửu, nghe văn mới ban khen, khen người này đầu tiên */ } }
+    if ((so && +so === MA.idx) || (!so && kd.includes(ten))) { G.ans = name; G.msg = { s: '✓ ' + name + ' đoán đúng nhanh nhất: mã số ' + MA.idx, t: 0 }; G.khenCho = { name, loai: 'chung', uu: 5, t: 0, cau: 'Ta ban khen cho [tên]' }; /* 14:54 anh Linh: chờ tới lúc phát lộc, ngự tửu, nghe văn mới ban khen, khen người này đầu tiên */ } }
   else if (G.ph === 'hoa' && !G.nguoi && m === 'để tôi hóa mã') { const p = S.people.find(v => v.name === name && !v.ra); if (p) { G.nguoi = p; G.msg = { s: '🔥 ' + name + ' được lên hoá mã', t: 0 }; } } }
 function hoaMa(p) { G.lua = 6.5; MA.carrier = null; MA.dat = null; MA.chay = true; const ten = p ? p.name : null;
   if (ten) KHEN.cur = { name: ten, loai: 'chung', uu: 5, t: 0, cau: 'Ta chứng lòng thành của con [tên]' }; G.msg = { s: ten ? '🔥 ' + ten + ' đã hoá mã dâng ngài' : '🔥 Hầu dâng hoá mã dâng ngài', t: 0 }; }
@@ -1709,7 +1709,7 @@ function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe();
     if (G.t >= 30) { G.ph = 'hoa_hd'; MA.ph = 'hoa_xuong'; } return; }
   if (G.ph === 'hoa_hd' && MA.chay) { G.ph = 'xong'; G.t = 0; }
   if (THU && G.ph === 'xong' && G.t > 9 && G.khenCho && !G.nhayLoc) { G.nhayLoc = true; try { const i = CU_LICH.findIndex((L, k) => k > CU.i && BUOC_KHEN.test(L[0])); if (i >= 0 && cuDangLe()) cuVao(i); } catch (e) {} } }
-function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd' || G.ph === 'xong' && G.t < 15)) return; const [x, y] = LO; ctx.save(); ctx.translate(x, y); ctx.scale(1.25, 1.25);
+function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd' || G.lua > 0)) return; // 15:06: hoá xong, lửa tàn thì lầu hoá mã biến mất const [x, y] = LO; ctx.save(); ctx.translate(x, y); ctx.scale(1.25, 1.25);
   const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 46); sh.addColorStop(0, 'rgba(0,0,0,.45)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 2, 46, 9, 0, 0, 7); ctx.fill();
   rr(-38, -8, 76, 9, 2, '#9a958c'); rr(-32, -14, 64, 7, 2, '#b0aba2'); // bậc đá
   rr(-30, -70, 10, 58, 2, '#a8a39a'); rr(20, -70, 10, 58, 2, '#a8a39a'); rr(-20, -70, 40, 58, 1, '#7a5440'); // trụ đá + tường gạch
@@ -1724,9 +1724,9 @@ function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd
   if (Math.random() < (G.lua > 0 ? .6 : .15)) S.particles.push({ x: x + rnd(-8, 8), y: y - 40, vx: rnd(-10, 10), vy: rnd(-60, -30), life: rnd(.5, 1.1), t: 0, kind: 'ember' });
   ctx.restore(); }
 function drawGame() { if (!HM || !G.ph) return; const box = (s1, s2, y) => { ctx.save(); ctx.font = `800 15px ${SERIF}`; const w = Math.min(W - 2 * SAFE_X, Math.max(ctx.measureText(s1).width, s2 ? ctx.measureText(s2).width * .8 : 0) + 36); rr(W / 2 - w / 2, y, w, s2 ? 52 : 34, 14, 'rgba(120,16,14,.95)'); ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(W / 2 - w / 2, y, w, s2 ? 52 : 34, 14); ctx.stroke(); text(s1, W / 2, y + 17, 15, '#ffe39a', { f: SERIF, w: 800 }); if (s2) text(s2, W / 2, y + 38, 12, '#fff6d6', { w: 700 }); ctx.restore(); };
-  if (G.ph === 'do') box('Đố mọi người mã nào để dâng lên ngài chứng?', 'Comment số thứ tự mã · còn ' + Math.max(0, Math.ceil(40 - G.t)) + ' giây', 592);
+  if (G.ph === 'do') box('Đố mọi người mã nào để dâng lên ngài chứng?', 'Comment số thứ tự mã · còn ' + Math.max(0, Math.ceil(40 - G.t)) + ' giây', 640);
   else if (G.ph === 'hoa') box('Comment "Để tôi hóa mã"', 'Nhanh nhất và chính xác sẽ được lên hóa mã · còn ' + Math.max(0, Math.ceil(30 - G.t)) + ' giây', 592);
-  if (G.msg) box(G.msg.s, null, 650); }
+  if (G.msg) box(G.msg.s, null, 700); }
 
 function voiSau() { // voi chiến màu vàng nhìn từ sau, có bành trên lưng
   const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 30, 7, 0, 0, 7); ctx.fill();
@@ -1753,6 +1753,9 @@ function kieuSau() { // kiệu mã màu hồng nhìn từ sau
   rr(-20, -58, 40, 46, 3, '#e86aa6'); ctx.strokeStyle = '#ffe39a'; ctx.lineWidth = 1.4; ctx.strokeRect(-17, -55, 34, 40); flowerMotif(0, -35, 6, '#ffe39a', '#ffd2e6');
   ctx.fillStyle = '#c94a8a'; ctx.beginPath(); ctx.moveTo(-26, -58); ctx.quadraticCurveTo(0, -80, 26, -58); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#ffe39a'; ctx.stroke(); // mái cong
   circ(0, -76, 4, '#e9b43a'); rr(-26, -60, 52, 4, 2, '#e9b43a'); }
+function thamHien() { // 15:06 anh Linh: đầu giá không có thảm đỏ, chỉ khi ban lộc mới trải thảm
+  if (S.dem || CO.giving || (S.queue && S.queue.length)) return true; let le = false; try { le = (typeof CU !== 'undefined' && cuDangLe()) || (typeof CB !== 'undefined' && cbDangLe()); } catch (e) {}
+  if (le) return goiDuoc(); if (laOng()) return ongNgoi(); return !!(S.phaLoc || S.loc); }
 function goiDuoc() { // 18/11 12:35 anh Linh: chỉ lúc phát lộc, ngự tửu mới gọi con nhang lên thảm
   if (!NH_MODE) return true; let le = false; try { le = (typeof CU !== 'undefined' && cuDangLe()) || (typeof CB !== 'undefined' && cbDangLe()); } catch (e) {} if (!le) return true;
   return /^(phatloc|tungloc|tungloc2|banloc|tientung|loctung|uongruou|uongnuoc|vengoi|locqua|phatlixi|ngutuu)$/.test(buocDangLe()); }
@@ -1815,7 +1818,7 @@ function drawThamGoi(t) { // thảm đỏ sát bậc sập: chỉ con nhang đư
 // ---------- Con nhang vỗ tay, hú hét ----------
 const HU = ['Húuuuuu!', 'Hú hú húuu!', 'Húuuu cô ơi!', 'Hayyy quá!'];
 const HU_ONG = ['Lậy ông', 'Dạaa', 'Con nhớ ông quá', 'Con xin ông'];
-function hu(p, txt) { if (!p || !p.seat) return; const ong = laOng(); p.pose = ong ? 'bow' : 'clap'; p.poseT = 2.6; S.floats.push({ x: p.seat.x, y: p.seat.y - 72 * p.seat.s, s: txt || pick(ong ? HU_ONG : HU), c: '#fff6b0', t: 0, life: 1.8 }); }
+function hu(p, txt) { if (!p || !p.seat) return; const ong = laOng(); p.pose = ong ? 'bow' : 'clap'; p.poseT = 2.6; if (!NH_MODE) S.floats.push({ x: p.seat.x, y: p.seat.y - 72 * p.seat.s, s: txt || pick(ong ? HU_ONG : HU), c: '#fff6b0', t: 0, life: 1.8 }); }
 function wave(n) { const seated = S.people.filter(q => q.state === 'seat'); for (let i = 0; i < n; i++) { const q = pick(seated); if (q) setTimeout(() => hu(q), i * 160); } }
 // ---------- Khai báo giá hầu (lưu trên máy, mở bảng bằng phím C) ----------
 const GIA_MAC_DINH = { id: 'cobe', ten: 'Cô Bé Thượng Ngàn', ao: '#1f8a5a', vay: '#26222c', khan: '#1a7a4e', vienKhan: '#c62a22', dai: '#e0508a', congCu: 'moi', coNhac: false };
@@ -2139,7 +2142,7 @@ function drawPerson(p, t) {
 
 // ---------- Effects + overlay ----------
 function drawBubbles() {
-  S.people.forEach(p => { const b = p.bubble; if (!b) return; const age = S.t - b.t; if (age > 4.5) { p.bubble = null; return; }
+  S.people.forEach(p => { const b = p.bubble; if (!b) return; if (NH_MODE && !b.cmt) { p.bubble = null; return; } const age = S.t - b.t; if (age > 4.5) { p.bubble = null; return; }
     if (p.name.startsWith('\u200b')) return;
     const a = Math.min(1, age / .2, (4.5 - age) / .4), sc = p.state === 'seat' ? p.seat.s : 1;
     const bs = fixXung(b.s), txt = bs.length > 26 ? bs.slice(0, 25) + '…' : bs;
@@ -2457,7 +2460,7 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   ctx.restore(); }
 const LYC = { x: 0 };
 function drawLuuYChay() { // 18/11 anh Linh: lưu ý chạy 1 hàng ngang như dòng tin thời sự, đặt sát mép dưới sập hầu
-  const yS = typeof camMap === 'function' ? camMap(270, NH_MODE ? 762 : 646)[1] : 560, h = 21, /* 13:25 anh Linh: dòng lưu ý xuống dưới thảm đỏ, không che tên người lên nhận lộc */ /* 8:40 anh Linh: dịch lên sát sập, không che con nhang ngồi thảm nhận lộc */ y = Math.round(yS), bw = 66;
+  const yS = typeof camMap === 'function' ? camMap(270, NH_MODE ? 762 + (typeof G !== 'undefined' && HM ? 74 * (G.len || 0) : 0) : 646)[1] : 560, h = 21, /* 13:25 anh Linh: dòng lưu ý xuống dưới thảm đỏ, không che tên người lên nhận lộc */ /* 8:40 anh Linh: dịch lên sát sập, không che con nhang ngồi thảm nhận lộc */ y = Math.round(yS), bw = 66;
   ctx.save(); ctx.font = `600 11.5px ${UI}`; const txt = LUU_Y.replace(/^Lưu ý:\s*/, '') + '      ✦      ', tw = ctx.measureText(txt).width;
   const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, 'rgba(120,16,14,.94)'); g.addColorStop(1, 'rgba(70,8,8,.96)'); ctx.fillStyle = g; ctx.fillRect(0, y, W, h);
   ctx.fillStyle = '#e6b552'; ctx.fillRect(0, y, W, 1.6); ctx.fillRect(0, y + h - 1.2, W, 1.2);
@@ -2638,7 +2641,7 @@ let simT = 0;
 function sim(dt) {
   if (!S.auto) return; simT -= dt; if (simT > 0) return; simT = rnd(.5, 1.5);
   const r = Math.random(), seated = S.people.filter(p => p.state === 'seat');
-  if ((r < .25 && (!NH_MODE || S.people.length < 16)) || seated.length < (NH_MODE ? 8 : 14)) { /* 11:55: bản mới chỉ giữ khoảng 16 con nhang giả lập */ const n = pick(NAMES.filter(n => !S.people.some(p => p.name === n))) || ('khách ' + Math.floor(rnd(100, 999))); person(n); addComment(n, 'đã vào phiên live'); return; }
+  if ((r < .25 && (!NH_MODE || S.people.length < 26)) || seated.length < (NH_MODE ? 8 : 14)) { /* 11:55: bản mới chỉ giữ khoảng 16 con nhang giả lập */ const n = pick(NAMES.filter(n => !S.people.some(p => p.name === n))) || ('khách ' + Math.floor(rnd(100, 999))); person(n); addComment(n, 'đã vào phiên live'); return; }
   const who = pick(seated).name;
   if (r < .3) { const x = Math.random(); if (x < .3) say(who, 'con thắp hương'); else if (x < .7) say(who, 'con ở ' + pick(['Hà Nội', 'Lạng Sơn', 'Bắc Ninh', 'Hải Phòng', 'Thái Nguyên', 'Sài Gòn', 'Nam Định'])); else if (x < .85) follow(who); else shareLive(who); return; }
   if (r < .62) { say(who, pick(laOng() ? ['Lậy ông', 'Dạaa', 'Con nhớ ông quá', 'Con xin ông', 'Con lậy ông ạ', 'Con thắp hương'] : ['Lạy cô', 'lạy cô ạ', 'Cô đẹp quá', 'cô đẹp quá ạ', 'Cô múa dẻo quá', 'con lạy cô', 'Húuuuu', 'hú hú', 'vỗ tay', 'Húuuu cô ơi'])); return; }
@@ -2757,7 +2760,7 @@ function follow(name) {
 }
 // (4) Thắp hương bằng bình luận
 const HUONG = { x: 270, y: 668 }; S.huong = [];
-function thapHuong(p) { if (!p.seat || p.state !== 'seat') return; p.pose = 'bow'; p.poseT = 2.4; float(p.seat.x, p.seat.y - 46, p.name.startsWith('​') ? 'Vái ' + xung() : p.name + ' vái ' + xung(), '#f6dc96'); }
+function thapHuong(p) { if (!p.seat || p.state !== 'seat') return; p.pose = 'bow'; p.poseT = 2.4; if (!NH_MODE) float(p.seat.x, p.seat.y - 46, p.name.startsWith('​') ? 'Vái ' + xung() : p.name + ' vái ' + xung(), '#f6dc96'); }
 function drawHuong(t) {
   const { x, y } = HUONG;
   S.huong.forEach(h => { h.t += 1 / 60; const L = Math.max(4, 22 - h.t * .25); ctx.strokeStyle = '#b8443a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(h.x, y - 4); ctx.lineTo(h.x, y - 4 - L); ctx.stroke(); circ(h.x, y - 4 - L, 1.4, '#ff8a3a');
@@ -3034,7 +3037,7 @@ function frame1(now) {
   ctx.clearRect(0, 0, W, H); const T0 = ctx.getTransform(); KH.T0 = T0;
   camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
   if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); if (NH_MODE) veNen2(); /* hai bên và mép trên lót ảnh soi gương để lia, lùi máy không hở */ else ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
-  ctx.save(); camShear(); drawBg(t); drawSong(t); if (NHANG) { drawMoneyFloor(); if (NH_MODE) { drawChieuTo(); drawThamGoi(t); } else drawDem(t); } ctx.restore();
+  ctx.save(); camShear(); drawBg(t); drawSong(t); if (NHANG) { drawMoneyFloor(); if (NH_MODE) { drawChieuTo(); if (thamHien()) drawThamGoi(t); } else drawDem(t); } ctx.restore();
   if (NH_MODE) hauDangUpd(t);
   camShift(1);
   try {
@@ -3188,7 +3191,7 @@ const bT = document.getElementById('bTuChuyen'); bT.addEventListener('click', ()
 document.getElementById('fm').addEventListener('submit', e => { e.preventDefault(); const v = document.getElementById('inp').value.trim(); if (v) say(ME, v); document.getElementById('inp').value = ''; });
 
 // lively first frame: 26 con nhang already seated
-if (NH_MODE && !S.auto) { for (let i = 0; i < 14; i++) { const p = person('\u200bcn' + i); p.gia = true; p.tAct = -1e9; p.x = p.seat.x; p.y = p.seat.y; p.wp = []; p.state = 'seat'; p.pose = 'kneel'; } } /* 13:25 anh Linh: live vẫn có sẵn con nhang giả lập, không hiện tên; người thật vào thì nhường chỗ */
+if (NH_MODE && !S.auto) { for (let i = 0; i < 22; i++) { const p = person('\u200bcn' + i); p.gia = true; p.tAct = -1e9; p.x = p.seat.x; p.y = p.seat.y; p.wp = []; p.state = 'seat'; p.pose = 'kneel'; } } /* 13:25 anh Linh: live vẫn có sẵn con nhang giả lập, không hiện tên; người thật vào thì nhường chỗ */
 if (S.auto) { /* 14/11: tắt giả lập thì không có người xem, quà giả lúc mở trang */ NAMES.slice(0, NH_MODE ? 10 : 26).forEach(n => { const p = person(n); p.x = p.seat.x; p.y = p.seat.y; p.wp = []; p.state = 'seat'; p.pose = 'kneel'; });
 S.likes = 210; S.merit = { 'Linh Miêu': 40, 'Mơ Dung': 26, 'Kỳ Sư': 20, 'Thanh Hằng': 12, 'Bà Tám': 6 };
 addComment('Linh Miêu', 'Cô đẹp quá'); addComment('Bà Tám', 'Lạy cô'); addComment('Mơ Dung', 'đã tặng hoa dâng cô', true);
