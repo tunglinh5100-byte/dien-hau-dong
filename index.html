@@ -197,8 +197,8 @@ setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.peopl
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
-  const id = typeof GIA === 'function' ? GIA().id : ''; if (id !== 'chaube' && !laCU(id) || typeof s !== 'string') return s;
-  const X = id === 'ongmuoi' ? 'Ông' : id === 'caube' ? 'Cậu' : 'Chầu', x = X.toLowerCase();
+  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
+  const x = X.toLowerCase();
   return s.replace(/(^|[^\p{L}])(Cô|cô|CÔ)(?![\p{L}])(?!\s+đồng)/gu, (m, a, c) => a + (c === 'cô' ? x : c === 'CÔ' ? X.toUpperCase() : X)); }
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
 function float(x, y, s, c) { S.floats.push({ x, y, s: fixXung(s), c, t: 0, life: 2 }); }
@@ -209,7 +209,7 @@ function say(name, msg) {
   if (/(^|\s)hu+|vo tay|hay qua/.test(n)) { hu(p); wave(4); }
   else if (/lay co|lay thanh|con lay/.test(n)) { p.pose = 'bow'; p.poseT = 2.4; if (!NH_MODE) float(p.seat.x, p.seat.y - 46, (laOng() ? 'Lậy ông ạ' : 'Lạy cô ạ'), '#f6dc96'); }
   else if (/dep qua|xinh qua|dep the/.test(n)) { p.pose = laOng() ? 'bow' : 'cheer'; p.poseT = 1.8; for (let i = 0; i < 18; i++) S.particles.push({ x: rnd(180, 360), y: rnd(330, 380), vx: rnd(-20, 20), vy: rnd(20, 60), life: rnd(2, 3), t: 0, kind: 'petal', c: pick(['#f6b6c8', '#ec8fae', '#fff0f4']) }); float(270, 360, name + (laOng() ? ': Lậy ông' : ': Cô đẹp quá!'), '#ffd2e6'); }
-  else if (/mua deo|mua dep|mua hay/.test(n)) { S.danceSpecial = 4; wave(10); S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .5) { q.pose = laOng() ? 'bow' : 'clap'; q.poseT = 3; } }); float(270, 360, (laOng() ? 'Ông múa hèo tạ lòng ' : 'Cô múa quạt tạ lòng ') + name, '#f6dc96'); }
+  else if (/mua deo|mua dep|mua hay/.test(n)) { S.danceSpecial = 4; wave(10); S.people.forEach(q => { if (q.state === 'seat' && Math.random() < .5) { q.pose = laOng() ? 'bow' : 'clap'; q.poseT = 3; } }); float(270, 360, (laOng() ? 'Ông múa hèo tạ lòng ' : QX[GIA().id] ? 'Quan múa tạ lòng ' : 'Cô múa quạt tạ lòng ') + name, '#f6dc96'); }
 }
 function gift(name, kind) {
   const p = person(name); p.qua = (p.qua || 0) + 1; khen(name, kind === 'big' ? 'big' : 'hoa');
