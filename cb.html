@@ -137,7 +137,7 @@ const BG2 = new Image(); if (NH_MODE) BG2.src = 'nen-rong.jpg?v=1'; /* 18/11 8:2
 const BG2_K = .74, BG2_X = 270 - 550 * BG2_K, BG2_Y = 692 - 1012 * BG2_K, BG2_W = 1080 * BG2_K, BG2_H = 1920 * BG2_K; // tâm sập ở x=550 ảnh -> 270; mép dưới bậc sập (y=1012 ảnh) -> 692; máy quay vừa khít ảnh
 function veNen2() { if (!(BG2.complete && BG2.naturalWidth)) return; ctx.drawImage(BG2, BG2_X, BG2_Y, BG2_W, BG2_H); ctx.save(); ctx.translate(2 * BG2_X, 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 0, 0, 160, 1920, BG2_X, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); ctx.save(); ctx.translate(2 * (BG2_X + BG2_W), 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 920, 0, 160, 1920, BG2_X + BG2_W - 160 * BG2_K, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); } // hai mép soi gương để lia máy không hở
 const THAT = new Set(); window.__that = THAT; // tên người xem thật (từ TikFinity/Euler); con nhang giả lập không hiện tên
-const HAU_DANG = [[115, 520, 'Hầu dâng 1'], [436, 518, 'Hầu dâng 2'], [78, 598, 'Hầu dâng 3'], [484, 596, 'Hầu dâng 4']].map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#169b55', sex: 'nu', hairC: '#1c120c', x, y, seat: { x, y, s: .92, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
+const HAU_DANG = [[181, 506, 'Hầu dâng 1'], [418, 506, 'Hầu dâng 2'], [129, 580, 'Hầu dâng 3'], [440, 580, 'Hầu dâng 4']] /* 18/11 8:40 anh Linh chấm 4 góc sập */.map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#169b55', sex: 'nu', hairC: '#1c120c', x, y, seat: { x, y, s: .92, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
 const KH = { on: !/[?&]khung=0/.test(location.search) && (!NH_MODE || /[?&]khung=1/.test(location.search)), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
@@ -155,7 +155,7 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   banner: null, viewers: 0, auto: !/[?&]sim=0/.test(location.search), /* /tn: sim=0 tắt hẳn giả lập ngay từ đầu (anh Linh 14/11) */ sound: false, danceSpecial: 0, throwT: 0, giving: 0, glow: 0 };
 (function buildSeats() { // scattered, no rows: rejection sampling with min spacing
   const pts = [];
-  const zones = NH_MODE ? [[-110, 545, 800, 1290, 46], [-110, 575, 800, 1290, 46], [-110, 575, 800, 1290, 46]] : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
+  const zones = NH_MODE ? [[-110, 512, 800, 1290, 46], [-110, 512, 800, 1290, 46], [-110, 512, 800, 1290, 46]] : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
   while (pts.length < (NH_MODE ? 50 : 34) && tries++ < 8000) {
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
@@ -182,7 +182,7 @@ function person(name) {
 function goTo(p, pts, then) { p.wp = pts.slice(); p.state = 'walk'; p.after = then; }
 function raVe(p) { // 18/11: con nhang đứng dậy đi ra khỏi điện (đi xuống dưới, ra khỏi khung hình)
   if (!p || p.ra) return; p.ra = true; if (p.seat) p.seat.who = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); p.giftQ = [];
-  const x = p.x + (p.x < 270 ? -30 : 30); goTo(p, [[x, Math.max(p.y + 20, WY1 - 120)], [x + (p.x < 270 ? -40 : 40), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) { S.people.splice(i, 1); S.viewers--; } }); }
+  const x = Math.min(500, p.x + (p.x < 270 ? -30 : 30)); goTo(p, [[x, Math.max(p.y + 20, WY1 - 120)], [Math.min(500, x + (p.x < 270 ? -40 : 40)), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) { S.people.splice(i, 1); S.viewers--; } }); }
 setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.quen && p.name !== ME); if (ngoi.length < 12) return; const lau = ngoi.filter(p => S.t - (p.tAct || 0) > 150); if (lau.length) raVe(pick(lau)); } catch (e) {} }, 15000); // ai ngồi lâu không tương tác thì lần lượt ra về, chỗ trống cho người mới vào
 
 // ---------- Commands ----------
@@ -2276,7 +2276,7 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   ctx.restore(); }
 const LYC = { x: 0 };
 function drawLuuYChay() { // 18/11 anh Linh: lưu ý chạy 1 hàng ngang như dòng tin thời sự, đặt sát mép dưới sập hầu
-  const yS = typeof camMap === 'function' ? camMap(270, 693)[1] : 560, h = 21, y = Math.round(yS), bw = 66;
+  const yS = typeof camMap === 'function' ? camMap(270, 646)[1] : 560, h = 21, /* 8:40 anh Linh: dịch lên sát sập, không che con nhang ngồi thảm nhận lộc */ y = Math.round(yS), bw = 66;
   ctx.save(); ctx.font = `600 11.5px ${UI}`; const txt = LUU_Y.replace(/^Lưu ý:\s*/, '') + '      ✦      ', tw = ctx.measureText(txt).width;
   const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, 'rgba(120,16,14,.94)'); g.addColorStop(1, 'rgba(70,8,8,.96)'); ctx.fillStyle = g; ctx.fillRect(0, y, W, h);
   ctx.fillStyle = '#e6b552'; ctx.fillRect(0, y, W, 1.6); ctx.fillRect(0, y + h - 1.2, W, 1.2);
