@@ -132,7 +132,8 @@ const MUSIC_SRC = "data:audio/mp4;base64,AAAAHGZ0eXBNNEEgAAACAE00QSBpc29taXNvMgA
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const W = 540, H = 960;
 // 15/11 anh Linh: khung hình phẳng (khung thẳng, viền vàng): trên là nền đen đặt thanh tiến trình, khung cảnh đền như cũ, cắt sát mép thảm; lộc bay vượt khỏi khung ra ngoài như màn LED 3D. ?khung=1 bật (link /tn), ?khung=0 tắt
-const KH = { on: !/[?&]khung=0/.test(location.search), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
+const NH_MODE = !/[?&]nhang=0/.test(location.search), WY1 = NH_MODE ? 1110 : 960, NH_FY = 492, NH_SC = .85; /* cảnh lùi xa (0,85) để sập hầu nằm trên, sân con nhang chiếm phần dưới màn */ /* 18/11 anh Linh: lại có con nhang đi ra đi vào, máy quay lia trái phải, sân con nhang cao lên; ?nhang=0 về kiểu cũ (chỉ sập hầu) */
+const KH = { on: !/[?&]khung=0/.test(location.search) && (!NH_MODE || /[?&]khung=1/.test(location.search)), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
 const UI = '"Be Vietnam Pro", system-ui, sans-serif', SERIF = '"Noto Serif", Georgia, serif';
@@ -149,9 +150,9 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   banner: null, viewers: 0, auto: !/[?&]sim=0/.test(location.search), /* /tn: sim=0 tắt hẳn giả lập ngay từ đầu (anh Linh 14/11) */ sound: false, danceSpecial: 0, throwT: 0, giving: 0, glow: 0 };
 (function buildSeats() { // scattered, no rows: rejection sampling with min spacing
   const pts = [];
-  const zones = [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
+  const zones = [[NH_MODE ? -20 : 30, NH_MODE ? 560 : 520, 728, NH_MODE ? 1030 : 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < 34 && tries++ < 4000) {
+  while (pts.length < (NH_MODE ? 46 : 34) && tries++ < 6000) {
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
@@ -164,15 +165,19 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
 const NAMES = ['Thu Hà', 'minhanh.99', 'Bà Tám', 'Tuấn Đạt', 'Lan Hương', 'an.nhien', 'Hoa Mai', 'Quang Huy', 'Ngọc Ánh', 'Phúc Lộc', 'Trà My', 'bé Su', 'Hải Đăng', 'Kim Oanh', 'Đức Minh', 'Mộc Miên', 'Thảo Vy', 'Gia Bảo', 'Cô Ba SG', 'Hưng Thịnh', 'Bảo Ngọc', 'Diệu Linh', 'Văn Tú', 'Mai Chi', 'Khánh An', 'Thanh Tâm', 'Hồng Nhung', 'Minh Khôi', 'Linh Miêu', 'Kỳ Sư', 'Mơ Dung', 'Thanh Hằng'];
 const COATS = ['#2f6f9e', '#b04a5a', '#3f8a5c', '#c07a2c', '#7a4fa0', '#a03c3c', '#2f8a86', '#8a6a2e', '#9c4f8a', '#4a5fae', '#c9a03a', '#3a7a3a'];
 function person(name) {
-  let p = S.people.find(v => v.name === name); if (p) return p;
-  const free = S.seats.filter(s => !s.who); if (!free.length) { const old = S.people.find(v => v.state === 'seat' && !v.quen) || S.people.find(v => v.state === 'seat') || S.people.find(v => v.state !== 'xinloc' && !v.goingHuong); if (!old) return { name, seat: { x: 270, y: 900, s: 1 }, state: 'ghost', pose: 'kneel', wp: [] }; old.seat.who = null; S.people.splice(S.people.indexOf(old), 1); S.viewers--; return person(name); }
+  let p = S.people.find(v => v.name === name && !v.ra); if (p) { p.tAct = S.t; return p; }
+  const free = S.seats.filter(s => !s.who); if (!free.length) { const old = S.people.filter(v => v.state === 'seat' && !v.ra && !v.quen).sort((a, b) => (a.tAct || 0) - (b.tAct || 0))[0] || S.people.find(v => v.state === 'seat' && !v.ra) || S.people.find(v => v.state !== 'xinloc' && !v.goingHuong && !v.ra); if (!old) return { name, seat: { x: 270, y: 900, s: 1 }, state: 'ghost', pose: 'kneel', wp: [] }; if (NH_MODE) raVe(old); else { old.seat.who = null; S.people.splice(S.people.indexOf(old), 1); S.viewers--; } return person(name); }
   const seat = free.sort((a, b) => a.y - b.y || Math.abs(a.x - 270) - Math.abs(b.x - 270))[QUEN[name] ? 0 : Math.floor(rnd(0, Math.min(6, free.length)))];
-  p = { name, coat: pick(COATS), sex: Math.random() < .6 ? 'nu' : 'nam', hairC: pick(['#1c120c', '#22160e', '#2e1d12', '#1a1410']), seat, x: 270, y: 960, state: 'enter', pose: 'walk', poseT: 0, wp: [[seat.x, seat.y]], q: [], carry: null };
+  p = { name, coat: pick(COATS), sex: Math.random() < .6 ? 'nu' : 'nam', hairC: pick(['#1c120c', '#22160e', '#2e1d12', '#1a1410']), seat, x: 270 + rnd(-20, 20), y: WY1 + 30, tAct: S.t, state: 'enter', pose: 'walk', poseT: 0, wp: [[seat.x, seat.y]], q: [], carry: null };
   p.lv = LVK[name] && LV[LVK[name]] ? lvOf(LV[LVK[name]].xp) : name === ME ? 1 : lvSim();
   if (QUEN[name]) { p.quen = true; setTimeout(() => float(270, 560, '⭐ Con nhang quen ' + name + ' đã về', '#f6dc96'), 1200); }
   seat.who = p; S.people.push(p); S.viewers++; return p;
 }
 function goTo(p, pts, then) { p.wp = pts.slice(); p.state = 'walk'; p.after = then; }
+function raVe(p) { // 18/11: con nhang đứng dậy đi ra khỏi điện (đi xuống dưới, ra khỏi khung hình)
+  if (!p || p.ra) return; p.ra = true; if (p.seat) p.seat.who = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); p.giftQ = [];
+  const x = p.x + (p.x < 270 ? -30 : 30); goTo(p, [[x, Math.max(p.y + 20, WY1 - 120)], [x + (p.x < 270 ? -40 : 40), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) { S.people.splice(i, 1); S.viewers--; } }); }
+setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.quen && p.name !== ME); if (ngoi.length < 12) return; const lau = ngoi.filter(p => S.t - (p.tAct || 0) > 150); if (lau.length) raVe(pick(lau)); } catch (e) {} }, 15000); // ai ngồi lâu không tương tác thì lần lượt ra về, chỗ trống cho người mới vào
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
@@ -242,9 +247,9 @@ const BG = new Image(); BG.src = BG_SRC;
 function drawBg(t) {
   ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, H);
   // floor below the photo: Bát Tràng tiles like the photo's floor
-  ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); ctx.strokeStyle = 'rgba(90,50,35,.55)'; ctx.lineWidth = 1.2;
-  for (let y = 680; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 30); ctx.stroke(); } }
-  const fg = ctx.createLinearGradient(0, 680, 0, H); fg.addColorStop(0, 'rgba(40,16,10,.15)'); fg.addColorStop(1, 'rgba(20,8,5,.35)'); ctx.fillStyle = fg; ctx.fillRect(0, 680, W, H - 680);
+  const FX0 = NH_MODE ? -150 : 0, FX1 = NH_MODE ? W + 150 : W; ctx.fillStyle = '#a8735a'; ctx.fillRect(FX0, 680, FX1 - FX0, WY1 - 680); ctx.strokeStyle = 'rgba(90,50,35,.55)'; ctx.lineWidth = 1.2;
+  for (let y = 680; y < WY1; y += 30) { ctx.beginPath(); ctx.moveTo(FX0, y); ctx.lineTo(FX1, y); ctx.stroke(); for (let x = FX0; x < FX1; x += 30) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 30); ctx.stroke(); } }
+  const fg = ctx.createLinearGradient(0, 680, 0, WY1); fg.addColorStop(0, 'rgba(40,16,10,.15)'); fg.addColorStop(1, 'rgba(20,8,5,.35)'); ctx.fillStyle = fg; ctx.fillRect(FX0, 680, FX1 - FX0, WY1 - 680);
   if (BG.complete && BG.naturalWidth) ctx.drawImage(BG, 0, 0, 540, 692);
   if (!NHANG && BG.complete && BG.naturalWidth) { // anh Linh 14/11: bỏ nền gạch, thảm sập hầu kéo dài xuống hết màn hình (phần gần máy quay giãn ra theo phối cảnh)
     // 14/11 anh Linh: giữ nguyên ảnh gốc (cả thảm và bậc gỗ sập), chỉ nối thân sập gỗ xuống tới đáy màn hình
@@ -256,10 +261,10 @@ function drawBg(t) {
   // soften the seam
   const sg = ctx.createLinearGradient(0, 668, 0, 700); sg.addColorStop(0, 'rgba(176,122,94,0)'); sg.addColorStop(1, 'rgba(168,115,90,1)'); ctx.fillStyle = sg; ctx.fillRect(0, 668, W, 32); }
   // candle-warm glow pulsing with lộc moments
-  const r = ctx.createRadialGradient(270, 380, 30, 270, 420, 420); r.addColorStop(0, `rgba(255,200,110,${.06 + S.glow * .3})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; ctx.fillRect(0, 0, W, H);
+  const r = ctx.createRadialGradient(270, 380, 30, 270, 420, 420); r.addColorStop(0, `rgba(255,200,110,${.06 + S.glow * .3})`); r.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = r; if (NH_MODE) ctx.fillRect(-300, -120, W + 600, WY1 + 120); else ctx.fillRect(0, 0, W, H);
 
   // top vignette so overlays read
-  const tg = ctx.createLinearGradient(0, 0, 0, 150); tg.addColorStop(0, 'rgba(10,4,2,.75)'); tg.addColorStop(1, 'rgba(10,4,2,0)'); ctx.fillStyle = tg; ctx.fillRect(0, 0, W, 150);
+  if (NH_MODE) { const tg = ctx.createLinearGradient(0, -110, 0, 120); tg.addColorStop(0, 'rgba(10,4,2,.8)'); tg.addColorStop(1, 'rgba(10,4,2,0)'); ctx.fillStyle = tg; ctx.fillRect(-600, -110, W + 1200, 230); } else { const tg = ctx.createLinearGradient(0, 0, 0, 150); tg.addColorStop(0, 'rgba(10,4,2,.75)'); tg.addColorStop(1, 'rgba(10,4,2,0)'); ctx.fillStyle = tg; ctx.fillRect(0, 0, W, 150); }
 }
 // ---------- Cô đồng: luôn hướng lên ban Công Đồng (nhìn từ phía sau / nghiêng), đi lại hai bên, tay cầm mồi lửa ----------
 function rongMotif(x, y, r) { // rồng cuộn thêu kim tuyến
@@ -1483,7 +1488,7 @@ const NEM_CC = { phatlixi: [[4.0, 330, 275, 'tien'], [12.0, 330, 275, 'tien']], 
 const NEM = { cb: { tungtien: [[3.65, 282, 300, 'tien'], [5.4, 312, 232, 'tien'], [6.6, 305, 235, 'tien'], [7.35, 300, 225, 'tien']], tunghoa: [[3.75, 280, 300, 'hoa'], [5.6, 335, 215, 'hoa'], [6.6, 330, 232, 'hoa'], [8.0, 294, 275, 'hoa']], tungqua: [[4.1, 262, 318, 'qua'], [7.0, 270, 320, 'qua']] }, cu: { tungtien: [[6.45, 135, 250, 'tien']], tungkeo: [[6.0, 180, 270, 'keo']], phatloc: OM_NEM }, ob: { loc: [[2.6, 270, 372, 'tien']] } }; Object.assign(NEM.cu, NEM_CC);
 /* 17/11 anh Linh: một hàng con nhang ngồi ngang sát mép dưới khung hình, tràn xuống nền đen (link thử /tn ?hang=1).
    Người xem thật tương tác thì ngồi vào hàng, hiện tên nick; chỗ còn trống là con nhang giả lập (không tên, không bao giờ được ban khen) */
-const HANG = !/[?&]hang=0/.test(location.search); /* 17/11: hàng con nhang luôn bật, ?hang=0 để tắt */
+const HANG = NH_MODE ? /[?&]hang=1/.test(location.search) : !/[?&]hang=0/.test(location.search); /* 17/11: hàng con nhang luôn bật, ?hang=0 để tắt */
 const CN_IMG = {}; if (HANG) ['ngoi', 'vo'].forEach(k => { const i = new Image(); i.src = 'cn/' + k + '.png?v=1'; CN_IMG[k] = i; });
 const HN = { slots: [], built: false }, HN_TINT = [null, '#b23a48', '#c07a2c', null, '#8a5a2b', '#a83c3c', null, '#c49a3c']; /* 17/11 anh Linh: bỏ màu xanh lá, tím (nhìn như ma) */
 function hnBuild() { for (let i = 0; i < 8; i++) HN.slots.push({ name: null, real: false, t: -1e9, pose: 'ngoi', tint: HN_TINT[(i * 3) % HN_TINT.length], flip: i >= 4, /* 17/11: ai cũng hướng lên ban Công Đồng ở giữa */ ph: i * 1.7, sc: .92 + ((i * 37) % 13) / 100, cache: {} }); HN.built = true; }
@@ -1919,7 +1924,7 @@ function drawBuc(t) { // bục sơn son thếp vàng + thảm đỏ lối đi ch
   const X = DEM.x;
   ctx.save();
   // thảm đỏ chạy dọc lối đi giữa
-  const rw = 30, y0 = 738, y1 = 960;
+  const rw = 30, y0 = 738, y1 = WY1;
   ctx.beginPath(); ctx.moveTo(X - rw * .85, y0); ctx.lineTo(X + rw * .85, y0); ctx.lineTo(X + rw * 1.05, y1); ctx.lineTo(X - rw * 1.05, y1); ctx.closePath();
   let g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#b3261d'); g.addColorStop(1, '#7a1410'); ctx.fillStyle = g; ctx.fill();
   ctx.strokeStyle = '#e8b84e'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(X - rw * .85 + 4, y0); ctx.lineTo(X - rw * 1.05 + 4, y1); ctx.moveTo(X + rw * .85 - 4, y0); ctx.lineTo(X + rw * 1.05 - 4, y1); ctx.stroke();
@@ -2222,6 +2227,16 @@ let ketLast = 0; function drawKet() { const now = performance.now(), dt = Math.m
   const fT = ctx.createLinearGradient(0, top, 0, top + 26); fT.addColorStop(0, 'rgba(60,14,10,1)'); fT.addColorStop(1, 'rgba(60,14,10,0)'); ctx.fillStyle = fT; ctx.fillRect(X + 10, top, Wd - 20, 26);
   const fB = ctx.createLinearGradient(0, top + vis - 26, 0, top + vis); fB.addColorStop(0, 'rgba(60,14,10,0)'); fB.addColorStop(1, 'rgba(60,14,10,1)'); ctx.fillStyle = fB; ctx.fillRect(X + 10, top + vis - 26, Wd - 20, 26); ctx.restore();
   ctx.restore(); }
+const LYC = { x: 0 };
+function drawLuuYChay() { // 18/11 anh Linh: lưu ý chạy 1 hàng ngang như dòng tin thời sự, đặt sát mép dưới sập hầu
+  const yS = typeof camMap === 'function' ? camMap(270, 693)[1] : 560, h = 26, y = Math.round(yS), bw = 66;
+  ctx.save(); ctx.font = `600 13px ${UI}`; const txt = LUU_Y.replace(/^Lưu ý:\s*/, '') + '      ✦      ', tw = ctx.measureText(txt).width;
+  const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, 'rgba(120,16,14,.94)'); g.addColorStop(1, 'rgba(70,8,8,.96)'); ctx.fillStyle = g; ctx.fillRect(0, y, W, h);
+  ctx.fillStyle = '#e6b552'; ctx.fillRect(0, y, W, 1.6); ctx.fillRect(0, y + h - 1.2, W, 1.2);
+  LYC.x = (LYC.x + (S.dtLY || 1 / 60) * 62) % tw; ctx.save(); ctx.beginPath(); ctx.rect(bw, y, W - bw, h); ctx.clip(); ctx.fillStyle = '#fff6e6'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  for (let x = bw + 6 - LYC.x; x < W; x += tw) ctx.fillText(txt, x, y + h / 2 + .5); ctx.restore();
+  const bg = ctx.createLinearGradient(0, y, 0, y + h); bg.addColorStop(0, '#f2cf72'); bg.addColorStop(1, '#c9932e'); ctx.fillStyle = bg; ctx.fillRect(0, y, bw, h); ctx.fillStyle = '#5a0e0a'; ctx.font = `800 13px ${UI}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LƯU Ý', bw / 2, y + h / 2 + .5);
+  ctx.restore(); }
 function drawLuuY() { // lưu ý cố định cuối màn hình, trong vùng an toàn TikTok
   ctx.save(); ctx.font = `600 11.5px ${UI}`; const ls = wrapTxt(LUU_Y, 540 - SAFE_X * 2 - 8), lh = 15, h = ls.length * lh + 12, y = 954 - h;
   const g = ctx.createLinearGradient(0, y - 8, 0, y + h); g.addColorStop(0, 'rgba(40,8,6,0)'); g.addColorStop(.2, 'rgba(40,8,6,.92)'); g.addColorStop(1, 'rgba(30,6,5,.96)'); ctx.fillStyle = g; ctx.fillRect(0, y - 8, 540, h + 14);
@@ -2280,7 +2295,7 @@ function drawTin(t) {
 const SAFE_X = 56;
 function drawOverlay(t) {
   { const ch = S.chuyen; if (ch && ch.toId === 'ongbay' && ch.t >= CG.thinh - .1 && OB.buf && !S.cat) { S.chuyen = null; CO.sit = 0; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); } catch (e) {} S.cat = { t: .6, id: 'ongbay', ten: 'Ông Hoàng Bảy' }; } }
-  drawLuuY(); if (S.cat) { drawCat(); }
+  if (NH_MODE) drawLuuYChay(); else drawLuuY(); if (S.cat) { drawCat(); }
   // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
   const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
   drawBangPhai();
@@ -2303,7 +2318,7 @@ function updQueue() { // ai đã dâng hoa mà chưa tới lượt thì ra quỳ
     if (Math.hypot(p.x - qx, p.y - qy) > 1.5) goTo(p, [[qx, qy]], () => { p.state = 'queue'; p.pose = 'kneel'; }); });
 }
 function update(dt) {
-  S.t += dt; updKhen(dt); updQueue();
+  S.dtLY = dt; S.t += dt; updKhen(dt); updQueue();
   S.people.forEach(p => {
     if (p.poseT > 0) { p.poseT -= dt; if (p.poseT <= 0 && p.state === 'seat') p.pose = 'kneel'; }
     if (p.wp && p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.cham ? 40 : 74) * dt; p.state = 'walk';
@@ -2775,7 +2790,7 @@ function frame(now) { // luôn hẹn khung sau TRƯỚC, lỗi ở 1 khung khôn
 }
 // dự phòng: nếu trình duyệt trong LIVE Studio ngừng gọi requestAnimationFrame thì tự vẽ bằng hẹn giờ
 setInterval(() => { const n = performance.now(); if (n - lastRun > 250) { lastRun = n; try { frame1(n); } catch (e) { last = n; } } }, 50);
-const NHANG = new URLSearchParams(location.search).get('nhang') === '1'; // anh Linh 14/11 (thử): bỏ hết con nhang, bục, đệm; chỉ còn sập hầu và cô đồng. Thêm ?nhang=1 để hiện lại
+const NHANG = NH_MODE; // anh Linh 14/11 (thử): bỏ hết con nhang, bục, đệm; chỉ còn sập hầu và cô đồng. Thêm ?nhang=1 để hiện lại
 const DBG = /[?&]dbg=1/.test(location.search); let DBG_ERR = ''; let DBG_N = 0; try { DBG_N = +(sessionStorage.getItem('hd_lan') || 0) + 1; sessionStorage.setItem('hd_lan', DBG_N); } catch (e) {}
 window.addEventListener('error', e => { DBG_ERR = String(e.message || e).slice(0, 80); });
 function drawDbg() { if (!DBG) return; const vv = v => v ? (v.paused ? 'P' : '▶') + v.readyState + ' ' + (v.currentTime || 0).toFixed(1) + (v.error ? ' E' + v.error.code : '') : '-'; let l = [];
@@ -2790,7 +2805,7 @@ function frame1(now) {
   const dt = clamp((now - last) / 1000, 0, .05); last = now; sim(dt); update(dt); updVolume(dt); quanNhac(dt); const t = S.t;
   ctx.clearRect(0, 0, W, H); const T0 = ctx.getTransform(); KH.T0 = T0;
   camUpd(dt); if (CAM_ON) { ctx.fillStyle = '#2a1510'; ctx.fillRect(0, 0, W, 680); ctx.fillStyle = '#a8735a'; ctx.fillRect(0, 680, W, H - 680); } ctx.save(); camBase(); // camera quay vòng quanh cô: phía sau cô trượt một chiều, con nhang phía trước trượt chiều ngược lại
-  if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
+  if (CAM_ON && BG.complete && BG.naturalWidth) { ctx.save(); ctx.translate(camOff(120), 0); if (NH_MODE) { const ky = BG.naturalHeight / 692, top = (dx, f) => { ctx.save(); ctx.translate(dx + (f < 0 ? 540 : 0), 0); ctx.scale(f, -1); ctx.drawImage(BG, 0, 0, BG.naturalWidth, 110 * ky, 0, 0, 540, 110); ctx.restore(); }; ctx.drawImage(BG, 0, 0, 540, 692); top(0, 1); top(-540, -1); top(540, -1); ctx.save(); ctx.scale(-1, 1); ctx.drawImage(BG, 0, 0, 540, 692); ctx.drawImage(BG, -1080, 0, 540, 692); ctx.restore(); } /* hai bên và mép trên lót ảnh soi gương để lia, lùi máy không hở */ else ctx.drawImage(BG, -90, 0, 720, 692); ctx.restore(); } // lót ảnh rộng hơn để mép trên không hở khi lia xa
   ctx.save(); camShear(); drawBg(t); drawSong(t); if (NHANG) { drawMoneyFloor(); drawDem(t); } ctx.restore();
   camShift(1);
   try {
@@ -2827,7 +2842,7 @@ const DD_DUR = { rong: 8, co: 7, thap: 9, can: 5.5, cau: 7, loc: 6 };
 function ddNguoi() { const ds = S.people.filter(p => p.state === 'seat' && !String(p.name).startsWith('​')); if (!ds.length) return null; const that = ds.filter(p => LVK[p.name]); return pick(that.length ? that : ds); }
 function ddCanNguoi(name) { if (!DD.on) return; const p = S.people.find(q => q.name === name); if (p && p.state === 'seat') DD.evt = { shot: 'can', p, t: 0, dur: 4.5 }; }
 function ddUpd(dt) {
-  if (!CAM_ON || !DD.on || S.chuyen && S.chuyen.t < .1) { DD.tz = 1; DD.tfx = 270; DD.tfy = 480; DD.k = 1.6; }
+  if (!CAM_ON || !DD.on || S.chuyen && S.chuyen.t < .1) { DD.tz = 1; DD.tfx = 270; DD.tfy = NHANG ? NH_FY : 480; DD.k = 1.6; }
   else {
     let shot, p = null;
     if (S.dem && S.dem.p && S.people.includes(S.dem.p) && (S.dem.t || 0) < 6) shot = 'loc';
@@ -2840,11 +2855,11 @@ function ddUpd(dt) {
     else if (shot === 'can' && p) { DD.tz = 2; DD.tfx = p.x; DD.tfy = p.y - 46 * (p.seat ? p.seat.s : 1); DD.k = 1.5; }
     else if (shot === 'loc') { DD.tz = 1.55; DD.tfx = (CO.x + DEM.x) / 2; DD.tfy = 590; DD.k = 1.1; }
     else if (shot === 'cau') { const v = S.chuyen ? clamp(S.chuyen.t / 14, 0, 1) : u, e = v * v * (3 - 2 * v); DD.tz = 1.6 - .35 * e; DD.tfx = 270 + (CO.x - 270) * e; DD.tfy = 820 - 330 * e; DD.k = 2.2; }
-    else { DD.tz = 1; DD.tfx = 270; DD.tfy = 480; DD.k = 1; }
+    else { DD.tz = 1; DD.tfx = 270; DD.tfy = NHANG ? NH_FY : 480; DD.k = 1; }
   }
   const a = Math.min(1, dt * DD.k); DD.z += (DD.tz - DD.z) * a; DD.fx += (DD.tfx - DD.fx) * a; DD.fy += (DD.tfy - DD.fy) * a;
-  const sc = CAM.S * DD.z, hw = W / 2 / sc, hh = H / 2 / sc; // không cho máy lia ra ngoài khung cảnh
-  DD.cx = clamp(DD.fx, hw - 30 * (DD.z - 1), W - hw + 30 * (DD.z - 1)); DD.cy = clamp(DD.fy, hh, H - hh);
+  const sc = (NHANG ? NH_SC : CAM.S) * DD.z, hw = W / 2 / sc, hh = H / 2 / sc; // không cho máy lia ra ngoài khung cảnh
+  DD.cx = NHANG && DD.z < 1.05 ? DD.fx : clamp(DD.fx, hw - 30 * (DD.z - 1), W - hw + 30 * (DD.z - 1)); DD.cy = NHANG && DD.z < 1.05 ? DD.fy : clamp(DD.fy, hh, (NHANG ? WY1 : H) - hh);
 }
 window.__hdDD = ddSet;
 // trình duyệt chặn tự phát âm thanh khi chưa bấm vào trang: nhắc bấm 1 lần, bấm xong bật lại nhạc và văn đang dở
@@ -2868,13 +2883,13 @@ function camUpd(dt) {
 }
 const camOff = y => CAM.P * (y - CAM.PIV) / 400; // lệch ngang theo chiều sâu (y càng gần máy càng lệch nhiều, ngược chiều với phía sau)
 const _q = new URLSearchParams(location.search), ZM = +(_q.get('zm') || 1.0), ZFY = +(_q.get('zfy') || 410); // không con nhang: phóng vào sập hầu (zm = độ phóng, zfy = điểm ra giữa màn)
-function camBase() { const sc = CAM.S * DD.z; if (KH.on) ctx.translate(0, KH.dy); if (!NHANG) { ctx.translate(W / 2, H / 2); ctx.scale(ZM, ZM); ctx.translate(-W / 2, -ZFY); } ctx.translate(W / 2, H / 2); ctx.scale(sc, sc); ctx.translate(-DD.cx, -DD.cy); }
+function camBase() { const sc = (NHANG ? NH_SC : CAM.S) * DD.z; if (KH.on) ctx.translate(0, KH.dy); if (!NHANG) { ctx.translate(W / 2, H / 2); ctx.scale(ZM, ZM); ctx.translate(-W / 2, -ZFY); } ctx.translate(W / 2, H / 2); ctx.scale(sc, sc); ctx.translate(-DD.cx, -DD.cy); }
 function camShear() { const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
 function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
   const sh = o => { if (o && typeof o.x === 'number' && typeof o.y === 'number') o.x += d * camOff(o.y); };
   S.people.forEach(sh); if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); sh(CO); S.floats.forEach(sh); S.particles.forEach(sh);
 }
-function camMap(x, y) { const sc = CAM.S * DD.z, X = (x + camOff(y) - DD.cx) * sc + W / 2, Y = (y - DD.cy) * sc + H / 2; const dy = KH.on ? KH.dy : 0; return NHANG ? [X, Y + dy] : [(X - W / 2) * ZM + W / 2, (Y - ZFY) * ZM + H / 2 + dy]; }
+function camMap(x, y) { const sc = (NHANG ? NH_SC : CAM.S) * DD.z, X = (x + camOff(y) - DD.cx) * sc + W / 2, Y = (y - DD.cy) * sc + H / 2; const dy = KH.on ? KH.dy : 0; return NHANG ? [X, Y + dy] : [(X - W / 2) * ZM + W / 2, (Y - ZFY) * ZM + H / 2 + dy]; }
 
 // ---------- Controls ----------
 const ME = 'Bạn (thử)';
