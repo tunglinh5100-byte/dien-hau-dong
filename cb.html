@@ -1677,7 +1677,7 @@ function veMaDat(t) { // mã đang được bê, hoặc đã đặt cạnh thả
   if (MA.ph === 'len') { const a = HAU_DANG[2], b = HAU_DANG[3]; y = (a.y + b.y) / 2 - 4; x = (a.x + b.x) / 2 - camOff(y); } else bow = Math.max(0, Math.sin(t * 1.5));
   const k = maSc(y) * 1.15; ctx.save(); ctx.translate(x, y); ctx.scale(k, k * (1 - .16 * bow)); ctx.rotate(Math.sin(t * 1.5 + 1) * .05); veMa(c, y2); ctx.restore(); }
 function maUpd(dt) { const g = GIA_DS.active; if (S.chuyen) return;
-  if (MA.gia !== g) { MA.gia = g; MA.dat = null; MA.chay = false; MA.carrier = null; MA.idx = MA_GIA[g] || null; MA.ph = MA.idx && !HM ? 'xuong' : ''; Object.assign(G, { ph: HM && MA.idx ? 'cho_do' : '', t: 0, len: 0, ans: null, nguoi: null, kq: false, lua: 0, msg: null, simT: 0 }); }
+  if (MA.gia !== g) { MA.gia = g; MA.dat = null; MA.chay = false; MA.carrier = null; MA.idx = MA_GIA[g] || null; MA.ph = MA.idx && !HM ? 'xuong' : ''; Object.assign(G, { ph: HM && MA.idx ? 'cho_do' : '', t: 0, len: 0, ans: null, nguoi: null, kq: false, lua: 0, msg: null, simT: 0, khenCho: null, nhayLoc: false }); }
   if (HM) gameUpd(dt);
   if (!MA.ph) return; const a = HAU_DANG[2], b = HAU_DANG[3], toi = p => p.maToi;
   if (MA.ph === 'xuong' && toi(a) && toi(b)) MA.ph = 'len';
@@ -1691,11 +1691,13 @@ function chuanHoa(s) { return String(s || '').toLowerCase().normalize('NFC').rep
 function khongDau(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
 function gameNghe(name, msg) { if (!HM || !G.ph) return; const m = chuanHoa(msg);
   if (G.ph === 'do' && !G.ans) { const so = (m.match(/(^|\D)(\d{1,2})(?!\d)/) || [])[2], kd = khongDau(m), ten = khongDau(MA_TEN[MA.idx - 1]);
-    if ((so && +so === MA.idx) || (!so && kd.includes(ten))) { G.ans = name; G.msg = { s: '✓ ' + name + ' trả lời đúng nhanh nhất: mã số ' + MA.idx, t: 0 }; KHEN.cur = { name, loai: 'chung', uu: 5, t: 0, cau: 'Ta ban khen cho [tên], đáp đúng mã số ' + MA.idx }; } }
+    if ((so && +so === MA.idx) || (!so && kd.includes(ten))) { G.ans = name; G.msg = { s: '✓ ' + name + ' đoán đúng nhanh nhất: mã số ' + MA.idx, t: 0 }; G.khenCho = { name, loai: 'chung', uu: 5, t: 0, cau: 'Ta ban khen cho [tên], đáp đúng mã số ' + MA.idx }; /* 14:54 anh Linh: chờ tới lúc phát lộc, ngự tửu, nghe văn mới ban khen, khen người này đầu tiên */ } }
   else if (G.ph === 'hoa' && !G.nguoi && m === 'để tôi hóa mã') { const p = S.people.find(v => v.name === name && !v.ra); if (p) { G.nguoi = p; G.msg = { s: '🔥 ' + name + ' được lên hoá mã', t: 0 }; } } }
 function hoaMa(p) { G.lua = 6.5; MA.carrier = null; MA.dat = null; MA.chay = true; const ten = p ? p.name : null;
   if (ten) KHEN.cur = { name: ten, loai: 'chung', uu: 5, t: 0, cau: 'Ta chứng lòng thành của con [tên]' }; G.msg = { s: ten ? '🔥 ' + ten + ' đã hoá mã dâng ngài' : '🔥 Hầu dâng hoá mã dâng ngài', t: 0 }; }
-function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe(); G.t += dt; if (G.msg) { G.msg.t += dt; if (G.msg.t > 5) G.msg = null; } if (G.lua > 0) G.lua -= dt;
+const BUOC_KHEN = /^(phatloc|tungloc|tungloc2|banloc|tientung|loctung|uongruou|uongnuoc|vengoi|locqua|phatlixi|ngutuu|nghevan|ngoinghe|antoa|ngoi)$/;
+function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe();
+  if (G.khenCho && BUOC_KHEN.test(b || '') && !S.chuyen) { KHEN.cur = G.khenCho; KHEN.cur.t = 0; G.khenCho = null; KHEN.q = KHEN.q.filter(x => x.name !== KHEN.cur.name); } G.t += dt; if (G.msg) { G.msg.t += dt; if (G.msg.t > 5) G.msg = null; } if (G.lua > 0) G.lua -= dt;
   const THU = /[?&]hmthu=1/.test(location.search); // link xem thử nhanh: vào thẳng trò chơi, không chờ hết thỉnh, khai quang
   if (G.ph === 'cho_do') { if ((b && !/^(thinh|thinhlap)$/.test(b)) || (THU && G.t > 4)) { G.ph = 'do'; G.t = 0; G.simT = rnd(8, 26); } return; }
   if (G.ph === 'do') { G.len = Math.min(1, G.t / 1.5); if (S.auto && !G.ans && Math.random() < dt * .25) { const q = pick(S.people.filter(v => v.state === 'seat' && !v.gia)), sai = 1 + Math.floor(rnd(0, 11)); if (q && sai !== MA.idx) say(q.name, pick(['mã số ' + sai, 'số ' + sai + ' ạ', MA_TEN[sai - 1].toLowerCase()])); } /* giả lập vài người đoán sai */ if (S.auto && G.simT && G.t > G.simT && !G.ans) { G.simT = 0; const q = pick(S.people.filter(v => v.state === 'seat' && !v.gia)); if (q) say(q.name, 'mã số ' + MA.idx + ' ạ'); }
@@ -1705,7 +1707,8 @@ function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe(); G.t += dt; i
   if (G.ph === 'hoa') { if (S.auto && !G.nguoi && Math.random() < dt * .2) { const q = pick(S.people.filter(v => v.state === 'seat' && !v.gia)); if (q) say(q.name, pick(['để con hoá mã', 'hoá mã đi ạ', 'con xin hoá mã'])); } if (S.auto && G.simT && G.t > G.simT && !G.nguoi) { G.simT = 0; const q = pick(S.people.filter(v => v.state === 'seat' && !v.gia)); if (q) say(q.name, 'Để tôi hoá mã'); }
     if (G.nguoi) { const p = G.nguoi; G.ph = 'hoa_di'; p.cham = true; goTo(p, [[p.x, Math.max(p.y, 800)], [MA_DICH[0] + 26, MA_DICH[1] + 14]], () => { MA.carrier = p; MA.dat = null; goTo(p, [[LO[0] + 34, LO[1] + 8]], () => { hoaMa(p); p.pose = 'bow'; p.poseT = 2; setTimeout(() => { if (S.people.includes(p)) goTo(p, [[p.seat.x, p.seat.y]], () => { p.state = 'seat'; p.pose = 'kneel'; }); }, 2200); G.ph = 'xong'; G.t = 0; }); }); return; }
     if (G.t >= 30) { G.ph = 'hoa_hd'; MA.ph = 'hoa_xuong'; } return; }
-  if (G.ph === 'hoa_hd' && MA.chay) { G.ph = 'xong'; G.t = 0; } }
+  if (G.ph === 'hoa_hd' && MA.chay) { G.ph = 'xong'; G.t = 0; }
+  if (THU && G.ph === 'xong' && G.t > 9 && G.khenCho && !G.nhayLoc) { G.nhayLoc = true; try { const i = CU_LICH.findIndex((L, k) => k > CU.i && BUOC_KHEN.test(L[0])); if (i >= 0 && cuDangLe()) cuVao(i); } catch (e) {} } }
 function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd' || G.ph === 'xong' && G.t < 15)) return; const [x, y] = LO; ctx.save(); ctx.translate(x, y); ctx.scale(1.25, 1.25);
   const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 46); sh.addColorStop(0, 'rgba(0,0,0,.45)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 2, 46, 9, 0, 0, 7); ctx.fill();
   rr(-38, -8, 76, 9, 2, '#9a958c'); rr(-32, -14, 64, 7, 2, '#b0aba2'); // bậc đá
