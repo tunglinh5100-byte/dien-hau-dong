@@ -247,8 +247,8 @@ function muaTien(n) { if (laOng()) return; if (KH.on) { bayRa(Math.max(8, Math.r
     fw: rnd(2, 3.4), amp: rnd(14, 30), ph: rnd(0, 6.28), tb: rnd(3, 8), gy: rnd(600, 940), t: 0, delay: rnd(0, 3.5), landed: 0, lt: 0, d: pickNote() }); }
 function muaHoaQua(n, chi) { if (laOng()) return; n = Math.round(n * .7); /* 18/11 10:46 anh Linh: bớt 30% lộc hoa, quả */ if (KH.on) n = Math.round(n * .5); /* 16/11 11:38 anh Linh: bớt 50% hoa quả mưa, khỏi che kín màn hình */ // lộc hoa, lộc quả: một phần cô tung ra, phần lớn rơi như mưa từ trên xuống khắp sân, rơi xuống nằm lại một lúc
   const loai = () => chi === 'hoa' ? pick(['img:hoa-hong', 'img:hoa-hong', 'flower']) : chi === 'qua' ? pick(['img:qua', 'img:qua', 'fruit', 'peach']) : chi === 'keo' ? 'img:keo-mut' : pick(['img:qua', 'img:hoa-hong', 'fruit', 'flower', 'peach']); // 14/11 anh Linh: dùng ảnh hoa, quả, kẹo mút trong kho đạo cụ
-  for (let i = 0; i < Math.round(n * .3); i++) { const tx = rnd(10, 530), ty = rnd(620, 935); S.flying.push({ x: CO.x + rnd(-10, 20), y: CO.y - 110, tx, ty, t: -rnd(0, 2.5), dur: rnd(1, 1.6), kind: loai(), nho: rnd(.8, 1.05), onDone() { S.locDat.push({ kind: this.kind, x: tx, y: ty, s: this.nho * 1.2, r: rnd(-.6, .6), t: 0 }); } }); }
-  for (let i = 0; i < Math.round(n * .7); i++) S.muaHQ.push({ kind: loai(), x: rnd(-5, 545), y: rnd(-80, 0), vx: rnd(-15, 15), vy: rnd(150, 230), gy: rnd(600, 940), rot: rnd(0, 6), vr: rnd(-4, 4), s: rnd(.85, 1.2), delay: rnd(0, 3.5), t: 0 }); }
+  for (let i = 0; i < Math.round(n * .3); i++) { const tx = NH_MODE ? rnd(-90, 630) : rnd(10, 530), ty = NH_MODE ? rnd(700, 1210) : rnd(620, 935); S.flying.push({ x: CO.x + rnd(-10, 20), y: CO.y - 110, tx, ty, t: -rnd(0, 2.5), dur: rnd(1, 1.6), kind: loai(), nho: rnd(.8, 1.05), onDone() { S.locDat.push({ kind: this.kind, x: tx, y: ty, s: this.nho * 1.2, r: rnd(-.6, .6), t: 0 }); } }); }
+  for (let i = 0; i < Math.round(n * .7); i++) S.muaHQ.push({ kind: loai(), x: NH_MODE ? rnd(-120, 660) : rnd(-5, 545), y: rnd(-80, 0), vx: rnd(-15, 15), vy: rnd(150, 230), gy: NH_MODE ? rnd(700, 1220) : rnd(600, 940), rot: rnd(0, 6), vr: rnd(-4, 4), s: rnd(.85, 1.2), delay: rnd(0, 3.5), t: 0 }); }
 function nemTien(arm) {
   if (laOng()) return; // Ông Hoàng Bảy không tung tiền, không mưa tiền
   const h = (CO.hand && CO.hand[arm]) || { x: CO.x, y: CO.y - 150 }, out = Math.sign(h.x - CO.x) || arm;
@@ -1565,7 +1565,7 @@ function drawItem(kind, x, y, s) {
 const ITEM_NAME = { sen: 'bông sen', note: 'tờ 500.000', flower: 'bông hoa', fruit: 'quả cam', peach: 'quả đào' };
 function updFlying(dt) {
   S.bayRa = (S.bayRa || []).filter(b => (b.t += dt) < b.dur + .06);
-  S.locDat = (S.locDat || []).filter(d => (d.t += dt) < 7.5);
+  S.locDat = (S.locDat || []).filter(d => { if (d.het == null) d.het = NH_MODE ? rnd(3, 5) : 6; return (d.t += dt) < d.het + 1.2; }); /* 18/11 11:09 anh Linh: lộc nằm trên chiếu 3-5 giây rồi mới biến mất */
   S.muaHQ = (S.muaHQ || []).filter(m => { m.t += dt; if (m.t < m.delay) return true; m.x += (m.vx + Math.sin(m.t * 2 + m.rot) * 25) * dt; m.y += m.vy * dt; m.rot += m.vr * dt; if (m.y >= m.gy) { S.locDat.push({ kind: m.kind, x: m.x, y: m.gy, s: m.s, r: rnd(-.6, .6), t: 0 }); return false; } return true; });
   S.flying.forEach(f => { f.t += dt; if (f.t >= f.dur && !f.done) { f.done = true; if (f.onDone) f.onDone(); const p = f.p; if (p && S.people.includes(p)) { p.carry = f.kind; p.pose = 'raise'; p.poseT = 3; p.bubble = { s: 'Con xin ' + xung(), t: S.t }; S.floats.push({ x: p.x, y: p.y - 56, s: p.name + ' được ' + xung() + ' ban ' + ITEM_NAME[f.kind], c: '#f6dc96', t: 0, life: 2.4 }); setTimeout(() => { if (p.carry === f.kind) p.carry = null; }, 5000); wave(3); } } });
   S.flying = S.flying.filter(f => !f.done);
@@ -1634,7 +1634,7 @@ function banLe(x, y, k) { // án sơn son nhỏ kê mỗi mâm lễ: mặt bàn,
   rr(x - w, top, 2 * w, 6 * k, 1, '#6e170f'); ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = .8; ctx.strokeRect(x - w + 2, top + 1.5 * k, 2 * w - 4, 3 * k); // diềm
   ctx.restore(); }
 function chieu(cx, cy) { // chiếu cói trải đất
-  ctx.save(); ctx.translate(cx, cy); ctx.rotate(1.42); ctx.beginPath(); ctx.rect(-44, -20, 88, 40); ctx.fillStyle = '#d8c48e'; ctx.fill(); ctx.strokeStyle = '#b5372a'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(1.94); ctx.beginPath(); ctx.rect(-44, -20, 88, 40); ctx.fillStyle = '#d8c48e'; ctx.fill(); ctx.strokeStyle = '#b5372a'; ctx.lineWidth = 3; ctx.stroke();
   ctx.strokeStyle = 'rgba(150,110,50,.35)'; ctx.lineWidth = 1; for (let k = -40; k <= 40; k += 5) { ctx.beginPath(); ctx.moveTo(k, -20); ctx.lineTo(k, 20); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(181,55,42,.7)'; ctx.lineWidth = 1.5; ctx.strokeRect(-36, -13, 72, 26); ctx.restore(); }
 function drawManhSan(t) { // vị trí theo ảnh anh Linh đánh dấu 18/11 8:25; 8:47: lễ vật không đè lên cột, thêm mâm cho đầy đặn, có bánh chưng
@@ -1644,9 +1644,9 @@ function drawManhSan(t) { // vị trí theo ảnh anh Linh đánh dấu 18/11 8:
   // giữa cột trái và sập (nét xanh rêu trong): 4 mâm xếp chéo
   [[88, 492, .72, mamQua], [76, 516, .76, mamBanhChung], [64, 541, .8, thapBia], [52, 568, .84, mamBanh]].forEach(([x, y, k, f]) => { banLe(x, y, k); nhom(x, y - 24 * k, k, () => f(x, y - 24 * k)); });
   // cung văn (tím): ngồi dọc theo mép phải sập, giữa sập và cột phải
-  chieu(492, 505); // 10:28 anh Linh: cung văn nhỏ lại, ngồi trên chiếu giữa cột và ban Công Đồng
-  const tm = S.canhDan > 0 ? t * 1.7 : t; [[488, 478, 'drum'], [492, 505, 'lute'], [496, 532, 'flute']].forEach(([x, y, k]) => nhom(x, y, .95, () => { ctx.translate(2 * x, 0); ctx.scale(-1, 1); musician(x, y, k, tm); })); // 10:58 anh Linh: cung văn 1 hàng giữa cột và chân hạc đồng, quay mặt về phía cô đồng
-  if (S.canhDan > 0 && Math.random() < .08) S.floats.push({ x: rnd(460, 510), y: 450, s: pick(['♪', '♫']), c: '#f6dc96', t: 0, life: 1.6 }); }
+  chieu(541, 550); // 10:28 anh Linh: cung văn nhỏ lại, ngồi trên chiếu giữa cột và ban Công Đồng
+  const tm = S.canhDan > 0 ? t * 1.7 : t; [[554, 516, 'drum'], [541, 550, 'lute'], [528, 584, 'flute']].forEach(([x, y, k]) => nhom(x, y, .95, () => { ctx.translate(2 * x, 0); ctx.scale(-1, 1); musician(x, y, k, tm); })); // 10:58 anh Linh: cung văn 1 hàng giữa cột và chân hạc đồng, quay mặt về phía cô đồng
+  if (S.canhDan > 0 && Math.random() < .08) S.floats.push({ x: rnd(520, 560), y: 470, s: pick(['♪', '♫']), c: '#f6dc96', t: 0, life: 1.6 }); }
 function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ngẩng hướng lên ban Công Đồng
   ctx.save(); ctx.translate(x, y); const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 26); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 26, 7, 0, 0, 7); ctx.fill();
   rr(-14, -6, 5, 6, 1, '#2a1a0e'); rr(9, -6, 5, 6, 1, '#2a1a0e'); // móng
@@ -1661,8 +1661,14 @@ function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ng�
   ctx.strokeStyle = c === '#1c1c1c' ? '#555' : '#3a2412'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.quadraticCurveTo(3, -16, -1, -6); ctx.stroke(); // đuôi
   ctx.restore(); }
 function drawMaHang(t) { // 8:47 anh Linh: mã chỉ là ngựa, đầu quay lên ban Công Đồng, xếp 1 hàng ngang sát mép dưới màn hình (chừa lối đi giữa)
-  [[-86, '#c62a22', '#e9b43a'], [-12, '#f4efe6', '#c62a22'], [62, '#e9b43a', '#2f6fb5'], [136, '#1c1c1c', '#c62a22'], [404, '#c62a22', '#2f9b5a'], [478, '#f4efe6', '#2f6fb5'], [552, '#e9b43a', '#c62a22'], [626, '#1c1c1c', '#e9b43a']]
-    .forEach(([x, c, y2]) => { ctx.save(); ctx.translate(x, 1346); ctx.scale(1.55, 1.55); nguaSau(0, 0, c, y2); ctx.restore(); }); }
+  [[-86, '#c62a22', '#e9b43a'], [-12, '#f4efe6', '#c62a22'], [62, '#163f8f', '#e9b43a'], [136, '#e9b43a', '#c62a22'], [404, '#7a3fa8', '#e9b43a'], [478, '#f4efe6', '#2f6fb5'], [552, '#c62a22', '#2f9b5a'], [626, 'kieu']]
+    .forEach(([x, c, y2]) => { ctx.save(); ctx.translate(x, 1346); ctx.scale(1.55, 1.55); if (c === 'kieu') kieuSau(); else nguaSau(0, 0, c, y2); ctx.restore(); }); } // 18/11 11:09 anh Linh: 2 ngựa trắng, 1 xanh biển đậm, 2 đỏ, 1 vàng, 1 tím, 1 kiệu hồng
+function kieuSau() { // kiệu mã màu hồng nhìn từ sau
+  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 30, 7, 0, 0, 7); ctx.fill();
+  rr(-30, -14, 60, 4, 2, '#8a4a1a'); rr(-24, -10, 4, 10, 1, '#5a2a10'); rr(20, -10, 4, 10, 1, '#5a2a10'); // đòn khiêng, chân
+  rr(-20, -58, 40, 46, 3, '#e86aa6'); ctx.strokeStyle = '#ffe39a'; ctx.lineWidth = 1.4; ctx.strokeRect(-17, -55, 34, 40); flowerMotif(0, -35, 6, '#ffe39a', '#ffd2e6');
+  ctx.fillStyle = '#c94a8a'; ctx.beginPath(); ctx.moveTo(-26, -58); ctx.quadraticCurveTo(0, -80, 26, -58); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#ffe39a'; ctx.stroke(); // mái cong
+  circ(0, -76, 4, '#e9b43a'); rr(-26, -60, 52, 4, 2, '#e9b43a'); }
 function buocDangLe() { try { if (typeof CU !== 'undefined' && cuDangLe()) return (CU_LICH[CU.i] || [''])[0]; } catch (e) {} try { if (typeof CB !== 'undefined' && cbDangLe()) return (CB_LICH[CB.i] || [''])[0]; } catch (e) {} try { if (typeof OB !== 'undefined' && OB.buf && laOng()) return OB.cur || ''; } catch (e) {} try { if (typeof OC !== 'undefined' && OC.buf) return OC.cur || ''; } catch (e) {} return ''; }
 function hauDangUpd(t) { // 18/11 anh Linh: 2 hầu dâng trên thay khăn áo, chuẩn bị hương, binh khí; 2 hầu dâng dưới cầm quạt quạt mát cho cô cậu đồng
   const b = buocDangLe(), thay = /thayao|tungkhan/.test(b) && !S.chuyen, dang = /vaihuong|tauhuong|dangnhang|khaiquang|camhuong|baisai/.test(b);
@@ -1697,12 +1703,11 @@ function hauDangDo(p, t) { // đồ trên tay hầu dâng
   ctx.strokeStyle = '#3f7a2a'; ctx.lineWidth = 1.4; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(-6 + k * 2, -1); ctx.lineTo(-8 + k * 3, -16); ctx.stroke(); circ(-8 + k * 3, -16.5, 1.3, '#ff7a2a'); } // 3 nén hương
   ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, -2); ctx.lineTo(16, -9); ctx.stroke(); ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(4, -3); ctx.stroke(); // thanh kiếm
   ctx.restore(); }
-function drawChieuTo() { // 18/11 10:46 anh Linh: chiếu cói lớn trải sân cho con nhang ngồi
-  const x0 = -190, x1 = 730, y0 = 694, y1 = 1236; /* 10:58: chiếu phủ sát tới sập, thảm đặt trên chiếu */ ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0);
-  const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#d9c38a'); g.addColorStop(1, '#cdb377'); ctx.fillStyle = g; ctx.fill(); ctx.clip();
-  ctx.strokeStyle = 'rgba(140,100,45,.28)'; ctx.lineWidth = 1.2; for (let y = y0 + 4; y < y1; y += 7) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
-  ctx.strokeStyle = 'rgba(170,40,30,.55)'; ctx.lineWidth = 5; for (const y of [y0 + 26, y1 - 26]) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
-  ctx.restore(); ctx.strokeStyle = '#a3291c'; ctx.lineWidth = 6; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0); ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = 1.5; ctx.strokeRect(x0 + 5, y0 + 5, x1 - x0 - 10, y1 - y0 - 10); }
+const CHIEU_IMG = new Image(); if (NH_MODE) CHIEU_IMG.src = 'chieu.jpg?v=1';
+function drawChieuTo() { // 18/11 11:09 anh Linh: dùng ảnh chiếu cói đỏ, trải kín sân dưới sập từ hai cột trở ra
+  const y0 = 694, y1 = 1236, n = 3, x0 = -262, w = (802 - x0) / n;
+  if (!(CHIEU_IMG.complete && CHIEU_IMG.naturalWidth)) { ctx.fillStyle = '#d9c38a'; ctx.fillRect(x0, y0, w * n, y1 - y0); return; }
+  for (let k = 0; k < n; k++) ctx.drawImage(CHIEU_IMG, x0 + k * w, y0, w + 1, y1 - y0); }
 function drawThamGoi(t) { // thảm đỏ sát bậc sập: chỉ con nhang được gọi tên mới lên ngồi nhận lộc
   const X = DEM.x, Y0 = DEM.y - 30, Y1 = DEM.y + 30; ctx.save(); ctx.beginPath(); ctx.moveTo(X - 80, Y0); ctx.lineTo(X + 80, Y0); ctx.lineTo(X + 90, Y1); ctx.lineTo(X - 90, Y1); ctx.closePath();
   const g = ctx.createLinearGradient(0, Y0, 0, Y1); g.addColorStop(0, '#b3261d'); g.addColorStop(1, '#8a1a12'); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#e8b84e'; ctx.lineWidth = 3; ctx.stroke();
@@ -2134,7 +2139,7 @@ function updTay(dt) { TAY.forEach(tay => { if (!tay.go) return; const dx = tay.g
   if (d <= sp) { tay.x = tay.go[0]; tay.y = tay.go[1]; tay.go = null; const f = tay.then; tay.then = null; if (f) f(); } else { tay.x += dx / d * sp; tay.y += dy / d * sp; } tay.seat.x = tay.x; tay.seat.y = tay.y; }); }
 function noteSz(y) { return .78 + clamp((y - 560) / 340, 0, 1) * .38; }
 function drawMoneyFloor() {
-  (S.locDat || []).forEach(d => { ctx.save(); ctx.globalAlpha = d.t > 6 ? Math.max(0, 1 - (d.t - 6) / 1.5) : 1; ctx.translate(d.x, d.y); ctx.rotate(d.r); ctx.scale(1, .8); drawItem(d.kind, 0, 0, d.s); ctx.restore(); });
+  (S.locDat || []).forEach(d => { ctx.save(); ctx.globalAlpha = d.t > (d.het || 6) ? Math.max(0, 1 - (d.t - (d.het || 6)) / 1.2) : 1; ctx.translate(d.x, d.y); ctx.rotate(d.r); ctx.scale(1, .8); drawItem(d.kind, 0, 0, d.s); ctx.restore(); });
   S.money.forEach(m => { if (m.kind !== 'n2' || m.t < m.delay) return; const z = noteSz(m.gy);
     if (m.landed) { ctx.save(); ctx.globalAlpha = m.lt > 4.5 ? Math.max(0, 1 - (m.lt - 4.5) / 1.5) : 1; ctx.translate(m.x, m.gy); ctx.scale(1, m.flat); ctx.rotate(m.rot); note(0, 0, z, m.d, 1); ctx.restore(); }
     else { const k = clamp(1 - (m.gy - m.y) / 260, 0, 1); if (k > 0) { ctx.save(); ctx.globalAlpha = .28 * k; ctx.translate(m.x, m.gy); ctx.scale(1, .3); ctx.beginPath(); ctx.ellipse(0, 0, 18 * z, 9 * z, 0, 0, 7); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore(); } } });
