@@ -162,7 +162,7 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
     if (Math.abs(x - 270) < 34) continue; // lối đi giữa
-    if (/[?&]hm=1/.test(location.search) && x < 80 && y < 990) continue; // chừa chỗ lò hoá mã
+    if (/[?&]hm=1/.test(location.search) && x < 40 && y < 900) continue; // chừa chỗ lầu hoá mã
     if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 72 : 52))) continue;
     pts.push({ x, y, truoc: NH_MODE && y < 950, s: (NH_MODE ? 1.3 : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
   }
@@ -1686,7 +1686,7 @@ function maUpd(dt) { const g = GIA_DS.active; if (S.chuyen) return;
   else if (MA.ph === 'hoa_xuong' && toi(a) && toi(b)) { MA.ph = 'hoa_mang'; MA.dat = null; }
   else if (MA.ph === 'hoa_mang' && toi(a) && toi(b)) { hoaMa(null); MA.ph = 've'; } }
 // ---------- 18/11 14:20 anh Linh: trò chơi mã (link duyệt ?hm=1): đố mã sau khi thỉnh, hoá mã sau khai quang ----------
-const HM = /[?&]hm=1/.test(location.search), G = { ph: '' }, LO = [8, 905];
+const HM = /[?&]hm=1/.test(location.search), G = { ph: '' }, LO = [-48, 748]; // 14:31 anh Linh: lầu hoá mã ở góc trên bên trái chiếu, lửa luôn cháy
 function chuanHoa(s) { return String(s || '').toLowerCase().normalize('NFC').replace(/hoá/g, 'hóa').replace(/[“”"'.!?,~…]+/g, ' ').replace(/\s+/g, ' ').trim(); }
 function khongDau(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
 function gameNghe(name, msg) { if (!HM || !G.ph) return; const m = chuanHoa(msg);
@@ -1705,14 +1705,19 @@ function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe(); G.t += dt; i
     if (G.nguoi) { const p = G.nguoi; G.ph = 'hoa_di'; p.cham = true; goTo(p, [[p.x, Math.max(p.y, 800)], [MA_DICH[0] + 26, MA_DICH[1] + 14]], () => { MA.carrier = p; MA.dat = null; goTo(p, [[LO[0] + 34, LO[1] + 8]], () => { hoaMa(p); p.pose = 'bow'; p.poseT = 2; setTimeout(() => { if (S.people.includes(p)) goTo(p, [[p.seat.x, p.seat.y]], () => { p.state = 'seat'; p.pose = 'kneel'; }); }, 2200); G.ph = 'xong'; G.t = 0; }); }); return; }
     if (G.t >= 30) { G.ph = 'hoa_hd'; MA.ph = 'hoa_xuong'; } return; }
   if (G.ph === 'hoa_hd' && MA.chay) { G.ph = 'xong'; G.t = 0; } }
-function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd' || G.ph === 'xong' && G.t < 12)) return; const [x, y] = LO; ctx.save(); ctx.translate(x, y); ctx.scale(1.6, 1.6);
-  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 34); sh.addColorStop(0, 'rgba(0,0,0,.4)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 34, 8, 0, 0, 7); ctx.fill();
-  rr(-24, -46, 48, 46, 4, '#8a3b1c'); ctx.strokeStyle = '#d9a640'; ctx.lineWidth = 1.5; ctx.strokeRect(-22, -44, 44, 42); for (let r = -36; r < 0; r += 9) { ctx.strokeStyle = 'rgba(40,10,4,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-23, r); ctx.lineTo(23, r); ctx.stroke(); } // thân lò gạch
-  rr(-28, -52, 56, 8, 3, '#c9a03a'); rr(-8, -86, 16, 34, 2, '#7a3418'); rr(-11, -90, 22, 6, 2, '#c9a03a'); // vành, ống khói
-  ctx.beginPath(); ctx.moveTo(-13, -6); ctx.lineTo(-13, -26); ctx.quadraticCurveTo(0, -38, 13, -26); ctx.lineTo(13, -6); ctx.closePath(); ctx.fillStyle = G.lua > 0 ? '#ff9a2a' : '#2a0e06'; ctx.fill(); // cửa lò
-  text('LÒ HOÁ', 0, -66, 6.5, '#ffe39a', { f: SERIF, w: 800 });
-  if (G.lua > 0) { const a = Math.min(1, G.lua / 1.2); for (let k = 0; k < 7; k++) { const fx = -16 + k * 5.3, fh = 26 + Math.sin(t * 9 + k * 1.7) * 9 + (k % 2) * 8; ctx.globalAlpha = a; const fg = ctx.createLinearGradient(0, -52, 0, -52 - fh); fg.addColorStop(0, '#fff2a0'); fg.addColorStop(.45, '#ff9a22'); fg.addColorStop(1, 'rgba(220,40,10,0)'); ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(fx - 5, -52); ctx.quadraticCurveTo(fx - 4, -52 - fh * .6, fx, -52 - fh); ctx.quadraticCurveTo(fx + 4, -52 - fh * .6, fx + 5, -52); ctx.fill(); }
-    if (Math.random() < .5) S.particles.push({ x: x + rnd(-14, 14), y: y - 80, vx: rnd(-14, 14), vy: rnd(-70, -35), life: rnd(.6, 1.3), t: 0, kind: 'ember' }); ctx.globalAlpha = 1; }
+function veLo(t) { if (!(G.ph === 'hoa' || G.ph === 'hoa_di' || G.ph === 'hoa_hd' || G.ph === 'xong' && G.t < 15)) return; const [x, y] = LO; ctx.save(); ctx.translate(x, y); ctx.scale(1.25, 1.25);
+  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 46); sh.addColorStop(0, 'rgba(0,0,0,.45)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 2, 46, 9, 0, 0, 7); ctx.fill();
+  rr(-38, -8, 76, 9, 2, '#9a958c'); rr(-32, -14, 64, 7, 2, '#b0aba2'); // bậc đá
+  rr(-30, -70, 10, 58, 2, '#a8a39a'); rr(20, -70, 10, 58, 2, '#a8a39a'); rr(-20, -70, 40, 58, 1, '#7a5440'); // trụ đá + tường gạch
+  ctx.strokeStyle = 'rgba(50,25,15,.35)'; ctx.lineWidth = .8; for (let r = -64; r < -14; r += 6) { ctx.beginPath(); ctx.moveTo(-20, r); ctx.lineTo(20, r); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-14, -14); ctx.lineTo(-14, -46); ctx.quadraticCurveTo(0, -60, 14, -46); ctx.lineTo(14, -14); ctx.closePath(); ctx.fillStyle = '#140604'; ctx.fill(); // cửa lò vòm
+  const to = G.lua > 0 ? 1 : .45, a = 1; for (let k = 0; k < 6; k++) { const fx = -10 + k * 4, fh = (12 + Math.sin(t * 9 + k * 1.9) * 4 + (k % 2) * 5) * (G.lua > 0 ? 1.9 : 1); const fg = ctx.createLinearGradient(0, -14, 0, -14 - fh); fg.addColorStop(0, '#fff2a0'); fg.addColorStop(.45, '#ff9a22'); fg.addColorStop(1, 'rgba(220,40,10,0)'); ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(fx - 4, -14); ctx.quadraticCurveTo(fx - 3, -14 - fh * .6, fx, -14 - fh); ctx.quadraticCurveTo(fx + 3, -14 - fh * .6, fx + 4, -14); ctx.fill(); } // lửa luôn cháy trong lò
+  const mai = (yy, w, h) => { ctx.fillStyle = '#6f6a62'; ctx.beginPath(); ctx.moveTo(-w, yy); ctx.quadraticCurveTo(-w * .55, yy - h * .35, -w * .4, yy - h); ctx.lineTo(w * .4, yy - h); ctx.quadraticCurveTo(w * .55, yy - h * .35, w, yy); ctx.quadraticCurveTo(0, yy - h * .25, -w, yy); ctx.fill(); ctx.strokeStyle = '#4e4a44'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = '#8c877e'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(-w, yy); ctx.quadraticCurveTo(-w - 6, yy - 6, -w - 3, yy - 13); ctx.moveTo(w, yy); ctx.quadraticCurveTo(w + 6, yy - 6, w + 3, yy - 13); ctx.stroke(); }; // mái cong, đầu đao vểnh
+  mai(-66, 44, 14); rr(-22, -96, 44, 18, 1, '#8a8378'); rr(-17, -93, 34, 12, 1, '#f4efe6'); text('LẦU HÓA MÃ', 0, -86.8, 5.6, '#c62a22', { f: SERIF, w: 900 }); mai(-94, 32, 12);
+  rr(-6, -124, 12, 22, 1, '#9a948a'); rr(-8, -126, 16, 4, 1, '#4a4640'); // ống khói
+  ctx.globalAlpha = .45; for (let k = 0; k < 3; k++) { const ph = (t * .5 + k / 3) % 1; ctx.fillStyle = 'rgba(120,115,110,' + (1 - ph) * .7 + ')'; ctx.beginPath(); ctx.arc(Math.sin(ph * 6 + k) * 4, -128 - ph * 40, 4 + ph * 8, 0, 7); ctx.fill(); } ctx.globalAlpha = 1; // khói
+  if (Math.random() < (G.lua > 0 ? .6 : .15)) S.particles.push({ x: x + rnd(-8, 8), y: y - 40, vx: rnd(-10, 10), vy: rnd(-60, -30), life: rnd(.5, 1.1), t: 0, kind: 'ember' });
   ctx.restore(); }
 function drawGame() { if (!HM || !G.ph) return; const box = (s1, s2, y) => { ctx.save(); ctx.font = `800 15px ${SERIF}`; const w = Math.min(W - 2 * SAFE_X, Math.max(ctx.measureText(s1).width, s2 ? ctx.measureText(s2).width * .8 : 0) + 36); rr(W / 2 - w / 2, y, w, s2 ? 52 : 34, 14, 'rgba(120,16,14,.95)'); ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(W / 2 - w / 2, y, w, s2 ? 52 : 34, 14); ctx.stroke(); text(s1, W / 2, y + 17, 15, '#ffe39a', { f: SERIF, w: 800 }); if (s2) text(s2, W / 2, y + 38, 12, '#fff6d6', { w: 700 }); ctx.restore(); };
   if (G.ph === 'do') box('Đố mọi người mã nào để dâng lên ngài chứng?', 'Comment số thứ tự mã · còn ' + Math.max(0, Math.ceil(40 - G.t)) + ' giây', 592);
