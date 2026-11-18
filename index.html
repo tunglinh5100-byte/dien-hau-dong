@@ -1661,8 +1661,27 @@ function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ng�
   ctx.strokeStyle = c === '#1c1c1c' ? '#555' : '#3a2412'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.quadraticCurveTo(3, -16, -1, -6); ctx.stroke(); // đuôi
   ctx.restore(); }
 function drawMaHang(t) { // 8:47 anh Linh: mã chỉ là ngựa, đầu quay lên ban Công Đồng, xếp 1 hàng ngang sát mép dưới màn hình (chừa lối đi giữa)
-  [[-86, '#c62a22', '#e9b43a'], [-12, '#f4efe6', '#c62a22'], [62, '#163f8f', '#e9b43a'], [136, '#e9b43a', '#c62a22'], [404, '#7a3fa8', '#e9b43a'], [478, '#f4efe6', '#2f6fb5'], [552, '#c62a22', '#2f9b5a'], [626, 'kieu']]
-    .forEach(([x, c, y2]) => { ctx.save(); ctx.translate(x, 1346); ctx.scale(1.55, 1.55); if (c === 'kieu') kieuSau(); else nguaSau(0, 0, c, y2); ctx.restore(); }); } // 18/11 11:09 anh Linh: 2 ngựa trắng, 1 xanh biển đậm, 2 đỏ, 1 vàng, 1 tím, 1 kiệu hồng
+  [[-86, '#c62a22', '#e9b43a'], [-12, '#f4efe6', '#c62a22'], [62, '#163f8f', '#e9b43a'], [136, '#e9b43a', '#c62a22'], [200, '#2f9b4a', '#c62a22'], [270, 'voi'], [340, 'thuyenchien'], [404, '#7a3fa8', '#e9b43a'], [478, 'thuyen'], [552, '#c62a22', '#2f9b5a'], [626, 'kieu']]
+    .forEach(([x, c, y2]) => { ctx.save(); ctx.translate(x, 1346); ctx.scale(1.55, 1.55); if (c === 'kieu') kieuSau(); else if (c === 'voi') voiSau(); else if (c === 'thuyen') thuyenSau(false); else if (c === 'thuyenchien') thuyenSau(true); else nguaSau(0, 0, c, y2); ctx.restore(); }); } // 11:19 anh Linh: 1 ngựa trắng đổi thành thuyền trắng; giữa thêm ngựa xanh lá, voi chiến vàng, thuyền chiến trắng
+function voiSau() { // voi chiến màu vàng nhìn từ sau, có bành trên lưng
+  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 30, 7, 0, 0, 7); ctx.fill();
+  const c = '#e2b53a', d = '#b8861e'; rr(-20, -24, 12, 24, 4, d); rr(8, -24, 12, 24, 4, d); // chân
+  ctx.fillStyle = c; ctx.strokeStyle = 'rgba(90,50,10,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(0, -36, 25, 22, 0, 0, 7); ctx.fill(); ctx.stroke(); // thân tròn
+  ctx.beginPath(); ctx.ellipse(-24, -52, 9, 14, -.3, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.ellipse(24, -52, 9, 14, .3, 0, 7); ctx.fill(); ctx.stroke(); // tai xoè hai bên
+  ctx.strokeStyle = d; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -24); ctx.quadraticCurveTo(3, -14, 0, -8); ctx.stroke(); // đuôi
+  rr(-22, -48, 44, 10, 2, '#c62a22'); ctx.strokeStyle = '#ffe39a'; ctx.lineWidth = 1; ctx.strokeRect(-20, -46, 40, 6); // chăn đỏ
+  rr(-14, -66, 28, 18, 2, '#c62a22'); ctx.fillStyle = '#e9b43a'; ctx.beginPath(); ctx.moveTo(-17, -66); ctx.quadraticCurveTo(0, -80, 17, -66); ctx.closePath(); ctx.fill(); // bành
+  ctx.strokeStyle = '#5a2a10'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(10, -72); ctx.lineTo(10, -96); ctx.stroke(); ctx.fillStyle = '#c62a22'; ctx.beginPath(); ctx.moveTo(10, -96); ctx.lineTo(24, -91); ctx.lineTo(10, -86); ctx.fill(); } // cờ
+function thuyenSau(chien) { // thuyền mã màu trắng nhìn từ phía đuôi; thuyền chiến có khiên, cờ
+  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 32); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 32, 7, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f4efe6'; ctx.strokeStyle = '#c9a03a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-30, -26); ctx.quadraticCurveTo(-26, -2, 0, -2); ctx.quadraticCurveTo(26, -2, 30, -26); ctx.closePath(); ctx.fill(); ctx.stroke(); // thân thuyền
+  ctx.strokeStyle = '#c62a22'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-27, -18); ctx.quadraticCurveTo(0, -10, 27, -18); ctx.stroke();
+  ctx.strokeStyle = '#7a4a1a'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(0, -26); ctx.lineTo(0, -92); ctx.stroke(); // cột buồm
+  ctx.fillStyle = chien ? '#f4efe6' : '#fff8ec'; ctx.strokeStyle = '#c9a03a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-18, -86); ctx.lineTo(18, -86); ctx.lineTo(22, -36); ctx.lineTo(-22, -36); ctx.closePath(); ctx.fill(); ctx.stroke(); // buồm
+  for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(-19 - k, -76 + k * 11); ctx.lineTo(19 + k, -76 + k * 11); ctx.stroke(); }
+  if (chien) { [-20, -7, 7, 20].forEach(x => { circ(x, -26, 5, '#c62a22'); circ(x, -26, 2, '#e9b43a'); }); // khiên dọc mạn
+    ctx.fillStyle = '#c62a22'; ctx.beginPath(); ctx.moveTo(0, -92); ctx.lineTo(16, -87); ctx.lineTo(0, -82); ctx.fill(); ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 1.4; [-26, 26].forEach(x => { ctx.beginPath(); ctx.moveTo(x, -26); ctx.lineTo(x * 1.15, -58); ctx.stroke(); }); } } // cờ, giáo
+ // 18/11 11:09 anh Linh: 2 ngựa trắng, 1 xanh biển đậm, 2 đỏ, 1 vàng, 1 tím, 1 kiệu hồng
 function kieuSau() { // kiệu mã màu hồng nhìn từ sau
   const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 30, 7, 0, 0, 7); ctx.fill();
   rr(-30, -14, 60, 4, 2, '#8a4a1a'); rr(-24, -10, 4, 10, 1, '#5a2a10'); rr(20, -10, 4, 10, 1, '#5a2a10'); // đòn khiêng, chân
