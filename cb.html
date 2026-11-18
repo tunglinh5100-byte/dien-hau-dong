@@ -845,7 +845,7 @@ function cbAuPlay(key, at) { const a = CB.au; if (!a) return; try { if (CB.auKey
 function cbVao(i) { const L = CB_LICH[i]; if (!L) return; CB.i = i; CB.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CB.cue = 0; CB.cueClip = null; CB.t = L[2]; CB.lap = 0; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CB.auKey === au && !CB.au.paused && Math.abs(CB.au.currentTime - a) < 1.5) {} else cbAuPlay(au, a); } else { try { CB.au.pause(); } catch (e) {} }
-  const v = CB.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di' || kieu === 'xuyen2'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : /^(tungloc|tungloc2|banloc)$/.test(L[0]) ? .7 : 1; } /* 11:14 anh Linh: động tác phát lộc, tung tiền chậm 30% */
+  const v = CB.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di' || kieu === 'xuyen2'; const dai = L[3] - L[2]; v.playbackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : /^(tungloc|tungloc2|banloc)$/.test(L[0]) ? .9 : 1; } /* 11:52 anh Linh: động tác phát lộc, tung tiền chậm 10% */
   if (CB.cur !== clip || kieu !== 'lap') cbPlay(clip, 0);
   CB.chu = chu; /* anh Linh bỏ khung chữ giữa màn hình: không hiện chữ từng đoạn */ }
 function cbTiep() { if (CB.i + 1 < CB_LICH.length) { cbVao(CB.i + 1); return; } cbHet(); }
@@ -857,7 +857,7 @@ function cbXeGia(id) { CB.exitTo = id; const xi = CB_LICH.findIndex(l => l[0] ==
 function coVideoGia(id) { return (id === 'cobo' && BO_THU) || (id === 'ongbay' && OB.buf) || (id === 'codoi' && OC.buf) || (id === 'chaube' && CB.buf) || (laCU(id) && typeof CU !== 'undefined' && CU.buf); }
 function cbCue(k) { // đúng nhịp nhạc Quỳnh ghi: tung tiền, tung quả, tung hoa
   if (k === 'tien') { if (!KH.on) muaTien(220); if (CB.cur === 'tungtien') cbPlay('tungtien', 0); }
-  else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CB.cueClip = c; const v = CB.v[c]; if (v) { v.loop = false; v.playbackRate = .7; } cbPlay(c, 0); if (!KH.on) setTimeout(() => { if (cbDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
+  else { const c = k === 'qua' ? 'tungqua' : 'tunghoa'; CB.cueClip = c; const v = CB.v[c]; if (v) { v.loop = false; v.playbackRate = .9; } cbPlay(c, 0); if (!KH.on) setTimeout(() => { if (cbDangLe()) muaHoaQua(170, k === 'qua' ? 'qua' : 'hoa'); }, 1200); } }
 const CB_QUAY = { di: [2.2, 11.8], q1: 12.6, q2: [14.0, 14.5] }; // clip quay người của Tú: 2,2–11,8 giây đi hướng trái; 11,8–12,6 quay qua lưng; 14,0–14,5 quay tiếp sang hướng mới
 const CB_VAI = [2.4, 5.0]; // clip vái hương: giây 2,4 đến 5,0 cô quay mặt xuống vái, bỏ đoạn đó, chỉ vái lên ban công đồng
 const CB_X2 = { baisai: { R: 1.4, T: 1.0, L: 3.0 }, muamoi: { R: 2.0, T: 1.0, L: 3.0 } }; // clip ghép: [đi phải ngược][đi phải][quay sang trái][đi trái][đi trái ngược][quay về phải]
@@ -1058,7 +1058,7 @@ function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
   if (!clip) { const o = CU.v[CU.cur]; if (o) try { o.pause(); } catch (e) {} CU.chu = chu; return; }
-  const v = CU.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = v.defaultPlaybackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : (CU_RATE[clip] || 1) * (/^(chaulu|cobo)$/.test(GIA().id) && /^(phatloc|tientung|loctung)$/.test(L[0]) ? .7 : 1); } /* 11:14: Chầu Lục, Cô Bơ phát lộc chậm 30% */
+  const v = CU.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = v.defaultPlaybackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : (CU_RATE[clip] || 1) * (/^(chaulu|cobo)$/.test(GIA().id) && /^(phatloc|tientung|loctung)$/.test(L[0]) ? .9 : 1); } /* 11:52: Chầu Lục, Cô Bơ phát lộc chậm 10% */
   if (CU.cur !== clip || kieu !== 'lap') cuPlay(clip, 0);
   CU.chu = chu; /* anh Linh bỏ khung chữ giữa màn hình: không hiện chữ từng đoạn */ }
 function cuTiep() { if (CU.i + 1 < CU_LICH.length) { cuVao(CU.i + 1); return; } cuHet(); }
