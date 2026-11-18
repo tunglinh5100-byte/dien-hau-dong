@@ -11,12 +11,13 @@ button:active{transform:translateY(2px)}
 #xl{background:linear-gradient(#c0392b,#8e1f16);font-size:24px;padding:30px 16px;border:2px solid var(--gold)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row button{margin:0}
 .ong{background:#5a2d6b}.co{background:#1f8a5a}.mua{background:#7a4a14}.loc{background:#a8762a}.bo{background:#3d7fb0}.am{background:#1f5f7a;font-size:18px}.am.tat{background:#444}
+h2{font-size:15px;color:var(--gold);margin:6px 0 8px}.g8 button{padding:18px 8px;font-size:17px}
 #st{margin-top:12px;font-size:14px;text-align:center;min-height:20px;color:var(--gold)}
 </style></head><body>
 <h1>Điều khiển điện hầu</h1>
 <p>Bấm nút là trang hầu đang live chuyển ngay, không cần gõ lệnh.</p>
 <button id="xl" data-l="hoicung">🐉 Xe loan thánh giá</button>
-<div class="row"><button class="ong" data-l="ong">Thỉnh Ông Bảy</button><button class="co" data-l="co">Thỉnh Cô Đôi</button></div>
+<h2>Thỉnh vào thẳng giá</h2><div class="row g8"><button class="g" style="background:#b3202c" data-l="g:chaulu">Thỉnh Chầu Lục</button><button class="g" style="background:#3a3236" data-l="g:chaube">Thỉnh Chầu Bé</button><button class="g" style="background:#5a2d6b" data-l="g:ongbay">Thỉnh Ông Hoàng Bảy</button><button class="g" style="background:#b0841c" data-l="g:ongmuoi">Thỉnh Ông Hoàng Mười</button><button class="g" style="background:#1f8a5a" data-l="g:codoi">Thỉnh Cô Đôi</button><button class="g" style="background:#c8457f" data-l="g:cochin">Thỉnh Cô Chín</button><button class="g" style="background:#1f7a4e" data-l="g:caube">Thỉnh Cậu Bé</button><button class="g" style="background:#3d7fb0" data-l="g:cobo">Thỉnh Cô Bơ</button></div><p style="margin-top:8px">Chầu Lục và Cô Bơ hiện chỉ có trên link thử /tn.</p>
 <div class="row" style="margin-top:12px"><button class="mua" data-l="mua">Múa</button><button class="loc" data-l="loc">Phát lộc</button></div>
 <div class="row" style="margin-top:12px"><button class="mua" data-l="ddbat">🎥 Góc máy: bật</button><button class="am tat" data-l="ddtat">🎥 Góc máy: tắt</button></div>
 <button id="ket" data-l="ket" style="margin-top:12px;width:100%;background:#3a1a10;border:1px solid #e6b552;color:#ffd76a">🙏 Kết thúc chương trình (bấm lần nữa để tiếp tục)</button>
@@ -24,8 +25,9 @@ button:active{transform:translateY(2px)}
 <div id="st"></div>
 <script>
 const Q = new URLSearchParams(location.search), GK = Q.get('gia'), tp = Q.get('dk') || ('dienhau-linhxo-7q4k' + (GK ? '-' + GK : '')), st = document.getElementById('st');
-if (GK) { document.querySelector('h1').textContent = 'Điều khiển giá ' + ({ codoi: 'Cô Đôi', ongbay: 'Ông Hoàng Bảy' }[GK] || GK); document.querySelectorAll('[data-l="hoicung"],[data-l="ong"],[data-l="co"]').forEach(b => { b.style.display = 'none'; }); }
+if (GK) { document.querySelector('h1').textContent = 'Điều khiển giá ' + ({ codoi: 'Cô Đôi', ongbay: 'Ông Hoàng Bảy' }[GK] || GK); document.querySelectorAll('[data-l="hoicung"],[data-l^="g:"],h2').forEach(b => { b.style.display = 'none'; }); }
 const TEN = { hoicung: 'Xe loan thánh giá', ong: 'Thỉnh Ông Bảy', co: 'Thỉnh Cô Đôi', bo: 'Thỉnh Cô Bơ', mua: 'Múa', loc: 'Phát lộc', ambat: 'Bật âm thanh', amtat: 'Tắt âm thanh', ddbat: 'Bật góc máy tự động', ddtat: 'Tắt góc máy tự động', ket: 'Kết thúc chương trình' };
+document.querySelectorAll('[data-l^="g:"]').forEach(b => { TEN[b.dataset.l] = b.textContent; });
 document.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', async () => {
   const l = b.dataset.l; st.textContent = 'Đang gửi: ' + TEN[l] + '…'; if (navigator.vibrate) navigator.vibrate(30);
   try { const r = await fetch('https://ntfy.sh/' + tp, { method: 'POST', body: l }); st.textContent = r.ok ? '✓ Đã gửi: ' + TEN[l] + ' (' + new Date().toLocaleTimeString('vi-VN') + ')' : 'Lỗi gửi (' + r.status + '), bấm lại'; }
