@@ -137,7 +137,7 @@ const BG2 = new Image(); if (NH_MODE) BG2.src = 'nen-rong.jpg?v=1'; /* 18/11 8:2
 const BG2_K = .74, BG2_X = 270 - 550 * BG2_K, BG2_Y = 692 - 1012 * BG2_K, BG2_W = 1080 * BG2_K, BG2_H = 1920 * BG2_K; // tâm sập ở x=550 ảnh -> 270; mép dưới bậc sập (y=1012 ảnh) -> 692; máy quay vừa khít ảnh
 function veNen2() { if (!(BG2.complete && BG2.naturalWidth)) return; ctx.drawImage(BG2, BG2_X, BG2_Y, BG2_W, BG2_H); ctx.save(); ctx.translate(2 * BG2_X, 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 0, 0, 160, 1920, BG2_X, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); ctx.save(); ctx.translate(2 * (BG2_X + BG2_W), 0); ctx.scale(-1, 1); ctx.drawImage(BG2, 920, 0, 160, 1920, BG2_X + BG2_W - 160 * BG2_K, BG2_Y, 160 * BG2_K, BG2_H); ctx.restore(); } // hai mép soi gương để lia máy không hở
 const THAT = new Set(); window.__that = THAT; // tên người xem thật (từ TikFinity/Euler); con nhang giả lập không hiện tên
-const HAU_DANG = [[172, 525, 'Hầu dâng 1'], [428, 525, 'Hầu dâng 2'], [112, 598, 'Hầu dâng 3'], [510, 598, 'Hầu dâng 4']] /* 18/11 10:11 anh Linh: ngồi đúng 4 góc thảm sập (góc thảm trong ảnh), không lấn lên ban Công Đồng */.map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#00a0bc', sex: 'nu', hairC: '#1c120c', x, y, hx: x, hy: y, vai: i < 2 ? 'tren' : 'duoi', ben: i % 2 ? 1 : -1, seat: { x, y, s: i < 2 ? 1 : 1.12, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
+const HAU_DANG = [[154, 525, 'Hầu dâng 1'], [398, 525, 'Hầu dâng 2'], [90, 598, 'Hầu dâng 3'], [470, 598, 'Hầu dâng 4']] /* 18/11 10:58: dịch sang trái cho ngồi hẳn trên sập */ /* 18/11 10:11 anh Linh: ngồi đúng 4 góc thảm sập (góc thảm trong ảnh), không lấn lên ban Công Đồng */.map(([x, y, n], i) => ({ name: '\u200b' + n, nhan: n, coat: '#00a0bc', sex: 'nu', hairC: '#1c120c', x, y, hx: x, hy: y, vai: i < 2 ? 'tren' : 'duoi', ben: i % 2 ? 1 : -1, seat: { x, y, s: i < 2 ? 1 : 1.12, lean: 0 }, state: 'seat', pose: 'kneel', poseT: 0, wp: [], hd: true, lv: 2 })); // 4 góc sập hầu, áo xanh ADELA
 const KH = { on: !/[?&]khung=0/.test(location.search) && (!NH_MODE || /[?&]khung=1/.test(location.search)), /* 16/11: khung phẳng đưa lên /g, mặc định bật */ BY: 742, R: 26, dy: 0, T0: null }; // 15/11 14:01: thanh tiến trình nằm trên ảnh điện thờ như /g, khung bo tròn, cắt sát mép thảm
 const LQ = new URLSearchParams(location.search), LIVE1 = LQ.get('live') === '1', NHE = LQ.get('nhe') === '1';
 (function fit() { const r = NHE ? 1.5 : LIVE1 ? 2 : Math.min(3, Math.max(2.5, window.devicePixelRatio || 1)); /* vẽ nét gấp 2,5 lần để lên live không mờ */ cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); })();
@@ -1193,7 +1193,8 @@ function obDraw(t, x, y, sc) {
   else { OB.fade = null; OB.mat = ctx.getTransform(); ctx.drawImage(OB.buf, 0, 0, CV_W, CV_H); }
   ctx.restore(); return true;
 }
-function drawCo(t) {
+function drawCo(t) { if (NH_MODE) { ctx.save(); ctx.translate(camOff(CO.y), 0); try { drawCo0(t); } finally { ctx.restore(); } return; } drawCo0(t); }
+function drawCo0(t) {
   const sc = depthScale(CO.y) * 1.02 * (boDangLe() ? 1.32 : cc2D() ? 1.1 : 1), x = CO.x, y = CO.y; // Cô Bơ 2D: vẽ to hơn cho cân với các giá có clip thật
   { ctx.save(); ctx.translate(x + 6 * sc, y + 2); ctx.scale(1, .2); const sh = ctx.createRadialGradient(0, 0, 4, 0, 0, 50 * sc); sh.addColorStop(0, 'rgba(0,0,0,.6)'); sh.addColorStop(.6, 'rgba(0,0,0,.28)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(0, 0, 50 * sc, 0, 6.28); ctx.fill(); ctx.restore(); }
   if (laOng() && obDraw(t, x, y, sc)) return;
@@ -1633,7 +1634,7 @@ function banLe(x, y, k) { // án sơn son nhỏ kê mỗi mâm lễ: mặt bàn,
   rr(x - w, top, 2 * w, 6 * k, 1, '#6e170f'); ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = .8; ctx.strokeRect(x - w + 2, top + 1.5 * k, 2 * w - 4, 3 * k); // diềm
   ctx.restore(); }
 function chieu(cx, cy) { // chiếu cói trải đất
-  ctx.save(); ctx.translate(cx, cy); ctx.rotate(1.12); ctx.beginPath(); ctx.rect(-44, -20, 88, 40); ctx.fillStyle = '#d8c48e'; ctx.fill(); ctx.strokeStyle = '#b5372a'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(1.42); ctx.beginPath(); ctx.rect(-44, -20, 88, 40); ctx.fillStyle = '#d8c48e'; ctx.fill(); ctx.strokeStyle = '#b5372a'; ctx.lineWidth = 3; ctx.stroke();
   ctx.strokeStyle = 'rgba(150,110,50,.35)'; ctx.lineWidth = 1; for (let k = -40; k <= 40; k += 5) { ctx.beginPath(); ctx.moveTo(k, -20); ctx.lineTo(k, 20); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(181,55,42,.7)'; ctx.lineWidth = 1.5; ctx.strokeRect(-36, -13, 72, 26); ctx.restore(); }
 function drawManhSan(t) { // vị trí theo ảnh anh Linh đánh dấu 18/11 8:25; 8:47: lễ vật không đè lên cột, thêm mâm cho đầy đặn, có bánh chưng
@@ -1643,8 +1644,8 @@ function drawManhSan(t) { // vị trí theo ảnh anh Linh đánh dấu 18/11 8:
   // giữa cột trái và sập (nét xanh rêu trong): 4 mâm xếp chéo
   [[88, 492, .72, mamQua], [76, 516, .76, mamBanhChung], [64, 541, .8, thapBia], [52, 568, .84, mamBanh]].forEach(([x, y, k, f]) => { banLe(x, y, k); nhom(x, y - 24 * k, k, () => f(x, y - 24 * k)); });
   // cung văn (tím): ngồi dọc theo mép phải sập, giữa sập và cột phải
-  chieu(494, 518); // 10:28 anh Linh: cung văn nhỏ lại, ngồi trên chiếu giữa cột và ban Công Đồng
-  const tm = S.canhDan > 0 ? t * 1.7 : t; [[482, 494, 'drum'], [494, 518, 'lute'], [506, 542, 'flute']].forEach(([x, y, k]) => nhom(x, y, .95, () => musician(x, y, k, tm)));
+  chieu(492, 505); // 10:28 anh Linh: cung văn nhỏ lại, ngồi trên chiếu giữa cột và ban Công Đồng
+  const tm = S.canhDan > 0 ? t * 1.7 : t; [[488, 478, 'drum'], [492, 505, 'lute'], [496, 532, 'flute']].forEach(([x, y, k]) => nhom(x, y, .95, () => { ctx.translate(2 * x, 0); ctx.scale(-1, 1); musician(x, y, k, tm); })); // 10:58 anh Linh: cung văn 1 hàng giữa cột và chân hạc đồng, quay mặt về phía cô đồng
   if (S.canhDan > 0 && Math.random() < .08) S.floats.push({ x: rnd(460, 510), y: 450, s: pick(['♪', '♫']), c: '#f6dc96', t: 0, life: 1.6 }); }
 function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ngẩng hướng lên ban Công Đồng
   ctx.save(); ctx.translate(x, y); const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 26); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 26, 7, 0, 0, 7); ctx.fill();
@@ -1665,8 +1666,23 @@ function drawMaHang(t) { // 8:47 anh Linh: mã chỉ là ngựa, đầu quay lê
 function buocDangLe() { try { if (typeof CU !== 'undefined' && cuDangLe()) return (CU_LICH[CU.i] || [''])[0]; } catch (e) {} try { if (typeof CB !== 'undefined' && cbDangLe()) return (CB_LICH[CB.i] || [''])[0]; } catch (e) {} try { if (typeof OB !== 'undefined' && OB.buf && laOng()) return OB.cur || ''; } catch (e) {} try { if (typeof OC !== 'undefined' && OC.buf) return OC.cur || ''; } catch (e) {} return ''; }
 function hauDangUpd(t) { // 18/11 anh Linh: 2 hầu dâng trên thay khăn áo, chuẩn bị hương, binh khí; 2 hầu dâng dưới cầm quạt quạt mát cho cô cậu đồng
   const b = buocDangLe(), thay = /thayao|tungkhan/.test(b) && !S.chuyen, dang = /vaihuong|tauhuong|dangnhang|khaiquang|camhuong|baisai/.test(b);
-  HAU_DANG.forEach(p => { let tx = p.hx, ty = p.hy; if (p.vai === 'tren' && thay) { tx = CO.x + p.ben * 46; ty = CO.y - 6; } // tiến vào hai bên cô đồng mặc áo
+  HAU_DANG.forEach(p => { let tx = p.hx, ty = p.hy; if (p.vai === 'tren' && thay) { tx = CO.x + p.ben * 74; ty = CO.y - 4; } // tiến vào hai bên cô đồng mặc áo
     const k = Math.min(1, (S.dtLY || .016) * 2.2); p.x += (tx - p.x) * k; p.y += (ty - p.y) * k; p.seat.x = p.x; p.seat.y = p.y; p.dang = dang; p.thay = thay; }); }
+function veHauDang(p, t) { if (p.thay && Math.hypot(p.x - (CO.x + p.ben * 74), p.y - (CO.y - 4)) < 30) hauDangNghieng(p, t); else { drawPerson(p, t); hauDangDo(p, t); } }
+function hauDangNghieng(p, t) { // 10:58 anh Linh: quỳ cạnh cô cậu đồng, hướng về phía cô, làm động tác thay khăn, thay áo
+  const s = depthScale(p.y) * 1.05, dir = -p.ben, ao = '#00a0bc', aoT = '#00788f', da = '#e2b98f', toc = '#1c120c';
+  const ph = t * 1.6 + (p.ben > 0 ? 1.7 : 0), nang = (Math.sin(ph) + 1) / 2; // tay nâng lên hạ xuống: choàng áo, chỉnh khăn
+  ctx.save(); ctx.translate(p.x, p.y); ctx.scale(s * dir, s);
+  ctx.globalAlpha = .35; ctx.beginPath(); ctx.ellipse(0, 1, 24, 5, 0, 0, 7); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.moveTo(-20, 0); ctx.quadraticCurveTo(-22, -12, -12, -16); ctx.lineTo(10, -14); ctx.quadraticCurveTo(16, -8, 14, 0); ctx.closePath(); ctx.fillStyle = aoT; ctx.fill(); // chân quỳ, gót dưới mông
+  ctx.beginPath(); ctx.moveTo(-14, -12); ctx.quadraticCurveTo(-16, -40, -6, -54); ctx.lineTo(6, -54); ctx.quadraticCurveTo(10, -36, 8, -12); ctx.closePath(); ctx.fillStyle = ao; ctx.fill(); // thân hơi nghiêng về phía cô
+  circ(2, -62, 8, da); ctx.beginPath(); ctx.arc(0, -63, 8.4, Math.PI * .75, Math.PI * 1.9); ctx.fillStyle = toc; ctx.fill(); circ(-7, -64, 4.2, toc); // đầu, tóc búi
+  const vx = 30, vy = -62 - nang * 14; // tay vươn lên vai cô
+  ctx.strokeStyle = ao; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(2, -48); ctx.quadraticCurveTo(18, -46, vx, vy); ctx.stroke();
+  ctx.strokeStyle = aoT; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-1, -46); ctx.quadraticCurveTo(14, -40, vx - 4, vy + 8); ctx.stroke();
+  circ(vx, vy, 3, da); circ(vx - 4, vy + 8, 3, da);
+  const kh = buocDangLe() === 'tungkhan'; ctx.fillStyle = kh ? '#c62a22' : '#e9b43a'; ctx.beginPath(); ctx.moveTo(vx - 6, vy - 2); ctx.quadraticCurveTo(vx + 6, vy + 10 + nang * 6, vx + 2, vy + 26); ctx.lineTo(vx - 6, vy + 22); ctx.closePath(); ctx.fill(); // vạt áo / khăn trên tay
+  ctx.restore(); }
 function hauDangDo(p, t) { // đồ trên tay hầu dâng
   const s = p.seat.s, inx = p.ben * -1; ctx.save(); ctx.translate(p.x, p.y);
   if (p.vai === 'duoi') { // quạt: đưa đều về phía cô đồng
@@ -1682,7 +1698,7 @@ function hauDangDo(p, t) { // đồ trên tay hầu dâng
   ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, -2); ctx.lineTo(16, -9); ctx.stroke(); ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(4, -3); ctx.stroke(); // thanh kiếm
   ctx.restore(); }
 function drawChieuTo() { // 18/11 10:46 anh Linh: chiếu cói lớn trải sân cho con nhang ngồi
-  const x0 = -190, x1 = 730, y0 = 778, y1 = 1236; ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0);
+  const x0 = -190, x1 = 730, y0 = 694, y1 = 1236; /* 10:58: chiếu phủ sát tới sập, thảm đặt trên chiếu */ ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0);
   const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#d9c38a'); g.addColorStop(1, '#cdb377'); ctx.fillStyle = g; ctx.fill(); ctx.clip();
   ctx.strokeStyle = 'rgba(140,100,45,.28)'; ctx.lineWidth = 1.2; for (let y = y0 + 4; y < y1; y += 7) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(170,40,30,.55)'; ctx.lineWidth = 5; for (const y of [y0 + 26, y1 - 26]) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
@@ -2920,9 +2936,9 @@ function frame1(now) {
   camShift(1);
   try {
     /* cung văn tạm ẩn: anh Linh cho làm lại, sẽ ngồi bên phải sập hầu */
-    if (NH_MODE) { ctx.save(); ctx.translate(camOff(520), 0); drawManhSan(t); ctx.restore(); HAU_DANG.forEach(p => { if (p.y < CO.y) { drawPerson(p, t); hauDangDo(p, t); } }); }
+    if (NH_MODE) { ctx.save(); ctx.translate(camOff(520), 0); drawManhSan(t); ctx.restore(); HAU_DANG.forEach(p => { if (p.y < CO.y) veHauDang(p, t); }); }
     const behind = S.people.filter(p => p.y < CO.y), front = S.people.filter(p => p.y >= CO.y);
-    if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng() && NHANG) TAY.forEach(p => drawPerson(p, t)); /* 15/11: không con nhang thì bỏ hai hầu dâng vẽ hoạt hình ở giá Ông */ if (NHANG) front.forEach(p => drawPerson(p, t)); if (NH_MODE) { HAU_DANG.forEach(p => { if (p.y >= CO.y) { drawPerson(p, t); hauDangDo(p, t); } }); ctx.save(); ctx.translate(camOff(1300), 0); drawMaHang(t); ctx.restore(); }
+    if (NHANG) behind.forEach(p => drawPerson(p, t)); if (!(OB.ok && laOng())) { drawThamDong(t); drawKhayOng(t); } drawCo(t); drawHelpers(t); if (laOng() && NHANG) TAY.forEach(p => drawPerson(p, t)); /* 15/11: không con nhang thì bỏ hai hầu dâng vẽ hoạt hình ở giá Ông */ if (NHANG) front.forEach(p => drawPerson(p, t)); if (NH_MODE) { HAU_DANG.forEach(p => { if (p.y >= CO.y) veHauDang(p, t); }); ctx.save(); ctx.translate(camOff(1300), 0); drawMaHang(t); ctx.restore(); }
     if (KH.on) { KH.T0 = T0; khMask(T0); } if (NHANG) drawBubbles(); ctx.save(); ctx.translate(camOff(700), 0); drawMoney(); drawFlying(); ctx.restore(); drawParticles();
     /* 14/11 anh Linh: bỏ nhãn Thế Hoàn */ drawDangOng(t); if (NHANG) drawTenNhanLoc(t);
   } finally { camShift(-1); }
@@ -2998,7 +3014,7 @@ function camBase() { const sc = (NHANG ? NH_SC : CAM.S) * DD.z; if (KH.on) ctx.t
 function camShear() { if (NHANG) { ctx.translate(CAM.P, 0); return; } const k = CAM.P / 400; ctx.transform(1, 0, k, 1, -k * CAM.PIV, 0); }
 function camShift(d) { // dời tạm toạ độ ngang của người, cô, chữ bay theo chiều sâu khi vẽ, vẽ xong trả lại
   const sh = o => { if (o && typeof o.x === 'number' && typeof o.y === 'number') o.x += d * camOff(o.y); };
-  S.people.forEach(sh); if (NH_MODE) HAU_DANG.forEach(sh); /* 18/11 10:46 anh Linh: hầu dâng đứng yên theo nền khi lia máy */ if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); sh(CO); S.floats.forEach(sh); S.particles.forEach(sh);
+  S.people.forEach(sh); if (NH_MODE) HAU_DANG.forEach(sh); /* 18/11 10:46 anh Linh: hầu dâng đứng yên theo nền khi lia máy */ if (typeof TAY !== 'undefined' && laOng()) TAY.forEach(sh); if (!NH_MODE) sh(CO); /* 18/11 10:58: bản rộng thì cô đồng dời bằng phép vẽ trong drawCo (clip tự đặt lại toạ độ cô khi vẽ) */ S.floats.forEach(sh); S.particles.forEach(sh);
 }
 function camMap(x, y) { const sc = (NHANG ? NH_SC : CAM.S) * DD.z, X = (x + camOff(y) - DD.cx) * sc + W / 2, Y = (y - DD.cy) * sc + H / 2; const dy = KH.on ? KH.dy : 0; return NHANG ? [X, Y + dy] : [(X - W / 2) * ZM + W / 2, (Y - ZFY) * ZM + H / 2 + dy]; }
 
