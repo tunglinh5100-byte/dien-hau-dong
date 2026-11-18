@@ -157,12 +157,12 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   const pts = [];
   const zones = NH_MODE ? [[-70, 610, 800, 1210, 46], [-70, 610, 800, 1210, 46], [-70, 610, 800, 1210, 46]] : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < (NH_MODE ? 50 : 34) && tries++ < 8000) {
+  while (pts.length < (NH_MODE ? 28 : 34) && tries++ < 8000) { /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
     if (Math.abs(x - 270) < 34) continue; // lối đi giữa
-    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 64 : 52))) continue;
+    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 84 : 52))) continue;
     pts.push({ x, y, truoc: NH_MODE && y < 920, s: (NH_MODE ? 1.3 : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
   }
   S.seats = pts;
@@ -2565,7 +2565,7 @@ let simT = 0;
 function sim(dt) {
   if (!S.auto) return; simT -= dt; if (simT > 0) return; simT = rnd(.5, 1.5);
   const r = Math.random(), seated = S.people.filter(p => p.state === 'seat');
-  if (r < .25 || seated.length < 14) { const n = pick(NAMES.filter(n => !S.people.some(p => p.name === n))) || ('khách ' + Math.floor(rnd(100, 999))); person(n); addComment(n, 'đã vào phiên live'); return; }
+  if ((r < .25 && (!NH_MODE || S.people.length < 16)) || seated.length < (NH_MODE ? 8 : 14)) { /* 11:55: bản mới chỉ giữ khoảng 16 con nhang giả lập */ const n = pick(NAMES.filter(n => !S.people.some(p => p.name === n))) || ('khách ' + Math.floor(rnd(100, 999))); person(n); addComment(n, 'đã vào phiên live'); return; }
   const who = pick(seated).name;
   if (r < .3) { const x = Math.random(); if (x < .3) say(who, 'con thắp hương'); else if (x < .7) say(who, 'con ở ' + pick(['Hà Nội', 'Lạng Sơn', 'Bắc Ninh', 'Hải Phòng', 'Thái Nguyên', 'Sài Gòn', 'Nam Định'])); else if (x < .85) follow(who); else shareLive(who); return; }
   if (r < .62) { say(who, pick(laOng() ? ['Lậy ông', 'Dạaa', 'Con nhớ ông quá', 'Con xin ông', 'Con lậy ông ạ', 'Con thắp hương'] : ['Lạy cô', 'lạy cô ạ', 'Cô đẹp quá', 'cô đẹp quá ạ', 'Cô múa dẻo quá', 'con lạy cô', 'Húuuuu', 'hú hú', 'vỗ tay', 'Húuuu cô ơi'])); return; }
@@ -3115,7 +3115,7 @@ const bT = document.getElementById('bTuChuyen'); bT.addEventListener('click', ()
 document.getElementById('fm').addEventListener('submit', e => { e.preventDefault(); const v = document.getElementById('inp').value.trim(); if (v) say(ME, v); document.getElementById('inp').value = ''; });
 
 // lively first frame: 26 con nhang already seated
-if (S.auto) { /* 14/11: tắt giả lập thì không có người xem, quà giả lúc mở trang */ NAMES.slice(0, 26).forEach(n => { const p = person(n); p.x = p.seat.x; p.y = p.seat.y; p.wp = []; p.state = 'seat'; p.pose = 'kneel'; });
+if (S.auto) { /* 14/11: tắt giả lập thì không có người xem, quà giả lúc mở trang */ NAMES.slice(0, NH_MODE ? 10 : 26).forEach(n => { const p = person(n); p.x = p.seat.x; p.y = p.seat.y; p.wp = []; p.state = 'seat'; p.pose = 'kneel'; });
 S.likes = 210; S.merit = { 'Linh Miêu': 40, 'Mơ Dung': 26, 'Kỳ Sư': 20, 'Thanh Hằng': 12, 'Bà Tám': 6 };
 addComment('Linh Miêu', 'Cô đẹp quá'); addComment('Bà Tám', 'Lạy cô'); addComment('Mơ Dung', 'đã tặng hoa dâng cô', true);
 setTimeout(() => gift('Mơ Dung', 'loc'), 600); }
@@ -3147,7 +3147,7 @@ buildCfgPanel(); napNhacGia();
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) { shareLive(nm); K(nm, 'share', 3); } else follow(nm); }
     else if (t === 'share') { shareLive(nm); K(nm, 'share', 3); }
     else if (t === 'follow') follow(nm);
-    else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm)) { person(nm); addComment(nm, 'đã vào phiên live'); } }
+    else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm) && H.S.seats.some(z => !z.who)) { /* 11:55: chiếu đầy thì người mới vào xem không chen chỗ, chỉ ai tương tác mới vào ngồi */ person(nm); addComment(nm, 'đã vào phiên live'); } }
   }
   // ---- TikFinity (chạy trên cùng máy tính): tự kết nối, không cần API key ----
   let tf = null, tfOk = false, tfTimer = null, euOk = false, euTimer = null;
