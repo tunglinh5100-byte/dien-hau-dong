@@ -1774,6 +1774,7 @@ function drawManhSan(t) { // vị trí theo ảnh anh Linh đánh dấu 18/11 8:
   [[-80, 512, .8, mamBanh], [-90, 540, .85, mamBanhChung], [-100, 568, .9, mamXoi], [-110, 598, .95, mamQua]].forEach(([x, y, k, f]) => { banLe(x, y, k); nhom(x, y - 24 * k, k, () => f(x, y - 24 * k)); }); // 10:28 anh Linh: lễ vật đặt trên bàn
   // giữa cột trái và sập (nét xanh rêu trong): 4 mâm xếp chéo
   [[88, 492, .72, mamQua], [76, 516, .76, mamBanhChung], [64, 541, .8, thapBia], [52, 568, .84, mamBanh]].forEach(([x, y, k, f]) => { banLe(x, y, k); nhom(x, y - 24 * k, k, () => f(x, y - 24 * k)); });
+  veSonTrang(t); /* 19/11 15:35 anh Linh: 3 bộ toà sơn trang xanh lá treo trên mâm lễ bên trái sập */
   // cung văn (tím): ngồi dọc theo mép phải sập, giữa sập và cột phải
   chieu(466, 512); // 10:28 anh Linh: cung văn nhỏ lại, ngồi trên chiếu giữa cột và ban Công Đồng
   const tm = S.canhDan > 0 ? t * 1.7 : t; [[440, 486, 'drum'], [466, 512, 'lute'], [492, 538, 'flute']] /* 11:14 anh Linh: 1 hàng song song mép phải sập hầu */.forEach(([x, y, k]) => nhom(x, y, .95, () => { ctx.translate(2 * x, 0); ctx.scale(-1, 1); musician(x, y, k, tm); })); // 10:58 anh Linh: cung văn 1 hàng giữa cột và chân hạc đồng, quay mặt về phía cô đồng
@@ -1791,9 +1792,9 @@ function nguaSau(x, y, c, yen) { // ngựa mã nhìn từ sau lưng, đầu ng�
   rr(-16, -52, 32, 12, 3, yen); ctx.strokeStyle = '#ffe39a'; ctx.lineWidth = 1.1; ctx.strokeRect(-14, -50, 28, 8); flowerMotif(0, -46, 3.5, '#ffe39a', '#ff8a8a'); // yên, chăn yên
   ctx.strokeStyle = c === '#1c1c1c' ? '#555' : '#3a2412'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.quadraticCurveTo(3, -16, -1, -6); ctx.stroke(); // đuôi
   ctx.restore(); }
-const MA_HANG = [[-95, '#c62a22', '#e9b43a'], [-35, '#f4efe6', '#c62a22'], [26, '#163f8f', '#e9b43a'], [86, '#e9b43a', '#c62a22'], [147, '#2f9b4a', '#c62a22'], [207, 'voi'], [268, 'thuyenchien'], [328, '#7a3fa8', '#e9b43a'], [388, 'thuyen'], [449, '#c62a22', '#2f9b5a'], [509, 'kieu'], [570, 'kieutim'], [630, 'sontrang']]; /* 19/11 15:31 anh Linh: thêm 13 toà sơn trang (mã Chúa Thác Bờ) */ // số 1 → 12 từ trái sang phải (18/11 Quỳnh thêm 12 kiệu tím)
-const MA_TEN = ['Ngựa đỏ', 'Ngựa trắng', 'Ngựa xanh biển', 'Ngựa vàng', 'Ngựa xanh lá', 'Voi chiến vàng', 'Thuyền chiến trắng', 'Ngựa tím', 'Thuyền trắng', 'Ngựa đỏ', 'Kiệu hồng', 'Kiệu tím', 'Toà sơn trang'];
-const MA_GIA = { chaulu: 12, ongbay: 8, ongmuoi: 4, cobo: 9, cochin: 11, caube: 5, quantam: 2, quanngu: 3, quannhat: 10, chuatb: 13 }; // 18/11 16:20 theo tab 'Mã dâng' Quỳnh ghi (số trong danh sách mã); giá để trống (Chầu Bé, Cô Đôi) không có đố mã, hoá mã
+const MA_HANG = [[-95, '#c62a22', '#e9b43a'], [-29, '#f4efe6', '#c62a22'], [37, '#163f8f', '#e9b43a'], [103, '#e9b43a', '#c62a22'], [169, '#2f9b4a', '#c62a22'], [234, 'voi'], [300, 'thuyenchien'], [366, '#7a3fa8', '#e9b43a'], [432, 'thuyen'], [498, '#c62a22', '#2f9b5a'], [564, 'kieu'], [630, 'kieutim']]; // số 1 → 12 từ trái sang phải (18/11 Quỳnh thêm 12 kiệu tím); 19/11 15:35 anh Linh: toà sơn trang không xếp vào hàng này, treo 3 bộ bên trái sập hầu
+const MA_TEN = ['Ngựa đỏ', 'Ngựa trắng', 'Ngựa xanh biển', 'Ngựa vàng', 'Ngựa xanh lá', 'Voi chiến vàng', 'Thuyền chiến trắng', 'Ngựa tím', 'Thuyền trắng', 'Ngựa đỏ', 'Kiệu hồng', 'Kiệu tím'];
+const MA_GIA = { chaulu: 12, ongbay: 8, ongmuoi: 4, cobo: 9, cochin: 11, caube: 5, quantam: 2, quanngu: 3, quannhat: 10 }; // 18/11 16:20 theo tab 'Mã dâng' Quỳnh ghi (số trong danh sách mã); giá để trống (Chầu Bé, Cô Đôi) không có đố mã, hoá mã
 const MA_DICH = [150, 732], MA = { gia: null, idx: null, ph: '', dat: null };
 function veMa(c, y2) { if (c === 'sontrang') toaSonTrang(); else if (c === 'kieu') kieuSau(); else if (c === 'kieutim') kieuSau(['#9a5ad0', '#6f2fa0', '#ead6ff']); else if (c === 'voi') voiSau(); else if (c === 'thuyen') thuyenSau(false); else if (c === 'thuyenchien') thuyenSau(true); else nguaSau(0, 0, c, y2); }
 function maSc(y) { return 1 + clamp((y - MA_DICH[1]) / (1346 - MA_DICH[1]), 0, 1) * .55; }
@@ -1906,26 +1907,30 @@ function thuyenSau(chien) { // thuyền mã màu trắng nhìn từ phía đuôi
   if (chien) { [-20, -7, 7, 20].forEach(x => { circ(x, -26, 5, '#c62a22'); circ(x, -26, 2, '#e9b43a'); }); // khiên dọc mạn
     ctx.fillStyle = '#c62a22'; ctx.beginPath(); ctx.moveTo(0, -92); ctx.lineTo(16, -87); ctx.lineTo(0, -82); ctx.fill(); ctx.strokeStyle = '#d8dde2'; ctx.lineWidth = 1.4; [-26, 26].forEach(x => { ctx.beginPath(); ctx.moveTo(x, -26); ctx.lineTo(x * 1.15, -58); ctx.stroke(); }); } } // cờ, giáo
  // 18/11 11:09 anh Linh: 2 ngựa trắng, 1 xanh biển đậm, 2 đỏ, 1 vàng, 1 tím, 1 kiệu hồng
-function toaSonTrang() { // 19/11 anh Linh: toà sơn trang theo ảnh: Chúa giữa có quạt nan nhiều màu sau lưng, áo xanh khoác đỏ viền tua vàng; hàng cô sơn trang nhỏ phía trước, mũ sặc sỡ, thẻ vàng
-  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 34); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 34, 7, 0, 0, 7); ctx.fill();
-  rr(-32, -9, 64, 8, 2, '#b3202c'); rr(-32, -10, 64, 2.4, 1, '#e9b43a');
-  // quạt nan sau lưng
-  const R = 27, cy = -66, mau = ['#d8342a', '#f08a2c', '#f2cf3a', '#3aa55a', '#2f6fd0', '#7a3fa8', '#e86aa6'];
-  ctx.save(); ctx.beginPath(); ctx.arc(0, cy, R + 3, Math.PI * .92, Math.PI * 2.08); ctx.closePath(); ctx.fillStyle = '#e86aa6'; ctx.fill();
+function toaSonTrang() { // 19/11 anh Linh: toà sơn trang theo ảnh, 15:35: toàn màu xanh lá cây
+  const G1 = '#1f7a3a', G2 = '#2f9b4a', G3 = '#5cc36a', G4 = '#a6e08a', G5 = '#d8f5c4';
+  const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 34); sh.addColorStop(0, 'rgba(0,0,0,.3)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 34, 7, 0, 0, 7); ctx.fill();
+  rr(-32, -9, 64, 8, 2, G1); rr(-32, -10, 64, 2.4, 1, G4);
+  const R = 27, cy = -66, mau = [G1, G3, G5, G2, G4, G1, G3];
+  ctx.save(); ctx.beginPath(); ctx.arc(0, cy, R + 3, Math.PI * .92, Math.PI * 2.08); ctx.closePath(); ctx.fillStyle = G4; ctx.fill();
   for (let i = 0; i < 14; i++) { const a0 = Math.PI * .95 + i * (Math.PI * 1.1 / 14), a1 = a0 + Math.PI * 1.1 / 14; ctx.beginPath(); ctx.moveTo(0, cy); ctx.arc(0, cy, R, a0, a1); ctx.closePath(); ctx.fillStyle = mau[i % mau.length]; ctx.fill(); }
-  ctx.beginPath(); ctx.arc(0, cy, R * .55, Math.PI * .95, Math.PI * 2.05); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(0, cy, R + 1.5, Math.PI * .92, Math.PI * 2.08); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
-  // Chúa giữa
-  ctx.fillStyle = '#2f9b4a'; ctx.beginPath(); ctx.moveTo(-11, -52); ctx.lineTo(11, -52); ctx.lineTo(17, -12); ctx.lineTo(-17, -12); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#c62a22'; ctx.beginPath(); ctx.moveTo(-13, -50); ctx.quadraticCurveTo(0, -36, 13, -50); ctx.lineTo(10, -40); ctx.quadraticCurveTo(0, -30, -10, -40); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = '#f2cf3a'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-10, -40); ctx.quadraticCurveTo(0, -30, 10, -40); ctx.stroke();
-  rr(-2.6, -36, 5.2, 22, 1, '#f2cf3a'); ctx.fillStyle = '#c62a22'; for (let k = 0; k < 4; k++) ctx.fillRect(-1.2, -33 + k * 5, 2.4, 2);
+  ctx.beginPath(); ctx.arc(0, cy, R * .55, Math.PI * .95, Math.PI * 2.05); ctx.strokeStyle = G5; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(0, cy, R + 1.5, Math.PI * .92, Math.PI * 2.08); ctx.strokeStyle = G5; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
+  ctx.fillStyle = G2; ctx.beginPath(); ctx.moveTo(-11, -52); ctx.lineTo(11, -52); ctx.lineTo(17, -12); ctx.lineTo(-17, -12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = G1; ctx.beginPath(); ctx.moveTo(-13, -50); ctx.quadraticCurveTo(0, -36, 13, -50); ctx.lineTo(10, -40); ctx.quadraticCurveTo(0, -30, -10, -40); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = G4; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-10, -40); ctx.quadraticCurveTo(0, -30, 10, -40); ctx.stroke();
+  rr(-2.6, -36, 5.2, 22, 1, G4); ctx.fillStyle = G1; for (let k = 0; k < 4; k++) ctx.fillRect(-1.2, -33 + k * 5, 2.4, 2);
   circ(0, -57, 5.6, '#fbe9e4'); circ(-1.9, -57.5, .7, '#2a1a14'); circ(1.9, -57.5, .7, '#2a1a14'); circ(0, -55, .8, '#d84a5a');
-  ctx.fillStyle = '#e9b43a'; ctx.beginPath(); ctx.moveTo(-6, -61); ctx.lineTo(-4, -66); ctx.lineTo(0, -63); ctx.lineTo(4, -66); ctx.lineTo(6, -61); ctx.closePath(); ctx.fill(); circ(0, -64, 1.4, '#e86aa6');
-  // hàng cô sơn trang nhỏ phía trước
-  [[-23, '#c62a22'], [-11.5, '#2f9b4a'], [0, '#f4efe6'], [11.5, '#2f9b4a'], [23, '#c62a22']].forEach(([x, ao], k) => { ctx.save(); ctx.translate(x, -2);
-    ctx.fillStyle = ao; ctx.beginPath(); ctx.moveTo(-3.6, -16); ctx.lineTo(3.6, -16); ctx.lineTo(5, 0); ctx.lineTo(-5, 0); ctx.closePath(); ctx.fill();
-    rr(-1.2, -14, 2.4, 11, .6, '#f2cf3a'); circ(0, -18.5, 3, '#fbe9e4');
-    ctx.fillStyle = ['#2f6fd0', '#e86aa6', '#7a3fa8', '#f08a2c', '#3aa55a'][k]; ctx.beginPath(); ctx.arc(0, -20, 4.4, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#f2cf3a'; ctx.lineWidth = .9; ctx.stroke(); ctx.restore(); }); }
+  ctx.fillStyle = G3; ctx.beginPath(); ctx.moveTo(-6, -61); ctx.lineTo(-4, -66); ctx.lineTo(0, -63); ctx.lineTo(4, -66); ctx.lineTo(6, -61); ctx.closePath(); ctx.fill(); circ(0, -64, 1.4, G5);
+  [-23, -11.5, 0, 11.5, 23].forEach((x, k) => { ctx.save(); ctx.translate(x, -2);
+    ctx.fillStyle = k % 2 ? G1 : G3; ctx.beginPath(); ctx.moveTo(-3.6, -16); ctx.lineTo(3.6, -16); ctx.lineTo(5, 0); ctx.lineTo(-5, 0); ctx.closePath(); ctx.fill();
+    rr(-1.2, -14, 2.4, 11, .6, G4); circ(0, -18.5, 3, '#fbe9e4');
+    ctx.fillStyle = k % 2 ? G3 : G2; ctx.beginPath(); ctx.arc(0, -20, 4.4, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.strokeStyle = G5; ctx.lineWidth = .9; ctx.stroke(); ctx.restore(); }); }
+function veSonTrang(t) { // 3 toà sơn trang treo trên giá phía trên mâm lễ, bên trái sập hầu
+  const L = [[-132, 498], [-104, 486], [-76, 474]], k = .55; /* trên 4 mâm lễ bên trái cột trái (chỗ trống, không bị bảng sự tích che) */ ctx.save();
+  ctx.strokeStyle = '#6a3a1a'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(L[0][0] - 24, L[0][1] - 66); ctx.lineTo(L[2][0] + 24, L[2][1] - 66); ctx.stroke();
+  L.forEach(([x, y], i) => { const lac = Math.sin(t * 1.6 + i * 1.7) * .035; ctx.strokeStyle = 'rgba(80,50,20,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 8, y - 66 + (x - L[0][0]) * 0); ctx.lineTo(x - 6, y - 44); ctx.moveTo(x + 8, y - 66); ctx.lineTo(x + 6, y - 44); ctx.stroke();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(lac); ctx.scale(k, k); toaSonTrang(); ctx.restore(); });
+  ctx.restore(); }
 function kieuSau(mau) { // kiệu mã màu hồng (hoặc màu khác) nhìn từ sau
   const [m0, m1, m2] = mau || ['#e86aa6', '#c94a8a', '#ffd2e6'];
   const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(0, 0, 30, 7, 0, 0, 7); ctx.fill();
