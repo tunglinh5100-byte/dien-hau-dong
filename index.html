@@ -1881,9 +1881,9 @@ function ketQua() { const ds = Object.entries(G.tl), dung = ds.filter(([, a]) =>
   else if (dung.length === 2) s += ' Nhanh nhì là ' + dung[1] + ', và nhanh nhất là ' + dung[0] + '!'; else if (dung.length === 1) s += ' Nhanh nhất là ' + dung[0] + '!';
   if (dung[0]) G.khenCho = { name: dung[0], loai: 'chung', uu: 5, t: 0, cau: 'Ta ban khen cho [tên]' }; return s; }
 function hoaMa(p) { G.lua = 6.5; MA.carrier = null; MA.dat = null; MA.chay = true; const kem = []; for (let k = MA_CHO.length - 1; k >= 0; k--) if (MA_CHO[k].tai === MA.gia) { kem.push(MA_TEN[MA_CHO[k].idx - 1].toLowerCase()); MA_CHO.splice(k, 1); } /* hoá luôn mã các giá trước đã chứng, chờ giá này hoá */ const ten = p ? (G.doan && G.doan.length > 1 ? G.doan.map(v => v.name).join(', ') : p.name) : null;
-  if (ten) KHEN.cur = { name: ten, loai: 'chung', uu: 5, t: 0, cau: 'Ta chứng lòng thành của con [tên]' }; G.msg = { s: (ten ? '🔥 ' + ten + ' đã hoá mã dâng ngài' : '🔥 Hầu dâng hoá mã dâng ngài') + (kem.length ? ' (hoá cả ' + kem.join(', ') + ')' : ''), t: 0 }; }
+  if (ten) khen(ten, 'chung', 5); /* 19/11 20:06: khen người hoá mã để dành đến lúc phát lộc, ngự tửu */ G.msg = { s: (ten ? '🔥 ' + ten + ' đã hoá mã dâng ngài' : '🔥 Hầu dâng hoá mã dâng ngài') + (kem.length ? ' (hoá cả ' + kem.join(', ') + ')' : ''), t: 0 }; }
 const BUOC_LOC = /^(phatloc|tungloc|tungloc2|banloc|tientung|loctung|locqua|phatlixi)$/;
-const BUOC_KHEN = /^(phatloc|tungloc|tungloc2|banloc|tientung|loctung|uongruou|uongnuoc|vengoi|locqua|phatlixi|ngutuu|nghevan|ngoinghe|antoa|ngoi)$/;
+const BUOC_KHEN = /^(phatloc|tungloc|tungloc2|banloc|tientung|loctung|uongruou|uongnuoc|vengoi|locqua|phatlixi|ngutuu)$/; /* 19/11 20:06 anh Linh: chỉ ban khen lúc phát lộc, ngự tửu */
 function gameUpd(dt) { if (!MA.idx) return; const b = buocDangLe();
   if (G.khenCho && BUOC_KHEN.test(b || '') && !S.chuyen) { KHEN.cur = G.khenCho; KHEN.cur.t = 0; G.khenCho = null; KHEN.q = KHEN.q.filter(x => x.name !== KHEN.cur.name); } G.t += dt; if (G.msg) { G.msg.t += dt; if (G.msg.t > 5) G.msg = null; } if (G.lua > 0) G.lua -= dt;
   const THU = /[?&]hmthu=1/.test(location.search); // link xem thử nhanh: vào thẳng trò chơi, không chờ hết thỉnh, khai quang
@@ -2248,7 +2248,7 @@ function noiKhen(name, cau) {
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
-function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 0; } /* 16/11 9:21: không nghỉ giữa các lần ban khen */ } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe()) { /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
+function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 0; } /* 16/11 9:21: không nghỉ giữa các lần ban khen */ } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (KHEN.q.length > 12 && !goiDuoc()) KHEN.q.splice(0, KHEN.q.length - 12); /* chưa tới lúc khen: giữ 12 người gần nhất */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe() && goiDuoc()) { /* 19/11 20:06 anh Linh: chỉ ban khen lúc phát lộc, ngự tửu */ /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
 function dauHinh() { const id = GIA().id; let c = null;
