@@ -70,4 +70,49 @@ window.BANG_TIN = {
     'Cô nổi tiếng giỏi xem bói, chữa bệnh, cứu giúp dân lành; dân làng thấy linh ứng nên lập đền thờ Cô ở Chín Giếng (Bỉm Sơn, Thanh Hóa)',
     'Hằng năm có lễ rước Thánh Mẫu từ đền Sòng Sơn sang đền Cô Chín Giếng, tái hiện tích "chị đến thăm em"; tiệc chính của Cô là mùng 9 tháng 9 âm lịch',
   ],
+  // 19/11 19:10 anh Linh: sự tích các giá mới trên /g
+  nguon_tamtoa: 'Báo Nhân Dân (nhandan.vn); Vietcetera, "Mother Goddesses of the Three Palaces"',
+  tamtoa: [
+    'Tam Tòa Thánh Mẫu là ba vị Thánh Mẫu đứng đầu điện thờ: Mẫu Thượng Thiên cai quản miền trời, Mẫu Thượng Ngàn cai quản núi rừng, Mẫu Thoải cai quản sông nước',
+    'Thánh Mẫu được tôn thờ như người mẹ che chở, ban phúc lộc, sức khỏe và bình an cho con nhang đệ tử',
+    'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
+  ],
+  nguon_chuanh: 'tinnguongthomauvietnam.com, "Chúa Đệ Nhị Nguyệt Hồ"',
+  chuanh: [
+    'Chúa Đệ Nhị Nguyệt Hồ là vị thứ hai trong Tam vị Chúa Mường, còn gọi là Chúa Bói Nguyệt Hồ hay Nguyệt Nga Công chúa',
+    'Tương truyền năm 14 tuổi bà được Quỷ Cốc Tiên Sinh nhận làm con nuôi, truyền dạy chiêm tinh, bói toán; danh tiếng bà đến tai nhà vua',
+    'Đền Nguyệt Hồ (Từ Linh Nguyệt Hồ) ở xã Hương Vĩ, huyện Yên Thế, Bắc Giang; khánh tiệc hằng năm ngày 15 tháng Hai âm lịch',
+  ],
+  nguon_chuatb: 'Báo Pháp luật Việt Nam, "Chốn thiêng Thác Bờ trên dòng Đà Giang"',
+  chuatb: [
+    'Theo truyền thuyết, Bà Chúa Thác Bờ là tiên nữ hóa thân thành cô gái Mường tên Đinh Thị Vân',
+    'Bà dạy dân làm nương rẫy, đan lưới bắt cá, và góp công tiếp tế lương thực cho vua Lê Lợi cùng quân sĩ vượt thác sông Đà dẹp loạn Đèo Cát Hãn',
+    'Tương truyền thuyền bà đi qua đâu thì thác nước nơi đó trở nên hiền hòa',
+    'Đền Chúa Thác Bờ ở sườn núi Chủa, xã Ngòi Hoa, huyện Tân Lạc (Hòa Bình cũ), gần Động Thác Bờ',
+  ],
+  nguon_quannhat: 'oancotam.com, "Quan Đệ Nhất Thượng Thiên - Sự tích, đền thờ"',
+  quannhat: [
+    'Quan Lớn Đệ Nhất Thượng Thiên đứng đầu Ngũ vị Tôn Quan trong hệ Tứ Phủ, cai quản cõi Thượng Thiên (miền trời)',
+    'Đền thờ chính là đền Đồng Bằng, thôn Đồng Phúc, xã An Lễ, huyện Quỳnh Phụ, Thái Bình',
+    'Lễ đản sinh của Quan ngày 10 tháng Giêng, lễ đản nhật ngày 24 tháng Tám âm lịch',
+  ],
+  nguon_quantam: 'Báo Pháp luật Việt Nam, "Huyền tích về Quan Lớn Đệ Tam và ngôi đền thiêng bên bờ Lục Đầu"',
+  quantam: [
+    'Quan Lớn Đệ Tam là vị thần đứng đầu Thoải phủ (sông nước), tương truyền là con trai thứ ba của Vua Cha Bát Hải Động Đình',
+    'Tương truyền Ông là vị tướng thời Hùng Vương, thống lĩnh quân thủy bộ, hy sinh trong một trận đánh; dân lập đền thờ khắp vùng sông nước',
+    'Đền Lảnh Giang (Hà Nam) và đền Xích Đằng (Hưng Yên) là nơi thờ chính; tháng Sáu âm lịch là "tháng tiệc Thoải phủ"',
+  ],
+  nguon_quanngu: 'Báo Pháp luật Việt Nam, "Về Đền Tranh cầu gì được nấy"',
+  quanngu: [
+    'Quan Lớn Đệ Ngũ Tuần Tranh là vị thần sông nước, theo bài báo là quan nhà Trần từng nhậm chức tuần ở Ninh Giang',
+    'Tương truyền ở bến sông Tranh có rắn dữ quấy phá, bắt cả vợ quan; Ông kiện lên Long Vương, rắn thua phải dời đi, từ đó khúc sông yên bình',
+    'Đền Tranh ở xã Đồng Tâm, huyện Ninh Giang, Hải Dương, di tích quốc gia năm 2009; hội chính ngày 14 tháng Hai và 22 tháng Tám âm lịch',
+  ],
+  nguon_caube: 'chonthieng.com, "Cậu Bé Bản Đền"',
+  caube: [
+    'Cậu Bé Bản Đền là vị Thánh Cậu coi sóc bản đền, bản điện, thuộc hàng Tứ Phủ Thánh Cậu, màu sắc đại diện là xanh',
+    'Cậu thường hầu cận các Quan Hoàng hoặc ngự tại một bản đền; được thờ ở Lầu Cậu trong các đền, phủ thờ Mẫu',
+    'Ngày tiệc của Cậu là mùng 7 tháng Ba âm lịch hằng năm',
+  ],
 };
+window.BANG_TIN.codoi2 = window.BANG_TIN.codoi; /* /g dùng Cô Đôi bản mới (id codoi2) */
