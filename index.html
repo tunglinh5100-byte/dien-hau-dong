@@ -266,6 +266,13 @@ function chuUpd(dt) { if (!S.chu || !S.chu.length) return;
       if (c.y >= ty) { c.y = ty; c.lt = 0; if (c.p) { c.ph = 'nhan'; const p = c.p; p.nc = S.t; p.pose = 'kneel'; p.poseT = 0; } else { c.ph = 'nam'; c.vao = c.vy; } } }
     else { c.lt += dt; if (c.ph === 'nhan' && c.p) { c.x = c.p.x; c.y = dauNguoi(c.p) - 4 - Math.min(1, c.lt / .35) * 10; } } });
   S.chu = S.chu.filter(c => !(c.ph === 'nam' && c.lt > CHU_NAM + 3.2) && !(c.ph === 'nhan' && c.lt > 2.1)); }
+const CHU_ANH = {};
+function chuAnh(key, a, b) { if (CHU_ANH[key]) return CHU_ANH[key]; const K = 2.2, w = 84, h = 54, cv = document.createElement('canvas'); cv.width = Math.ceil((w + 5) * K); cv.height = Math.ceil((h + 6) * K); const g = cv.getContext('2d'); g.scale(K, K); g.translate(w / 2 + 1, h + 1);
+  const rr2 = (x, y, ww, hh, r, f) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + ww, y, x + ww, y + hh, r); g.arcTo(x + ww, y + hh, x, y + hh, r); g.arcTo(x, y + hh, x, y, r); g.arcTo(x, y, x + ww, y, r); g.closePath(); if (f) { g.fillStyle = f; g.fill(); } };
+  rr2(-w / 2 + 2, -h + 3, w, h, 7, 'rgba(0,0,0,.35)'); const gr = g.createLinearGradient(0, -h, 0, 0); gr.addColorStop(0, '#d8342a'); gr.addColorStop(1, '#9c1712'); rr2(-w / 2, -h, w, h, 7, gr);
+  g.strokeStyle = '#f3c84e'; g.lineWidth = 2.4; rr2(-w / 2 + 3, -h + 3, w - 6, h - 6, 5); g.stroke();
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 18px ${SERIF}`; g.lineWidth = 3; g.strokeStyle = '#5a0c08'; g.fillStyle = '#ffe9a0'; g.lineJoin = 'round';
+  [[a, -h * .69], [b, -h * .31]].forEach(([tx, ty]) => { g.strokeText(tx, 0, ty); g.fillText(tx, 0, ty); }); if (document.fonts && document.fonts.status !== 'loaded') return cv; return (CHU_ANH[key] = cv); }
 function veChu1(c) { const z = chuSz(c.ph === 'nhan' && c.p ? c.p.y : (c.gy || c.y)) * (c.ph === 'nhan' ? .8 : 1), w = 84 * z, h = 54 * z, [a, b] = (() => { const t = c.s.split(' '); return [t.slice(0, 2).join(' '), t.slice(2).join(' ')]; })();
   let ang = 0, al = 1, dy = 0;
   if (c.ph === 'roi') ang = Math.sin(c.t * 2.2 + c.sw) * .07;
@@ -276,11 +283,7 @@ function veChu1(c) { const z = chuSz(c.ph === 'nhan' && c.p ? c.p.y : (c.gy || c
   else if (c.ph === 'roi' && !c.p) { const k = clamp(1 - (c.gy - c.y) / 300, 0, 1); if (k > 0) { ctx.save(); ctx.globalAlpha *= .25 * k; ctx.translate(c.x, c.gy); ctx.scale(1, .28); ctx.beginPath(); ctx.ellipse(0, 0, w * .5, w * .28, 0, 0, 7); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore(); } }
   ctx.translate(c.x, c.y + dy); ctx.rotate(ang);
   if (c.ph === 'nhan') { const g = ctx.createRadialGradient(0, -h / 2, 4, 0, -h / 2, w * .9); g.addColorStop(0, 'rgba(255,226,120,.55)'); g.addColorStop(1, 'rgba(255,200,80,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -h / 2, w * .9, 0, 7); ctx.fill(); }
-  const gr = ctx.createLinearGradient(0, -h, 0, 0); gr.addColorStop(0, '#d8342a'); gr.addColorStop(1, '#9c1712');
-  rr(-w / 2 + 2 * z, -h + 3 * z, w, h, 7 * z, 'rgba(0,0,0,.35)'); rr(-w / 2, -h, w, h, 7 * z, gr);
-  ctx.strokeStyle = '#f3c84e'; ctx.lineWidth = 2.4 * z; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-w / 2 + 3 * z, -h + 3 * z, w - 6 * z, h - 6 * z, 5 * z) : ctx.rect(-w / 2 + 3 * z, -h + 3 * z, w - 6 * z, h - 6 * z); ctx.stroke();
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `800 ${Math.round(18 * z)}px ${SERIF}`; ctx.lineWidth = 3 * z; ctx.strokeStyle = '#5a0c08'; ctx.fillStyle = '#ffe9a0';
-  [[a, -h * .69], [b, -h * .31]].forEach(([tx, ty]) => { ctx.strokeText(tx, 0, ty); ctx.fillText(tx, 0, ty); });
+  ctx.drawImage(chuAnh(c.s, a, b), -w / 2 - 1 * z, -h - 1 * z, w + 5 * z, h + 6 * z); /* 19/11 10:20: vẽ sẵn mỗi câu một lần cho nhẹ máy */
   ctx.restore(); }
 function drawChu() { if (!S.chu || !S.chu.length) return; S.chu.filter(c => c.t >= c.delay).sort((u, v) => (u.ph === 'roi' ? 2e3 : u.y) - (v.ph === 'roi' ? 2e3 : v.y)).forEach(c => { try { veChu1(c); } catch (e) {} }); }
 function muaTien(n) { if (laOng()) return; muaChu(); } window.__muaChu = () => muaChu();
