@@ -1086,9 +1086,9 @@ QM.cd = { id: 'codoi2', AU: CD_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3
   ['tientung', 'mua', 100, 124, 'tientung', 'lap', '', null, [2.0, 'tien']],
   ['loctung', 'mua', 124, 139, 'loctung', 'lap', '', null, [2.0, 'qua']],
   ['locqua', 'mua', 139, 153.8, 'locqua', 'lap', '', null, [2.0, 'hoa']],
-  ['uongnuoc', 'mua', 0, 40, 'ngoi', 'ngoi', '', null, null, 6.0] /* nghe văn: chưa có clip uống nước, tạm clip ngồi nghe văn */,
+  /* 19/11 anh Linh: bỏ bước nghe văn – uống nước (chưa có clip); múa, tung lộc xong là xe giá */
   ['segia', 'segia', 0, 5, 'xegia', 'vua', '', null, null, null, 'giu']],
-  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Tung lộc', 'Nghe văn', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, dungday: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, tientung: 5, loctung: 5, locqua: 5, uongnuoc: 6, segia: 7 },
+  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Tung lộc', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, dungday: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, tientung: 5, loctung: 5, locqua: 5, segia: 6 },
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.702, 49.5, 179.3], "dungday": [0.802, 32.9, 120.0], "ngoi": [0.802, 32.9, 120.0], "xegia": [0.776, 35.2, 133.3], "muamoi": [0.872, 20.1, 80.3], "tientung": [0.875, 15.6, 75.1], "loctung": [0.874, 13.6, 76.1], "locqua": [0.877, 13.1, 74.8], "vaihuong": [0.775, 34.2, 104.3], "dangnhang": [0.798, 35.9, 101.6]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 143, "dungday": 93, "ngoi": 93, "xegia": 189, "muamoi": 131, "tientung": 137, "loctung": 136, "locqua": 137, "vaihuong": 117, "dangnhang": 117}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
 QX.quannhat = 'q1'; QX.codoi2 = 'cd';
 function cuMoi() { return CUM === 'cc' || CUM === 'cl' || CUM === 'bo' || !!QM[CUM]; } /* các giá dùng clip Tú (tách nền) */
@@ -1805,10 +1805,10 @@ function docSo(msg) { // đọc linh hoạt: '2', 'số 2', 'ngựa số 2 ạ',
   const kd = khongDau(msg).replace(/[^a-z0-9]+/g, ' ').trim(); if (!kd) return 0; const ds = new Set(); (kd.match(/\d+/g) || []).forEach(x => ds.add(+x));
   const tk = kd.split(' '); for (let k = 0; k < tk.length; k++) { const w = tk[k]; if (w === 'muoi' && tk[k + 1] === 'mot') { ds.add(11); k++; continue; } if (w === 'muoi' && (tk[k + 1] === 'hai' || tk[k + 1] === 'hia')) { ds.add(12); k++; continue; } if (SO_CHU[w]) ds.add(SO_CHU[w]); }
   if (ds.size !== 1) return 0; const v = [...ds][0]; return v >= 1 && v <= MA_HANG.length ? v : 0; }
-function datGio() { G.T1 = 25; G.T2 = 30; if (/[?&]hmthu=1/.test(location.search)) return; // tính thời gian còn lại từ bây giờ tới bước khai quang (lúc mã phải được dâng lên chứng)
+function datGio() { G.T1 = 25; G.T2 = 15; /* 19/11 Quỳnh + anh Linh: thời gian trả lời minigame 15 giây cho mọi giá */ if (/[?&]hmthu=1/.test(location.search)) return; // tính thời gian còn lại từ bây giờ tới bước khai quang (lúc mã phải được dâng lên chứng)
   try { if (!cuDangLe()) return; let i = CU.i, con = Math.max(0, CU_LICH[i][3] - CU.t); const kq = CU_LICH.findIndex((L, k) => k > i && /^(khaiquang|muamoi|baisai|tungloc|phatloc|tientung)$/.test(L[0])); if (kq < 0) return;
     for (let k = i + 1; k < kq; k++) con += Math.max(0, CU_LICH[k][3] - CU_LICH[k][2]); const ngan = con - 22; // chừa ~22 giây cho hầu dâng xuống bê mã lên
-    if (ngan < 55) { G.T2 = Math.max(12, Math.round(ngan * .55)); G.T1 = Math.max(6, Math.round(ngan - G.T2)); } } catch (e) {} }
+    if (ngan < 55) { G.T2 = Math.min(15, Math.max(12, Math.round(ngan * .55))); G.T1 = Math.max(6, Math.round(ngan - G.T2)); } } catch (e) {} }
 function ketQua() { const ds = Object.entries(G.tl), dung = ds.filter(([, a]) => a.so === G.dung).sort((a, b) => a[1].t - b[1].t).map(([n]) => n);
   let s = !ds.length ? 'Chưa có ai trả lời. Ngài chứng mã số ' + G.dung + '.' : 'Có ' + dung.length + '/' + ds.length + ' người đã trả lời đúng mã số ' + G.dung + '.';
   if (dung.length >= 3) s += ' Nhanh thứ ba là ' + dung[2] + ', nhanh nhì là ' + dung[1] + ', và nhanh nhất là ' + dung[0] + '!';
