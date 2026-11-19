@@ -1125,7 +1125,7 @@ QX.chuanh = 'nh';
 /* 19/11 17:45 anh Linh: Tam Tòa Thánh Mẫu (Mẫu Đệ Nhất → Đệ Nhị → Đệ Tam) – clip Tú tách nền, 1 file văn thỉnh Quỳnh (bỏ đoạn 03:04–04:28). Hầu bóng, giữ áo đỏ, khăn phủ diện đỏ.
    Mẫu Đệ Nhất: ngồi nghe văn → giơ 1 ngón (00:59) → xe giá; Mẫu Đệ Nhị, Đệ Tam: vào văn 2 giây giơ 2/3 ngón, có vái hương. 'ngoi' = đoạn ngồi lắc lư cắt từ clip giơ tay (tạm, thay khi Tú có mdnhat_00_codong_ngoi-nghe-van-thinh) */
 const MAU_AU = { van: 'mau/mau_van_thinh-tam-toa.mp3' };
-QM.mau = { id: 'tamtoa', LAP: 1, AU: MAU_AU, SRC: n => 'mau/mau-' + n + '.mp4?v=1', LICH: [
+QM.mau = { id: 'tamtoa', LAP: 1, AU: MAU_AU, SRC: n => 'mau/mau-' + n + '.mp4?v=' + (n === 'ngoi' ? 2 : 1) /* 19/11 17:55: 'ngoi' = clip Tú mdnhat_00_codong_ngoi-nghe-van-thinh (up 17:28) */, LICH: [
   ['nghe1', 'van', 0, 59, 'ngoi', 'lap', ''], ['gio1', 'van', 59, 67, 'gio1', 'mot', ''], ['ngoi1', 'van', 67, 106, 'ngoi', 'lap', ''], ['xegia1', 'van', 106, 120, 'xegia', 'mot', ''],
   ['ngoi2', 'van', 120, 122, 'ngoi', 'lap', ''], ['gio2', 'van', 122, 130, 'gio2', 'mot', ''], ['ngoi2b', 'van', 130, 184, 'ngoi', 'lap', ''], ['vai2', 'van', 184, 228, 'vaihuong', 'lap', ''], ['xegia2', 'van', 228, 243, 'xegia', 'mot', ''],
   ['ngoi3', 'van', 243, 245, 'ngoi', 'lap', ''], ['gio3', 'van', 245, 253, 'gio3', 'mot', ''], ['ngoi3b', 'van', 253, 290, 'ngoi', 'lap', ''], ['vai3', 'van', 290, 324, 'vaihuong', 'lap', ''],

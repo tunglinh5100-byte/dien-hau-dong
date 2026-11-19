@@ -198,7 +198,7 @@ setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.peopl
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
-  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', chuanh: 'Chúa', chuatb: 'Chúa' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
+  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', chuanh: 'Chúa', chuatb: 'Chúa', tamtoa: 'Mẫu' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
   const x = X.toLowerCase();
   return s.replace(/(^|[^\p{L}])(Cô|cô|CÔ)(?![\p{L}])(?!\s+đồng)/gu, (m, a, c) => a + (c === 'cô' ? x : c === 'CÔ' ? X.toUpperCase() : X)); }
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
@@ -1036,8 +1036,8 @@ const BOC_TF = { thinh: [0.756, 39.9, 159.9], tungkhan: [0.756, 39.9, 159.9], th
 const BOC_DEM = { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, BOC_DAU = { thinh: 159, tungkhan: 159, thayao: 148, vaihuong: 38, dangnhang: 51, cheo: 30, cheodung: 30, uongnuoc: 87, segia: 124 }, BOC_RATE = { uongnuoc: .8 };
 /* ---------- 18/11 Quan Lớn Đệ Tam (qdtam), Quan Lớn Đệ Ngũ (qdngu): clip Tú (tách nền; thay khăn áo bỏ 2 hầu dâng, áo trắng hoà sang áo quan), nhạc văn + kịch bản Quỳnh; chỉ link thử /tn (?qd=1) ---------- */
 const QD_THU = /[?&]qd=1/.test(location.search), CD2 = QD_THU || /[?&]cd2=1/.test(location.search), QG = QD_THU || /[?&]qg=1/.test(location.search); /* 19/11 13:52 anh Linh: ?qg=1 đưa 3 giá Quan lên /g */ /* 19/11 anh Linh: ?cd2=1 đưa Cô Đôi bản mới lên /g (thay Cô Đôi cũ) */
-const CHUA = /[?&]chua=1/.test(location.search); /* 19/11 17:05 anh Linh: 2 giá Chúa lên /g */
-function qOn(id) { return !!QX[id] && (QD_THU || (CD2 && id === 'codoi2') || (QG && /^quan/.test(id)) || (CHUA && /^chua/.test(id))); }
+const CHUA = /[?&]chua=1/.test(location.search); const MAU = /[?&]mau=1/.test(location.search); /* 19/11 anh Linh: ?mau=1 bật giá Tam Tòa Thánh Mẫu */ /* 19/11 17:05 anh Linh: 2 giá Chúa lên /g */
+function qOn(id) { return !!QX[id] && (QD_THU || (MAU && id === 'tamtoa') || (CD2 && id === 'codoi2') || (QG && /^quan/.test(id)) || (CHUA && /^chua/.test(id))); }
 const QX = { quantam: 'q3', quanngu: 'q5' };
 const Q3_AU = { thinh: 'q3/qdtam_01_van_thinh.mp3', thayao: 'q3/qdtam_02_nhac_thay-khan-ao.mp3', tau: 'q3/qdtam_03_nhac_tau-huong.mp3', khai: 'q3/qdtam_04_nhac_khai-quang.mp3', kiem: 'q3/qdtam_05_nhac_mua-song-kiem.mp3', nghe: 'q3/qdtam_06_van_nghe-van.mp3', loc: 'q3/qdtam_07_van_phat-loc.mp3', segia: 'q3/qdtam_08_van_se-gia.mp3' };
 const Q3_LICH = [
@@ -1122,6 +1122,19 @@ QM.nh = { id: 'chuanh', LAP: 1, AU: NH_AU, SRC: n => /^(thinh|tungkhan)$/.test(n
   BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Phát lộc', 'Ngự tửu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, muamoi: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
   TF: {"thayao": [0.97, 1.0, 79.7], "vaihuong": [0.729, 42.8, 144.0], "dangnhang": [0.75, 50.5, 129.8], "khaiquang": [0.746, 57.8, 129.4], "muamoi": [0.746, 48.6, 130.1], "tungtien": [0.759, 49.4, 123.7], "uongruou": [0.611, 62.2, 209.7], "segia": [0.675, 54.2, 188.9], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 206, "vaihuong": 70, "dangnhang": 87, "khaiquang": 88, "muamoi": 87, "tungtien": 94, "uongruou": 115, "segia": 135, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .75 }, XF: 2.5 };
 QX.chuanh = 'nh';
+/* 19/11 17:45 anh Linh: Tam Tòa Thánh Mẫu (Mẫu Đệ Nhất → Đệ Nhị → Đệ Tam) – clip Tú tách nền, 1 file văn thỉnh Quỳnh (bỏ đoạn 03:04–04:28). Hầu bóng, giữ áo đỏ, khăn phủ diện đỏ.
+   Mẫu Đệ Nhất: ngồi nghe văn → giơ 1 ngón (00:59) → xe giá; Mẫu Đệ Nhị, Đệ Tam: vào văn 2 giây giơ 2/3 ngón, có vái hương. 'ngoi' = đoạn ngồi lắc lư cắt từ clip giơ tay (tạm, thay khi Tú có mdnhat_00_codong_ngoi-nghe-van-thinh) */
+const MAU_AU = { van: 'mau/mau_van_thinh-tam-toa.mp3' };
+QM.mau = { id: 'tamtoa', LAP: 1, AU: MAU_AU, SRC: n => 'mau/mau-' + n + '.mp4?v=' + (n === 'ngoi' ? 2 : 1) /* 19/11 17:55: 'ngoi' = clip Tú mdnhat_00_codong_ngoi-nghe-van-thinh (up 17:28) */, LICH: [
+  ['nghe1', 'van', 0, 59, 'ngoi', 'lap', ''], ['gio1', 'van', 59, 67, 'gio1', 'mot', ''], ['ngoi1', 'van', 67, 106, 'ngoi', 'lap', ''], ['xegia1', 'van', 106, 120, 'xegia', 'mot', ''],
+  ['ngoi2', 'van', 120, 122, 'ngoi', 'lap', ''], ['gio2', 'van', 122, 130, 'gio2', 'mot', ''], ['ngoi2b', 'van', 130, 184, 'ngoi', 'lap', ''], ['vai2', 'van', 184, 228, 'vaihuong', 'lap', ''], ['xegia2', 'van', 228, 243, 'xegia', 'mot', ''],
+  ['ngoi3', 'van', 243, 245, 'ngoi', 'lap', ''], ['gio3', 'van', 245, 253, 'gio3', 'mot', ''], ['ngoi3b', 'van', 253, 290, 'ngoi', 'lap', ''], ['vai3', 'van', 290, 324, 'vaihuong', 'lap', ''],
+  ['xegia', 'van', 324, 331.6, 'xegia', 'mot', '', null, null, null, 'giu']],
+  BUOC: ['Mẫu Đệ Nhất', 'Xe giá', 'Mẫu Đệ Nhị', 'Vái hương', 'Xe giá', 'Mẫu Đệ Tam', 'Vái hương', 'Xe giá'], K: { nghe1: 0, gio1: 0, ngoi1: 0, xegia1: 1, ngoi2: 2, gio2: 2, ngoi2b: 2, vai2: 3, xegia2: 4, ngoi3: 5, gio3: 5, ngoi3b: 5, vai3: 6, xegia: 7 },
+  TF: {"ngoi": [0.659, 58.4, 214.1], "gio1": [0.657, 57.8, 214.9], "gio2": [0.664, 56.6, 204.9], "gio3": [0.63, 63.9, 210.7], "vaihuong": [0.713, 48.3, 188.8], "xegia": [0.624, 62.9, 219.5]},
+  DAU: {"ngoi": 100, "gio1": 99, "gio2": 113, "gio3": 110, "vaihuong": 128, "xegia": 97},
+  DEM: {"ngoi": [12, 348, 563], "gio1": [12, 348, 563], "gio2": [12, 348, 572], "gio3": [12, 348, 594], "vaihuong": [12, 348, 556], "xegia": [12, 348, 586]}, RATE: {}, XF: 1 };
+QX.tamtoa = 'mau';
 
 
 function cuMoi() { return CUM === 'cc' || CUM === 'cl' || CUM === 'bo' || !!QM[CUM]; } /* các giá dùng clip Tú (tách nền) */
@@ -1177,7 +1190,7 @@ const CU_LAP = OMU ? 2 : 2; // văn thỉnh hát 2 lượt (anh Linh)
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(thinhlap|tungkhan|camhuong|chaylen|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
     v.style.cssText = 'width:2px;height:4px'; vHoan(v, bo ? (/^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'bo3/bo-' + n + '.mp4?v=1') : cl ? ('cl3/cl-' + n + '.mp4?v=' + (n === 'thayao' ? 3 : 1)) : cc ? ('cc3/cc-' + n + '.mp4?v=' + (n === 'thayao' ? '4kf' : 3)) : (om ? (n === 'thinh' ? 'cu3/cu-thinhlap.mp4?v=3' : n === 'tungkhan' ? 'cu3/cu-tungkhan.mp4?v=3' : 'om3/om-' + n + '.mp4?v=3') : 'cu3/cu-' + n + '.mp4?v=3') /* 18/11 17:30 chạy thử /g: Ông Mười, Cậu Bé đổi sang clip nhẹ 360x1280 như các giá khác cho khỏi giật */, bo ? 'cobo' : cl ? 'chaulu' : cc ? 'cochin' : om ? 'ongmuoi' : 'caube'); CV_HOLD.appendChild(v); dich[n] = v; }); });
-  (QD_THU ? Object.keys(QM) : [].concat(CD2 ? ['cd'] : [], QG ? ['q1', 'q3', 'q5'] : [], CHUA ? ['nh', 'tb'] : [])).forEach(md => { const Q = QM[md], dich = CU['v' + md] = {}; Object.keys(Q.TF).forEach(n => { const v = document.createElement('video');
+  (QD_THU ? Object.keys(QM) : [].concat(CD2 ? ['cd'] : [], QG ? ['q1', 'q3', 'q5'] : [], CHUA ? ['nh', 'tb'] : [], MAU ? ['mau'] : [])).forEach(md => { const Q = QM[md], dich = CU['v' + md] = {}; Object.keys(Q.TF).forEach(n => { const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = /^(tungkhan|thayao)$/.test(n) ? 'auto' : 'metadata';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
     v.style.cssText = 'width:2px;height:4px'; vHoan(v, Q.SRC ? Q.SRC(n) : /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : md + '/' + md + '-' + n + '.mp4?v=1', Q.id); CV_HOLD.appendChild(v); dich[n] = v; }); });
@@ -2073,6 +2086,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   if (CL_THU) ds.unshift({ id: 'chaulu', ten: 'Chầu Lục Cung Nương', hang: 'co', ao: '#b3202c', vay: '#1b1418', khan: '#b3202c', vienKhan: '#e8c040', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 17/11 giá Chầu Lục, link thử /tn */
   if (BO_THU || BOC_THU) ds.splice(ds.findIndex(g => g.id === 'codoi') + 1 || ds.length, 0, { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false, mat: 'buon' }); /* 16/11 anh Linh: giá Cô Bơ bản 2D, chỉ ở link thử /tn */
   if (QD_THU || CHUA) ds.push({ id: 'chuatb', ten: 'Chúa Thác Bờ', hang: 'co', ao: '#f2ead8', vay: '#1b1418', khan: '#1b1418', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 Chúa Thác Bờ (clip Tú) trên /tn */
+  if (QD_THU || MAU) ds.unshift({ id: 'tamtoa', ten: 'Tam Tòa Thánh Mẫu', hang: 'co', ao: '#c8242a', vay: '#c8242a', khan: '#c62a22', vienKhan: '#e8c040', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 17:45 anh Linh: Tam Tòa Thánh Mẫu lên đầu /tn */
   if (NH_THU || CHUA) ds.push({ id: 'chuanh', ten: 'Chúa Đệ Nhị Nguyệt Hồ', hang: 'co', ao: '#2f86b8', vay: '#1b2a3a', khan: '#2f86b8', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 Chúa Nguyệt Hồ 2D trên /tn */
   if (CD2 && !QD_THU) { const i = ds.findIndex(g => g.id === 'codoi'); if (i >= 0) ds[i] = { id: 'codoi2', ten: 'Cô Đôi Thượng Ngàn', hang: 'co', ao: '#4a9a8a', vay: '#1b1418', khan: '#2f6f5a', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }; } /* 19/11: /g dùng Cô Đôi bản mới; thay sau khi đã chèn Cô Bơ, Cô Chín để thứ tự Cô Đôi → Cô Bơ → Cô Chín → Cậu Bé */
   if (QG && !QD_THU) { const TT = ['quannhat', 'quantam', 'quanngu', 'chaulu', 'chaube', 'chuanh', 'chuatb', 'ongbay', 'ongmuoi', 'codoi2', 'cobo', 'cochin', 'caube']; ds.sort((a, b) => (TT.indexOf(a.id) + 1 || 99) - (TT.indexOf(b.id) + 1 || 99)); } /* 19/11 14:12 anh Linh: thứ tự giá trên /g */
