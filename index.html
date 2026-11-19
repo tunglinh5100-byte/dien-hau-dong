@@ -1106,6 +1106,22 @@ QM.tb = { id: 'chuatb', LAP: 1, AU: TB_AU, SRC: n => /^(thinh|tungkhan)$/.test(n
   BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Múa chèo', 'Tung tiền', 'Uống rượu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, muacheo: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
   TF: {"thayao": [0.859, 16.3, 133.9], "vaihuong": [0.724, 40.2, 142.2], "dangnhang": [0.763, 37.6, 130.9], "muamoi": [0.751, 27.0, 129.6], "muacheo": [0.714, 44.4, 140.7], "tungtien": [0.777, 27.3, 115.0], "uongruou": [0.58, 68.4, 226.7], "segia": [0.649, 57.6, 205.4], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 170, "vaihuong": 73, "dangnhang": 84, "muamoi": 87, "muacheo": 76, "tungtien": 103, "uongruou": 92, "segia": 115, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
 QX.chuatb = 'tb';
+/* 19/11 15:59 anh Linh: Chúa Đệ Nhị Nguyệt Hồ bằng clip Tú (áo xanh trên phông xanh, đã làm đặc lại phần áo) trên /tn. Văn Quỳnh chưa cắt (file gốc 12MB tải không được) → TẠM nhạc múa chung cdoi_00, thay khi có cnh_01…09 */
+const NH_NHAC = 'cd/cdoi_00_nhac_mua-chung.mp3';
+QM.nh = { id: 'chuanh', LAP: 1, AU: { thinh: NH_NHAC, mua: NH_NHAC }, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'nh/nh-' + n + '.mp4?v=1', LICH: [
+  ['thinh', 'thinh', 0, 30, 'thinh', 'lap', ''], ['tungkhan', 'mua', 0, 5.4, 'tungkhan', 'vua', ''],
+  ['thayao', 'mua', 5.4, 57, 'thayao', 'ngoi', '', null, null, 5.0],
+  ['vaihuong', 'mua', 0, 12, 'vaihuong', 'vua', ''],
+  ['dangnhang', 'mua', 12, 39, 'dangnhang', 'di', ''],
+  ['khaiquang', 'mua', 39, 73, 'khaiquang', 'di', ''],
+  ['muamoi', 'mua', 73, 112, 'muamoi', 'lap', ''],
+  ['tungtien', 'mua', 0, 65, 'tungtien', 'lap', '', null, [3.0, 'tien']],
+  ['uongruou', 'mua', 0, 95, 'uongruou', 'lap', ''],
+  ['segia0', 'mua', 95, 130, 'uongruou', 'lap', ''], ['segia', 'mua', 130, 138, 'segia', 'vua', '', null, null, null, 'giu']],
+  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Tung tiền', 'Uống rượu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, muamoi: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
+  TF: {"thayao": [0.97, 1.0, 79.7], "vaihuong": [0.729, 42.8, 144.0], "dangnhang": [0.75, 50.5, 129.8], "khaiquang": [0.746, 57.8, 129.4], "muamoi": [0.746, 48.6, 130.1], "tungtien": [0.759, 49.4, 123.7], "uongruou": [0.611, 62.2, 209.7], "segia": [0.675, 54.2, 188.9], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 206, "vaihuong": 70, "dangnhang": 87, "khaiquang": 88, "muamoi": 87, "tungtien": 94, "uongruou": 115, "segia": 135, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
+QX.chuanh = 'nh';
+
 
 function cuMoi() { return CUM === 'cc' || CUM === 'cl' || CUM === 'bo' || !!QM[CUM]; } /* các giá dùng clip Tú (tách nền) */
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
@@ -1207,7 +1223,7 @@ const BO_CFG = { cobo: [BO_AU, BO_LICH, BUOC_BO, BO_BUOC_K, BO_LOC_T],
 function boCfg(id) { const c = BO_CFG[id]; if (!c) return; [BO_AU, BO_LICH, BUOC_BO, BO_BUOC_K, BO_LOC_T] = c; }
 const BO = { au: null, i: 0, t: 0, st: 0, lap: 0, hold: false, auKey: null, veil: 0, toss: 0, bow: 0, sway: 0, locK: 0, exitTo: null };
 if (BO_THU || NH_THU) { BO.au = new Audio(); BO.au.preload = 'auto'; }
-function boDangLe() { return !!BO.au && ((BO_THU && GIA().id === 'cobo') || (NH_THU && GIA().id === 'chuanh')); }
+function boDangLe() { return !!BO.au && BO_THU && GIA().id === 'cobo'; } /* 19/11 16:00: Nguyệt Hồ đã có clip Tú, bỏ bản hình vẽ */
 function boAuPlay(key, at) { const a = BO.au; if (!a || !key) return; try { if (BO.auKey !== key) { a.src = auSrc(BO_AU[key] + '?v=1'); BO.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.volume = 1; a.muted = !S.sound; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 function boVao(i) { const L = BO_LICH[i]; if (!L) return; BO.i = i; BO.t = 0; BO.st = 0; BO.locK = 0; if (L[1]) boAuPlay(L[1], 0); else { try { BO.au.pause(); } catch (e) {} BO.auKey = null; } }
 function boReset() { if (!BO.au) return; boCfg(GIA().id); BO.i = 0; BO.lap = 0; BO.hold = false; BO.exitTo = null; BO.veil = 1; BO.toss = 0; CO.sit = 1; CO.x = CARPET.cx; CO.y = CARPET.cy - 4; boVao(0); }
