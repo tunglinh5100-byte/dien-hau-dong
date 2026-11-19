@@ -198,7 +198,7 @@ setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.peopl
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
-  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', chuanh: 'Chúa' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
+  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', chuanh: 'Chúa', chuatb: 'Chúa' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
   const x = X.toLowerCase();
   return s.replace(/(^|[^\p{L}])(Cô|cô|CÔ)(?![\p{L}])(?!\s+đồng)/gu, (m, a, c) => a + (c === 'cô' ? x : c === 'CÔ' ? X.toUpperCase() : X)); }
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
@@ -1091,6 +1091,22 @@ QM.cd = { id: 'codoi2', AU: CD_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3
   BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Tung lộc', 'Nghe văn', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, dungday: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, tientung: 5, loctung: 5, locqua: 5, uongnuoc: 6, segia: 7 },
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.702, 49.5, 179.3], "dungday": [0.802, 32.9, 120.0], "ngoi": [0.802, 32.9, 120.0], "xegia": [0.776, 35.2, 133.3], "muamoi": [0.872, 20.1, 80.3], "tientung": [0.875, 15.6, 75.1], "loctung": [0.874, 13.6, 76.1], "locqua": [0.877, 13.1, 74.8], "vaihuong": [0.775, 34.2, 104.3], "dangnhang": [0.798, 35.9, 101.6], "uongnuoc": [0.669, 46.9, 186.4]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 143, "dungday": 93, "ngoi": 93, "xegia": 189, "muamoi": 131, "tientung": 137, "loctung": 136, "locqua": 137, "vaihuong": 117, "dangnhang": 117, "uongnuoc": 140}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
 QX.quannhat = 'q1'; QX.codoi2 = 'cd';
+/* 19/11 15:20 anh Linh: giá Chúa Thác Bờ (clip Tú tách nền) trên /tn. Nhạc văn Quỳnh chưa cắt theo bước (file gốc 20MB tải không được) → TẠM dùng nhạc múa chung cd/cdoi_00, thay khi có ctb_01…09 */
+const TB_NHAC = 'cd/cdoi_00_nhac_mua-chung.mp3';
+QM.tb = { id: 'chuatb', LAP: 1, AU: { thinh: TB_NHAC, mua: TB_NHAC }, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'tb/tb-' + n + '.mp4?v=1', LICH: [
+  ['thinh', 'thinh', 0, 45, 'thinh', 'lap', ''], ['tungkhan', 'mua', 0, 5.4, 'tungkhan', 'vua', ''],
+  ['thayao', 'mua', 5.4, 136, 'thayao', 'ngoi', '', null, null, 5.0],
+  ['vaihuong', 'mua', 0, 15, 'vaihuong', 'vua', ''],
+  ['dangnhang', 'mua', 15, 34, 'dangnhang', 'di', ''],
+  ['muamoi', 'mua', 34, 66, 'muamoi', 'lap', ''],
+  ['muacheo', 'mua', 0, 136, 'muacheo', 'di', ''],
+  ['tungtien', 'mua', 0, 150, 'tungtien', 'lap', '', null, [3.0, 'tien']],
+  ['uongruou', 'mua', 0, 90, 'uongruou', 'lap', ''],
+  ['segia', 'mua', 90, 98, 'segia', 'vua', '', null, null, null, 'giu']],
+  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Múa chèo', 'Tung tiền', 'Uống rượu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, muacheo: 5, tungtien: 6, uongruou: 7, segia: 8 },
+  TF: {"thayao": [0.859, 16.3, 133.9], "vaihuong": [0.724, 40.2, 142.2], "dangnhang": [0.763, 37.6, 130.9], "muamoi": [0.751, 27.0, 129.6], "muacheo": [0.714, 44.4, 140.7], "tungtien": [0.777, 27.3, 115.0], "uongruou": [0.58, 68.4, 226.7], "segia": [0.649, 57.6, 205.4], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 170, "vaihuong": 73, "dangnhang": 84, "muamoi": 87, "muacheo": 76, "tungtien": 103, "uongruou": 92, "segia": 115, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
+QX.chuatb = 'tb';
+
 function cuMoi() { return CUM === 'cc' || CUM === 'cl' || CUM === 'bo' || !!QM[CUM]; } /* các giá dùng clip Tú (tách nền) */
 function cc2D() { return CUM === 'cc' && typeof CU !== 'undefined' && laCU(GIA().id) && GIA().id === 'cochin' && !CU.hold && !S.chuyen && !S.cat && (CC_LICH[CU.i] || [])[5] === '2d'; }
 function ccTu2D(dt) { // tư thế hình vẽ Cô Chín cho các đoạn chưa có clip
@@ -2005,6 +2021,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   if (CC_THU) ds.splice(Math.max(0, ds.findIndex(g => g.id === 'codoi') + 1) || ds.length, 0, { id: 'cochin', ten: 'Cô Chín Sòng Sơn', hang: 'co', ao: '#ec6ea6', vay: '#ec6ea6', khan: '#2a2026', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 17/11 anh Linh: giá Cô Chín, link thử /tn */
   if (CL_THU) ds.unshift({ id: 'chaulu', ten: 'Chầu Lục Cung Nương', hang: 'co', ao: '#b3202c', vay: '#1b1418', khan: '#b3202c', vienKhan: '#e8c040', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 17/11 giá Chầu Lục, link thử /tn */
   if (BO_THU || BOC_THU) ds.splice(ds.findIndex(g => g.id === 'codoi') + 1 || ds.length, 0, { id: 'cobo', ten: 'Cô Bơ Thoải Cung', hang: 'co', ao: '#f4f1ea', vay: '#e6e0d4', khan: '#f4f1ea', vienKhan: '#c9a03a', dai: '#5f9fd4', congCu: 'cheo', tim: 'tien', nhacSan: 'bo', coNhac: false, mat: 'buon' }); /* 16/11 anh Linh: giá Cô Bơ bản 2D, chỉ ở link thử /tn */
+  if (QD_THU) ds.push({ id: 'chuatb', ten: 'Chúa Thác Bờ', hang: 'co', ao: '#f2ead8', vay: '#1b1418', khan: '#1b1418', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 Chúa Thác Bờ (clip Tú) trên /tn */
   if (NH_THU) ds.push({ id: 'chuanh', ten: 'Chúa Đệ Nhị Nguyệt Hồ', hang: 'co', ao: '#2f86b8', vay: '#1b2a3a', khan: '#2f86b8', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 Chúa Nguyệt Hồ 2D trên /tn */
   if (CD2 && !QD_THU) { const i = ds.findIndex(g => g.id === 'codoi'); if (i >= 0) ds[i] = { id: 'codoi2', ten: 'Cô Đôi Thượng Ngàn', hang: 'co', ao: '#4a9a8a', vay: '#1b1418', khan: '#2f6f5a', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }; } /* 19/11: /g dùng Cô Đôi bản mới; thay sau khi đã chèn Cô Bơ, Cô Chín để thứ tự Cô Đôi → Cô Bơ → Cô Chín → Cậu Bé */
   if (QG && !QD_THU) { const TT = ['quannhat', 'quantam', 'quanngu', 'chaulu', 'chaube', 'ongbay', 'ongmuoi', 'codoi2', 'cobo', 'cochin', 'caube']; ds.sort((a, b) => (TT.indexOf(a.id) + 1 || 99) - (TT.indexOf(b.id) + 1 || 99)); } /* 19/11 14:12 anh Linh: thứ tự giá trên /g */
