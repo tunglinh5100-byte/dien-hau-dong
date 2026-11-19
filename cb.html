@@ -1098,28 +1098,28 @@ QM.tb = { id: 'chuatb', LAP: 1, AU: TB_AU, SRC: n => /^(thinh|tungkhan)$/.test(n
   ['thayao', 'thay', 5.4, 135.8, 'thayao', 'ngoi', '', null, null, 5.0],
   ['vaihuong', 'vai', 0, 14.8, 'vaihuong', 'vua', ''],
   ['dangnhang', 'dang', 0, 18.8, 'dangnhang', 'di', ''],
-  ['muamoi', 'moi', 0, 31.8, 'muamoi', 'lap', ''],
+  ['muamoi', 'moi', 0, 31.8, 'muamoi', 'di', ''] /* 19/11 Quỳnh: múa mồi đi trái phải */,
   ['muacheo', 'cheo', 0, 135.8, 'muacheo', 'di', ''],
-  ['tungtien', 'tien', 0, 315.8, 'tungtien', 'lap', '', null, [3.0, 'tien']],
+  ['tungtien', 'tien', 0, 315.8, 'tungtien', 'di', '', null, [3.0, 'tien']] /* 19/11 Quỳnh: phát lộc đi trái phải */,
   ['uongruou', 'uong', 0, 90.8, 'uongruou', 'lap', ''],
   ['segia0', 'segia', 0, 38, 'uongruou', 'lap', ''], ['segia', 'segia', 38, 45.8, 'segia', 'vua', '', null, null, null, 'giu']],
-  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Múa chèo', 'Tung tiền', 'Uống rượu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, muacheo: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
-  TF: {"thayao": [0.859, 16.3, 133.9], "vaihuong": [0.724, 40.2, 142.2], "dangnhang": [0.763, 37.6, 130.9], "muamoi": [0.751, 27.0, 129.6], "muacheo": [0.714, 44.4, 140.7], "tungtien": [0.777, 27.3, 115.0], "uongruou": [0.58, 68.4, 226.7], "segia": [0.649, 57.6, 205.4], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 170, "vaihuong": 73, "dangnhang": 84, "muamoi": 87, "muacheo": 76, "tungtien": 103, "uongruou": 92, "segia": 115, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
+  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Múa mồi', 'Múa chèo', 'Phát lộc', 'Ngự tửu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, muamoi: 4, muacheo: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
+  TF: {"thayao": [0.859, 16.3, 133.9], "vaihuong": [0.724, 40.2, 142.2], "dangnhang": [0.763, 37.6, 130.9], "muamoi": [0.751, 27.0, 129.6], "muacheo": [0.714, 44.4, 140.7], "tungtien": [0.777, 27.3, 115.0], "uongruou": [0.58, 68.4, 226.7], "segia": [0.649, 57.6, 205.4], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 170, "vaihuong": 73, "dangnhang": 84, "muamoi": 87, "muacheo": 76, "tungtien": 103, "uongruou": 92, "segia": 115, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .75 }, XF: 2.5 }; /* 19/11 Quỳnh: uống rượu chậm lại; nhạc các bước gối nhau 2,5 giây */
 QX.chuatb = 'tb';
 /* 19/11 15:59 anh Linh: Chúa Đệ Nhị Nguyệt Hồ bằng clip Tú (áo xanh trên phông xanh, đã làm đặc lại phần áo) trên /tn. Văn Quỳnh chưa cắt (file gốc 12MB tải không được) → TẠM nhạc múa chung cdoi_00, thay khi có cnh_01…09 */
-const NH_NHAC = 'cd/cdoi_00_nhac_mua-chung.mp3';
-QM.nh = { id: 'chuanh', LAP: 1, AU: { thinh: NH_NHAC, mua: NH_NHAC }, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'nh/nh-' + n + '.mp4?v=1', LICH: [
-  ['thinh', 'thinh', 0, 30, 'thinh', 'lap', ''], ['tungkhan', 'mua', 0, 5.4, 'tungkhan', 'vua', ''],
-  ['thayao', 'mua', 5.4, 57, 'thayao', 'ngoi', '', null, null, 5.0],
-  ['vaihuong', 'mua', 0, 12, 'vaihuong', 'vua', ''],
-  ['dangnhang', 'mua', 12, 39, 'dangnhang', 'di', ''],
-  ['khaiquang', 'mua', 39, 73, 'khaiquang', 'di', ''],
-  ['muamoi', 'mua', 73, 112, 'muamoi', 'lap', ''],
-  ['tungtien', 'mua', 0, 65, 'tungtien', 'lap', '', null, [3.0, 'tien']],
-  ['uongruou', 'mua', 0, 95, 'uongruou', 'lap', ''],
-  ['segia0', 'mua', 95, 130, 'uongruou', 'lap', ''], ['segia', 'mua', 130, 138, 'segia', 'vua', '', null, null, null, 'giu']],
-  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Tung tiền', 'Uống rượu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, muamoi: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
-  TF: {"thayao": [0.97, 1.0, 79.7], "vaihuong": [0.729, 42.8, 144.0], "dangnhang": [0.75, 50.5, 129.8], "khaiquang": [0.746, 57.8, 129.4], "muamoi": [0.746, 48.6, 130.1], "tungtien": [0.759, 49.4, 123.7], "uongruou": [0.611, 62.2, 209.7], "segia": [0.675, 54.2, 188.9], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 206, "vaihuong": 70, "dangnhang": 87, "khaiquang": 88, "muamoi": 87, "tungtien": 94, "uongruou": 115, "segia": 135, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {} };
+const NH_AU = { thinh: 'nh/cnh_01_van_thinh.mp3', thay: 'nh/cnh_02_nhac_thay-khan-ao.mp3', vai: 'nh/cnh_03_van_vai-huong.mp3', dang: 'nh/cnh_04_van_dang-nhang.mp3', khai: 'nh/cnh_05_nhac_khai-quang.mp3', moi: 'nh/cnh_06_nhac_mua-moi.mp3', tien: 'nh/cnh_07_nhac_tung-tien.mp3', uong: 'nh/cnh_08_van_uong-ruou.mp3', segia: 'nh/cnh_09_van_se-gia.mp3' }; /* 19/11 Quỳnh đã cắt văn cnh_01…09 */
+QM.nh = { id: 'chuanh', LAP: 1, AU: NH_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'nh/nh-' + n + '.mp4?v=1', LICH: [
+  ['thinh', 'thinh', 0, 29.8, 'thinh', 'lap', ''], ['tungkhan', 'thay', 0, 5.4, 'tungkhan', 'vua', ''],
+  ['thayao', 'thay', 5.4, 56.8, 'thayao', 'ngoi', '', null, null, 5.0],
+  ['vaihuong', 'vai', 0, 11.8, 'vaihuong', 'vua', ''],
+  ['dangnhang', 'dang', 0, 26.8, 'dangnhang', 'di', ''],
+  ['khaiquang', 'khai', 0, 33.8, 'khaiquang', 'di', ''],
+  ['muamoi', 'moi', 0, 38.8, 'muamoi', 'di', ''],
+  ['tungtien', 'tien', 0, 64.8, 'tungtien', 'di', '', null, [3.0, 'tien']],
+  ['uongruou', 'uong', 0, 94.8, 'uongruou', 'lap', ''],
+  ['segia0', 'segia', 0, 35, 'uongruou', 'lap', ''], ['segia', 'segia', 35, 42.8, 'segia', 'vua', '', null, null, null, 'giu']],
+  BUOC: ['Thỉnh mời', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Phát lộc', 'Ngự tửu', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, muamoi: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
+  TF: {"thayao": [0.97, 1.0, 79.7], "vaihuong": [0.729, 42.8, 144.0], "dangnhang": [0.75, 50.5, 129.8], "khaiquang": [0.746, 57.8, 129.4], "muamoi": [0.746, 48.6, 130.1], "tungtien": [0.759, 49.4, 123.7], "uongruou": [0.611, 62.2, 209.7], "segia": [0.675, 54.2, 188.9], "thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9]}, DAU: {"thayao": 206, "vaihuong": 70, "dangnhang": 87, "khaiquang": 88, "muamoi": 87, "tungtien": 94, "uongruou": 115, "segia": 135, "thinh": 159, "tungkhan": 159}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .75 }, XF: 2.5 };
 QX.chuanh = 'nh';
 
 
@@ -1192,12 +1192,15 @@ function cuDauY(sc) { const n = CU.shown || CU.cur, tf = CU_TF[n] || [1, 0, 0], 
 function cuDangLe() { return typeof CU !== 'undefined' && !!CU.buf && laCU(GIA().id); }
 function cuReset() { if (!CU.buf) return; cuCfg(cuModeOf(GIA().id)); CU.i = 0; CU.t = 0; CU.lap = 0; CU.cue = 0; CU.cueClip = null; CU.exitTo = null; CU.hold = false; CU.xong = false; CU.auKey = null; CU.cur = null; CU.ok = false; try { CU.au.pause(); } catch (e) {} cuVao(0); }
 function cuPlay(n, from) { const v = CU.v[n]; if (!v) return; if (CU.cur !== n) { const old = CU.v[CU.cur]; if (old) try { old.pause(); } catch (e) {} CU.cur = n; } CU.st = 0; v.__want = from || 0; try { v.currentTime = from || 0; } catch (e) {} cvPlay(v); }
-function cuAuFade(o) { const t0 = performance.now(), v0 = o.volume; const iv = setInterval(() => { try { const u = Math.min(1, (performance.now() - t0) / 1400); o.volume = v0 * (1 - u) * (1 - u); if (u >= 1 || !S.sound || S.chuyen || S.cat || !laCU(GIA().id)) { o.pause(); clearInterval(iv); } } catch (e) { clearInterval(iv); } }, 40); } // 17/11 Quỳnh: nối nhạc giữa các bước cho mượt — bài cũ nhỏ dần 1,4 giây
-function cuAuPlay(key, at) { let a = CU.au; if (!a) return; try { let vao = false; if (CU.auKey !== key) { if (CU.auKey && !a.paused && !a.muted && !(typeof IOS_VOL !== 'undefined' && IOS_VOL)) { cuAuFade(a); a = CU.au = new Audio(); a.preload = 'auto'; vao = true; } a.src = auSrc(CU_AU[key] + (cuMoi() ? '?v=1' : OMU ? '?v=' + OM_AU_V : '?v=2')); CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = vao ? 0 : .9; const p = a.play(); if (p && p.catch) p.catch(() => {});
-  if (vao) { const t0 = performance.now(), el = a; const iv = setInterval(() => { try { const u = Math.min(1, (performance.now() - t0) / 1000); if (CU.au !== el) { clearInterval(iv); return; } el.volume = .9 * u; if (u >= 1) clearInterval(iv); } catch (e) { clearInterval(iv); } }, 40); } } catch (e) {} } // bài mới to dần 1 giây
+function cuXF() { const Q = QM[CUM]; return Q && Q.XF ? Q.XF : 0; } /* 19/11 Quỳnh: nhạc các bước gối nhau, không đứt */
+function cuXFNext() { const xf = cuXF(), L = CU_LICH[CU.i], N = CU_LICH[CU.i + 1]; return xf && L && N && N[1] && N[1] !== L[1] ? xf : 0; }
+function cuAuFade(o) { const t0 = performance.now(), v0 = o.volume, ms = cuXF() ? cuXF() * 1000 : 1400; const iv = setInterval(() => { try { const u = Math.min(1, (performance.now() - t0) / ms); o.volume = cuXF() ? v0 * Math.cos(u * Math.PI / 2) : v0 * (1 - u) * (1 - u); if (u >= 1 || !S.sound || S.chuyen || S.cat || !laCU(GIA().id)) { o.pause(); clearInterval(iv); } } catch (e) { clearInterval(iv); } }, 40); } // 17/11 Quỳnh: nối nhạc giữa các bước cho mượt — bài cũ nhỏ dần 1,4 giây
+function cuAuPlay(key, at) { let a = CU.au; if (!a) return; try { let vao = false; if (CU.auKey !== key) { const nx = CU.auNx && CU.auNx.key === key && CU.auNx.m === CUM ? CU.auNx.el : null; CU.auNx = null; if (CU.auKey && !a.paused && !a.muted && !(typeof IOS_VOL !== 'undefined' && IOS_VOL)) { cuAuFade(a); a = CU.au = nx || new Audio(); a.preload = 'auto'; vao = true; } else if (nx) { try { a.pause(); } catch (e) {} a = CU.au = nx; } if (!nx) a.src = auSrc(CU_AU[key] + (cuMoi() ? '?v=1' : OMU ? '?v=' + OM_AU_V : '?v=2')); CU.auKey = key; } if (Math.abs((a.currentTime || 0) - at) > .4) a.currentTime = at; a.muted = !S.sound; a.volume = vao ? 0 : .9; const p = a.play(); if (p && p.catch) p.catch(() => {});
+  if (vao) { const t0 = performance.now(), el = a, ms = cuXF() ? 1600 : 1000; const iv = setInterval(() => { try { const u = Math.min(1, (performance.now() - t0) / ms); if (CU.au !== el) { clearInterval(iv); return; } el.volume = .9 * u; if (u >= 1) clearInterval(iv); } catch (e) { clearInterval(iv); } }, 40); } } catch (e) {} } // bài mới to dần 1 giây
 function cuVao(i) { const L = CU_LICH[i]; if (!L) return; CU.i = i; CU.kLast = L[7] && L[7][0] ? L[7][0][1] : null; CU.kbPrev = null; CU.xy = L[5] === 'xuyen' ? { ph: 'walk', m: false, init: true } : null; CU.cue = 0; CU.cueClip = null; CU.t = L[2]; CU.lap = 0; CU.tgPrev = null; CU.vaiN = 0; CU.thPrev = null; const [, au, a, , clip, kieu, chu] = L;
   // nhạc nối liền: cùng file và đoạn sau nối tiếp đoạn trước thì không tua
   if (au) { if (CU.auKey === au && !CU.au.paused && Math.abs(CU.au.currentTime - a) < 1.5) {} else cuAuPlay(au, a); } else { try { CU.au.pause(); } catch (e) {} }
+  { const N = CU_LICH[i + 1]; if (cuXF() && N && N[1] && N[1] !== au && CU_AU[N[1]]) { const el = new Audio(); el.preload = 'auto'; el.src = auSrc(CU_AU[N[1]] + '?v=1'); try { el.load(); } catch (e) {} CU.auNx = { key: N[1], m: CUM, el }; } } /* tải sẵn nhạc bước sau để nối không bị hụt */
   if (!clip) { const o = CU.v[CU.cur]; if (o) try { o.pause(); } catch (e) {} CU.chu = chu; return; }
   const v = CU.v[clip]; if (v) { v.loop = kieu === 'lap' || kieu === 'di'; const dai = L[3] - L[2]; v.playbackRate = v.defaultPlaybackRate = kieu === 'vua' && v.duration && dai > 0 ? clamp(v.duration / dai, .4, 1) : (CU_RATE[clip] || 1) * (/^(chaulu|cobo)$/.test(GIA().id) && /^(phatloc|tientung|loctung)$/.test(L[0]) ? .9 : 1); } /* 11:52: Chầu Lục, Cô Bơ phát lộc chậm 10% */
   if (CU.cur !== clip || kieu !== 'lap') cuPlay(clip, 0);
@@ -1289,7 +1292,7 @@ function cuStep(dt) {
     if (nhacChay) CU.t = a.currentTime; else { CU.t += dt; if (au && a && a.paused && !a.ended && CU.st > 1 && !(CU.retry > performance.now())) { CU.retry = performance.now() + 2000; cuAuPlay(au, CU.t); } }
     const v = CU.v[CU.cueClip || clip];
     if (L[0] === 'thinh') { // văn thỉnh hát 3 lượt, cô trùm khăn lắc lư, làm dấu
-      const het = (a && a.ended) || (!nhacChay && CU.t >= 15.1);
+      const xfT = CU.lap + 1 >= ((QM[CUM] && QM[CUM].LAP) || CU_LAP) ? cuXFNext() : 0, het = (a && a.ended) || (!nhacChay && CU.t >= 15.1) || (xfT && nhacChay && a.duration && CU.t >= a.duration - xfT);
       if (het) { CU.lap++; if (CU.lap >= ((QM[CUM] && QM[CUM].LAP) || CU_LAP)) cuTiep(); else { CU.t = 0; cuAuPlay('thinh', 0); try { a.currentTime = 0; } catch (e) {} } } }
     else if (L[0] === 'tungkhan') { if (v && (v.ended || (v.duration && v.currentTime >= v.duration - .06)) || CU.st > 12) cuTiep(); }
     else {
@@ -1304,14 +1307,15 @@ function cuStep(dt) {
         else if (X.ph === 't2' && ct >= CU_QUAY.q2[1]) { X.ph = 'walk'; try { v.currentTime = CU_QUAY.di[0]; } catch (e) {} } }
       if (kieu === 'vai' && v && !CU.cueClip) { if (v.currentTime > CU_VAI[0] && v.currentTime < CU_VAI[1]) try { v.currentTime = CU_VAI[1]; } catch (e) {} if (v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = CU_VAI[1]; } catch (e) {} cvPlay(v); } }
       if (!CU.cueClip && v && !v.loop && kieu !== 'vai' && kieu !== 'xuyen' && v.duration && v.currentTime >= v.duration - .06) { if (kieu === 'ngoi' || kieu === 'ngoidi') { try { v.currentTime = L[9] != null ? L[9] : 3.2; } catch (e) {} cvPlay(v); } else if (!v.paused) try { v.pause(); } catch (e) {} } // ngồi rồi thì lặp đoạn ngự tửu; còn lại giữ dáng cuối
-      if (CU.t >= den - .05 || (a && CU.auKey === au && a.ended && !L[10])) cuTiep(); // L[10] 'giu': hết nhạc vẫn chờ clip chạy hết
+      if (CU.t >= den - .05 - cuXFNext() || (a && CU.auKey === au && a.ended && !L[10])) cuTiep(); // L[10] 'giu': hết nhạc vẫn chờ clip chạy hết
     }
   }
   const vv = CU.v[CU.cur]; CU.st += dt; if (vv && vv.paused && !vv.ended && CU.st > .3 && !CU.hold && !(vv.duration && vv.currentTime >= vv.duration - .07)) cvPlay(vv);
-  if (vv && vv.readyState >= 2 && vv.currentTime !== CU.lastT) { try { if (vv.videoWidth && CU.buf.width !== vv.videoWidth) { CU.buf.width = vv.videoWidth; CU.buf.height = vv.videoHeight / 2; } cvGrabTo(vv, CU.buf); CU.lastT = vv.currentTime; CU.ok = true; CU.shown = CU.cur; } catch (e) {} }
+  if (vv && vv.readyState >= 2 && vv.currentTime !== CU.lastT) { try { if (vv.videoWidth && CU.buf.width !== vv.videoWidth) { CU.buf.width = vv.videoWidth; CU.buf.height = vv.videoHeight / 2; } if (cuXF() && CU.ok && CU.shown && CU.shown !== CU.cur) { if (!CU.fbuf) CU.fbuf = document.createElement('canvas'); CU.fbuf.width = CU.buf.width; CU.fbuf.height = CU.buf.height; CU.fbuf.getContext('2d').drawImage(CU.buf, 0, 0); CU.fade = { n: CU.shown, a: 1 }; } cvGrabTo(vv, CU.buf); CU.lastT = vv.currentTime; CU.ok = true; CU.shown = CU.cur; } catch (e) {} } /* 19/11 Quỳnh: hình nhân vật hoà dần sang động tác sau */
+  if (CU.fade) { CU.fade.a -= dt / .6; if (CU.fade.a <= 0 || !cuXF()) CU.fade = null; }
   return CU.ok;
 }
-window.__cu = () => ({ tx: Math.round(CO.tx), sit: +(CO.sit || 0).toFixed(2), vai: CU.vaiN, gia: GIA().id, i: CU.i, st: (CU_LICH[CU.i] || [''])[0], cur: CU.cur, ok: CU.ok, t: +CU.t.toFixed(1), au: CU.auKey, ap: CU.au ? CU.au.paused : null, lap: CU.lap, hold: CU.hold, x: Math.round(CO.x), dir: CU.dir, vt: CU.v[CU.cur] ? +CU.v[CU.cur].currentTime.toFixed(2) : null, cat: S.cat && S.cat.id }); window.__cuVao = i => cuVao(i); window.__cuSeek = (t, lap) => { try { CU.au.currentTime = t; } catch (e) {} CU.t = t; if (lap != null) CU.lap = lap; };
+window.__cu = () => ({ tx: Math.round(CO.tx), sit: +(CO.sit || 0).toFixed(2), vai: CU.vaiN, gia: GIA().id, i: CU.i, st: (CU_LICH[CU.i] || [''])[0], cur: CU.cur, ok: CU.ok, t: +CU.t.toFixed(1), au: CU.auKey, ap: CU.au ? CU.au.paused : null, lap: CU.lap, hold: CU.hold, x: Math.round(CO.x), dir: CU.dir, vt: CU.v[CU.cur] ? +CU.v[CU.cur].currentTime.toFixed(2) : null, cat: S.cat && S.cat.id }); window.__cuVao = i => cuVao(i); window.__cuL = i => CU_LICH[i]; window.__cuFa = () => (CU.fade ? +CU.fade.a.toFixed(2) : null); window.__cuSeek = (t, lap) => { try { CU.au.currentTime = t; } catch (e) {} CU.t = t; if (lap != null) CU.lap = lap; };
 let cuLastNow = performance.now();
 function cuDraw(t, x, y, sc) {
   const now = performance.now(), dt = Math.min(.1, (now - cuLastNow) / 1000); cuLastNow = now;
@@ -1328,7 +1332,8 @@ function cuDraw(t, x, y, sc) {
     const g = ctx.createLinearGradient(0, ty, 0, by); g.addColorStop(0, '#d23a2c'); g.addColorStop(1, '#a4241a'); quad(0); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#5e120c'; ctx.lineWidth = 1.2; ctx.stroke();
     quad(2.5); ctx.strokeStyle = '#e2b250'; ctx.lineWidth = Math.max(2.5, hw * .07); ctx.stroke(); quad(2.5 + Math.max(2.5, hw * .07)); ctx.strokeStyle = 'rgba(255,226,140,.55)'; ctx.lineWidth = 1; ctx.stroke();
     quad(2.5); ctx.save(); ctx.clip(); ctx.restore(); ctx.strokeStyle = 'rgba(150,30,20,.7)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); quad(2.5); ctx.stroke(); ctx.setLineDash([]); ctx.restore(); }
-  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); CU.mat = ctx.getTransform(); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
+  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); if (CU.fade && CU.fbuf) { const f = CU_TF[CU.fade.n] || tf; ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(f[1], f[2]); ctx.scale(f[0], f[0]); ctx.globalAlpha = CU.fade.a; ctx.drawImage(CU.fbuf, 0, 0, CV_W, CV_H); ctx.restore(); }
+  ctx.save(); ctx.translate(x, y); ctx.scale(fx, k); ctx.translate(-CV_FX, -CV_FY); ctx.translate(tf[1], tf[2]); ctx.scale(tf[0], tf[0]); CU.mat = ctx.getTransform(); if (CU.fade) ctx.globalAlpha = Math.min(1, 1.3 - CU.fade.a); ctx.drawImage(CU.buf, 0, 0, CV_W, CV_H); ctx.restore(); return true;
 }
 
 function obDraw(t, x, y, sc) {
