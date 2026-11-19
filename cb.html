@@ -193,7 +193,8 @@ function goTo(p, pts, then) { p.wp = pts.slice(); p.state = 'walk'; p.after = th
 function raVe(p) { // 18/11: con nhang đứng dậy đi ra khỏi điện (đi xuống dưới, ra khỏi khung hình)
   if (!p || p.ra) return; p.ra = true; if (p.seat) p.seat.who = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); p.giftQ = [];
   goTo(p, [[p.x, Math.max(p.y + 16, 1236)], [270 + (p.x < 270 ? -14 : 14), 1250], [270 + (p.x < 270 ? -14 : 14), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) { S.people.splice(i, 1); S.viewers--; } }); }
-setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.quen && !p.gia && p.name !== ME); if (ngoi.length < 12) return; const lau = ngoi.filter(p => S.t - (p.tAct || 0) > 150); if (lau.length) raVe(pick(lau)); } catch (e) {} }, 15000); // ai ngồi lâu không tương tác thì lần lượt ra về, chỗ trống cho người mới vào
+const NGOI_GIAY = 120;
+setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.quen && !p.gia && p.name !== ME); const lau = ngoi.filter(p => S.t - (p.tAct || 0) > NGOI_GIAY && p.state === 'seat'); lau.slice(0, 3).forEach((p, i) => setTimeout(() => { try { if (S.t - (p.tAct || 0) > NGOI_GIAY) raVe(p); } catch (e) {} }, i * 1200)); } catch (e) {} }, 5000); /* 19/11 11:09 anh Linh: mỗi người ngồi 2 phút nếu không tương tác, áp dụng cả khi vắng người */ // ai ngồi lâu không tương tác thì lần lượt ra về, chỗ trống cho người mới vào
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
