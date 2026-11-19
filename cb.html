@@ -157,7 +157,7 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   const pts = [];
   const zones = NH_MODE ? [[-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46]] /* 19/11 11:05 anh Linh: dịch người ngồi lên sát thảm (838 -> 783), không vượt dòng LƯU Ý */ : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < (NH_MODE ? 50 : 34) && tries++ < 12000) { /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
+  while (pts.length < (NH_MODE ? 34 : 34) && tries++ < 12000) { /* 19/11 11:46 live đông người xem thật, chiếu kín 50 người làm múa giật: giới hạn 34 chỗ */ /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
