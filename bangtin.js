@@ -102,11 +102,12 @@ window.BANG_TIN = {
     'Tương truyền Ông là vị tướng thời Hùng Vương, thống lĩnh quân thủy bộ, hy sinh trong một trận đánh; dân lập đền thờ khắp vùng sông nước',
     'Đền Lảnh Giang (Hà Nam) và đền Xích Đằng (Hưng Yên) là nơi thờ chính; tháng Sáu âm lịch là "tháng tiệc Thoải phủ"',
   ],
-  nguon_quanngu: 'Báo Pháp luật Việt Nam, "Về Đền Tranh cầu gì được nấy"',
+  nguon_quanngu: 'VOV2, "Đền Quan Lớn Tuần Tranh: Nơi lưu giữ giá trị văn hóa tín ngưỡng"',
   quanngu: [
-    'Quan Lớn Đệ Ngũ Tuần Tranh là vị thần sông nước, theo bài báo là quan nhà Trần từng nhậm chức tuần ở Ninh Giang',
-    'Tương truyền ở bến sông Tranh có rắn dữ quấy phá, bắt cả vợ quan; Ông kiện lên Long Vương, rắn thua phải dời đi, từ đó khúc sông yên bình',
-    'Đền Tranh ở xã Đồng Tâm, huyện Ninh Giang, Hải Dương, di tích quốc gia năm 2009; hội chính ngày 14 tháng Hai và 22 tháng Tám âm lịch',
+    'Quan Lớn Đệ Ngũ Tuần Tranh là vị thần sông nước, tương truyền là hoàng tử thứ năm của Vua Thủy Tề, được giao cai quản ngã ba sông Tranh',
+    'Vì một mối tình, Ông bị đày lên biên giới phía Bắc; để minh oan, Ông gieo mình xuống sông Kỳ Cùng (Lạng Sơn), thi hài trôi về bến đò Tranh',
+    'Dân lập đền thờ vì Ông phù trợ người buôn thuyền, bán bè. Đền Tranh ở xã Đồng Tâm, huyện Ninh Giang, Hải Dương, di tích quốc gia năm 2009',
+    'Lễ hội chính từ mùng 10 tháng Hai âm lịch, trọng hội ngày 14 tháng Hai, tương truyền là ngày sinh của Quan Lớn',
   ],
   nguon_caube: 'chonthieng.com, "Cậu Bé Bản Đền"',
   caube: [
