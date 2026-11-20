@@ -158,7 +158,7 @@ const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: 
   const pts = [];
   const zones = NH_MODE ? [[-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46]] /* 19/11 11:05 anh Linh: dịch người ngồi lên sát thảm (838 -> 783), không vượt dòng LƯU Ý */ : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < (NH_MODE ? 34 : 34) && tries++ < 12000) { /* 19/11 11:46 live đông người xem thật, chiếu kín 50 người làm múa giật: giới hạn 34 chỗ */ /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
+  while (pts.length < (NH_MODE ? 30 : 34) && tries++ < 12000) { /* 20/11 20:41 anh Linh: 30 chỗ ngồi chiếu */ /* 19/11 11:46 live đông người xem thật, chiếu kín 50 người làm múa giật: giới hạn 34 chỗ */ /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
@@ -178,7 +178,7 @@ function nguoiTam(name) { const lv = LVK[name] && LV[LVK[name]] ? lvOf(LV[LVK[na
 function raTam(p) { if (!p || !p.tam) return false; goTo(p, [[p.x, 1250], [270 + (p.x < 270 ? -14 : 14), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) S.people.splice(i, 1); }); return true; }
 function ghostOf(name) { return { name, seat: { x: 270, y: 900, s: 1 }, x: 270, y: 900, state: 'ghost', pose: 'kneel', wp: [], q: [], ghost: true }; }
 function person(name, tao) {
-  let p = S.people.find(v => v.name === name && !v.ra); if (p) { if (!LUAT_MOI()) p.tAct = S.t; return p; }
+  let p = S.people.find(v => v.name === name && !v.ra); if (p && p.choDung && tao) { const e = HANG_CHO.find(x => x.name === name); if (e) e.t = S.t; return p; } if (p) { if (p.choDung) { const e = HANG_CHO.find(x => x.name === name); if (e) e.t = S.t; } if (!LUAT_MOI()) p.tAct = S.t; return p; }
   if (LUAT_MOI() && !tao) { const e = HANG_CHO.find(x => x.name === name); if (e) e.t = S.t; return ghostOf(name); } /* 20/11 anh Linh: chỉ share live mới được vào chiếu */
   const free = S.seats.filter(s => !s.who); if (!free.length && LUAT_MOI()) { const gia = S.people.find(v => v.gia && !v.ra && v.state === 'seat'); if (gia) { raVe(gia); return person(name, tao); } choVao(name); return ghostOf(name); } /* con nhang giả nhường chỗ; hết chỗ thì xếp hàng chờ */
   if (!free.length) { const old = S.people.filter(v => v.state === 'seat' && !v.ra && !v.quen && !v.hoaMa).sort((a, b) => (a.tAct || 0) - (b.tAct || 0))[0] || S.people.find(v => v.state === 'seat' && !v.ra && !v.hoaMa) || S.people.find(v => v.state !== 'xinloc' && !v.goingHuong && !v.ra && !v.hoaMa); /* 20/11: không đuổi người đang đi hoá mã */ if (!old) return { name, seat: { x: 270, y: 900, s: 1 }, state: 'ghost', pose: 'kneel', wp: [] }; if (NH_MODE) raVe(old); else { old.seat.who = null; S.people.splice(S.people.indexOf(old), 1); S.viewers--; } return person(name); }
@@ -203,8 +203,9 @@ function raVe(p) { // 18/11: con nhang đứng dậy đi ra khỏi điện (đi 
   if (!p || p.ra || p.hoaMa || p.goingHuong) return; p.ra = true; if (p.seat) p.seat.who = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); p.giftQ = [];
   goTo(p, [[p.x, Math.max(p.y + 16, 1236)], [270 + (p.x < 270 ? -14 : 14), 1250], [270 + (p.x < 270 ? -14 : 14), WY1 + 60]], () => { const i = S.people.indexOf(p); if (i >= 0) { S.people.splice(i, 1); S.viewers--; } }); }
 const NGOI_GIAY = 120;
-setInterval(() => { try { if (!LUAT_MOI()) return; for (let i = HANG_CHO.length - 1; i >= 0; i--) { const e = HANG_CHO[i]; if (S.t - e.t > 300 || S.people.some(v => v.name === e.name && !v.ra)) HANG_CHO.splice(i, 1); } /* chờ 5 phút không tương tác thì rời hàng */
-  if (!HANG_CHO.length || S.chuyen) return; if (S.seats.some(z => !z.who)) { const e = HANG_CHO.shift(); const p = person(e.name, true); if (p && !p.ghost) float(270, 1180, '🙏 ' + e.name + ' vào chiếu', '#f6dc96'); } else { const g = S.people.find(v => v.gia && !v.ra && v.state === 'seat'); if (g) raVe(g); } } catch (e) {} }, 1000); /* 20/11 anh Linh: có chỗ trống thì người đầu hàng chờ vào chiếu */
+setInterval(() => { try { if (!LUAT_MOI()) return; for (let i = HANG_CHO.length - 1; i >= 0; i--) { const e = HANG_CHO[i]; if (S.t - e.t > 300 || S.people.some(v => v.name === e.name && !v.ra && !v.choDung)) HANG_CHO.splice(i, 1); }
+  { const dau3 = HANG_CHO.slice(0, 3).map(e => e.name); S.people.slice().forEach(v => { if (v.choDung && !dau3.includes(v.name) && !v.hoaMa && !v.goingHuong) { const i = S.people.indexOf(v); if (i >= 0) S.people.splice(i, 1); } }); dau3.forEach((nm, k) => { const tx = 432 + k * 44, ty = 756; let v = S.people.find(q => q.name === nm && !q.ra); if (!v) { v = nguoiTam(nm); v.choDung = true; v.x = 270 + rnd(-14, 14); v.y = WY1 + 30; } if (v.choDung && !v.hoaMa && !v.goingHuong && v.state !== 'walk' && Math.hypot(v.x - tx, v.y - ty) > 2) goTo(v, v.y < 900 ? [[tx, ty]] : [[270 + rnd(-12, 12), 1236], [tx, ty]], () => { v.state = 'stand'; v.pose = 'stand'; }); }); } /* 20/11 20:41 anh Linh: 3 người đầu hàng chờ đứng dọc hàng lưu ý */ /* chờ 5 phút không tương tác thì rời hàng */
+  if (!HANG_CHO.length || S.chuyen) return; if (S.seats.some(z => !z.who)) { const e = HANG_CHO.shift(); const d = S.people.find(v => v.name === e.name && v.choDung && !v.hoaMa && !v.goingHuong); let x0 = null, y0 = null; if (d) { x0 = d.x; y0 = d.y; S.people.splice(S.people.indexOf(d), 1); } const p = person(e.name, true); if (p && !p.ghost) { if (x0 != null) { p.x = x0; p.y = y0; p.wp = [[p.seat.x, p.seat.y]]; } float(270, 1180, '🙏 ' + e.name + ' vào chiếu', '#f6dc96'); } } else { const g = S.people.find(v => v.gia && !v.ra && v.state === 'seat'); if (g) raVe(g); } } catch (e) {} }, 1000); /* 20/11 anh Linh: có chỗ trống thì người đầu hàng chờ vào chiếu */
 const HQ = []; let HQ_DANG = null; /* 20/11 anh Linh: dâng hương lần lượt từng người */
 setInterval(() => { try { if (HQ_DANG || !HQ.length || S.chuyen || !NH_MODE) return; const name = HQ.shift(); let p = S.people.find(v => v.name === name && !v.ra); if (p && p.state !== 'seat') return; const ngoi = !!p;
   if (!p) { const lv = LVK[name] && LV[LVK[name]] ? lvOf(LV[LVK[name]].xp) : 1; p = { name, coat: pick(COATS), sex: GIOI[name] || (Math.random() < .6 ? 'nu' : 'nam'), hairC: pick(['#1c120c', '#22160e', '#2e1d12']), seat: { x: 270, y: WY1 + 30, s: 1.3 }, x: 270 + rnd(-14, 14), y: WY1 + 30, tAct: S.t, state: 'enter', pose: 'walk', poseT: 0, wp: [], q: [], carry: null, lv, tam: true }; S.people.push(p); }
@@ -2787,7 +2788,7 @@ function drawTin(t) {
 const SAFE_X = 56;
 function drawOverlay(t) {
   { const ch = S.chuyen; if (ch && ch.toId === 'ongbay' && ch.t >= CG.thinh - .1 && OB.buf && !S.cat) { S.chuyen = null; CO.sit = 0; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); } catch (e) {} S.cat = { t: .6, id: 'ongbay', ten: 'Ông Hoàng Bảy' }; } }
-  if (NH_MODE) { drawLuuYChay(); drawNguoiCho(); } else drawLuuY(); if (S.cat) { drawCat(); }
+  if (NH_MODE) drawLuuYChay(); else drawLuuY(); /* 20/11 20:41: bỏ vòng tròn số người chờ */ if (S.cat) { drawCat(); }
   // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
   const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
   drawBangPhai();
