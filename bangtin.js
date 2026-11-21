@@ -90,6 +90,13 @@ window.BANG_TIN = {
     'Cô nổi tiếng giỏi chữa bệnh, thường vào rừng sâu hái thuốc quý cứu người',
     'Cung thờ cô ở cạnh đền Chầu Lục tại Lục Cung Chín Tư (Hữu Lũng, Lạng Sơn); khánh tiệc ngày 10 tháng Năm âm lịch',
   ],
+  nguon_chuanp: 'Báo Quốc tế (baoquocte.vn), "Độc đáo lễ khánh tiệc Chúa Bà Năm Phương"',
+  chuanp: [
+    'Theo GS.TS Ngô Đức Thịnh, Chúa Bà Năm Phương vốn là tiên nữ trên Thiên Đình giáng trần',
+    'Bà giáng sinh vào nhà họ Vũ ở vùng Cửa Cấm Giang, đất Gia Viên, nay thuộc Hải Phòng',
+    'Về trời, bà được giao cai quản năm phương trời đất nên được tôn xưng là Bà Chúa Quận Năm Phương; bà khuyên dân chăm làm ăn, trừng trị kẻ ngang ngược',
+    'Khánh tiệc Chúa Bà Năm Phương ngày 16 tháng Sáu âm lịch, lễ ở Hải Phòng đặc sắc hơn cả',
+  ],
   nguon_chuatb: 'Báo Pháp luật Việt Nam, "Chốn thiêng Thác Bờ trên dòng Đà Giang"',
   chuatb: [
     'Theo truyền thuyết, Bà Chúa Thác Bờ là tiên nữ hóa thân thành cô gái Mường tên Đinh Thị Vân',
