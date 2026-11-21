@@ -102,6 +102,7 @@ window.BANG_TIN = {
     'Chúa Lê Mại Đại Vương thuộc hàng Tam vị Chúa Mường, gắn với miền thượng ngàn',
     'Theo một quan điểm được đồng thầy Trần Văn Hải nêu, ngài là Sơn Trang Đệ Nhất, cai quản sơn lâm',
     'Tương truyền Lâm Cung Thánh Mẫu hiện thân ở Đông Cuông được vua Lê Lợi sắc phong là Lê Mại Đại Vương',
+    'Về Chúa Lê Mại có nhiều tích truyện và nhiều quan điểm khác nhau trong giới đồng đền, chưa thống nhất',
   ],
   nguon_chaudn: 'oancotam.com, "Sự tích, đền thờ và bản văn Chầu Đệ Nhị Thượng Ngàn"',
   chaudn: [
