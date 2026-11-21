@@ -83,6 +83,13 @@ window.BANG_TIN = {
     'Tương truyền năm 14 tuổi bà được Quỷ Cốc Tiên Sinh nhận làm con nuôi, truyền dạy chiêm tinh, bói toán; danh tiếng bà đến tai nhà vua',
     'Đền Nguyệt Hồ (Từ Linh Nguyệt Hồ) ở xã Hương Vĩ, huyện Yên Thế, Bắc Giang; khánh tiệc hằng năm ngày 15 tháng Hai âm lịch',
   ],
+  nguon_cosau: 'chonthieng.com, "Cô Sáu Sơn Trang"',
+  cosau: [
+    'Cô Sáu Sơn Trang, còn gọi là Cô Sáu Lục Cung, là vị Thánh Cô thứ sáu trong hàng Tứ phủ Thánh Cô',
+    'Tương truyền cô là tiên nữ thương dân ốm đau nên xin giáng trần, sinh vào một gia đình người Nùng ở Hữu Lũng, Lạng Sơn',
+    'Cô nổi tiếng giỏi chữa bệnh, thường vào rừng sâu hái thuốc quý cứu người',
+    'Cung thờ cô ở cạnh đền Chầu Lục tại Lục Cung Chín Tư (Hữu Lũng, Lạng Sơn); khánh tiệc ngày 10 tháng Năm âm lịch',
+  ],
   nguon_chuatb: 'Báo Pháp luật Việt Nam, "Chốn thiêng Thác Bờ trên dòng Đà Giang"',
   chuatb: [
     'Theo truyền thuyết, Bà Chúa Thác Bờ là tiên nữ hóa thân thành cô gái Mường tên Đinh Thị Vân',
