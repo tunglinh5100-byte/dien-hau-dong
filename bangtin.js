@@ -97,6 +97,19 @@ window.BANG_TIN = {
     'Về trời, bà được giao cai quản năm phương trời đất nên được tôn xưng là Bà Chúa Quận Năm Phương; bà khuyên dân chăm làm ăn, trừng trị kẻ ngang ngược',
     'Khánh tiệc Chúa Bà Năm Phương ngày 16 tháng Sáu âm lịch, lễ ở Hải Phòng đặc sắc hơn cả',
   ],
+  nguon_chualm: 'phuday.com, "Tam vị Chúa Mường là những ai?"',
+  chualm: [
+    'Chúa Lê Mại Đại Vương thuộc hàng Tam vị Chúa Mường, gắn với miền thượng ngàn',
+    'Theo một quan điểm được đồng thầy Trần Văn Hải nêu, ngài là Sơn Trang Đệ Nhất, cai quản sơn lâm',
+    'Tương truyền Lâm Cung Thánh Mẫu hiện thân ở Đông Cuông được vua Lê Lợi sắc phong là Lê Mại Đại Vương',
+  ],
+  nguon_chaudn: 'oancotam.com, "Sự tích, đền thờ và bản văn Chầu Đệ Nhị Thượng Ngàn"',
+  chaudn: [
+    'Chầu Đệ Nhị Thượng Ngàn là vị Chầu thứ hai trong Thập nhị Chầu Bà, cai quản sơn lâm thượng ngàn',
+    'Tương truyền bà là Đông Quang Công Chúa, ở lại Đông Cuông dạy dân lập bản, trồng trọt, chăn nuôi, chữa bệnh',
+    'Bà phù trợ thuyền bè qua sông Thao, cai quản 36 động sơn trang',
+    'Đền chính là đền Đông Cuông (Văn Yên, Yên Bái cũ); tiệc Chầu ngày 2 tháng Mười Một âm lịch',
+  ],
   nguon_chuatb: 'Báo Pháp luật Việt Nam, "Chốn thiêng Thác Bờ trên dòng Đà Giang"',
   chuatb: [
     'Theo truyền thuyết, Bà Chúa Thác Bờ là tiên nữ hóa thân thành cô gái Mường tên Đinh Thị Vân',
