@@ -1178,15 +1178,15 @@ QM.cs = { id: 'cosau', LAP: 1, AU: CS_AU, SRC: n => /^(thinh|tungkhan)$/.test(n)
   BUOC: ['Thỉnh Cô', 'Thay khăn áo', 'Bái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Phát lộc', 'Ngự trà', 'Xe giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, baisai: 3, khaiquang: 4, muamoi: 5, tungtien: 6, locqua: 6, loctung: 6, uongnuoc: 7, segia0: 8, segia: 8 }, /* 21/11 Quỳnh sửa chữ trên thanh timeline theo cột Quy trình: Bái hương, Dâng nhang; giỏ hoa, phát quả gộp vào Phát lộc */
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.67, 54.1, 211.0], "vaihuong": [0.696, 43.6, 151.8], "baisai": [0.746, 34.3, 135.7], "khaiquang": [0.713, 62.5, 146.9], "muamoi": [0.716, 39.8, 157.4], "tungtien": [0.722, 37.9, 147.0], "locqua": [0.781, 30.4, 130.6], "loctung": [0.708, 41.3, 156.0], "uongnuoc": [0.593, 65.4, 221.0], "segia": [0.682, 52.5, 220.0]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 103, "vaihuong": 62, "baisai": 79, "khaiquang": 67, "muamoi": 52, "tungtien": 66, "locqua": 82, "loctung": 55, "uongnuoc": 99, "segia": 88}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: {}, XF: 2.5 };
 QX.cosau = 'cs';
-/* 21/11 17:15 anh Linh: giá Chúa Bà Năm Phương (clip Tú cbnp_02…09 tách nền, văn Quỳnh cbnp_01…09) trên /tn */
-const NP_AU = { thinh: 'np/cbnp_01_van_thinh.mp3', thay: 'np/cbnp_02_nhac_thay-khan-ao.mp3', vai: 'np/cbnp_03_van_vai-huong.mp3', dang: 'np/cbnp_04_van_dang-nhang.mp3', khai: 'np/cbnp_05_nhac_khai-quang.mp3', tien: 'np/cbnp_07_nhac_tung-tien.mp3', uong: 'np/cbnp_08_van_uong-ruou.mp3', segia: 'np/cbnp_09_van_se-gia.mp3' };
+/* 21/11 18:07 Quỳnh cắt lại văn 04 dâng nhang, 05 khai quang, 07 tung tiền (_v2) */ /* 21/11 17:15 anh Linh: giá Chúa Bà Năm Phương (clip Tú cbnp_02…09 tách nền, văn Quỳnh cbnp_01…09) trên /tn */
+const NP_AU = { thinh: 'np/cbnp_01_van_thinh.mp3', thay: 'np/cbnp_02_nhac_thay-khan-ao.mp3', vai: 'np/cbnp_03_van_vai-huong.mp3', dang: 'np/cbnp_04_van_dang-nhang_v2.mp3', khai: 'np/cbnp_05_nhac_khai-quang_v2.mp3', tien: 'np/cbnp_07_nhac_tung-tien_v2.mp3', uong: 'np/cbnp_08_van_uong-ruou.mp3', segia: 'np/cbnp_09_van_se-gia.mp3' };
 QM.np = { id: 'chuanp', LAP: 1, AU: NP_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'np/np-' + n + '.mp4?v=1', LICH: [
   ['thinh', 'thinh', 0, 19.8, 'thinh', 'lap', ''], ['tungkhan', 'thay', 0, 5.4, 'tungkhan', 'vua', ''],
   ['thayao', 'thay', 5.4, 96.8, 'thayao', 'ngoi', '', null, null, 6.0] /* clip Tú: áo trắng hoá áo Chúa, không có hầu dâng */,
   ['vaihuong', 'vai', 0, 22.8, 'vaihuong', 'vua', ''],
-  ['dangnhang', 'dang', 0, 35.8, 'dangnhang', 'di', ''],
-  ['khaiquang', 'khai', 0, 26.8, 'khaiquang', 'di', ''],
-  ['tungtien', 'tien', 0, 231.8, 'tungtien', 'di', '', null, [3.0, 'tien']],
+  ['dangnhang', 'dang', 0, 60.8, 'dangnhang', 'di', ''],
+  ['khaiquang', 'khai', 0, 66.8, 'khaiquang', 'di', ''],
+  ['tungtien', 'tien', 0, 171.8, 'tungtien', 'di', '', null, [3.0, 'tien']],
   ['uongruou', 'uong', 0, 74.8, 'uongruou', 'lap', ''],
   ['segia0', 'segia', 0, 4, 'uongruou', 'lap', ''], ['segia', 'segia', 4, 11.8, 'segia', 'vua', '', null, null, null, 'giu']],
   BUOC: ['Thỉnh Chúa', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Phát lộc', 'Ngự tửu', 'Se giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, tungtien: 5, uongruou: 6, segia0: 7, segia: 7 },
