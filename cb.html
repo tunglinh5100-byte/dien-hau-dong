@@ -1207,8 +1207,8 @@ QM.lm = { id: 'chualm', LAP: 1, AU: LM_AU, SRC: n => /^(thinh|tungkhan)$/.test(n
   BUOC: ['Thỉnh Chúa', 'Thay khăn áo', 'Vái hương', 'Dâng nhang', 'Khai quang', 'Múa mồi', 'Phát lộc', 'Ngự tửu', 'Se giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, dangnhang: 3, khaiquang: 4, muamoi: 5, tungtien: 6, uongruou: 7, segia0: 8, segia: 8 },
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.642, 64.3, 197.8], "vaihuong": [0.748, 40.4, 135.2], "dangnhang": [0.765, 55.1, 136.4], "khaiquang": [0.738, 45.9, 152.6], "muamoi": [0.786, 42.4, 127.8], "tungtien": [0.867, 67.5, 87.5], "uongruou": [0.681, 50.7, 194.9], "segia": [0.632, 56.3, 213.9]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 162, "vaihuong": 80, "dangnhang": 76, "khaiquang": 57, "muamoi": 85, "tungtien": 124, "uongruou": 125, "segia": 104}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .75 }, XF: 2.5 };
 QX.chualm = 'lm';
-/* 21/11 17:39 anh Linh: giá Chầu Đệ Nhị (clip Tú cdnhi_02…10; clip 05 khai quang từ giây 3,4 bị mất khăn sau lưng → chỉ dùng 0–3,3s chạy đi chạy lại; văn Quỳnh cdnhi_01…08). TẠM: uống rượu, se giá chưa có văn 09, 10 → để im lặng, thay khi Quỳnh up */
-const C2_AU = { thinh: 'c2/cdnhi_01_van_thinh.mp3', thay: 'c2/cdnhi_02_nhac_thay-khan-ao.mp3', vai: 'c2/cdnhi_03_nhac_vai-huong.mp3', sai: 'c2/cdnhi_04_nhac_bai-sai.mp3', khai: 'c2/cdnhi_05_nhac_khai-quang.mp3', moi: 'c2/cdnhi_06_nhac_mua-moi.mp3', tien: 'c2/cdnhi_07_van_tung-tien.mp3', loc: 'c2/cdnhi_08_van_tung-loc.mp3', uong: 'c2/cdnhi_09_tam-im-lang.mp3', segia: 'c2/cdnhi_10_tam-im-lang.mp3' };
+/* 21/11 17:39 anh Linh: giá Chầu Đệ Nhị (clip Tú cdnhi_02…10; clip 05 khai quang từ giây 3,4 bị mất khăn sau lưng → chỉ dùng 0–3,3s chạy đi chạy lại; văn Quỳnh cdnhi_01…08). 21/11 17:59 Quỳnh up văn 09, 10 */
+const C2_AU = { thinh: 'c2/cdnhi_01_van_thinh.mp3', thay: 'c2/cdnhi_02_nhac_thay-khan-ao.mp3', vai: 'c2/cdnhi_03_nhac_vai-huong.mp3', sai: 'c2/cdnhi_04_nhac_bai-sai.mp3', khai: 'c2/cdnhi_05_nhac_khai-quang.mp3', moi: 'c2/cdnhi_06_nhac_mua-moi.mp3', tien: 'c2/cdnhi_07_van_tung-tien.mp3', loc: 'c2/cdnhi_08_van_tung-loc.mp3', uong: 'c2/cdnhi_09_van_uong-ruou.mp3', segia: 'c2/cdnhi_10_van_se-gia.mp3' };
 QM.c2 = { id: 'chaudn', LAP: 1, AU: C2_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'c2/c2-' + n + '.mp4?v=1', LICH: [
   ['thinh', 'thinh', 0, 19.8, 'thinh', 'lap', ''], ['tungkhan', 'thay', 0, 5.4, 'tungkhan', 'vua', ''],
   ['thayao', 'thay', 5.4, 36.8, 'thayao', 'ngoi', '', null, null, 5.5],
@@ -1218,8 +1218,8 @@ QM.c2 = { id: 'chaudn', LAP: 1, AU: C2_AU, SRC: n => /^(thinh|tungkhan)$/.test(n
   ['muamoi', 'moi', 0, 83.8, 'muamoi', 'di', ''],
   ['tungtien', 'tien', 0, 163.8, 'tungtien', 'di', '', null, [3.0, 'tien']],
   ['loctung', 'loc', 0, 148.8, 'loctung', 'di', '', null, [2.5, 'qua']],
-  ['uongruou', 'uong', 0, 89.8, 'uongruou', 'lap', ''],
-  ['segia0', 'segia', 0, 8, 'uongruou', 'lap', ''], ['segia', 'segia', 8, 15.8, 'segia', 'vua', '', null, null, null, 'giu']],
+  ['uongruou', 'uong', 0, 144.8, 'uongruou', 'lap', ''],
+  ['segia0', 'segia', 0, 35, 'uongruou', 'lap', ''], ['segia', 'segia', 35, 42.8, 'segia', 'vua', '', null, null, null, 'giu']],
   BUOC: ['Thỉnh Chầu', 'Thay khăn áo', 'Vái hương', 'Bài sai', 'Khai quang', 'Múa mồi', 'Tung tiền', 'Tung lộc', 'Uống rượu', 'Se giá'], K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, baisai: 3, khaiquang: 4, muamoi: 5, tungtien: 6, loctung: 7, uongruou: 8, segia0: 9, segia: 9 },
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.57, 76.0, 250.9], "vaihuong": [0.677, 48.0, 175.4], "baisai": [0.754, 53.5, 136.5], "khaiquang": [0.717, 55.4, 154.1], "muamoi": [0.735, 51.6, 150.5], "tungtien": [0.705, 64.1, 153.4], "loctung": [0.723, 41.4, 150.2], "uongruou": [0.669, 53.9, 215.8], "segia": [0.622, 61.7, 227.1]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 52, "vaihuong": 29, "baisai": 77, "khaiquang": 57, "muamoi": 60, "tungtien": 59, "loctung": 62, "uongruou": 96, "segia": 85}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .75 }, XF: 2.5 };
 QX.chaudn = 'c2';
