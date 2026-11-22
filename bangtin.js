@@ -129,6 +129,14 @@ window.BANG_TIN = {
     'Đền thờ chính là đền Đồng Bằng, thôn Đồng Phúc, xã An Lễ, huyện Quỳnh Phụ, Thái Bình',
     'Lễ đản sinh của Quan ngày 10 tháng Giêng, lễ đản nhật ngày 24 tháng Tám âm lịch',
   ],
+  nguon_quannhi: 'phuday.com, "Quan lớn Đệ Nhị Giám Sát"',
+  quannhi: [
+    'Quan Lớn Đệ Nhị Giám Sát, còn gọi là Đệ Nhị Thượng Ngàn, đứng thứ hai trong Ngũ vị Tôn Quan, được giao giám sát, cai quản miền sơn lâm thượng ngàn',
+    'Tương truyền ngài là con trai thứ hai của Vua Cha Bát Hải Động Đình; khi dân gặp hạn hán cầu đảo, ngài ban mưa thuận gió hòa',
+    'Khi ngự đồng, ngài mặc áo xanh thêu rồng, thường múa kiếm',
+    'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ngài được thờ ở đền Quan Giám (Hữu Lũng, Lạng Sơn), đền Quan ở Phố Cát (Thanh Hóa), một đền ở Thái Bình gần đền Đồng Bằng, và ở ban Công Đồng các đền phủ',
+    'Khánh tiệc của ngài vào tháng Mười Một âm lịch (tài liệu ghi ngày 10 hoặc 11, chưa thống nhất)',
+  ],
   nguon_quantam: 'Báo Pháp luật Việt Nam, "Huyền tích về Quan Lớn Đệ Tam và ngôi đền thiêng bên bờ Lục Đầu"',
   quantam: [
     'Quan Lớn Đệ Tam là vị thần đứng đầu Thoải phủ (sông nước), tương truyền là con trai thứ ba của Vua Cha Bát Hải Động Đình',
