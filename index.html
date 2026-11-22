@@ -155,17 +155,17 @@ const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').repla
 const S = { flying: [], noteChoice: -1, t: 0, seats: [], people: [], particles: [], comments: [], floats: [], money: [], likes: 0, goal: 100, goalHits: 0, merit: {},
   banner: null, viewers: 0, auto: !/[?&]sim=0/.test(location.search), /* /tn: sim=0 tắt hẳn giả lập ngay từ đầu (anh Linh 14/11) */ sound: false, danceSpecial: 0, throwT: 0, giving: 0, glow: 0 };
 (function buildSeats() { // scattered, no rows: rejection sampling with min spacing
-  const pts = [];
-  const zones = NH_MODE ? [[-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46], [-80, 620, 783, 1159, 46]] /* 19/11 11:05 anh Linh: dịch người ngồi lên sát thảm (838 -> 783), không vượt dòng LƯU Ý */ : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
+  const pts = [], NCHO = Math.max(20, Math.min(60, +(new URLSearchParams(location.search).get('cho')) || 45)), KC = NCHO > 30 ? Math.sqrt(30 / NCHO) : 1; /* 22/11 15:08 anh Linh: thử tăng chỗ ngồi ?cho=45 */
+  const YM = NCHO > 30 ? 1205 : 1159, zones = NH_MODE ? [[-80, 620, 783, YM, 46], [-80, 620, 783, YM, 46], [-80, 620, 783, YM, 46]] /* 22/11: thêm chỗ thì dùng cả phần dưới chiếu */ /* 19/11 11:05 anh Linh: dịch người ngồi lên sát thảm (838 -> 783), không vượt dòng LƯU Ý */ : [[30, 520, 728, 900, 46], [190, 230, 728, 760, 999], [400, 530, 650, 700, 999]];
   let tries = 0;
-  while (pts.length < (NH_MODE ? 30 : 34) && tries++ < 12000) { /* 20/11 20:41 anh Linh: 30 chỗ ngồi chiếu */ /* 19/11 11:46 live đông người xem thật, chiếu kín 50 người làm múa giật: giới hạn 34 chỗ */ /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
+  while (pts.length < (NH_MODE ? NCHO : 34) && tries++ < 20000) { /* 20/11 20:41 anh Linh: 30 chỗ ngồi chiếu */ /* 19/11 11:46 live đông người xem thật, chiếu kín 50 người làm múa giật: giới hạn 34 chỗ */ /* 13:25 anh Linh: tăng chỗ ngồi chiếu (28 -> 38) */ /* 18/11 11:55 anh Linh: giới hạn 28 người ngồi chiếu cho đỡ giật */
     const z = Math.random() < .86 ? zones[0] : pick([zones[1], zones[2]]);
     const x = rnd(z[0], z[1]), y = rnd(z[2], z[3]);
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
     if (Math.abs(x - 270) < 34) continue; // lối đi giữa
     if (/[?&]hm=1/.test(location.search) && x < 40 && y < 900) continue; // chừa chỗ lầu hoá mã
-    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 64 : 52))) continue;
-    pts.push({ x, y, truoc: NH_MODE && y < 870, /* 19/11: dải gần sập dành người tương tác nhiều thu hẹp lại (950 -> 870) để mọi người ngồi lên sát thảm */ s: (NH_MODE ? 1.3 : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
+    if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 64 * KC : 52))) continue;
+    pts.push({ x, y, truoc: NH_MODE && y < 870, /* 19/11: dải gần sập dành người tương tác nhiều thu hẹp lại (950 -> 870) để mọi người ngồi lên sát thảm */ s: (NH_MODE ? 1.3 * Math.pow(KC, .6) : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
   }
   S.seats = pts;
 })();
@@ -2601,7 +2601,7 @@ function drawTrays(t) {
 }
 
 // ---------- Con nhang (back view) ----------
-const VS_ON = !/[?&]vs=0/.test(location.search) && /[?&]vs=1/.test(location.search); let VS_VE = false; const VSC = new Map(); let VS_MOI = 0;
+const VS_ON = !/[?&]vs=0/.test(location.search); /* 22/11 15:08: bật vẽ sẵn con nhang mặc định cho nhẹ khi đông người */ let VS_VE = false; const VSC = new Map(); let VS_MOI = 0;
 function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 30 ? 3 : vS >= 10 ? 2 : vS >= 5 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0, JSON.stringify(NV[nm] || '')].join('|'); }
 function vsVe(p, t, s, lv, rot) { if (p.state !== 'seat' || p.pose !== 'kneel' || p.carry || (p.nc != null && S.t - p.nc < CHU_NHAN) || p.hd || p.tam) return false;
   const k = vsKhoa(p, s, lv); let c = VSC.get(k);
