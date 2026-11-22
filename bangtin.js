@@ -39,6 +39,7 @@ window.BANG_TIN = {
     'Giá văn Cô Đôi Thượng Ngàn có lời cổ, thuộc những giá hầu văn nổi tiếng',
     'Các vị Thánh thuộc hệ thống Tứ phủ, trong đó Mẫu Liễu Hạnh ở vị trí trung tâm. Nghi lễ hầu đồng có các giá hầu nam thần và nữ thần',
     'Âm nhạc chầu văn là phần cốt lõi của nghi lễ hầu đồng',
+    'Nơi thờ chính của Cô Đôi Thượng Ngàn có nhiều tích, chưa xác định chính xác; Cô được phối thờ ở các đền, phủ thờ Mẫu Thượng Ngàn',
     'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
     'Tín ngưỡng thờ Mẫu Tam Tứ Phủ là sự kết hợp giữa tín ngưỡng bản địa của người Việt với một số yếu tố của Đạo giáo và Phật giáo',
   ],
@@ -71,11 +72,13 @@ window.BANG_TIN = {
     'Hằng năm có lễ rước Thánh Mẫu từ đền Sòng Sơn sang đền Cô Chín Giếng, tái hiện tích "chị đến thăm em"; tiệc chính của Cô là mùng 9 tháng 9 âm lịch',
   ],
   // 19/11 19:10 anh Linh: sự tích các giá mới trên /g
-  nguon_tamtoa: 'Báo Nhân Dân (nhandan.vn); Vietcetera, "Mother Goddesses of the Three Palaces"',
+  nguon_tamtoa: 'Báo Nhân Dân (nhandan.vn); Vietcetera; Báo Lào Cai, "Linh thiêng đền Mẫu Đông Cuông"',
   tamtoa: [
     'Tam Tòa Thánh Mẫu là ba vị Thánh Mẫu đứng đầu điện thờ: Mẫu Thượng Thiên cai quản miền trời, Mẫu Thượng Ngàn cai quản núi rừng, Mẫu Thoải cai quản sông nước',
     'Thánh Mẫu được tôn thờ như người mẹ che chở, ban phúc lộc, sức khỏe và bình an cho con nhang đệ tử',
     'Thực hành tín ngưỡng thờ Mẫu Tam phủ của người Việt đã được UNESCO ghi danh là Di sản văn hóa phi vật thể đại diện của nhân loại',
+    'Nơi thờ: Phủ Dày (Vụ Bản, Nam Định cũ) là trung tâm thờ Mẫu lớn nhất; Mẫu Thượng Ngàn được thờ chính ở đền Bắc Lệ (Lạng Sơn), đền Đông Cuông (Yên Bái cũ)',
+    'Riêng nơi thờ chính của Mẫu Thoải có nhiều tích, chưa xác định chính xác; Mẫu được phối thờ ở các đền, phủ thờ Mẫu khắp nơi',
   ],
   nguon_chuanh: 'tinnguongthomauvietnam.com, "Chúa Đệ Nhị Nguyệt Hồ"',
   chuanh: [
@@ -90,12 +93,13 @@ window.BANG_TIN = {
     'Cô nổi tiếng giỏi chữa bệnh, thường vào rừng sâu hái thuốc quý cứu người',
     'Cung thờ cô ở cạnh đền Chầu Lục tại Lục Cung Chín Tư (Hữu Lũng, Lạng Sơn); khánh tiệc ngày 10 tháng Năm âm lịch',
   ],
-  nguon_chuanp: 'Báo Quốc tế (baoquocte.vn), "Độc đáo lễ khánh tiệc Chúa Bà Năm Phương"',
+  nguon_chuanp: 'Báo Quốc tế (baoquocte.vn); Sun Paradise Land, "Đền Bà Chúa Năm Phương Hải Phòng"',
   chuanp: [
     'Theo GS.TS Ngô Đức Thịnh, Chúa Bà Năm Phương vốn là tiên nữ trên Thiên Đình giáng trần',
     'Bà giáng sinh vào nhà họ Vũ ở vùng Cửa Cấm Giang, đất Gia Viên, nay thuộc Hải Phòng',
     'Về trời, bà được giao cai quản năm phương trời đất nên được tôn xưng là Bà Chúa Quận Năm Phương; bà khuyên dân chăm làm ăn, trừng trị kẻ ngang ngược',
     'Khánh tiệc Chúa Bà Năm Phương ngày 16 tháng Sáu âm lịch, lễ ở Hải Phòng đặc sắc hơn cả',
+    'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ở Hải Phòng bà được thờ tại đền Cấm, đền Tiên Nga (phố Lê Lợi), đền Cây Đa 13 Gốc, phường Ngô Quyền',
   ],
   nguon_chualm: 'phuday.com, "Tam vị Chúa Mường là những ai?"',
   chualm: [
@@ -103,6 +107,7 @@ window.BANG_TIN = {
     'Theo một quan điểm được đồng thầy Trần Văn Hải nêu, ngài là Sơn Trang Đệ Nhất, cai quản sơn lâm',
     'Tương truyền Lâm Cung Thánh Mẫu hiện thân ở Đông Cuông được vua Lê Lợi sắc phong là Lê Mại Đại Vương',
     'Về Chúa Lê Mại có nhiều tích truyện và nhiều quan điểm khác nhau trong giới đồng đền, chưa thống nhất',
+    'Nơi thờ chính cũng có nhiều tích, chưa xác định chính xác; tích của ngài gắn với vùng Đông Cuông (Yên Bái cũ), ngài thường được phối thờ ở các đền, phủ thờ Mẫu',
   ],
   nguon_chaudn: 'oancotam.com, "Sự tích, đền thờ và bản văn Chầu Đệ Nhị Thượng Ngàn"',
   chaudn: [
@@ -142,6 +147,7 @@ window.BANG_TIN = {
     'Cậu Bé Bản Đền là vị Thánh Cậu coi sóc bản đền, bản điện, thuộc hàng Tứ Phủ Thánh Cậu, màu sắc đại diện là xanh',
     'Cậu thường hầu cận các Quan Hoàng hoặc ngự tại một bản đền; được thờ ở Lầu Cậu trong các đền, phủ thờ Mẫu',
     'Ngày tiệc của Cậu là mùng 7 tháng Ba âm lịch hằng năm',
+    'Nơi thờ: Cậu không có một đền chính được xác định; có nhiều tích khác nhau, Cậu được thờ ở Lầu Cậu của hầu hết các đền, phủ thờ Mẫu',
   ],
 };
 window.BANG_TIN.codoi2 = window.BANG_TIN.codoi; /* /g dùng Cô Đôi bản mới (id codoi2) */
