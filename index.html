@@ -175,13 +175,13 @@ const AO_MAU = [['xanh (la|la cay|luc|non|reu)', '#2f8a3c', 'xanh lá'], ['xanh 
 const AO_RE = new RegExp('(^|\\s)(doi |thay |mac |cho con |xin |con )?(ao|mau ao|khan ao|mau) (' + AO_MAU.map(m => m[0]).join('|') + ')(\\s|$|[.!?])');
 const AO_TAM = {}; /* người chưa có ID TikTok (thử) thì nhớ trong phiên */
 function aoTuCmt(n) { const m = n.trim().match(AO_RE); if (!m) return null; const w = m[4]; return AO_MAU.find(x => new RegExp('^(' + x[0] + ')$').test(w)) || null; }
-function aoLuu(name) { const r = LVK[name] && LV[LVK[name]]; return (r && r.ao) || AO_TAM[name] || null; }
-function doiAo(name, p, m) { const r = LVK[name] && LV[LVK[name]]; if (r) { r.ao = m[1]; lvDirty = true; } else AO_TAM[name] = m[1]; if (p && !p.ghost) { p.ao = m[1]; p.aoT = S.t; for (let i = 0; i < 10; i++) S.particles.push({ x: p.x + rnd(-14, 14), y: p.y - rnd(20, 60), vx: rnd(-22, 22), vy: rnd(-40, -8), life: rnd(.8, 1.4), t: 0, kind: 'spark' }); float(p.x, p.y - 70, (String(name).startsWith('\u200b') ? 'Con nhang' : name) + ' mặc áo ' + m[2], '#f6dc96'); } }
+function aoLuu(name) { return AO_TAM[name] || null; } /* 22/11 14:09 anh Linh: màu áo, giới tính chỉ giữ trong phiên live, không lưu sang phiên sau */
+function doiAo(name, p, m) { AO_TAM[name] = m[1]; if (p && !p.ghost) { p.ao = m[1]; p.aoT = S.t; for (let i = 0; i < 10; i++) S.particles.push({ x: p.x + rnd(-14, 14), y: p.y - rnd(20, 60), vx: rnd(-22, 22), vy: rnd(-40, -8), life: rnd(.8, 1.4), t: 0, kind: 'spark' }); float(p.x, p.y - 70, (String(name).startsWith('\u200b') ? 'Con nhang' : name) + ' mặc áo ' + m[2], '#f6dc96'); } }
 const QUA_MOC = [[5, 'khăn vấn đỏ'], [10, 'quạt'], [30, 'áo gấm']];
 function mocTiep(v) { return QUA_MOC.find(m => m[0] > v) || null; }
 const CHAO = []; /* thẻ chào đích danh người quen quay lại */
 function chao(name, dong2, mau) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, name + ': ' + dong2, mau || '#f6dc96'); } /* 22/11: bỏ thẻ chào, chỉ hiện chữ nổi */
-const HD = { t: 270, i: -1, ti: 0, cau: [['Vào chiếu ngồi', 'share live'], ['Giữ chỗ ngồi', 'share · bình luận · thả tim'], ['Lên hàng đầu', '5 người tương tác nhiều nhất'], ['Đổi chỗ ngồi', 'gõ sang trái / sang phải'], ['Thay màu áo', 'gõ màu sắc muốn mặc'], ['Thay giới tính', 'gõ nam / nữ']] }; /* 22/11 12:00 anh Linh: cứ 5 phút hiện lần lượt từng câu hướng dẫn */
+const HD = { t: 270, i: -1, ti: 0, cau: [['Vào chiếu ngồi', 'share live'], ['Giữ chỗ ngồi', 'share · bình luận · thả tim'], ['Lên hàng đầu', '5 người tương tác nhiều nhất'], ['Đổi chỗ ngồi', 'gõ lên / xuống / sang trái / sang phải'], ['Thay màu áo', 'gõ màu sắc muốn mặc'], ['Thay màu quần, khăn', 'gõ quần đỏ / khăn tím'], ['Đổi tên hiển thị', 'gõ tên + tên mới'], ['Đổi màu tên', 'gõ màu tên + màu'], ['Thay giới tính', 'gõ nam / nữ']] }; /* 22/11 12:00 anh Linh: cứ 5 phút hiện lần lượt từng câu hướng dẫn */
 function drawHD(dt) { if (!NH_MODE) return; if (TK.on || S.ket) { HD.i = -1; return; } HD.t += dt; if (HD.i < 0) { if (HD.t >= 300 && !TK.on && !S.ket) { HD.i = 0; HD.ti = 0; HD.t = 0; } return; } HD.ti += dt; if (HD.ti > 6.5) { HD.i++; HD.ti = 0; if (HD.i >= HD.cau.length) { HD.i = -1; HD.t = 0; return; } }
   const [a1, a2] = HD.cau[HD.i], al = Math.min(1, HD.ti / .35, (6.5 - HD.ti) / .35), y = (LYC.y || 560) + 16 + (1 - Math.min(1, HD.ti / .35)) * 6; ctx.save(); ctx.globalAlpha = Math.max(0, al);
   ctx.font = `800 11px ${SERIF}`; const w1 = ctx.measureText(a1 + ':').width; ctx.font = `600 11px ${UI}`; const w = w1 + ctx.measureText(' ' + a2).width + 20, x = SAFE_X; /* 22/11 anh Linh: chữ nhỏ, lệch trái */
@@ -247,9 +247,26 @@ function person(name, tao) {
 const laVip = p => (p.share || 0) > 0 || (p.bl || 0) > 3 || (p.tim || 0) > 100 || (p.qua || 0) > 0;
 const duocGoi = p => (p.share || 0) > 0 || (p.bl || 0) > 0 || (p.tim || 0) >= 50 || (p.qua || 0) > 0; // 18/11 10:46 anh Linh: share, bình luận, 50 tim thì được gọi lên thảm giữa nhận lộc
 function diemTT(p) { return (p.bl || 0) + 3 * Math.max(0, (p.share || 0) - 1) /* lần share để vào chiếu không tính */ + (p.tim || 0) / 30 + 5 * (p.qua || 0); }
-function doiCho(p, dir) { if (!p || p.ghost || p.tam || p.ra || p.state !== 'seat' || !p.seat || p.seat.who !== p || p.hoaMa || p.goingHuong) return; const cu = p.seat, f5 = S.seats.slice().sort((a, b) => a.y - b.y).slice(0, 5), trongF5 = f5.includes(cu);
-  const ds = S.seats.filter(z => z !== cu && (!z.who || (z.who.gia && !z.who.ra && z.who.state === 'seat')) && Math.abs(z.y - cu.y) < 40 && (z.x - cu.x) * dir > 8 && (trongF5 || !f5.includes(z))).sort((a, b) => Math.abs(a.x - cu.x) - Math.abs(b.x - cu.x));
-  const ns = ds[0]; if (!ns) { float(p.x, p.y - 60, 'Bên ' + (dir > 0 ? 'phải' : 'trái') + ' hết chỗ', '#f6dc96'); return; } if (ns.who) raVe(ns.who); cu.who = null; ns.who = p; p.seat = ns; p.tAct = S.t; goTo(p, [[p.x, p.y - 4], [ns.x, ns.y]]); }
+const NV = {}; /* tuỳ chỉnh nhân vật trong phiên: màu quần, màu khăn, tên hiển thị, màu tên */
+function tenHien(n) { return (NV[n] && NV[n].nick) || n; }
+function mauTu(t) { t = String(t || '').trim(); return AO_TEN.find(x => x[0] === t) || null; }
+const TU_XAU = /(đm|đmm|địt|đ[ịi]t|lồn|l[oồ]n|cặc|c[aặ]c|buồi|đéo|vãi l|vcl|vkl|dcm|clm|fuck|shit)/i;
+function lenhNV(name, p, msg) { let m0 = String(msg || '').normalize('NFC').trim(); let s = m0.toLowerCase().replace(/[.!?,~…:;"'“”]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/^(con |em |cho con |cho em |xin |mình |minh )/, '').replace(/( nhé| nha| ạ| đi| với| nhe| nhá| ak| à)+$/, '').trim();
+  const ten = (String(name).startsWith('\u200b') ? 'Con nhang' : tenHien(name)), noi = (txt, c) => float(p && !p.ghost ? p.x : 270, p && !p.ghost ? p.y - 70 : 600, txt, c || '#f6dc96'), nv = () => NV[name] || (NV[name] = {});
+  let m = s.match(/^(?:màu tên|tên màu|đổi màu tên|màu chữ tên|màu nick|nick màu)(?: sang| thành)? (.+)$/); if (m) { const c = mauTu(m[1]); if (c) { nv().mauTen = c[1]; noi(ten + ' đổi màu tên ' + c[0], c[1]); return true; } }
+  m = s.match(/^(?:đổi |thay |mặc |chọn |lấy )?(?:sang |qua )?(?:màu )?(quần|khăn)(?: màu)? (.+)$/); if (m) { const c = mauTu(m[2]); if (!c) return false;
+    if (m[1] === 'quần') { nv().quan = c[1]; noi(ten + ' mặc quần ' + c[0]); return true; }
+    const lv = NH_MODE ? Math.max(2, (p && p.lv) || 2) : ((p && p.lv) || 2), coKhan = lv >= 3 || soLanVao(name) >= 5 || (p && p.quen); if (!coKhan) { noi(ten + ': dự xem 5 canh hầu để được ban khăn'); return true; } nv().khan = c[1]; noi(ten + ' đổi khăn ' + c[0]); return true; }
+  m = m0.match(/^(?:con |em |cho con |cho em |mình )?(?:đổi |đặt |lấy )?(?:tên|nick|biệt danh)(?: là| thành| mới)?[: ]+(.+)$/i); if (m) { let nk = m[1].replace(/https?:\/\/\S+|www\.\S+|@\S+/gi, '').replace(/\s+/g, ' ').trim(); if (mauTu(nk.toLowerCase())) return false; if (!nk || TU_XAU.test(nk)) return true; nk = [...nk].slice(0, 16).join(''); nv().nick = nk; noi('📛 ' + name + ' đổi tên thành ' + nk); return true; }
+  return false; }
+function huongDi(n) { const t = n.trim().replace(/( di| nhe| nha| a| voi| chut| ti| xiu)+$/, ''); if (/^(di |dich |chuyen |cho con |con |em )?(sang|qua) trai$/.test(t)) return 'trai'; if (/^(di |dich |chuyen |cho con |con |em )?(sang|qua) phai$/.test(t)) return 'phai';
+  if (/^(di |dich |chuyen |cho con |con |em |tien )?len( tren| truoc| phia tren)?$/.test(t)) return 'len'; if (/^(di |dich |chuyen |cho con |con |em |lui )?(xuong( duoi| phia duoi)?|lui|lui lai|ra sau)$/.test(t)) return 'xuong'; return null; }
+let DI_GAN = []; /* giới hạn đổi chỗ: mỗi người 5 giây một lần, cả chiếu tối đa 3 người mỗi giây cho khỏi giật */
+function doiCho(p, huong) { const dir = huong === 1 ? 'phai' : huong === -1 ? 'trai' : huong; if (!p || p.ghost || p.tam || p.ra || p.state !== 'seat' || !p.seat || p.seat.who !== p || p.hoaMa || p.goingHuong) return; if (p.diT && S.t - p.diT < 5) return; DI_GAN = DI_GAN.filter(x => S.t - x < 1); if (DI_GAN.length >= 3) return;
+  const cu = p.seat, f5 = S.seats.slice().sort((a, b) => a.y - b.y).slice(0, 5), trongF5 = f5.includes(cu), ngang = dir === 'trai' || dir === 'phai', sx = dir === 'phai' ? 1 : dir === 'trai' ? -1 : 0, sy = dir === 'xuong' ? 1 : dir === 'len' ? -1 : 0;
+  const ds = S.seats.filter(z => z !== cu && (!z.who || (z.who.gia && !z.who.ra && z.who.state === 'seat')) && !(f5.includes(z) && !(trongF5 && ngang)) /* không ai tự đi lên được hàng đầu: hàng đầu dành cho 5 người tương tác nhiều nhất */ && (ngang ? Math.abs(z.y - cu.y) < 40 && (z.x - cu.x) * sx > 8 : Math.abs(z.x - cu.x) < 60 && (z.y - cu.y) * sy > 15)).sort((a, b) => Math.hypot(a.x - cu.x, (a.y - cu.y) * 1.5) - Math.hypot(b.x - cu.x, (b.y - cu.y) * 1.5));
+  const ns = ds[0]; if (!ns) { if (sy < 0 && !trongF5) float(p.x, p.y - 60, 'Hàng đầu dành cho 5 người tương tác nhiều nhất', '#f6dc96'); else float(p.x, p.y - 60, 'Bên ' + ({ trai: 'trái', phai: 'phải', len: 'trên', xuong: 'dưới' })[dir] + ' hết chỗ', '#f6dc96'); p.diT = S.t; return; }
+  p.diT = S.t; DI_GAN.push(S.t); if (ns.who) raVe(ns.who); cu.who = null; ns.who = p; p.seat = ns; p.tAct = S.t; goTo(p, [[ns.x, ns.y]]); }
 function xepTop5() { // 20/11 20:49 anh Linh: 5 người tương tác nhiều nhất trong chiếu mới được lên hàng đầu
   const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.gia && !p.tam && p.seat && p.seat.who === p), front = S.seats.slice().sort((a, b) => a.y - b.y).slice(0, 5);
   const top = ngoi.filter(p => diemTT(p) > 0).sort((a, b) => diemTT(b) - diemTT(a)).slice(0, 5); let doi = 0;
@@ -301,8 +318,9 @@ function float(x, y, s, c) { S.floats.push({ x, y, s: fixXung(s), c, t: 0, life:
 function say(name, msg) {
   addComment(name, msg); const n = norm(msg); let p = person(name, 'bl'); /* 20/11 21:10: chiếu chưa đầy thì bình luận là được vào */ if (LUAT_MOI() && /(^|\s)(xin|nhan|cho con|ban|phat|hai|hung|don)? ?loc(\s|$)|xin loc|nhan loc|ban loc/.test(n)) { if (p.ghost) p = nguoiTam(name); if (!p.xinLoc) p.xinLoc = S.t; } /* comment xin lộc / nhận lộc: được gọi lên nhận lộc */ if (!p.ghost) { p.tAct = S.t; p.timWin = 0; } p.bl = (p.bl || 0) + 1; /* 20/11: bình luận giữ chỗ thêm 2 phút */ try { gameNghe(name, msg); } catch (e) {} p.bubble = { s: NH_MODE ? String(msg) : laOng() && /(^|\s)co(\s|$)|co oi|(^|\s)hu+|vo tay|hay qua|dep qua|xinh qua|mua deo/.test(n) ? pick(HU_ONG) : String(msg), t: S.t, cmt: true }; /* 15:06 anh Linh: trên đầu chỉ hiện đúng lời người xem comment */ khen(name, /lay co|lay thanh|con lay|lay quan|tau lay/.test(n) ? 'lay' : 'chung');
   { const m = n.trim().match(/^(gioi tinh |toi la |minh la |em la |con la |doi sang |doi )?(nam|nu|trai|gai)[.!?\s]*$/); if (m && !(m[2] === 'nam' && typeof G !== 'undefined' && G.ph === 'do2')) { const sx = /^(nam|trai)$/.test(m[2]) ? 'nam' : 'nu'; /* lúc đố mã, 'năm' là đáp số 5, không đổi giới tính */ GIOI[name] = sx; if (p.sex !== sx) { p.sex = sx; float(p.x, p.y - 60, (String(name).startsWith('\u200b') ? 'Con nhang' : name) + ' đổi sang nhân vật ' + (sx === 'nam' ? 'nam' : 'nữ'), '#f6dc96'); } } } /* 19/11 18:23 anh Linh: comment nam/nữ thì đổi nhân vật nam/nữ */
+  if (lenhNV(name, p, msg)) return; /* 22/11 14:09 anh Linh: đổi màu quần, màu khăn, tên hiển thị, màu tên */
   { const ao = aoCmt(msg); if (ao) doiAo(name, p, [null, ao[1], ao[0]]); } /* 21/11 22:47 anh Linh: comment màu (có dấu) là đổi màu áo; tặng hoa hồng vẫn đổi ngẫu nhiên */ /* 21/11 21:25 anh Linh: comment 'áo đỏ', 'đổi áo xanh'… thì đổi màu áo nhân vật, lưu cho lần sau */
-  if (/^(di |dich |chuyen |cho con |con )?(sang|qua) (trai|phai)( di| nhe| nha| a| voi)?$/.test(n.trim())) { doiCho(p, /phai/.test(n) ? 1 : -1); return; } /* 22/11 anh Linh: gõ sang trái / sang phải để đổi chỗ */
+  { const h = huongDi(n); if (h) { doiCho(p, h); return; } } /* 22/11 anh Linh: lên / xuống / sang trái / sang phải để đổi chỗ */ /* 22/11 anh Linh: gõ sang trái / sang phải để đổi chỗ */
   const tq = timTinh(msg); if (tq) { p.que = tq; S.tinh.add(tq); }
   if (/(thap|dang|dot|cam|tháp|dâng) ?(nen |nen nhang |cay )?(huong|nhang)/.test(n)) { thapHuong(p); return; } /* 20/11: nhận cả 'thắp nhang', 'dâng nhang', 'đốt hương' */
   if (/(^|\s)hu+|vo tay|hay qua/.test(n)) { hu(p); wave(4); }
@@ -2562,7 +2580,7 @@ function drawTrays(t) {
 
 // ---------- Con nhang (back view) ----------
 const VS_ON = !/[?&]vs=0/.test(location.search) && /[?&]vs=1/.test(location.search); let VS_VE = false; const VSC = new Map(); let VS_MOI = 0;
-function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 30 ? 3 : vS >= 10 ? 2 : vS >= 5 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0].join('|'); }
+function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 30 ? 3 : vS >= 10 ? 2 : vS >= 5 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0, JSON.stringify(NV[nm] || '')].join('|'); }
 function vsVe(p, t, s, lv, rot) { if (p.state !== 'seat' || p.pose !== 'kneel' || p.carry || (p.nc != null && S.t - p.nc < CHU_NHAN) || p.hd || p.tam) return false;
   const k = vsKhoa(p, s, lv); let c = VSC.get(k);
   if (!c) { if (VS_MOI > 6) return false; /* mỗi khung vẽ sẵn tối đa 6 người, còn lại vẽ thường */ VS_MOI++; const R = window.CV_R || 1.6, w = Math.ceil(110 * s), h = Math.ceil(120 * s), ox = w / 2, oy = Math.round(h * .78), oc = document.createElement('canvas'); oc.width = Math.ceil(w * R); oc.height = Math.ceil(h * R); const g = oc.getContext('2d'); g.setTransform(R, 0, 0, R, 0, 0);
@@ -2594,13 +2612,13 @@ function drawPerson1(p, t) {
   else {
   const kneel = !walking && p.pose !== 'walk' && p.state !== 'stand', nu = p.sex === 'nu', SK = '#e3b78c', sw = nu ? 7.6 : 9.2, top = (kneel ? -21 : -26) + lean * .5;
   const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0; /* 21/11 21:38 anh Linh: quà theo số lần về điện: 5 lần khăn vấn đỏ, 10 lần quạt, 30 lần áo gấm */
-  const aoR = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); /* 21/11: màu áo người xem tự chọn bằng comment, đè màu theo cấp */
+  const nvp = (p.name && NV[p.name]) || {}; const aoR = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); /* 21/11: màu áo người xem tự chọn bằng comment, đè màu theo cấp */
   const coat = aoR ? aoR : lv === 1 ? ['#6d6258', '#5e5a52', '#74685c', '#66605a'][(p.name.length + p.name.charCodeAt(0)) % 4] : lv === 5 ? '#c9962a' : (p.quen && lv < 3) ? '#b0261e' : p.coat;
   const g = ctx.createLinearGradient(-11, 0, 11, 0); g.addColorStop(0, shade(coat, -.35)); g.addColorStop(.45, shade(coat, .1)); g.addColorStop(1, shade(coat, -.4));
   if (kneel) { // bàn chân gập phía sau
     ctx.beginPath(); ctx.ellipse(-4.5, -1, 3.2, 1.8, -.2, 0, 6.28); ctx.fillStyle = '#c99a72'; ctx.fill(); ctx.beginPath(); ctx.ellipse(4.5, -1, 3.2, 1.8, .2, 0, 6.28); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-11.5, -1); ctx.quadraticCurveTo(-12.5, -6, -9, -9); ctx.lineTo(9, -9); ctx.quadraticCurveTo(12.5, -6, 11.5, -1); ctx.quadraticCurveTo(0, 1.5, -11.5, -1); ctx.fillStyle = nu ? shade(p.coat, -.55) : '#2b2b33'; ctx.fill(); }
-  else { ctx.fillStyle = nu ? shade(p.coat, -.55) : '#2b2b33'; rr(-6, -12, 5, 12, 2, ctx.fillStyle); rr(1, -12, 5, 12, 2, ctx.fillStyle); }
+    ctx.beginPath(); ctx.moveTo(-11.5, -1); ctx.quadraticCurveTo(-12.5, -6, -9, -9); ctx.lineTo(9, -9); ctx.quadraticCurveTo(12.5, -6, 11.5, -1); ctx.quadraticCurveTo(0, 1.5, -11.5, -1); ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); ctx.fill(); }
+  else { ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); rr(-6, -12, 5, 12, 2, ctx.fillStyle); rr(1, -12, 5, 12, 2, ctx.fillStyle); }
   // thân: eo, vai tròn
   ctx.beginPath(); ctx.moveTo(-(nu ? 8 : 8.5), kneel ? -7 : -11); ctx.quadraticCurveTo(-(nu ? 6.2 : 8), (top - 7) * .6, -sw, top + 3); ctx.quadraticCurveTo(-sw + .5, top, -sw + 3, top - .5); ctx.lineTo(sw - 3, top - .5); ctx.quadraticCurveTo(sw - .5, top, sw, top + 3); ctx.quadraticCurveTo(nu ? 6.2 : 8, (top - 7) * .6, nu ? 8 : 8.5, kneel ? -7 : -11); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, top + 1); ctx.lineTo(0, kneel ? -8 : -12); ctx.stroke();
@@ -2633,12 +2651,12 @@ function drawPerson1(p, t) {
     ctx.beginPath(); ctx.ellipse(0, hy + 4.4, 3.4, 1.6, 0, 0, Math.PI); ctx.fillStyle = '#c99a72'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, hy, 3.6, Math.PI * 1.15, Math.PI * 1.75); ctx.stroke(); }
   if (lv === 1) { ctx.strokeStyle = p.hairC; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; [[-4, -1.2, -6.5, -3.5], [-1.5, -1.6, -2.2, -5.2], [1.6, -1.6, 3, -5], [4, -1.2, 6.8, -3]].forEach(([a, b, c2, d2]) => { ctx.beginPath(); ctx.moveTo(a, hy + b - 3.6); ctx.lineTo(c2, hy + d2 - 2.4); ctx.stroke(); }); }
-  if (lv >= 3 || vS >= 5) { const kc = lv === 5 ? '#e9b43a' : (lv === 4 || vS >= 5) ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
+  if (lv >= 3 || vS >= 5) { const kc = nvp.khan ? nvp.khan : lv === 5 ? '#e9b43a' : (lv === 4 || vS >= 5) ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
     ctx.lineWidth = 3; ctx.strokeStyle = kc; ctx.beginPath(); ctx.ellipse(0, hy - 2.4, 5.9, 2.5, 0, 0, 6.28); ctx.stroke(); ctx.lineWidth = .6; ctx.strokeStyle = lv >= 4 ? '#ffe39a' : 'rgba(255,255,255,.35)'; ctx.stroke();
     if (lv >= 4) { const fx = nu ? 4.6 : 0, fy = hy - 4.6; for (let i = 0; i < 5; i++) { const a = i * 1.2566 + t * .4; circ(fx + Math.cos(a) * 1.5, fy + Math.sin(a) * 1.5, 1.1, lv === 5 ? '#ff6a6a' : '#f4a0b8'); } circ(fx, fy, .8, '#ffe39a'); } }
   ctx.restore();
   if (vS >= 30) { [-1, 1].forEach(k => { ctx.beginPath(); ctx.moveTo(k * 3.2, top - .8); ctx.quadraticCurveTo(k * (sw + .8), top - 1.2, k * (sw + 1.2), top + 4.5); ctx.quadraticCurveTo(k * (sw - 1.5), top + 7.5, k * 4.8, top + 5.2); ctx.closePath(); const vg = ctx.createLinearGradient(0, top - 1, 0, top + 7); vg.addColorStop(0, '#fff0b0'); vg.addColorStop(1, '#d9a22a'); ctx.fillStyle = vg; ctx.fill(); ctx.strokeStyle = '#8a1018'; ctx.lineWidth = .5; ctx.stroke(); circ(k * (sw - 1.6), top + 3, .9, '#c4232b'); circ(k * 5.6, top + 2, .7, '#c4232b'); }); ctx.save(); ctx.globalAlpha *= .85; ctx.fillStyle = '#ffd86b'; const hm = kneel ? -9 : -13; ctx.fillRect(-sw + 1, hm - 1.6, (sw - 1) * 2, 1.4); ctx.restore(); } /* áo gấm 30 lần: vân kiên vàng trên vai, viền gấu vàng */
-  if (p.quen && lv < 3) { ctx.lineWidth = 2.4; ctx.strokeStyle = '#c62a22'; ctx.beginPath(); ctx.ellipse(0, hy - 2.6, 5.8, 2.4, 0, 0, 6.28); ctx.stroke(); ctx.strokeStyle = '#f4d47c'; ctx.lineWidth = .6; ctx.stroke(); }
+  if (p.quen && lv < 3) { ctx.lineWidth = 2.4; ctx.strokeStyle = (NV[p.name] && NV[p.name].khan) || '#c62a22'; ctx.beginPath(); ctx.ellipse(0, hy - 2.6, 5.8, 2.4, 0, 0, 6.28); ctx.stroke(); ctx.strokeStyle = '#f4d47c'; ctx.lineWidth = .6; ctx.stroke(); }
   }
   if (p.carry) drawItem(p.carry, 11, -22, .8);
   ctx.restore();
@@ -2648,9 +2666,9 @@ function drawPerson1(p, t) {
   if (p.nhan) { ctx.font = `700 ${8.5 * Math.max(.9, s)}px ${UI}`; const w2 = ctx.measureText(p.nhan).width + 10; rr(p.x - w2 / 2, p.y - 62 * s - 6, w2, 12, 6, 'rgba(14,110,58,.9)'); text(p.nhan, p.x, p.y - 62 * s, 8.5 * Math.max(.9, s), '#eafff0', { w: 700 }); return; }
   if (String(p.name).startsWith('\u200b') || (S.dem && S.dem.p === p)) return;
   if (NH_MODE && !THAT.has(p.name)) return; // 18/11 anh Linh: chỉ hiện tên người xem thật, bỏ chữ Lv
-  const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + p.name + (p.que ? ' · ' + p.que : '');
+  const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : '');
   const NK = NH_MODE ? 1.3 : 1; /* 13:25 anh Linh: tên người xem to hơn 30% */ ctx.font = `600 ${8.5 * NK * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8 * NK;
-  rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff', { w: 600 });
+  rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
 }
 
 // ---------- Effects + overlay ----------
@@ -2668,7 +2686,7 @@ function veTho(t) { if (!THO_ON || TK.on) return; THO.forEach((p, i) => { thoDi(
 function drawSoLan() {
   S.people.forEach(p => { if (!p.name || p.name.startsWith('\u200b') || p.ghost || p.gia) return; const v = soLanVao(p.name); if (!v) return;
     const sc = p.state === 'seat' ? p.seat.s : 1, r = 7.5; let x = p.x, y = p.y - 62 * sc + 4;
-    if (!(NH_MODE && !THAT.has(p.name)) && !(S.dem && S.dem.p === p)) { /* có nhãn tên thì số nằm đầu nhãn, không đè chữ */ const NK = NH_MODE ? 1.3 : 1, tag = (NH_MODE ? '' : 'Lv' + (p.lv || 2) + ' ') + (p.quen ? '⭐ ' : '') + p.name + (p.que ? ' · ' + p.que : ''); ctx.save(); ctx.font = `600 ${8.5 * NK * Math.max(.9, sc)}px ${UI}`; const tw = ctx.measureText(tag).width + 8 * NK; ctx.restore(); x = p.x - tw / 2 - 3; y = p.y - 62 * sc; }
+    if (!(NH_MODE && !THAT.has(p.name)) && !(S.dem && S.dem.p === p)) { /* có nhãn tên thì số nằm đầu nhãn, không đè chữ */ const NK = NH_MODE ? 1.3 : 1, tag = (NH_MODE ? '' : 'Lv' + (p.lv || 2) + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : ''); ctx.save(); ctx.font = `600 ${8.5 * NK * Math.max(.9, sc)}px ${UI}`; const tw = ctx.measureText(tag).width + 8 * NK; ctx.restore(); x = p.x - tw / 2 - 3; y = p.y - 62 * sc; }
     const lop = v >= 10 ? ['#b3121b', '#ffd86b', '#fff3c4'] : v >= 5 ? ['#d99a1e', '#fff1b8', '#4a1a06'] : v >= 2 ? ['#fff4dc', '#e2a93a', '#7a2a10'] : ['#e9fbe9', '#59b36a', '#1f5a2a'];
     const txt = String(v > 99 ? '99+' : v); ctx.save(); ctx.font = `800 ${v > 9 ? 9 : 10}px ${UI}`; const w = Math.max(r * 2, ctx.measureText(txt).width + 8);
     ctx.globalAlpha = .96; rr(x - w / 2, y - r, w, r * 2, r, lop[0]); ctx.lineWidth = 1.3; ctx.strokeStyle = lop[1]; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - w / 2, y - r, w, r * 2, r) : ctx.rect(x - w / 2, y - r, w, r * 2); ctx.stroke();
