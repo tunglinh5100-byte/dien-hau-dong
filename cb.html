@@ -181,7 +181,7 @@ const QUA_MOC = [[5, 'khăn vấn đỏ'], [10, 'quạt'], [30, 'áo gấm']];
 function mocTiep(v) { return QUA_MOC.find(m => m[0] > v) || null; }
 const CHAO = []; /* thẻ chào đích danh người quen quay lại */
 function chao(name, dong2, mau) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, name + ': ' + dong2, mau || '#f6dc96'); } /* 22/11: bỏ thẻ chào, chỉ hiện chữ nổi */
-const HD = { t: 270, i: -1, ti: 0, cau: [['Vào chiếu ngồi', 'share live'], ['Giữ chỗ ngồi', 'share · bình luận · thả tim'], ['Lên hàng đầu', '5 người tương tác nhiều nhất'], ['Đổi chỗ ngồi', 'gõ lên / xuống / sang trái / sang phải'], ['Thay màu áo', 'gõ màu sắc muốn mặc'], ['Thay màu quần, khăn', 'gõ quần đỏ / khăn tím'], ['Đổi tên hiển thị', 'gõ tên + tên mới'], ['Đổi màu tên', 'gõ màu tên + màu'], ['Thay giới tính', 'gõ nam / nữ']] }; /* 22/11 12:00 anh Linh: cứ 5 phút hiện lần lượt từng câu hướng dẫn */
+const HD = { t: 270, i: -1, ti: 0, cau: [['Vào chiếu ngồi', 'share live'], ['Giữ chỗ ngồi', 'share · bình luận · thả tim'], ['Lên hàng đầu', '5 người tương tác nhiều nhất'], ['Đổi chỗ ngồi', 'gõ lên / xuống / sang trái / sang phải'], ['Thay màu áo', 'gõ màu sắc muốn mặc'], ['Thay màu quần, khăn', 'gõ quần đỏ / khăn tím'], ['Thay màu tóc, giày', 'gõ tóc vàng / giày trắng'], ['Đổi tên hiển thị', 'gõ tên + tên mới'], ['Đổi màu tên', 'gõ màu tên + màu'], ['Thay giới tính', 'gõ nam / nữ']] }; /* 22/11 12:00 anh Linh: cứ 5 phút hiện lần lượt từng câu hướng dẫn */
 function drawHD(dt) { if (!NH_MODE) return; if (TK.on || S.ket) { HD.i = -1; return; } HD.t += dt; if (HD.i < 0) { if (HD.t >= 300 && !TK.on && !S.ket) { HD.i = 0; HD.ti = 0; HD.t = 0; } return; } HD.ti += dt; if (HD.ti > 6.5) { HD.i++; HD.ti = 0; if (HD.i >= HD.cau.length) { HD.i = -1; HD.t = 0; return; } }
   const [a1, a2] = HD.cau[HD.i], al = Math.min(1, HD.ti / .35, (6.5 - HD.ti) / .35), y = (LYC.y || 560) + 16 + (1 - Math.min(1, HD.ti / .35)) * 6; ctx.save(); ctx.globalAlpha = Math.max(0, al);
   ctx.font = `800 11px ${SERIF}`; const w1 = ctx.measureText(a1 + ':').width; ctx.font = `600 11px ${UI}`; const w = w1 + ctx.measureText(' ' + a2).width + 20, x = SAFE_X; /* 22/11 anh Linh: chữ nhỏ, lệch trái */
@@ -254,7 +254,8 @@ const TU_XAU = /(đm|đmm|địt|đ[ịi]t|lồn|l[oồ]n|cặc|c[aặ]c|buồi|
 function lenhNV(name, p, msg) { let m0 = String(msg || '').normalize('NFC').trim(); let s = m0.toLowerCase().replace(/[.!?,~…:;"'“”]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/^(con |em |cho con |cho em |xin |mình |minh )/, '').replace(/( nhé| nha| ạ| đi| với| nhe| nhá| ak| à)+$/, '').trim();
   const ten = (String(name).startsWith('\u200b') ? 'Con nhang' : tenHien(name)), noi = (txt, c) => float(p && !p.ghost ? p.x : 270, p && !p.ghost ? p.y - 70 : 600, txt, c || '#f6dc96'), nv = () => NV[name] || (NV[name] = {});
   let m = s.match(/^(?:màu tên|tên màu|đổi màu tên|màu chữ tên|màu nick|nick màu)(?: sang| thành)? (.+)$/); if (m) { const c = mauTu(m[1]); if (c) { nv().mauTen = c[1]; noi(ten + ' đổi màu tên ' + c[0], c[1]); return true; } }
-  m = s.match(/^(?:đổi |thay |mặc |chọn |lấy )?(?:sang |qua )?(?:màu )?(quần|khăn)(?: màu)? (.+)$/); if (m) { const c = mauTu(m[2]); if (!c) return false;
+  m = s.match(/^(?:đổi |thay |mặc |chọn |lấy |đi |nhuộm )?(?:sang |qua )?(?:màu )?(quần|khăn|tóc|giày|giầy|dép)(?: màu)? (.+)$/); if (m) { const c = mauTu(m[2]); if (!c) return false;
+    if (m[1] === 'tóc') { nv().toc = c[1]; noi(ten + ' nhuộm tóc ' + c[0]); return true; } if (/^(giày|giầy|dép)$/.test(m[1])) { nv().giay = c[1]; noi(ten + ' đi giày ' + c[0]); return true; }
     if (m[1] === 'quần') { nv().quan = c[1]; noi(ten + ' mặc quần ' + c[0]); return true; }
     const lv = NH_MODE ? Math.max(2, (p && p.lv) || 2) : ((p && p.lv) || 2), coKhan = lv >= 3 || soLanVao(name) >= 5 || (p && p.quen); if (!coKhan) { noi(ten + ': dự xem 5 canh hầu để được ban khăn'); return true; } nv().khan = c[1]; noi(ten + ' đổi khăn ' + c[0]); return true; }
   m = m0.match(/^(?:con |em |cho con |cho em |mình )?(?:đổi |đặt |lấy )?(?:tên|nick|biệt danh)(?: là| thành| mới)?[: ]+(.+)$/i); if (m) { let nk = m[1].replace(/https?:\/\/\S+|www\.\S+|@\S+/gi, '').replace(/\s+/g, ' ').trim(); if (mauTu(nk.toLowerCase())) return false; if (!nk || TU_XAU.test(nk)) return true; nk = [...nk].slice(0, 16).join(''); nv().nick = nk; noi('📛 ' + name + ' đổi tên thành ' + nk); return true; }
@@ -2612,13 +2613,13 @@ function drawPerson1(p, t) {
   else {
   const kneel = !walking && p.pose !== 'walk' && p.state !== 'stand', nu = p.sex === 'nu', SK = '#e3b78c', sw = nu ? 7.6 : 9.2, top = (kneel ? -21 : -26) + lean * .5;
   const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0; /* 21/11 21:38 anh Linh: quà theo số lần về điện: 5 lần khăn vấn đỏ, 10 lần quạt, 30 lần áo gấm */
-  const nvp = (p.name && NV[p.name]) || {}; const aoR = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); /* 21/11: màu áo người xem tự chọn bằng comment, đè màu theo cấp */
+  const nvp = (p.name && NV[p.name]) || {}, hcol = nvp.toc || p.hairC, giay = nvp.giay || '#2a1f1a'; const aoR = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); /* 21/11: màu áo người xem tự chọn bằng comment, đè màu theo cấp */
   const coat = aoR ? aoR : lv === 1 ? ['#6d6258', '#5e5a52', '#74685c', '#66605a'][(p.name.length + p.name.charCodeAt(0)) % 4] : lv === 5 ? '#c9962a' : (p.quen && lv < 3) ? '#b0261e' : p.coat;
   const g = ctx.createLinearGradient(-11, 0, 11, 0); g.addColorStop(0, shade(coat, -.35)); g.addColorStop(.45, shade(coat, .1)); g.addColorStop(1, shade(coat, -.4));
   if (kneel) { // bàn chân gập phía sau
     ctx.beginPath(); ctx.ellipse(-4.5, -1, 3.2, 1.8, -.2, 0, 6.28); ctx.fillStyle = '#c99a72'; ctx.fill(); ctx.beginPath(); ctx.ellipse(4.5, -1, 3.2, 1.8, .2, 0, 6.28); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-11.5, -1); ctx.quadraticCurveTo(-12.5, -6, -9, -9); ctx.lineTo(9, -9); ctx.quadraticCurveTo(12.5, -6, 11.5, -1); ctx.quadraticCurveTo(0, 1.5, -11.5, -1); ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); ctx.fill(); }
-  else { ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); rr(-6, -12, 5, 12, 2, ctx.fillStyle); rr(1, -12, 5, 12, 2, ctx.fillStyle); }
+    ctx.beginPath(); ctx.moveTo(-11.5, -1); ctx.quadraticCurveTo(-12.5, -6, -9, -9); ctx.lineTo(9, -9); ctx.quadraticCurveTo(12.5, -6, 11.5, -1); ctx.quadraticCurveTo(0, 1.5, -11.5, -1); ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); ctx.fill(); [-1, 1].forEach(k => { ctx.beginPath(); ctx.ellipse(k * 5, .6, 3.6, 1.7, 0, 0, 6.28); ctx.fillStyle = giay; ctx.fill(); ctx.beginPath(); ctx.ellipse(k * 5, .1, 2.4, .7, 0, 0, 6.28); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill(); }); } /* 22/11 anh Linh: con nhang có giày, đổi màu được */
+  else { ctx.fillStyle = nvp.quan || (nu ? shade(p.coat, -.55) : '#2b2b33'); rr(-6, -12, 5, 12, 2, ctx.fillStyle); rr(1, -12, 5, 12, 2, ctx.fillStyle); rr(-7, -2, 6.5, 3.2, 1.4, giay); rr(.5, -2, 6.5, 3.2, 1.4, giay); }
   // thân: eo, vai tròn
   ctx.beginPath(); ctx.moveTo(-(nu ? 8 : 8.5), kneel ? -7 : -11); ctx.quadraticCurveTo(-(nu ? 6.2 : 8), (top - 7) * .6, -sw, top + 3); ctx.quadraticCurveTo(-sw + .5, top, -sw + 3, top - .5); ctx.lineTo(sw - 3, top - .5); ctx.quadraticCurveTo(sw - .5, top, sw, top + 3); ctx.quadraticCurveTo(nu ? 6.2 : 8, (top - 7) * .6, nu ? 8 : 8.5, kneel ? -7 : -11); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, top + 1); ctx.lineTo(0, kneel ? -8 : -12); ctx.stroke();
@@ -2643,14 +2644,14 @@ function drawPerson1(p, t) {
   const hy = top - 6.2; ctx.save(); if (p.pose === 'reach') ctx.translate((p.reach || 1) * 1.8, 0); // quay đầu vào giữa
   rr(-2, top - 3.4, 4, 4, 1.5, '#c99a72');
   circ(-5.4, hy + .6, 1.3, SK); circ(5.4, hy + .6, 1.3, SK); // tai
-  circ(0, hy, 5.4, p.hairC);
+  circ(0, hy, 5.4, hcol);
   if (nu) { // tóc dài xõa sau lưng
-    ctx.beginPath(); ctx.moveTo(-5.2, hy - .5); ctx.quadraticCurveTo(-6.6, hy + 7, -5.6 + Math.sin(t * 2 + p.x) * .4, top + 11); ctx.quadraticCurveTo(0, top + 13.5, 5.6 + Math.sin(t * 2 + p.x) * .4, top + 11); ctx.quadraticCurveTo(6.6, hy + 7, 5.2, hy - .5); ctx.closePath(); ctx.fillStyle = p.hairC; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-5.2, hy - .5); ctx.quadraticCurveTo(-6.6, hy + 7, -5.6 + Math.sin(t * 2 + p.x) * .4, top + 11); ctx.quadraticCurveTo(0, top + 13.5, 5.6 + Math.sin(t * 2 + p.x) * .4, top + 11); ctx.quadraticCurveTo(6.6, hy + 7, 5.2, hy - .5); ctx.closePath(); ctx.fillStyle = hcol; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; [-2.4, 0, 2.4].forEach(dx => { ctx.beginPath(); ctx.moveTo(dx, hy - 3); ctx.quadraticCurveTo(dx * 1.3, hy + 6, dx * 1.1, top + 10); ctx.stroke(); });
   } else { // tóc ngắn, lộ gáy
     ctx.beginPath(); ctx.ellipse(0, hy + 4.4, 3.4, 1.6, 0, 0, Math.PI); ctx.fillStyle = '#c99a72'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, hy, 3.6, Math.PI * 1.15, Math.PI * 1.75); ctx.stroke(); }
-  if (lv === 1) { ctx.strokeStyle = p.hairC; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; [[-4, -1.2, -6.5, -3.5], [-1.5, -1.6, -2.2, -5.2], [1.6, -1.6, 3, -5], [4, -1.2, 6.8, -3]].forEach(([a, b, c2, d2]) => { ctx.beginPath(); ctx.moveTo(a, hy + b - 3.6); ctx.lineTo(c2, hy + d2 - 2.4); ctx.stroke(); }); }
+  if (lv === 1) { ctx.strokeStyle = hcol; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; [[-4, -1.2, -6.5, -3.5], [-1.5, -1.6, -2.2, -5.2], [1.6, -1.6, 3, -5], [4, -1.2, 6.8, -3]].forEach(([a, b, c2, d2]) => { ctx.beginPath(); ctx.moveTo(a, hy + b - 3.6); ctx.lineTo(c2, hy + d2 - 2.4); ctx.stroke(); }); }
   if (lv >= 3 || vS >= 5) { const kc = nvp.khan ? nvp.khan : lv === 5 ? '#e9b43a' : (lv === 4 || vS >= 5) ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
     ctx.lineWidth = 3; ctx.strokeStyle = kc; ctx.beginPath(); ctx.ellipse(0, hy - 2.4, 5.9, 2.5, 0, 0, 6.28); ctx.stroke(); ctx.lineWidth = .6; ctx.strokeStyle = lv >= 4 ? '#ffe39a' : 'rgba(255,255,255,.35)'; ctx.stroke();
     if (lv >= 4) { const fx = nu ? 4.6 : 0, fy = hy - 4.6; for (let i = 0; i < 5; i++) { const a = i * 1.2566 + t * .4; circ(fx + Math.cos(a) * 1.5, fy + Math.sin(a) * 1.5, 1.1, lv === 5 ? '#ff6a6a' : '#f4a0b8'); } circ(fx, fy, .8, '#ffe39a'); } }
