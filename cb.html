@@ -2677,7 +2677,7 @@ function drawPerson1(p, t) {
     ctx.beginPath(); ctx.ellipse(0, hy + 4.4, 3.4, 1.6, 0, 0, Math.PI); ctx.fillStyle = '#c99a72'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, hy, 3.6, Math.PI * 1.15, Math.PI * 1.75); ctx.stroke(); }
   if (lv === 1) { ctx.strokeStyle = hcol; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; [[-4, -1.2, -6.5, -3.5], [-1.5, -1.6, -2.2, -5.2], [1.6, -1.6, 3, -5], [4, -1.2, 6.8, -3]].forEach(([a, b, c2, d2]) => { ctx.beginPath(); ctx.moveTo(a, hy + b - 3.6); ctx.lineTo(c2, hy + d2 - 2.4); ctx.stroke(); }); }
-  if (true) { const kc = nvp.khan ? nvp.khan : lv < 3 && !(vS >= 5) ? ['#c62a22', '#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a', '#c9962a'][(String(p.name).length + String(p.name).charCodeAt(0)) % 6] : lv === 5 ? '#e9b43a' : (lv === 4 || vS >= 5) ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
+  if (true) { const kc = nvp.khan ? nvp.khan : lv < 3 ? ['#c62a22', '#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a', '#c9962a'][(String(p.name).length + String(p.name).charCodeAt(0)) % 6] : lv === 5 ? '#e9b43a' : lv === 4 ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][p.name.length % 4];
     ctx.lineWidth = 3; ctx.strokeStyle = kc; ctx.beginPath(); ctx.ellipse(0, hy - 2.4, 5.9, 2.5, 0, 0, 6.28); ctx.stroke(); ctx.lineWidth = .6; ctx.strokeStyle = lv >= 4 ? '#ffe39a' : 'rgba(255,255,255,.35)'; ctx.stroke();
     if (lv >= 4) { const fx = nu ? 4.6 : 0, fy = hy - 4.6; for (let i = 0; i < 5; i++) { const a = i * 1.2566 + t * .4; circ(fx + Math.cos(a) * 1.5, fy + Math.sin(a) * 1.5, 1.1, lv === 5 ? '#ff6a6a' : '#f4a0b8'); } circ(fx, fy, .8, '#ffe39a'); } }
   ctx.restore();
