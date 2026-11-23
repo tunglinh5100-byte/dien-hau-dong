@@ -2760,6 +2760,7 @@ function drawPerson1(p, t) {
   const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : '');
   const NK = NH_MODE ? 1.3 : 1; /* 13:25 anh Linh: tên người xem to hơn 30% */ ctx.font = `600 ${8.5 * NK * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8 * NK;
   rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, (NV[p.name] && NV[p.name].nenTen) || ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
+  if (typeof VY_TEN !== 'undefined' && p.name === VY_TEN) { const l2 = 'Dự 8 lần live · ở live 30 phút', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); } /* 23/11 anh Linh: cho người xem biết cần dự bao nhiêu lần, ở live bao lâu để được như Tường Vy */
 }
 
 // ---------- Effects + overlay ----------
@@ -3457,10 +3458,10 @@ const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
     let m; for (let k = 0; k < 6; k++) { m = pick(LENH); if (!gan.includes(m)) break; } gan.push(m); if (gan.length > 8) gan.shift(); say(VY_TEN, m); } catch (e) {} }
   setTimeout(() => { try { nap(); shareLive(VY_TEN); } catch (e) {} }, 15000);
   (function vong() { setTimeout(() => { lam(); vong(); }, 9000 + Math.random() * 9000); })(); /* 9–18 giây một hành động */
-  function gheVy() { if (!S.seats.length) return null; const minY = Math.min(...S.seats.map(z => z.y)); return S.seats.filter(z => z.y < minY + 70).sort((a, b) => a.x - b.x)[0]; } /* 23/11 anh Linh: Tường Vy luôn ngồi chỗ trên cùng góc trái */
+  function gheVy() { if (!S.seats.length) return null; const minY = Math.min(...S.seats.map(z => z.y)); const hang = S.seats.filter(z => z.y < minY + 70).sort((a, b) => a.x - b.x); return hang.find(z => z.x > 115) || hang[0]; } /* tránh chỗ thợ chụp ảnh đứng sát mép trái */ /* 23/11 anh Linh: Tường Vy luôn ngồi chỗ trên cùng góc trái */
   function veGhe(p) { const g = gheVy(); if (!g || p.seat === g || p.state !== 'seat') return; const q = g.who && g.who !== p ? g.who : null, cu = p.seat; cu.who = q; if (q) { q.seat = cu; goTo(q, duongVong(q, q.x, q.y, cu.x, cu.y)); } g.who = p; p.seat = g; goTo(p, duongVong(p, p.x, p.y, g.x, g.y)); }
   window.__vyGhe = gheVy;
-  setInterval(() => { try { nap(); const p = coMat(); if (p) { p.tAct = S.t; p.giuCho = S.t; veGhe(p); } } catch (e) {} }, 3000); })();
+  setInterval(() => { try { nap(); try { window.__that && window.__that.add(VY_TEN); } catch (e) {} const p = coMat(); if (p) { p.tAct = S.t; p.giuCho = S.t; p.quen = true; p.lv = lvOf(LV[VY_TEN].xp); veGhe(p); } } catch (e) {} }, 3000); })(); /* 23/11 anh Linh: hiện tên + cấp như người xem thật (người quen ⭐) */
 // ---------- Xem mẫu tạo hình 5 cấp: mở trang với ?capdo=1 ----------
 const CAPDO = new URLSearchParams(location.search).get('capdo') === '1';
 const CAPDO_P = [[1, 'Lần đầu vào', 135, 330, 'nam'], [2, 'Vào lần 2', 405, 330, 'nu'], [3, 'Vào lần 3', 135, 600, 'nu'], [4, 'Tương tác nhiều', 405, 600, 'nu'], [5, 'Fan cứng', 270, 870, 'nam']]
