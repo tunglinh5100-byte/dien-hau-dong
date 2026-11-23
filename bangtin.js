@@ -137,6 +137,13 @@ window.BANG_TIN = {
     'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ngài được thờ ở đền Quan Giám (Hữu Lũng, Lạng Sơn), đền Quan ở Phố Cát (Thanh Hóa), một đền ở Thái Bình gần đền Đồng Bằng, và ở ban Công Đồng các đền phủ',
     'Khánh tiệc của ngài vào tháng Mười Một âm lịch (tài liệu ghi ngày 10 hoặc 11, chưa thống nhất)',
   ],
+  nguon_quantu: 'Tín ngưỡng Tứ Phủ (tư liệu dân gian, bản văn chầu); chưa có nguồn báo chí chính thống',
+  quantu: [
+    'Quan Lớn Đệ Tứ, còn gọi là Quan Đệ Tứ Khâm Sai, đứng thứ tư trong Ngũ vị Tôn Quan của hệ thống Tứ Phủ',
+    'Tương truyền ngài là quan khâm sai, thay mặt Vua Cha đi tuần tra, xét việc thiện ác khắp các miền',
+    'Khi ngự đồng, ngài thường mặc áo màu vàng, phong thái nho nhã, uy nghiêm',
+    'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ngài được phối thờ ở ban Công Đồng các đền phủ; ở Mỏ Hạc Linh Từ (Nghệ An) có dâng văn hầu Quan Đệ Tứ',
+  ],
   nguon_quantam: 'Báo Pháp luật Việt Nam, "Huyền tích về Quan Lớn Đệ Tam và ngôi đền thiêng bên bờ Lục Đầu"',
   quantam: [
     'Quan Lớn Đệ Tam là vị thần đứng đầu Thoải phủ (sông nước), tương truyền là con trai thứ ba của Vua Cha Bát Hải Động Đình',
