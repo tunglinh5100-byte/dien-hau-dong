@@ -3038,12 +3038,6 @@ function drawBinh(t) {
 }
 const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín ngưỡng Đạo Mẫu và các đền. Tôi KHÔNG nhận quà tặng dưới mọi hình thức, KHÔNG xem bói, KHÔNG tương tác với ai.';
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
-// 23/11 anh Linh: thêm dòng tiếng Anh cho người nước ngoài tìm hiểu văn hoá Việt
-const GIA_EN = { 'Thỉnh Tam Tòa Thánh Mẫu': 'Invoking the Three Holy Mothers', 'Chúa Lê Mại': 'Holy Lady Lê Mại', 'Chúa Đệ Nhị Nguyệt Hồ': 'Second Holy Lady of Nguyệt Hồ', 'Chúa Thác Bờ': 'Holy Lady of Thác Bờ Rapids', 'Chúa Bà Năm Phương': 'Holy Lady of the Five Directions',
-  'Quan Lớn Đệ Nhất': 'The First Mandarin', 'Quan Lớn Đệ Nhị': 'The Second Mandarin', 'Quan Lớn Đệ Tam': 'The Third Mandarin (Water Realm)', 'Quan Lớn Đệ Tứ': 'The Fourth Mandarin', 'Quan Lớn Đệ Ngũ': 'The Fifth Mandarin',
-  'Chầu Đệ Nhị Thượng Ngàn': 'Second Lady of the Mountains', 'Chầu Lục Cung Nương': 'Sixth Lady', 'Chầu Bé Bắc Lệ': 'Little Lady of Bắc Lệ', 'Ông Hoàng Bảy': 'The Seventh Prince', 'Ông Hoàng Mười': 'The Tenth Prince',
-  'Cô Đôi Thượng Ngàn': 'Second Maiden of the Mountains', 'Cô Bé Thượng Ngàn': 'Little Maiden of the Mountains', 'Cô Bơ Thoải Cung': 'Third Maiden of the Water Palace', 'Cô Sáu Sơn Trang': 'Sixth Maiden of the Forest', 'Cô Chín Sòng Sơn': 'Ninth Maiden of Sòng Sơn', 'Cậu Bé Bản Đền': 'Little Prince of the Temple' };
-function giaEN(ten) { ten = String(ten || '').replace(/^Giá\s+/, ''); return GIA_EN[ten] || ''; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 function drawBangPhai() { if (TK.on) return; // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
   const tt = !!buocGia(), NB = NH_MODE, X = NB ? -2 : tt || GIA().id === 'chaube' || laCU(GIA().id) ? W - 2 * SAFE_X - 150 - 8 : 8, Y = NB ? (tt ? 232 : 190) : tt ? 237 : 192, Wd = NB ? 134 : 150, cx = X + Wd / 2, h = NB ? 126 : tt ? 145 : 128, BY = Y + (NB ? 24 : 26), BH = h - (NB ? 28 : 32), LH = NB ? 13 : 12.5, FS = NB ? 10 : 9.5, /* 13:25 anh Linh: chữ sự tích to, rõ hơn trên điện thoại */ WW = Wd - 16; // 18/11 10:46 anh Linh: bảng sự tích sang chỗ bảng tương tác, nhỏ và sát mép để không che Chầu múa // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
@@ -3052,7 +3046,6 @@ function drawBangPhai() { if (TK.on) return; // hướng dẫn nhận lời ban 
   if (TICH.id !== g.id || TICH.w !== WW) { const B = window.BANG_TIN || {}; ctx.font = `600 ${FS}px ${UI}`; TICH.w = WW; TICH.lines = [];
     (B[g.id] && B[g.id].length ? B[g.id] : (B.chung || [])).forEach((para, k) => { if (k) TICH.lines.push(''); wrapTxt('✦ ' + para, WW).forEach(l => TICH.lines.push(l)); });
     if (B['nguon_' + g.id] || B.nguon) { TICH.lines.push(''); ctx.font = `italic 600 9px ${SERIF}`; wrapTxt('Nguồn: ' + (B['nguon_' + g.id] || B.nguon), WW).forEach(l => TICH.lines.push('\u0001' + l)); }
-    { ctx.font = `italic 600 9px ${SERIF}`; const en = giaEN(g.ten), dong = (en ? 'Now: ' + en + ' · ' : '') + 'Hầu đồng – Vietnamese Mother Goddess worship (UNESCO Intangible Cultural Heritage, 2016)'; const L = wrapTxt(dong, WW).map(l => '\u0002' + l); L.push(''); TICH.lines = L.concat(TICH.lines); }
     TICH.id = g.id; TICH.off = 0; TICH.ph = 'dau'; TICH.t = 0; }
   const tong = TICH.lines.length * LH, du = Math.max(0, tong - BH + 4), now = S.t, dt = clamp(now - (TICH.last || now), 0, .1); TICH.last = now; TICH.t += dt;
   let a = 1;
@@ -3061,7 +3054,7 @@ function drawBangPhai() { if (TK.on) return; // hướng dẫn nhận lời ban 
     else if (TICH.ph === 'cuoi') { a = TICH.t < 3 ? 1 : Math.max(0, 1 - (TICH.t - 3) / .6); if (TICH.t > 3.6) { TICH.off = 0; TICH.ph = 'vao'; TICH.t = 0; } }
     else if (TICH.ph === 'vao') { a = Math.min(1, TICH.t / .6); if (TICH.t > .6) { TICH.ph = 'dau'; TICH.t = 0; } } }
   ctx.save(); ctx.beginPath(); ctx.rect(X + 4, BY, Wd - 8, BH); ctx.clip(); ctx.globalAlpha = a;
-  TICH.lines.forEach((l, i) => { const y = BY + 6 + i * LH - TICH.off; if (y > BY - LH && y < BY + BH + LH && l) { if (l[0] === '\u0002') { ctx.font = `italic 600 9px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#9fd8ff'; ctx.fillText(l.slice(1), cx, y); } else if (l[0] === '\u0001') { ctx.font = `italic 600 9px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#f2cf72'; ctx.fillText(l.slice(1), cx, y); } else text(l, cx, y, FS, '#f6e9d6', { w: 600 }); } });
+  TICH.lines.forEach((l, i) => { const y = BY + 6 + i * LH - TICH.off; if (y > BY - LH && y < BY + BH + LH && l) { if (l[0] === '\u0001') { ctx.font = `italic 600 9px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#f2cf72'; ctx.fillText(l.slice(1), cx, y); } else text(l, cx, y, FS, '#f6e9d6', { w: 600 }); } });
   ctx.globalAlpha = 1; const f1 = ctx.createLinearGradient(0, BY, 0, BY + 10); f1.addColorStop(0, 'rgba(30,8,6,.9)'); f1.addColorStop(1, 'rgba(30,8,6,0)'); ctx.fillStyle = f1; ctx.fillRect(X + 4, BY, Wd - 8, 10);
   const f2 = ctx.createLinearGradient(0, BY + BH - 12, 0, BY + BH); f2.addColorStop(0, 'rgba(30,8,6,0)'); f2.addColorStop(1, 'rgba(30,8,6,.9)'); ctx.fillStyle = f2; ctx.fillRect(X + 4, BY + BH - 12, Wd - 8, 12);
   ctx.restore();
