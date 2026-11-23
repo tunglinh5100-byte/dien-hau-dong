@@ -157,6 +157,20 @@ window.BANG_TIN = {
     'Dân lập đền thờ vì Ông phù trợ người buôn thuyền, bán bè. Đền Tranh ở xã Đồng Tâm, huyện Ninh Giang, Hải Dương, di tích quốc gia năm 2009',
     'Lễ hội đền Tranh khai hội mùng 10 tháng Hai âm lịch; lễ trọng ngày 14 tháng Hai, tương truyền là ngày sinh của Quan Lớn; ngày 25 tháng Năm có lễ Tiệc Quan',
   ],
+  nguon_ongbo: 'Tín ngưỡng Tứ Phủ (tư liệu dân gian, bản văn chầu); chưa có nguồn báo chí chính thống',
+  ongbo: [
+    'Ông Hoàng Bơ, còn gọi là Quan Hoàng Bơ Thủy Phủ, là vị Ông Hoàng thuộc Thoải phủ (miền sông nước) trong tín ngưỡng Tứ Phủ',
+    'Tương truyền ngài coi sóc vùng sông nước, phù hộ người đi thuyền, đánh cá, buôn bán trên sông',
+    'Khi ngự đồng, ngài mặc áo trắng thêu rồng, thắt đai vàng cam, có điệu chèo thuyền',
+    'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ngài được phối thờ ở ban Công Đồng các đền phủ',
+  ],
+  nguon_cobe2: 'Tín ngưỡng Tứ Phủ (tư liệu dân gian, bản văn chầu); chưa có nguồn báo chí chính thống',
+  cobe2: [
+    'Cô Bé Thượng Ngàn là vị Thánh Cô nhỏ tuổi nhất, thuộc Thượng Ngàn (miền núi rừng), theo hầu Mẫu Thượng Ngàn',
+    'Tương truyền Cô là người con gái miền núi, hồn nhiên, tinh nghịch, hay giúp người đi rừng, hái thuốc',
+    'Khi ngự đồng, Cô mặc áo chàm, váy thổ cẩm, đội khăn hoa; múa mồi, tung tiền, tung quả hoa rồi ngồi nghe văn',
+    'Nơi thờ: có nhiều tích, chưa xác định đền chính. Cô được thờ ở nhiều đền Thượng Ngàn vùng Lạng Sơn, Yên Bái, Tuyên Quang và ở ban Công Đồng các đền phủ',
+  ],
   nguon_caube: 'chonthieng.com, "Cậu Bé Bản Đền"',
   caube: [
     'Cậu Bé Bản Đền là vị Thánh Cậu coi sóc bản đền, bản điện, thuộc hàng Tứ Phủ Thánh Cậu, màu sắc đại diện là xanh',
