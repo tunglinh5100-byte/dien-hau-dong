@@ -315,7 +315,7 @@ function doiCho(p, huong) { const dir = huong === 1 ? 'phai' : huong === -1 ? 't
   const ns = ds[0]; if (!ns) { if (sy < 0 && !trongF5) float(p.x, p.y - 60, 'Hàng đầu dành cho 5 người tương tác nhiều nhất', '#f6dc96'); else float(p.x, p.y - 60, 'Bên ' + ({ trai: 'trái', phai: 'phải', len: 'trên', xuong: 'dưới' })[dir] + ' hết chỗ', '#f6dc96'); p.diT = S.t; return; }
   p.diT = S.t; DI_GAN.push(S.t); if (ns.who) raVe(ns.who); cu.who = null; ns.who = p; p.seat = ns; p.tAct = S.t; p.giuCho = S.t; goTo(p, duongVong(p, p.x, p.y, ns.x, ns.y)); /* 23/11: đi vòng tránh người đang ngồi */ if (!String(p.name).startsWith('\u200b')) float(p.x, p.y - 60, ({ trai: '⬅', phai: '➡', len: '⬆', xuong: '⬇' })[dir] + ' ' + tenHien(p.name), '#f6dc96'); }
 function xepTop5() { // 20/11 20:49 anh Linh: 5 người tương tác nhiều nhất trong chiếu mới được lên hàng đầu
-  const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.gia && !p.tam && p.name !== VY_TEN && p.seat && p.seat.who === p), front = S.seats.slice().sort((a, b) => a.y - b.y).slice(0, 5);
+  const ngoi = S.people.filter(p => p.state === 'seat' && !p.ra && !p.gia && !p.tam && p.name !== VY_TEN && p.seat && p.seat.who === p), front = S.seats.filter(z => !(z.who && z.who.name === VY_TEN)).sort((a, b) => a.y - b.y).slice(0, 5); /* 23/11: chỗ Tường Vy không tính vào 5 chỗ hàng đầu */
   const top = ngoi.filter(p => diemTT(p) > 0).sort((a, b) => diemTT(b) - diemTT(a)).slice(0, 5); let doi = 0;
   top.forEach(p => { if (doi >= 2 || front.includes(p.seat)) return; let ns = front.find(z => !z.who) || front.find(z => z.who && !top.includes(z.who) && z.who.state === 'seat'); if (!ns) return; const q = ns.who && ns.who !== p ? ns.who : null, cu = p.seat; cu.who = null; ns.who = p; p.seat = ns; goTo(p, duongVong(p, p.x, p.y, ns.x, ns.y)); if (!String(p.name).startsWith('\u200b')) float(p.x, p.y - 60, '⬆ ' + tenHien(p.name) + ' lên hàng đầu', '#ffe39a');
     if (q) { /* 23/11 anh Linh: người bị nhường hàng đầu chỉ lùi xuống chỗ trống gần nhất, không chạy sang chỗ xa */ const gan = S.seats.filter(z => !z.who && !front.includes(z)).sort((a, b) => Math.hypot(a.x - q.x, (a.y - q.y) * 1.5) - Math.hypot(b.x - q.x, (b.y - q.y) * 1.5))[0] || cu; gan.who = q; q.seat = gan; goTo(q, duongVong(q, q.x, q.y, gan.x, gan.y)); if (!String(q.name).startsWith('\u200b')) float(q.x, q.y - 60, '⬇ ' + tenHien(q.name) + ' nhường hàng đầu', '#f6dc96'); } doi++; }); }
@@ -3447,17 +3447,20 @@ window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvD
 const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
 (function () { if (!VY_BAT) return;
   const LENH = ['áo đỏ', 'áo xanh ngọc', 'áo tím than', 'áo vàng', 'áo hồng', 'áo đỏ vàng xanh', 'áo trắng xanh', 'quần trắng', 'quần đen', 'quần đỏ', 'vấn đỏ', 'khăn vàng', 'khăn tím', 'tóc nâu', 'tóc vàng', 'tóc đen', 'tóc ngắn', 'tóc vừa', 'tóc dài', 'giày trắng', 'giày đỏ', 'nam', 'nữ',
-    'sang trái', 'sang phải', 'lên', 'xuống', 'vỗ tay', 'lạy cô', 'vẫy tay', 'giơ tay', 'hú', 'đệm đỏ', 'đệm xanh', 'đệm vàng', 'quạt vàng', 'quạt hồng', 'quạt đỏ', 'thắt lưng tím', 'đai vàng', 'thắt lưng đỏ', 'màu tên vàng', 'bảng tên đỏ', 'thắp hương'];
+    'vỗ tay', 'lạy cô', 'vẫy tay', 'giơ tay', 'hú', 'đệm đỏ', 'đệm xanh', 'đệm vàng', 'quạt vàng', 'quạt hồng', 'quạt đỏ', 'thắt lưng tím', 'đai vàng', 'thắt lưng đỏ', 'màu tên vàng', 'bảng tên đỏ', 'thắp hương'];
   const DI = ['sang trái', 'sang phải', 'lên', 'xuống'];
   let gan = [];
   function nap() { const now = Date.now(); LVK[VY_TEN] = VY_TEN; const r = LV[VY_TEN] = LV[VY_TEN] || { n: VY_TEN, v: 8, xp: 200, at: now, f: 1 }; r.n = VY_TEN; r.v = Math.max(r.v || 0, 8); r.xp = Math.max(r.xp || 0, 200); r.f = 1; r.phT = PHIEN; r.phDa = PHIEN; FOL_TAM[VY_TEN] = 1;
     const se = sesOf(VY_TEN); if (now - se.t0 < 31 * 60000) se.t0 = now - 31 * 60000; se.t1 = now; } /* đủ 8 lần dự xem: thắt lưng, đệm gấm, 2 quạt; ở trong live trên 30 phút: hào quang xanh + sao bay */
   function coMat() { return S.people.find(v => v.name === VY_TEN && !v.ra && !v.ghost && v.seat && v.seat.who === v); }
   function lam() { try { if (S.chuyen || (typeof TK !== 'undefined' && TK.on)) return; nap(); const p = coMat(); if (!p) { shareLive(VY_TEN); return; } if (p.state !== 'seat') return;
-    let m; for (let k = 0; k < 6; k++) { m = Math.random() < .3 ? pick(DI) : pick(LENH); if (!gan.includes(m)) break; } gan.push(m); if (gan.length > 8) gan.shift(); say(VY_TEN, m); } catch (e) {} }
+    let m; for (let k = 0; k < 6; k++) { m = pick(LENH); if (!gan.includes(m)) break; } gan.push(m); if (gan.length > 8) gan.shift(); say(VY_TEN, m); } catch (e) {} }
   setTimeout(() => { try { nap(); shareLive(VY_TEN); } catch (e) {} }, 15000);
   (function vong() { setTimeout(() => { lam(); vong(); }, 9000 + Math.random() * 9000); })(); /* 9–18 giây một hành động */
-  setInterval(() => { try { nap(); const p = coMat(); if (p) { p.tAct = S.t; p.giuCho = S.t; } } catch (e) {} }, 5000); })();
+  function gheVy() { if (!S.seats.length) return null; const minY = Math.min(...S.seats.map(z => z.y)); return S.seats.filter(z => z.y < minY + 70).sort((a, b) => a.x - b.x)[0]; } /* 23/11 anh Linh: Tường Vy luôn ngồi chỗ trên cùng góc trái */
+  function veGhe(p) { const g = gheVy(); if (!g || p.seat === g || p.state !== 'seat') return; const q = g.who && g.who !== p ? g.who : null, cu = p.seat; cu.who = q; if (q) { q.seat = cu; goTo(q, duongVong(q, q.x, q.y, cu.x, cu.y)); } g.who = p; p.seat = g; goTo(p, duongVong(p, p.x, p.y, g.x, g.y)); }
+  window.__vyGhe = gheVy;
+  setInterval(() => { try { nap(); const p = coMat(); if (p) { p.tAct = S.t; p.giuCho = S.t; veGhe(p); } } catch (e) {} }, 3000); })();
 // ---------- Xem mẫu tạo hình 5 cấp: mở trang với ?capdo=1 ----------
 const CAPDO = new URLSearchParams(location.search).get('capdo') === '1';
 const CAPDO_P = [[1, 'Lần đầu vào', 135, 330, 'nam'], [2, 'Vào lần 2', 405, 330, 'nu'], [3, 'Vào lần 3', 135, 600, 'nu'], [4, 'Tương tác nhiều', 405, 600, 'nu'], [5, 'Fan cứng', 270, 870, 'nam']]
