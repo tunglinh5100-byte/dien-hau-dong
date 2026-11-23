@@ -159,7 +159,7 @@ window.BANG_TIN = {
   ],
   nguon_ongbo: 'Tín ngưỡng Tứ Phủ (tư liệu dân gian, bản văn chầu); chưa có nguồn báo chí chính thống',
   ongbo: [
-    'Ông Hoàng Bơ, còn gọi là Quan Hoàng Bơ Thủy Phủ, là vị Ông Hoàng thuộc Thoải phủ (miền sông nước) trong tín ngưỡng Tứ Phủ',
+    'Quan Hoàng Bơ, còn gọi là Ông Hoàng Bơ Thủy Phủ, là vị Ông Hoàng thuộc Thoải phủ (miền sông nước) trong tín ngưỡng Tứ Phủ',
     'Tương truyền ngài coi sóc vùng sông nước, phù hộ người đi thuyền, đánh cá, buôn bán trên sông',
     'Khi ngự đồng, ngài mặc áo trắng thêu rồng, thắt đai vàng cam, có điệu chèo thuyền',
     'Nơi thờ: có nhiều tích, chưa xác định đền chính. Ngài được phối thờ ở ban Công Đồng các đền phủ',
