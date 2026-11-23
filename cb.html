@@ -3366,6 +3366,11 @@ function vinhDanh() { const ds = Object.values(SES).filter(r => sesCon(r) && !la
     ['🔥 Hoá mã nhiều nhất', top(r => r.hoa).map(r => [r.n, r.hoa + ' lần'])],
     ['🎯 Đoán mã đúng & nhanh', top(r => r.dg, (a, b) => b.dg - a.dg || a.dgT / a.dg - b.dgT / b.dg).map(r => [r.n, r.dg + ' lần · ' + (r.dgT / r.dg).toFixed(1) + 's'])]]; }
 window.__ses = SES;
+const LV_DU = 5 * 60000; /* ở trong live ít nhất 5 phút mới tính 1 lần dự xem */
+function lvXet(name, r, now) { if (!r || !r.cho || now - r.cho < LV_DU) return; r.cho = 0; lvDirty = true; const truoc = lvOf(r.xp); lvMoi(r); const sau = lvOf(r.xp);
+    if (r.v >= 2) setTimeout(() => { const moc = QUA_MOC.find(m => m[0] === r.v), tiep = mocTiep(r.v); if (moc) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, '🎁 ' + name + ' được ban ' + moc[1], '#ffe39a'); } /* 22/11 12:00 anh Linh: bỏ thẻ chào */ if (sau > truoc) lvUp(name, sau); }, 1600); /* 21/11 21:38 anh Linh: chào đích danh người quen */
+    else if (sau > truoc) setTimeout(() => lvUp(name, sau), 1600); }
+setInterval(() => { try { const now = Date.now(); S.people.forEach(p => { if (p.ra || p.ghost || !p.name || !LVK[p.name]) return; const r = LV[LVK[p.name]]; if (r && r.cho) { r.at = now; lvXet(p.name, r, now); } }); Object.keys(LVK).forEach(n => { const r = LV[LVK[n]]; if (r && r.cho && now - (r.at || 0) < 120000) lvXet(n, r, now); }); } catch (e) {} }, 15000); /* người còn ngồi trong chiếu hoặc vừa tương tác trong 2 phút: coi như vẫn ở trong live */
 function lvEv(name, d, t) {
   { const se = sesOf(name), tt = String(t || '').toLowerCase(); se.t1 = Date.now(); if (!se.av) { const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || d || {}, pp = u.profilePicture || u.avatarThumb || u.avatarMedium || {}, av = u.profilePictureUrl || (d && d.profilePictureUrl) || (pp.url && (Array.isArray(pp.url) ? pp.url[0] : pp.url)) || (pp.urls && pp.urls[0]) || (pp.urlList && pp.urlList[0]) || (pp.url_list && pp.url_list[0]) || ''; if (av) se.av = String(av); } if (tt.includes('chat')) se.bl++; else if (tt.includes('like')) se.tim += Math.max(1, Math.min(50, +((d && (d.count || d.likeCount)) || 1))); else if (tt.includes('share') || (tt.includes('social') && (JSON.stringify(d && d.common && d.common.displayText || d && d.action || d && d.displayType || '').toLowerCase().includes('share') || +(d && d.action) === 3))) se.sh++; }
   const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || {};
@@ -3373,9 +3378,8 @@ function lvEv(name, d, t) {
   LVK[name] = k; let r = LV[k], now = Date.now(), lanMoi = false;
   if (!r) { r = LV[k] = { n: name, v: 0, xp: 0, at: 0, f: 0 }; }
   r.n = name; { const fr = u.followRole != null ? +u.followRole : u.followInfo && u.followInfo.followStatus != null ? +u.followInfo.followStatus : d && d.followRole != null ? +d.followRole : 0; if (fr >= 1 || (d && (d.isModerator || d.isSubscriber)) || u.isModerator) { r.f = 1; FOL_TAM[name] = 1; } } /* 23/11: nhận biết người đã follow từ dữ liệu TikTok */
-  if (now - (r.at || 0) > LV_GIO) { const truoc = lvOf(r.xp); lvMoi(r); lanMoi = true; const sau = lvOf(r.xp);
-    if (r.v >= 2) setTimeout(() => { const moc = QUA_MOC.find(m => m[0] === r.v), tiep = mocTiep(r.v); if (moc) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, '🎁 ' + name + ' được ban ' + moc[1], '#ffe39a'); } /* 22/11 12:00 anh Linh: bỏ thẻ chào */ if (sau > truoc) lvUp(name, sau); }, 1600); /* 21/11 21:38 anh Linh: chào đích danh người quen */
-    else if (sau > truoc) setTimeout(() => lvUp(name, sau), 1600); }
+  if (now - (r.at || 0) > LV_GIO) r.cho = now; /* 23/11 08:41 anh Linh: phiên mới bắt đầu tính giờ; ở trong live đủ 5 phút mới được tính là đã tham dự */
+  lvXet(name, r, now);
   r.at = now; lvDirty = true;
   const p = S.people.find(q => q.name === name); if (p) p.lv = lvOf(r.xp);
   t = String(t || '').toLowerCase();
