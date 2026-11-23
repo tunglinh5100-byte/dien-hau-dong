@@ -3394,7 +3394,8 @@ function lvCong(name, k, r, pts) {
   if (sau > truoc) lvUp(name, sau);
 }
 // gọi từ phần kết nối TikFinity / EulerStream cho MỖI sự kiện của người xem thật
-const SES = {}; /* 22/11 12:00 anh Linh: thống kê trong phiên live này (mở lại trang là tính lại) */
+const SES = (() => { try { const ph = JSON.parse(localStorage.getItem('hd_phien') || 'null'), o = JSON.parse(localStorage.getItem('hd_ses') || 'null'); if (ph && Date.now() - ph.t < 30 * 60000 && o && o.ph === ph.id && o.d) return o.d; } catch (e) {} return {}; })(); /* 23/11 anh Linh: số liệu cảm ơn tính từ đầu phiên live — tải lại trang giữa phiên (dưới 30 phút) vẫn giữ nguyên, không tính lại từ đầu */
+setInterval(() => { try { localStorage.setItem('hd_ses', JSON.stringify({ ph: PHIEN, d: SES })); } catch (e) {} }, 5000);
 function sesOf(name) { return SES[name] || (SES[name] = { n: name, t0: Date.now(), t1: Date.now(), tim: 0, bl: 0, sh: 0, hoa: 0, dg: 0, dgT: 0 }); }
 function sesXem(r) { const q = S.people.find(v => v.name === r.n && !v.ra && !v.ghost); return ((q ? Date.now() : r.t1) - r.t0) / 60000; }
 function sesCon(r) { const q = S.people.some(v => v.name === r.n && !v.ra && !v.ghost); return q || Date.now() - r.t1 < 10 * 60000; }
@@ -3409,7 +3410,7 @@ function vinhDanh() { const ds = Object.values(SES).filter(r => sesCon(r) && !la
 window.__ses = SES;
 let PHIEN = String(Date.now()); try { const o = JSON.parse(localStorage.getItem('hd_phien') || 'null'); if (o && Date.now() - o.t < 30 * 60000) PHIEN = o.id; } catch (e) {} /* mỗi lần mở trang live là một phiên; tải lại trang giữa chừng (dưới 30 phút) vẫn giữ phiên cũ */
 setInterval(() => { try { localStorage.setItem('hd_phien', JSON.stringify({ id: PHIEN, t: Date.now() })); } catch (e) {} }, 20000); try { localStorage.setItem('hd_phien', JSON.stringify({ id: PHIEN, t: Date.now() })); } catch (e) {}
-const LV_DU = 5 * 60000; window.__phienMoi = () => { PHIEN = String(Date.now() + Math.random()); }; /* ở trong live ít nhất 5 phút mới tính 1 lần dự xem */
+const LV_DU = 5 * 60000; window.__phienMoi = () => { PHIEN = String(Date.now() + Math.random()); try { Object.keys(SES).forEach(k => delete SES[k]); } catch (e) {} }; /* ở trong live ít nhất 5 phút mới tính 1 lần dự xem */
 function lvXet(name, r, now) { if (!r || r.phT !== PHIEN || r.phDa === PHIEN || (r.ph1 || 0) - (r.ph0 || now) < LV_DU) return; r.phDa = PHIEN; lvDirty = true; const truoc = lvOf(r.xp); lvMoi(r); const sau = lvOf(r.xp);
     if (r.v >= 2) setTimeout(() => { const moc = QUA_MOC.find(m => m[0] === r.v), tiep = mocTiep(r.v); if (moc) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, '🎁 ' + name + ' được ban ' + moc[1], '#ffe39a'); } /* 22/11 12:00 anh Linh: bỏ thẻ chào */ if (sau > truoc) lvUp(name, sau); }, 1600); /* 21/11 21:38 anh Linh: chào đích danh người quen */
     else if (sau > truoc) setTimeout(() => lvUp(name, sau), 1600); }
