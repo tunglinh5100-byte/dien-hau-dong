@@ -3408,14 +3408,17 @@ function vinhDanh() { const ds = Object.values(SES).filter(r => sesCon(r) && !la
     ['🔥 Hoá mã nhiều nhất', top(r => r.hoa).map(r => [r.n, r.hoa + ' lần'])],
     ['🎯 Đoán mã đúng & nhanh', top(r => r.dg, (a, b) => b.dg - a.dg || a.dgT / a.dg - b.dgT / b.dg).map(r => [r.n, r.dg + ' lần · ' + (r.dgT / r.dg).toFixed(1) + 's'])]]; }
 window.__ses = SES;
-let PHIEN = String(Date.now()); try { const o = JSON.parse(localStorage.getItem('hd_phien') || 'null'); if (o && Date.now() - o.t < 30 * 60000) PHIEN = o.id; } catch (e) {} /* mỗi lần mở trang live là một phiên; tải lại trang giữa chừng (dưới 30 phút) vẫn giữ phiên cũ */
-setInterval(() => { try { localStorage.setItem('hd_phien', JSON.stringify({ id: PHIEN, t: Date.now() })); } catch (e) {} }, 20000); try { localStorage.setItem('hd_phien', JSON.stringify({ id: PHIEN, t: Date.now() })); } catch (e) {}
+/* 23/11 anh Linh: ĐẦU PHIÊN LIVE = tương tác thật đầu tiên từ TikTok (qua TikFinity/Euler) sau ít nhất 30 phút không có tương tác thật nào.
+   Không phụ thuộc lúc mở hay tải lại trang: tải lại giữa phiên vẫn giữ phiên cũ; để trang mở cả ngày thì phiên 10h sáng và phiên 7h tối vẫn là 2 phiên riêng. Bảng cảm ơn, số lần dự xem đều tính theo phiên này. */
+const PH_GAP = 30 * 60000; let PHIEN = String(Date.now()), PH_LAST = 0; try { const o = JSON.parse(localStorage.getItem('hd_phien') || 'null'); if (o && o.id && Date.now() - o.t < PH_GAP) { PHIEN = o.id; PH_LAST = o.t; } } catch (e) {}
+window.__hdPhien = () => PHIEN; let PH_LUU = 0; function phienXet() { const now = Date.now(); if (!PH_LAST || now - PH_LAST > PH_GAP) { PHIEN = String(now); try { Object.keys(SES).forEach(k => delete SES[k]); } catch (e) {} } PH_LAST = now; if (now - PH_LUU > 5000) { PH_LUU = now; try { localStorage.setItem('hd_phien', JSON.stringify({ id: PHIEN, t: now })); } catch (e) {} } }
 const LV_DU = 5 * 60000; window.__phienMoi = () => { PHIEN = String(Date.now() + Math.random()); try { Object.keys(SES).forEach(k => delete SES[k]); } catch (e) {} }; /* ở trong live ít nhất 5 phút mới tính 1 lần dự xem */
 function lvXet(name, r, now) { if (!r || r.phT !== PHIEN || r.phDa === PHIEN || (r.ph1 || 0) - (r.ph0 || now) < LV_DU) return; r.phDa = PHIEN; lvDirty = true; const truoc = lvOf(r.xp); lvMoi(r); const sau = lvOf(r.xp);
     if (r.v >= 2) setTimeout(() => { const moc = QUA_MOC.find(m => m[0] === r.v), tiep = mocTiep(r.v); if (moc) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, '🎁 ' + name + ' được ban ' + moc[1], '#ffe39a'); } /* 22/11 12:00 anh Linh: bỏ thẻ chào */ if (sau > truoc) lvUp(name, sau); }, 1600); /* 21/11 21:38 anh Linh: chào đích danh người quen */
     else if (sau > truoc) setTimeout(() => lvUp(name, sau), 1600); }
 setInterval(() => { try { const now = Date.now(); S.people.forEach(p => { if (p.ra || p.ghost || !p.name || !LVK[p.name]) return; const r = LV[LVK[p.name]]; if (r && r.phT === PHIEN) { r.ph1 = now; r.at = now; lvXet(p.name, r, now); } }); /* đang ngồi trong chiếu thì coi như vẫn ở trong live */ } catch (e) {} }, 15000); /* người còn ngồi trong chiếu hoặc vừa tương tác trong 2 phút: coi như vẫn ở trong live */
 function lvEv(name, d, t) {
+  try { phienXet(); } catch (e) {} /* tương tác thật: xét đầu phiên live */
   { const se = sesOf(name), tt = String(t || '').toLowerCase(); se.t1 = Date.now(); if (!se.av) { const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || d || {}, pp = u.profilePicture || u.avatarThumb || u.avatarMedium || {}, av = u.profilePictureUrl || (d && d.profilePictureUrl) || (pp.url && (Array.isArray(pp.url) ? pp.url[0] : pp.url)) || (pp.urls && pp.urls[0]) || (pp.urlList && pp.urlList[0]) || (pp.url_list && pp.url_list[0]) || ''; if (av) se.av = String(av); } if (tt.includes('chat')) se.bl++; else if (tt.includes('like')) se.tim += Math.max(1, Math.min(50, +((d && (d.count || d.likeCount)) || 1))); else if (tt.includes('share') || (tt.includes('social') && (JSON.stringify(d && d.common && d.common.displayText || d && d.action || d && d.displayType || '').toLowerCase().includes('share') || +(d && d.action) === 3))) se.sh++; }
   const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || {};
   const k = String(u.userId || u.uniqueId || (d && (d.userId || d.uniqueId)) || name);
@@ -4011,5 +4014,5 @@ buildCfgPanel(); napNhacGia();
 })();
 </script>
 
-<script src="nhatky.js?v=1"></script>
+<script src="nhatky.js?v=2"></script>
 </body></html>

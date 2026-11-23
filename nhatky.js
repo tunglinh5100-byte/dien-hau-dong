@@ -48,7 +48,8 @@
     else if (loai.includes('follow')) kieu = 'theo doi';
     else if (loai.includes('member')) kieu = 'vao live';
     const now = new Date();
-    return { id: now.getTime() + '-' + Math.random().toString(36).slice(2, 8), thoiGian: gioVN(now), phien, trang: TRANG, loai: kieu,
+    const phTrang = window.__hdPhien && window.__hdPhien(); /* 23/11: cùng mốc đầu phiên live với trang (tương tác thật đầu tiên sau 30 phút im) */
+    return { id: now.getTime() + '-' + Math.random().toString(36).slice(2, 8), thoiGian: gioVN(now), phien: phTrang && +phTrang ? gioVN(new Date(+phTrang)).slice(0, 16) : phien, trang: TRANG, loai: kieu,
       userId: String(u.userId || d.userId || ''), taiKhoan: String(u.uniqueId || d.uniqueId || ''), tenHienThi: String(u.nickname || d.nickname || ten || ''),
       noiDung, soLuong, tenQua, kimCuong: kc, quanHe: quanHe(u, d), giaDangHau: giaDangHau(), soNguoiXem: '', anhDaiDien: anh(u, d), gui: 0 };
   }
@@ -58,7 +59,7 @@
 
   // ---- móc vào chỗ trang đã xử lý sự kiện người xem thật ----
   function moc() { const L = window.__hdLv; if (!L || L.__nk) return !!(L && L.__nk);
-    const goc = L.ev; L.ev = function (ten, d, t) { ghi(ten, d, t); return goc.apply(this, arguments); }; L.__nk = 1; return true; }
+    const goc = L.ev; L.ev = function (ten, d, t) { const kq = goc.apply(this, arguments); ghi(ten, d, t); return kq; }; /* trang xét đầu phiên trước, rồi mới ghi nhật ký */ L.__nk = 1; return true; }
   if (!moc()) { const iv = setInterval(() => { if (moc()) clearInterval(iv); }, 1000); }
 
   // ---- số người xem (chỉ có khi chạy TikFinity trên máy tính): ghi mỗi phút 1 dòng ----
