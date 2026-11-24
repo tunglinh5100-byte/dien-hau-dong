@@ -2560,11 +2560,11 @@ const TUI_O = [[500, 800], [444, 806], [388, 812], [506, 856], [450, 862], [394,
    Chỉ mở ở bước nghe văn / ngự tửu. Comment đúng 'cho con xin lộc ngài ạ' → xếp hàng, ai comment trước lên trước.
    Người xin lên quỳ cạnh ngài, cầm quạt phẩy hầu; cô cậu đồng đưa tiền (50k/100k/500k) cho hầu dâng 1, hầu dâng 1 trao tận tay. Xe giá thì xoá hàng. */
 const XLN = { q: [], cur: null };
-function xlnMo() { try { return !S.chuyen && /^(nghevan|ngutuu|uongruou|uongnuoc|nghe1|ngoinghe|ngamtho)$/.test(buocDangLe() || ''); } catch (e) { return false; } }
+function xlnMo() { try { return !S.chuyen && /^(nghevan|ngutuu|uongruou|uongnuoc|nghe1|ngoinghe|ngamtho|phatloc|tungtien|tientung|loctung|tungloc|tungloc2|banloc|locqua|phatlixi)$/.test(buocDangLe() || '') /* 24/11 15:05 anh Linh: ngự tửu (nghe văn) và phát lộc đều được xin lộc */; } catch (e) { return false; } }
 function xlnCau(msg) { return /cho con xin loc ngai a/.test(norm(String(msg || '')).replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ')); }
 const XLN_SLOT = i => [DEM.x - 72 + (i % 2 ? 4 : -4), (NH_MODE ? 836 : 770) + i * 34]; /* hàng xin lộc thẳng bên dưới, song song với hàng nhận lộc ở thảm */
 function xlnVe(p) { p.quatXL = false; p.carry = null; if (!S.people.includes(p) || p.ra) return; if (p.seat && p.seat.who === p) goTo(p, [[p.x, Math.max(p.y, 760)], [p.seat.x, p.seat.y]], () => { p.state = 'seat'; p.pose = 'kneel'; }); else raVe(p); }
-function xinLocNgai(p) { if (!p || p.ghost || p.ra) return; if (!xlnMo()) { float(p.x, p.y - 60, 'Đến lúc nghe văn, ngự tửu mới xin lộc được nhé', '#f6dc96'); return; }
+function xinLocNgai(p) { if (!p || p.ghost || p.ra) return; if (!xlnMo()) { float(p.x, p.y - 60, 'Đến lúc ngự tửu, phát lộc mới xin lộc được nhé', '#f6dc96'); return; }
   if (XLN.cur === p || XLN.q.includes(p)) return; p.xinLoc = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); /* đang chờ nhận lộc ở thảm thì sang hàng xin lộc */
   XLN.q.push(p); const k = XLN.q.length + (XLN.cur ? 1 : 0); float(p.x, p.y - 60, '🙏 ' + tenHien(p.name) + ' xếp hàng xin lộc' + (k > 1 ? ' (thứ ' + k + ')' : ''), '#ffe39a'); }
 function xlnUpd() { const b = buocDangLe() || ''; if (S.chuyen || /^(segia|segia0|xegia|xegia1|xegia2)$/.test(b)) { XLN.q.forEach(xlnVe); XLN.q.length = 0; }
