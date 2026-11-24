@@ -235,12 +235,15 @@ const HH_RC = {}, AO_BAO = {};
 /* 24/11 14:39 anh Linh: mỗi bông hoa hồng người xem tặng = chủ live im lặng 10 giây, đếm lùi ngay dưới dòng LƯU Ý (tặng nhiều thì cộng dồn) */
 const IL = { het: 0, ten: '', xong: 0 };
 function imLang(name, so) { const now = Date.now(); IL.het = Math.min(Math.max(IL.het, now) + 10000 * (so || 1), now + 300000); IL.ten = name; IL.xong = 0; }
-function drawImLang() { const now = Date.now(); if (IL.het <= now) { if (IL.ten && !IL.xong) IL.xong = now; if (!IL.xong || now - IL.xong > 2500) return; }
-  const con = Math.max(0, Math.ceil((IL.het - now) / 1000)), y = (typeof LYC !== 'undefined' && LYC.y ? LYC.y : 690) + 6, w = 300, h = 46, x = 270 - w / 2, nhay = con > 0 && con <= 3 && Math.floor(now / 250) % 2 === 0;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; rr(x, y, w, h, 14, nhay ? 'rgba(200,30,60,.96)' : 'rgba(120,16,40,.94)'); ctx.shadowBlur = 0; ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x, y, w, h, 14); ctx.stroke();
-  if (con > 0) { text('🌹', x + 24, y + h / 2 + 1, 22, '#fff'); text('Chủ live im lặng', x + 122, y + h / 2 + 1, 17, '#ffe39a', { f: SERIF, w: 800 }); /* 24/11 14:44 anh Linh: không hiện tên người tặng */
-    ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (((IL.het - now) / 1000) % 10 || 10) / 10); ctx.strokeStyle = '#c8243c'; ctx.lineWidth = 4; ctx.stroke(); text(String(con), x + w - 34, y + h / 2 + 1, con > 99 ? 14 : 19, '#9c1c12', { f: SERIF, w: 900 }); }
-  else text('🎤 Chủ live được nói rồi!', 270, y + h / 2 + 1, 16, '#ffe39a', { f: SERIF, w: 800 });
+function veMute(cx, cy, k) { /* loa gạch đỏ */ ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k); ctx.fillStyle = '#fff6e6'; ctx.beginPath(); ctx.moveTo(-9, -3.5); ctx.lineTo(-4, -3.5); ctx.lineTo(2, -9); ctx.lineTo(2, 9); ctx.lineTo(-4, 3.5); ctx.lineTo(-9, 3.5); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#fff6e6'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(3, 0, 5, -.9, .9); ctx.stroke(); ctx.beginPath(); ctx.arc(3, 0, 9, -.9, .9); ctx.stroke();
+  ctx.strokeStyle = '#ff2a2a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-10, -10); ctx.lineTo(11, 10); ctx.stroke(); ctx.restore(); }
+function drawImLang() { const now = Date.now(); if (IL.het <= now) { if (IL.ten && !IL.xong) IL.xong = now; if (!IL.xong || now - IL.xong > 2500) return; } /* 24/11 14:47 anh Linh: biểu tượng loa gạch đỏ, khung nhỏ cho đỡ che người trong chiếu */
+  const con = Math.max(0, Math.ceil((IL.het - now) / 1000)), y = (typeof LYC !== 'undefined' && LYC.y ? LYC.y : 690) + 4, w = 176, h = 30, x = 270 - w / 2, nhay = con > 0 && con <= 3 && Math.floor(now / 250) % 2 === 0;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 6; rr(x, y, w, h, 10, nhay ? 'rgba(200,30,60,.95)' : 'rgba(120,16,40,.92)'); ctx.shadowBlur = 0; ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.stroke();
+  if (con > 0) { veMute(x + 18, y + h / 2, .8); text('Chủ live im lặng', x + 82, y + h / 2 + 1, 12.5, '#ffe39a', { f: SERIF, w: 800 });
+    const cx = x + w - 20, cy = y + h / 2; ctx.beginPath(); ctx.arc(cx, cy, 12, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.beginPath(); ctx.arc(cx, cy, 12, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (((IL.het - now) / 1000) % 10 || 10) / 10); ctx.strokeStyle = '#c8243c'; ctx.lineWidth = 3; ctx.stroke(); text(String(con), cx, cy + 1, con > 99 ? 10 : 13, '#9c1c12', { f: SERIF, w: 900 }); }
+  else text('🎤 Chủ live được nói rồi!', 270, y + h / 2 + 1, 12.5, '#ffe39a', { f: SERIF, w: 800 });
   ctx.restore(); }
 window.__imLang = n => imLang(n || 'Con nhang');
 function hoaHong(name, d) { /* 21/11 21:49 anh Linh: ấn tặng hoa hồng thì đổi màu áo ngẫu nhiên, ấn đến khi ưng ý */
