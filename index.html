@@ -238,7 +238,7 @@ function imLang(name, so) { const now = Date.now(); IL.het = Math.min(Math.max(I
 function drawImLang() { const now = Date.now(); if (IL.het <= now) { if (IL.ten && !IL.xong) IL.xong = now; if (!IL.xong || now - IL.xong > 2500) return; }
   const con = Math.max(0, Math.ceil((IL.het - now) / 1000)), y = (typeof LYC !== 'undefined' && LYC.y ? LYC.y : 690) + 6, w = 300, h = 46, x = 270 - w / 2, nhay = con > 0 && con <= 3 && Math.floor(now / 250) % 2 === 0;
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; rr(x, y, w, h, 14, nhay ? 'rgba(200,30,60,.96)' : 'rgba(120,16,40,.94)'); ctx.shadowBlur = 0; ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x, y, w, h, 14); ctx.stroke();
-  if (con > 0) { text('🌹', x + 24, y + h / 2 + 1, 22, '#fff'); text('Chủ live im lặng', x + 118, y + 16, 15, '#ffe39a', { f: SERIF, w: 800 }); text(tenHien(IL.ten) + ' tặng hoa hồng', x + 118, y + 34, 11, '#fff1d6', { w: 700 });
+  if (con > 0) { text('🌹', x + 24, y + h / 2 + 1, 22, '#fff'); text('Chủ live im lặng', x + 122, y + h / 2 + 1, 17, '#ffe39a', { f: SERIF, w: 800 }); /* 24/11 14:44 anh Linh: không hiện tên người tặng */
     ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (((IL.het - now) / 1000) % 10 || 10) / 10); ctx.strokeStyle = '#c8243c'; ctx.lineWidth = 4; ctx.stroke(); text(String(con), x + w - 34, y + h / 2 + 1, con > 99 ? 14 : 19, '#9c1c12', { f: SERIF, w: 900 }); }
   else text('🎤 Chủ live được nói rồi!', 270, y + h / 2 + 1, 16, '#ffe39a', { f: SERIF, w: 800 });
   ctx.restore(); }
