@@ -3555,6 +3555,10 @@ const LV_TEN = ['', 'Khách vãng lai', 'Con nhang', 'Con nhang thân', 'Đệ t
 const LV_XP = [0, 0, 20, 30, 90, 200]; // lần 1 = 10 điểm, lần 2 = 20 (Lv2), lần 3 = 30 (Lv3); tương tác thì lên nhanh hơn
 const LV_GIO = 3 * 3600 * 1000; // vắng quá 3 giờ rồi vào lại thì tính là một lần vào mới
 let LV = {}; try { LV = JSON.parse(localStorage.getItem('hd_lv') || '{}') || {}; } catch (e) {}
+/* 24/11 anh Linh: máy live bị xoá bộ nhớ thì số lần dự về 1 – lấy bản tính lại từ Sheet nhật ký (từ 22/11), gộp lấy số lớn hơn. Khoá là mã băm của ID TikTok, không lưu tên */
+let LV_GOC = null; function lvBam(s) { let h = 0x811c9dc5; for (const c of new TextEncoder().encode(String(s))) { h ^= c; h = Math.imul(h, 0x01000193) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
+function lvGop(k, r) { if (!LV_GOC || !r || r.gocDa) return; r.gocDa = 1; const g = LV_GOC[lvBam(k)]; if (!g) return; if (g[1]) r.f = 1; if ((g[0] || 0) > (r.v || 0)) { r.v = g[0]; r.xp = Math.max(r.xp || 0, g[0] * 10); } lvDirty = true; }
+fetch('lv-goc.json?t=' + Date.now()).then(x => x.json()).then(j => { LV_GOC = (j && j.d) || null; if (LV_GOC) Object.keys(LV).forEach(k => { const r = LV[k]; if (r) { r.gocDa = 0; lvGop(k, r); } }); }).catch(() => {});
 const LVK = {}; // tên đang hiện trên màn hình -> khoá lưu (ID TikTok)
 let lvDirty = false; setInterval(() => { if (!lvDirty) return; lvDirty = false;
   try { const ks = Object.keys(LV); if (ks.length > 4000) ks.sort((a, b) => LV[a].at - LV[b].at).slice(0, ks.length - 3500).forEach(k => delete LV[k]); localStorage.setItem('hd_lv', JSON.stringify(LV)); } catch (e) {} }, 4000);
@@ -3604,7 +3608,7 @@ function lvEv(name, d, t) {
   const u = (d && (d.user || d.fromUser || (d.common && d.common.user))) || {};
   const k = String(u.userId || u.uniqueId || (d && (d.userId || d.uniqueId)) || name);
   LVK[name] = k; let r = LV[k], now = Date.now(), lanMoi = false;
-  if (!r) { r = LV[k] = { n: name, v: 0, xp: 0, at: 0, f: 0 }; }
+  if (!r) { r = LV[k] = { n: name, v: 0, xp: 0, at: 0, f: 0 }; } lvGop(k, r);
   r.n = name; { const fr = u.followRole != null ? +u.followRole : u.followInfo && u.followInfo.followStatus != null ? +u.followInfo.followStatus : d && d.followRole != null ? +d.followRole : 0; if (fr >= 1 || (d && (d.isModerator || d.isSubscriber)) || u.isModerator) { r.f = 1; FOL_TAM[name] = 1; } } /* 23/11: nhận biết người đã follow từ dữ liệu TikTok */
   if (r.phT !== PHIEN) { r.phT = PHIEN; r.ph0 = now; } r.ph1 = now; lvXet(name, r, now); /* 23/11 08:50 anh Linh: tính theo phiên live: từ tương tác đầu tiên đến cuối cùng trong phiên đủ 5 phút thì được 1 lần */
   r.at = now; lvDirty = true;
