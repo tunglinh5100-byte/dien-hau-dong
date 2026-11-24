@@ -232,10 +232,21 @@ function aoCmt(msg) { let m = sachCmt(msg); const coTu = /(^|\s)(áo|ao|màu|mau
   m = m.replace(/^(?:(?:con|em|cho|xin|mình|minh|tôi|toi|tớ|to|muốn|muon|được|duoc|hãy|hay)\s)*(?:(?:đổi|doi|thay|mặc|mac|chọn|chon|lấy|lay)\s)?(?:(?:sang|qua)\s)?(?:(?:màu áo|mau ao|khăn áo|áo|ao|màu|mau)\s)?(?:(?:màu|mau)\s)?(?:(?:sang|qua|thành|thanh)\s)?/, '').replace(/( nhé| nha| ạ| đi| với| nhe| nhá| ak| à| thôi| nha| a| di| voi)+$/, '').trim();
   if (!m || m.length > 20) return null; return mauX(m, coTu); }
 const HH_RC = {}, AO_BAO = {};
+/* 24/11 14:39 anh Linh: mỗi bông hoa hồng người xem tặng = chủ live im lặng 10 giây, đếm lùi ngay dưới dòng LƯU Ý (tặng nhiều thì cộng dồn) */
+const IL = { het: 0, ten: '', xong: 0 };
+function imLang(name, so) { const now = Date.now(); IL.het = Math.min(Math.max(IL.het, now) + 10000 * (so || 1), now + 300000); IL.ten = name; IL.xong = 0; }
+function drawImLang() { const now = Date.now(); if (IL.het <= now) { if (IL.ten && !IL.xong) IL.xong = now; if (!IL.xong || now - IL.xong > 2500) return; }
+  const con = Math.max(0, Math.ceil((IL.het - now) / 1000)), y = (typeof LYC !== 'undefined' && LYC.y ? LYC.y : 690) + 6, w = 300, h = 46, x = 270 - w / 2, nhay = con > 0 && con <= 3 && Math.floor(now / 250) % 2 === 0;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; rr(x, y, w, h, 14, nhay ? 'rgba(200,30,60,.96)' : 'rgba(120,16,40,.94)'); ctx.shadowBlur = 0; ctx.strokeStyle = '#f2cf72'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x, y, w, h, 14); ctx.stroke();
+  if (con > 0) { text('🌹', x + 24, y + h / 2 + 1, 22, '#fff'); text('Chủ live im lặng', x + 118, y + 16, 15, '#ffe39a', { f: SERIF, w: 800 }); text(tenHien(IL.ten) + ' tặng hoa hồng', x + 118, y + 34, 11, '#fff1d6', { w: 700 });
+    ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, 0, 7); ctx.fillStyle = '#fff1c2'; ctx.fill(); ctx.beginPath(); ctx.arc(x + w - 34, y + h / 2, 19, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (((IL.het - now) / 1000) % 10 || 10) / 10); ctx.strokeStyle = '#c8243c'; ctx.lineWidth = 4; ctx.stroke(); text(String(con), x + w - 34, y + h / 2 + 1, con > 99 ? 14 : 19, '#9c1c12', { f: SERIF, w: 900 }); }
+  else text('🎤 Chủ live được nói rồi!', 270, y + h / 2 + 1, 16, '#ffe39a', { f: SERIF, w: 800 });
+  ctx.restore(); }
+window.__imLang = n => imLang(n || 'Con nhang');
 function hoaHong(name, d) { /* 21/11 21:49 anh Linh: ấn tặng hoa hồng thì đổi màu áo ngẫu nhiên, ấn đến khi ưng ý */
-  const rc = +((d && (d.repeatCount || (d.gift && d.gift.repeatCount))) || 0); if (rc) { const cu = HH_RC[name] || 0; if (rc === cu) return; HH_RC[name] = rc < cu ? rc : rc; }
+  let soHoa = 1; const rc = +((d && (d.repeatCount || (d.gift && d.gift.repeatCount))) || 0); if (rc) { const cu = HH_RC[name] || 0; if (rc === cu) return; soHoa = rc > cu ? Math.min(30, rc - cu) : 1; HH_RC[name] = rc; }
   const p = person(name), cu = aoLuu(name) || (p && p.coat); let m; do { m = AO_NN[Math.floor(Math.random() * AO_NN.length)]; } while (m[1] === cu && AO_NN.length > 1);
-  doiAo(name, p && !p.ghost ? p : null, [null, m[1], m[0]]); if (p && !p.ghost) { p.pose = 'raise'; p.poseT = 1.2; } }
+  doiAo(name, p && !p.ghost ? p : null, [null, m[1], m[0]]); if (p && !p.ghost) { p.pose = 'raise'; p.poseT = 1.2; } imLang(name, soHoa); }
 window.__hoaHong = hoaHong;
 function soLanVao(name) { const r = LVK[name] && LV[LVK[name]]; return r ? (r.f || FOL_TAM[name] ? (r.v || 1) : 1) : 0; } /* chưa follow: luôn tính là lần 1, chưa có phụ kiện */
 const HANG_CHO = []; /* 20/11 20:24 anh Linh: chiếu đủ người thì người share xếp hàng chờ */
@@ -3375,7 +3386,7 @@ function drawTin(t) {
 const SAFE_X = 56;
 function drawOverlay(t) {
   { const ch = S.chuyen; if (ch && ch.toId === 'ongbay' && ch.t >= CG.thinh - .1 && OB.buf && !S.cat) { S.chuyen = null; CO.sit = 0; try { VAN_STOP = 0; VAN_DONE = null; VAN_AU.pause(); } catch (e) {} S.cat = { t: .6, id: 'ongbay', ten: 'Ông Hoàng Bảy' }; } }
-  if (NH_MODE) drawLuuYChay(); else drawLuuY(); /* 20/11 20:41: bỏ vòng tròn số người chờ */ if (S.cat) { drawCat(); }
+  if (NH_MODE) { drawLuuYChay(); try { drawImLang(); } catch (e) {} } else drawLuuY(); /* 20/11 20:41: bỏ vòng tròn số người chờ */ if (S.cat) { drawCat(); }
   // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
   const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
   drawBangPhai();
