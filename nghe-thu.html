@@ -7,7 +7,7 @@
 <p style="margin-top:18px"><button id="cham" style="font-size:16px;padding:10px 18px;border-radius:10px;border:0">Nghe tốc độ thường</button></p>
 <p id="tb" style="opacity:.8;font-size:14px"></p>
 <script>
-const $=i=>document.getElementById(i);const cau=()=>$('ten').value.trim()+' ơi! Nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé!';
+const $=i=>document.getElementById(i);const cau=()=>$('ten').value.trim()+' ơi, để vào chiếu ngồi, bạn chia sẻ live nhé.';
 const hien=()=>$('cau').textContent='“'+cau()+'”';$('ten').oninput=hien;hien();
 function phat(r){const a=new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q='+encodeURIComponent(cau()));a.playbackRate=r;a.preservesPitch=true;a.onplaying=()=>{a.playbackRate=r};$('tb').textContent='Đang phát…';a.onended=()=>$('tb').textContent='';a.play().catch(()=>$('tb').textContent='Không phát được, anh thử bấm lại.');}
 $('phat').onclick=()=>phat(1.5);$('cham').onclick=()=>phat(1);

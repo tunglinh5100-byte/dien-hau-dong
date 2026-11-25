@@ -2805,7 +2805,7 @@ function noiKhen(name, cau) {
 const DOCMOI = { on: !/[?&]docmoi=0/.test(location.search), da: new Set(), q: [] };
 try { if (localStorage.getItem('hd_docmoi') === '0' && !/[?&]docmoi=1/.test(location.search)) DOCMOI.on = false; } catch (e) {}
 window.__hdDocMoi = on => { DOCMOI.on = !!on; try { localStorage.setItem('hd_docmoi', on ? '1' : '0'); } catch (e) {} S.banner = { admin: 1, text: on ? 'Bật đọc tên người mới vào live' : 'Tắt đọc tên người mới vào live', t: 0, life: 2.5 }; };
-function docMoiNoi() { if (!DOCMOI.q.length || DOCMOI.dang) return; const ten = DOCMOI.q.shift(), cau = ten + ' ơi! Nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé!';
+function docMoiNoi() { if (!DOCMOI.q.length || DOCMOI.dang) return; const ten = DOCMOI.q.shift(), cau = ten + ' ơi, để vào chiếu ngồi, bạn chia sẻ live nhé.';
   DOCMOI.dang = true; const xong = () => { DOCMOI.dang = false; setTimeout(docMoiNoi, 400); };
   /* 25/11 11:50 anh Linh: phát bằng âm thanh của trang (TikTok LIVE Studio thu được), giọng nữ, đọc nhanh, hào hứng */
   try { const a = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(cau)); a.volume = Math.min(1, VOL_KHEN + .15); a.muted = !S.sound; a.playbackRate = 1.5; a.preservesPitch = true;
