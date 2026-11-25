@@ -2805,13 +2805,16 @@ function noiKhen(name, cau) {
 const DOCMOI = { on: !/[?&]docmoi=0/.test(location.search), da: new Set(), q: [] };
 try { if (localStorage.getItem('hd_docmoi') === '0' && !/[?&]docmoi=1/.test(location.search)) DOCMOI.on = false; } catch (e) {}
 window.__hdDocMoi = on => { DOCMOI.on = !!on; try { localStorage.setItem('hd_docmoi', on ? '1' : '0'); } catch (e) {} S.banner = { admin: 1, text: on ? 'Bật đọc tên người mới vào live' : 'Tắt đọc tên người mới vào live', t: 0, life: 2.5 }; };
-function docMoiNoi() { if (typeof speechSynthesis === 'undefined' || !DOCMOI.q.length) return; try { if (speechSynthesis.speaking || speechSynthesis.pending) return;
-  const ten = DOCMOI.q.shift(), u = new SpeechSynthesisUtterance(ten + ' ơi, nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé'); u.lang = 'vi-VN';
-  const v = VI_NU || VI_NAM || VI_VOICE; if (v) u.voice = v; const nam = v && LA_NAM(v); u.rate = .95; u.pitch = nam ? 1.6 : 1.1; u.volume = VOL_KHEN; /* giọng nữ; máy chỉ có giọng nam thì nâng cao giọng */
-  u.onend = u.onerror = () => setTimeout(docMoiNoi, 600); speechSynthesis.speak(u); } catch (e) {} }
+function docMoiNoi() { if (!DOCMOI.q.length || DOCMOI.dang) return; const ten = DOCMOI.q.shift(), cau = ten + ' ơi! Nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé!';
+  DOCMOI.dang = true; const xong = () => { DOCMOI.dang = false; setTimeout(docMoiNoi, 400); };
+  /* 25/11 11:50 anh Linh: phát bằng âm thanh của trang (TikTok LIVE Studio thu được), giọng nữ, đọc nhanh, hào hứng */
+  try { const a = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(cau)); a.volume = Math.min(1, VOL_KHEN + .15); a.muted = !S.sound; a.playbackRate = 1.22; a.preservesPitch = true;
+    let xg = false; const ok = () => { if (!xg) { xg = true; xong(); } }; a.onended = ok; a.onerror = () => { if (xg) return; xg = true; docMoiMay(cau, xong); }; setTimeout(ok, 9000);
+    const p = a.play(); if (p && p.catch) p.catch(() => { if (!xg) { xg = true; docMoiMay(cau, xong); } }); } catch (e) { docMoiMay(cau, xong); } }
+function docMoiMay(cau, xong) { /* dự phòng: giọng đọc có sẵn trên máy */ try { if (typeof speechSynthesis === 'undefined') return xong(); const u = new SpeechSynthesisUtterance(cau); u.lang = 'vi-VN'; const v = VI_NU || VI_NAM || VI_VOICE; if (v) u.voice = v; const nam = v && LA_NAM(v); u.rate = 1.15; u.pitch = nam ? 1.6 : 1.2; u.volume = VOL_KHEN; u.onend = u.onerror = xong; speechSynthesis.speak(u); setTimeout(xong, 9000); } catch (e) { xong(); } }
 window.__docMoi = nm => { if (!DOCMOI.on || !nm || DOCMOI.da.has(nm)) return; const ten = tenDoc(nm); if (!ten) return; DOCMOI.da.add(nm); DOCMOI.q.push(ten); if (DOCMOI.q.length > 3) DOCMOI.q.splice(0, DOCMOI.q.length - 3); docMoiNoi(); };
 setInterval(docMoiNoi, 1500);
-window.__docThu = () => { DOCMOI.q.unshift('Hoa Mai'); docMoiNoi(); }; /* nút nghe thử trên /dk: đọc mẫu 1 câu, không cần bật */
+window.__docThu = () => { DOCMOI.q.unshift('Hoa Mai'); docMoiNoi(); S.banner = { admin: 1, text: 'Đang đọc thử câu chào người mới', t: 0, life: 3 }; }; /* nút nghe thử trên /dk: đọc mẫu 1 câu, không cần bật */
 function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 0; } /* 16/11 9:21: không nghỉ giữa các lần ban khen */ } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (KHEN.q.length > 12 && !goiDuoc()) KHEN.q.splice(0, KHEN.q.length - 12); /* chưa tới lúc khen: giữ 12 người gần nhất */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe() && goiDuoc()) { /* 19/11 20:06 anh Linh: chỉ ban khen lúc phát lộc, ngự tửu */ /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
