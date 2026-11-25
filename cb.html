@@ -2378,7 +2378,7 @@ function veAva(n, x, y, r, ring) { ctx.save(); ctx.beginPath(); ctx.arc(x, y, r 
   if (im) { ctx.save(); ctx.clip(); ctx.drawImage(im, x - r, y - r, r * 2, r * 2); ctx.restore(); }
   else { const h = [...String(n)].reduce((m, c) => m + c.charCodeAt(0), 0); ctx.fillStyle = ['#2f6f9e', '#b04a5a', '#3f8a5c', '#7a4fa0', '#c07a2c', '#2f8a86'][h % 6]; ctx.fill(); text(([...String(n).trim()][0] || '?').toUpperCase(), x, y + 1, r * 1.05, '#fff6e6', { w: 800 }); }
   ctx.restore(); }
-function veBangTK(t) { if (!TK.on) return; const a = Math.min(1, TK.t / .8), vd = TK.vd || [], W2 = 148, XL = SAFE_X, XR = W - SAFE_X - 148, Y1 = 92, Y2 = 296, Hb = 198; /* 22/11: nằm gọn trong vùng điện thoại nhìn thấy */
+function veBangTK(t) { if (!TK.on || !/[?&]tkbang=1/.test(location.search)) return; /* 25/11 13:54 anh Linh: bỏ 2 bảng thống kê cuối buổi (đang sai số); ?tkbang=1 để hiện lại */ const a = Math.min(1, TK.t / .8), vd = TK.vd || [], W2 = 148, XL = SAFE_X, XR = W - SAFE_X - 148, Y1 = 92, Y2 = 296, Hb = 198; /* 22/11: nằm gọn trong vùng điện thoại nhìn thấy */
   const TIEU = [['🙏 Cảm ơn người', 'xem live lâu nhất'], ['🙏 Cảm ơn người', 'tương tác nhiều nhất'], ['🙏 Cảm ơn người', 'hoá mã nhiều nhất'], ['🙏 Cảm ơn người', 'đoán mã đúng, nhanh nhất']], VT = [[XL, Y1], [XR, Y1], [XL, Y2], [XR, Y2]];
   ctx.save(); ctx.globalAlpha = a;
   vd.forEach(([, ds], i) => { const [x, y] = VT[i], cx = x + W2 / 2; rr(x, y, W2, Hb, 12, 'rgba(66,12,8,.94)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.roundRect(x, y, W2, Hb, 12); ctx.stroke();
