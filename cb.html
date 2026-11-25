@@ -2901,6 +2901,10 @@ function cnmVe(p, t, s) { p._cnm = 0;
   if (pk && pk.has('demGam')) { const d = cnmDem(cnmHex(nvp.dem)), dw = 50 * s, dh = dw * (d.naturalHeight || d.height) / (d.naturalWidth || d.width); ctx.drawImage(d, -dw / 2, -dh * .72, dw, dh); } /* đệm gấm dưới người ngồi */
   ctx.translate(0, -bob); if (rot) ctx.rotate(rot); if (mir) ctx.scale(-1, 1);
   ctx.drawImage(cnmTint(sx, cnmMau(p), cnmHex(nvp.lung), cnmHex(nvp.quat), nvp), col * M.cw + r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
+  { const kt = nvp.kieuToc, HT = { back: .6, br: .6, bl: .6, sit: .55, sitL: .55, sitQ: .55, sitQ2: .55 }[key]; /* 25/11 anh Linh: tóc vừa / dài xõa sau lưng (theo comment), tóc ngắn để như ảnh */
+    if (HT && (kt === 'dai' || kt === 'vua')) { const ny = -h * HT, ey = -h * (kt === 'dai' ? (HT > .58 ? .22 : .16) : (HT > .58 ? .4 : .36)), hw = w * (/^sitQ/.test(key) ? .13 : .2), sw = Math.sin(t * 2 + p.x) * hw * .06, hc = cnmHex(nvp.toc) || '#2b1d17';
+      ctx.beginPath(); ctx.moveTo(-hw, ny); ctx.quadraticCurveTo(-hw * 1.15, (ny + ey) / 2, -hw * .7 + sw, ey); ctx.quadraticCurveTo(0, ey + hw * .35, hw * .7 + sw, ey); ctx.quadraticCurveTo(hw * 1.15, (ny + ey) / 2, hw, ny); ctx.closePath(); ctx.fillStyle = hc; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.lineWidth = Math.max(.6, w * .012); [-.45, 0, .45].forEach(f => { ctx.beginPath(); ctx.moveTo(hw * f, ny + 2); ctx.quadraticCurveTo(hw * f * 1.2, (ny + ey) / 2, hw * f * .9 + sw, ey - 2); ctx.stroke(); }); } }
   ctx.restore();
   if (p.carry) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.7 * s, 1.7 * s); drawItem(p.carry, 11, -22, .8); ctx.restore(); }
   p._cnm = 1; return true; }
