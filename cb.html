@@ -3979,7 +3979,7 @@ function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i =
 function mauKhungGia() { /* 25/11 13:22 anh Linh: khung câu đối và tiến trình cùng màu áo cô cậu đồng của giá; chữ tự đổi màu cho dễ đọc nhất */
   const hx = (window.__ao || GIA().ao || '#8e211c').replace('#', ''), dich = [0, 2, 4].map(i => parseInt(hx.substr(i, 2), 16)); /* 25/11 13:28 anh Linh: chỉ đổi màu khi thay khăn áo xong */
   const laMau = /Mẫu/.test(GIA().ten || '') || GIA().id === 'tamtoa'; if (laMau) { dich[0] = 0xb3; dich[1] = 0x20; dich[2] = 0x2c; } /* 25/11 15:09 anh Linh: giá Mẫu màu đỏ, không có thay khăn áo nên đổi ngay */
-  const ch = S.chuyen, bg = buocGia(), kTA = bg ? bg[0].indexOf('Thay khăn áo') : -1, xong = laMau || (!(ch && ch.t < CG.khan[1]) && !(bg && kTA >= 0 && bg[1] <= kTA));
+  const ch = S.chuyen, bg = buocGia(), kTA = bg ? bg[0].indexOf('Thay khăn áo') : -1, daThay = !ch && bg && (kTA < 0 || bg[1] >= kTA); if (!laMau && !daThay) { dich[0] = 0xb3; dich[1] = 0x20; dich[2] = 0x2c; } const xong = true; /* 25/11 16:38 anh Linh: mặc định đỏ; tới bước Thay khăn áo mới đổi sang màu áo của giá */
   const cur = mauKhungGia.cur || (mauKhungGia.cur = dich.slice()), now = performance.now(), dt = Math.min(.1, (now - (mauKhungGia.tt || now)) / 1000); mauKhungGia.tt = now;
   if (xong) for (let i = 0; i < 3; i++) { const d = dich[i] - cur[i]; cur[i] = Math.abs(d) < 1 ? dich[i] : cur[i] + d * Math.min(1, dt * 2.5); } /* chuyển màu mượt khoảng 1,5 giây */
   const r = Math.round(cur[0]), g = Math.round(cur[1]), b = Math.round(cur[2]), key = r + ',' + g + ',' + b;
