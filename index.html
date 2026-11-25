@@ -3341,21 +3341,21 @@ const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
 const CAU_DOI = NH_MODE && !/[?&]caudoi=0/.test(location.search);
 function drawCauDoi() { /* 25/11 12:44 anh Linh: bảng câu đối "share live để vào chiếu ngồi" treo trên cột gỗ bên trái, dưới bảng sự tích */
   if (!CAU_DOI || (typeof TK !== 'undefined' && TK.on) || !LYC.y) return;
-  const top = (buocGia() ? 232 : 190) + 126 + 7, bot = LYC.y - 21 - 5 - (ilHien() ? 27 : 0), cx = 30, w = 40, h = bot - top; if (h < 60) return;
+  const top = (buocGia() && !TT_DOC ? 232 : 190) + 126 + 7, bot = LYC.y - 21 - 5 - (ilHien() ? 27 : 0), cx = 30, w = 40, h = bot - top; if (h < 60) return;
   const chu = ['Share', 'live', 'để', 'vào', 'chiếu', 'ngồi'], y0 = top + 7, y1 = bot - 7;
   ctx.save(); const ph = (Math.sin(performance.now() / 1000 * Math.PI * .7) + 1) / 2, sc = 1 + .07 * ph, cy = (top + bot) / 2; ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); /* 25/11 13:11 anh Linh: câu đối phập phồng cho mọi người để ý */
   ctx.strokeStyle = 'rgba(40,20,8,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 12, top + 3); ctx.lineTo(cx, top - 6); ctx.lineTo(cx + 12, top + 3); ctx.stroke(); /* dây treo */
   ctx.beginPath(); ctx.arc(cx, top - 6, 2, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill();
   ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
-  const g = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); g.addColorStop(0, '#7a120e'); g.addColorStop(.5, '#b3221a'); g.addColorStop(1, '#7a120e');
+  const M = mauKhungGia(), g = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); g.addColorStop(0, M.nen2); g.addColorStop(.5, `rgb(${M.r},${M.g},${M.b})`); g.addColorStop(1, M.nen2); /* 25/11 13:22: theo màu áo giá */
   ctx.fillStyle = g; ctx.fillRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = `rgba(255,210,90,${.35 + .5 * ph})`; ctx.shadowBlur = 6 + 12 * ph; ctx.shadowOffsetY = 0; ctx.strokeStyle = 'rgba(255,214,110,.9)'; ctx.lineWidth = 1; ctx.strokeRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = 'transparent'; /* hào quang vàng nhịp theo */
-  ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.6; ctx.strokeRect(cx - w / 2 + 2.5, y0 + 2.5, w - 5, y1 - y0 - 5);
+  ctx.strokeStyle = M.sang ? '#9a6a14' : '#e6b552'; ctx.lineWidth = 1.6; ctx.strokeRect(cx - w / 2 + 2.5, y0 + 2.5, w - 5, y1 - y0 - 5);
   for (const yy of [top, bot - 7]) { const gg = ctx.createLinearGradient(0, yy, 0, yy + 7); gg.addColorStop(0, '#5a3418'); gg.addColorStop(.5, '#a4703a'); gg.addColorStop(1, '#4a2a12'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(cx - w / 2 - 4, yy, w + 8, 7, 3.5); ctx.fill(); ctx.fillStyle = '#e6b552'; ctx.beginPath(); ctx.arc(cx - w / 2 - 4, yy + 3.5, 2.4, 0, 7); ctx.arc(cx + w / 2 + 4, yy + 3.5, 2.4, 0, 7); ctx.fill(); } /* trục gỗ trên dưới */
   const n = chu.length, b = (y1 - y0 - 8) / n; let fs = Math.min(12.5, b * .78); ctx.font = `800 ${fs}px ${SERIF}`; const mw = Math.max(...chu.map(c => ctx.measureText(c).width)); if (mw > w - 8) fs *= (w - 8) / mw;
-  chu.forEach((c, i) => text(c, cx, y0 + 4 + b * (i + .5), fs, '#ffe08a', { f: SERIF, w: 800 }));
+  chu.forEach((c, i) => text(c, cx, y0 + 4 + b * (i + .5), fs, M.chu, { f: SERIF, w: 800 }));
   ctx.restore(); }
 function drawBangPhai() { if (TK.on) return; // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
-  const tt = !!buocGia(), NB = NH_MODE, X = NB ? -2 : tt || GIA().id === 'chaube' || laCU(GIA().id) ? W - 2 * SAFE_X - 150 - 8 : 8, Y = NB ? (tt ? 232 : 190) : tt ? 237 : 192, Wd = NB ? 134 : 150, cx = X + Wd / 2, h = NB ? 126 : tt ? 145 : 128, BY = Y + (NB ? 24 : 26), BH = h - (NB ? 28 : 32), LH = NB ? 13 : 12.5, FS = NB ? 10 : 9.5, /* 13:25 anh Linh: chữ sự tích to, rõ hơn trên điện thoại */ WW = Wd - 16; // 18/11 10:46 anh Linh: bảng sự tích sang chỗ bảng tương tác, nhỏ và sát mép để không che Chầu múa // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
+  const tt = !!buocGia(), NB = NH_MODE, X = NB ? -2 : tt || GIA().id === 'chaube' || laCU(GIA().id) ? W - 2 * SAFE_X - 150 - 8 : 8, Y = NB ? (tt && !TT_DOC ? 232 : 190) : tt ? 237 : 192, Wd = NB ? 134 : 150, cx = X + Wd / 2, h = NB ? 126 : tt ? 145 : 128, BY = Y + (NB ? 24 : 26), BH = h - (NB ? 28 : 32), LH = NB ? 13 : 12.5, FS = NB ? 10 : 9.5, /* 13:25 anh Linh: chữ sự tích to, rõ hơn trên điện thoại */ WW = Wd - 16; // 18/11 10:46 anh Linh: bảng sự tích sang chỗ bảng tương tác, nhỏ và sát mép để không che Chầu múa // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
   const g0 = GIA(), g = { id: g0.id, ten: g0.ten }, BT = window.BANG_TIN || {}, coTich = BT[g.id] && BT[g.id].length, ten = coTich ? 'Sự tích ' + (g.ten || '') : 'Tín ngưỡng thờ Mẫu Tam Tứ Phủ'; ctx.font = `800 10px ${SERIF}`; text(ten, cx, Y + (NB ? 12 : 14), ctx.measureText(ten).width > WW + 2 ? Math.max(7, 10 * (WW + 2) / ctx.measureText(ten).width) : 10, '#f2cf72', { f: SERIF, w: 800 });
   if (TICH.id !== g.id || TICH.w !== WW) { const B = window.BANG_TIN || {}; ctx.font = `600 ${FS}px ${UI}`; TICH.w = WW; TICH.lines = [];
@@ -3968,7 +3968,37 @@ function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước,
     const k = n === 'thinh' ? 0 : n === 'tungkhan' || n === 'thayao' ? 1 : n === 'vaihuong' ? 2 : /^(baisai|khaiquang|muamoi)/.test(n) ? 3 : /^tungloc/.test(n) ? 4 : n === 'vengoi' ? 5 : n === 'banloc' ? 6 : 7; return [BUOC_CB, k]; }
   return null; }
 function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
-function drawTienTrinh() { const b = buocGia(); if (!b) return; const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 146, cy = y0 + 47, dx = (x1 - x0 - 64) / (n - 1); /* 25/11 13:14 anh Linh: thanh tiến trình kiểu mềm mại: dải lụa lượn sóng, hoa sen nở theo bước, không khung cứng */
+function mauKhungGia() { /* 25/11 13:22 anh Linh: khung câu đối và tiến trình cùng màu áo cô cậu đồng của giá; chữ tự đổi màu cho dễ đọc nhất */
+  const hx = (window.__ao || GIA().ao || '#8e211c').replace('#', ''), dich = [0, 2, 4].map(i => parseInt(hx.substr(i, 2), 16)); /* 25/11 13:28 anh Linh: chỉ đổi màu khi thay khăn áo xong */
+  const ch = S.chuyen, bg = buocGia(), kTA = bg ? bg[0].indexOf('Thay khăn áo') : -1, xong = !(ch && ch.t < CG.khan[1]) && !(bg && kTA >= 0 && bg[1] <= kTA);
+  const cur = mauKhungGia.cur || (mauKhungGia.cur = dich.slice()), now = performance.now(), dt = Math.min(.1, (now - (mauKhungGia.tt || now)) / 1000); mauKhungGia.tt = now;
+  if (xong) for (let i = 0; i < 3; i++) { const d = dich[i] - cur[i]; cur[i] = Math.abs(d) < 1 ? dich[i] : cur[i] + d * Math.min(1, dt * 2.5); } /* chuyển màu mượt khoảng 1,5 giây */
+  const r = Math.round(cur[0]), g = Math.round(cur[1]), b = Math.round(cur[2]), key = r + ',' + g + ',' + b;
+  if (mauKhungGia.k === key) return mauKhungGia.v;
+  const lin = c => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); }, L = (R, G, B) => .2126 * lin(R) + .7152 * lin(G) + .0722 * lin(B), Lb = L(r, g, b), cr = h => { const v = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)), l = L(...v); return (Math.max(l, Lb) + .05) / (Math.min(l, Lb) + .05); };
+  const sang = cr('#2a1006') > cr('#fff3d6'), dam = (k) => `rgb(${r * k | 0},${g * k | 0},${b * k | 0})`;
+  const vang = ['#ffe08a', '#fff3d6'].sort((a, c) => cr(c) - cr(a))[0], toi = ['#7a0e0e', '#2a1006'].sort((a, c) => cr(c) - cr(a))[0];
+  mauKhungGia.k = key; mauKhungGia.v = { r, g, b, sang, nen: `rgba(${r},${g},${b},.8)`, nen2: dam(.62), chu: sang ? toi : vang, chuMo: sang ? 'rgba(42,16,6,.72)' : 'rgba(255,243,214,.8)', chuQua: sang ? 'rgba(42,16,6,.85)' : 'rgba(246,220,150,.9)', vien: sang ? 'rgba(120,80,14,.85)' : 'rgba(230,181,82,.8)', lua: sang ? 'rgba(90,50,10,.4)' : 'rgba(246,220,150,.4)', luaNen: sang ? 'rgba(90,50,10,.12)' : 'rgba(246,220,150,.13)', luaQua: sang ? ['#8a5a10', '#b07810'] : ['rgba(184,134,46,.9)', '#ffd76a'], senQua: sang ? ['#d08a1a', '#a8620c'] : ['#ffe9a8', '#e6b552'], nu: sang ? 'rgba(200,70,100,.7)' : 'rgba(232,150,160,.6)' };
+  return mauKhungGia.v; }
+const TT_DOC = NH_MODE && !/[?&]tt=ngang/.test(location.search); /* 25/11 13:17 anh Linh: tiến trình dọc theo cột bên phải, nền trong suốt như bảng sự tích */
+function drawTienTrinhDoc(ds, k) { const n = ds.length, Wd = 86, X = W - SAFE_X + 2 - Wd, Y = 190, h = 150, bot = Y + h, t = S.t, M = mauKhungGia(); /* 25/11 13:22: ngắn lại, không che cung văn */
+  ctx.save(); rr(X, Y, Wd, h, 10, M.nen); ctx.strokeStyle = M.vien; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(X, Y, Wd, h, 10); ctx.stroke(); text('Các bước hầu', X + Wd / 2, Y + 12, 10, M.chu, { f: SERIF, w: 800 });
+  ctx.strokeStyle = M.lua; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(X + 12, Y + 22); ctx.lineTo(X + Wd - 12, Y + 22); ctx.stroke();
+  const ya = Y + 34, yb = bot - 10, dy = n > 1 ? (yb - ya) / (n - 1) : 0, py = i => ya + i * dy, lx = X + 15, wx = y => lx + 2.2 * Math.sin((y - Y) / 26 + t * 1.1);
+  const lua = (y1, y2, w, st) => { ctx.beginPath(); for (let y = y1; y <= y2; y += 3) { const x = wx(y); y === y1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.lineTo(wx(y2), y2); ctx.strokeStyle = st; ctx.lineWidth = w; ctx.stroke(); };
+  ctx.lineCap = 'round'; lua(py(0) - 6, py(n - 1) + 6, 4.5, M.luaNen); lua(py(0) - 6, py(n - 1) + 6, 1.3, M.lua);
+  if (k > 0) { const gl = ctx.createLinearGradient(0, py(0), 0, py(k)); gl.addColorStop(0, M.luaQua[0]); gl.addColorStop(1, M.luaQua[1]); ctx.shadowColor = 'rgba(255,200,90,.7)'; ctx.shadowBlur = 7; lua(py(0), py(k), 3.2, gl); ctx.shadowBlur = 0;
+    const u = (t * .35) % 1, ys = py(0) + (py(k) - py(0)) * u, xs = wx(ys), rg = ctx.createRadialGradient(xs, ys, 0, xs, ys, 8); rg.addColorStop(0, 'rgba(255,250,215,.95)'); rg.addColorStop(1, 'rgba(255,215,106,0)'); ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(xs, ys, 8, 0, 7); ctx.fill(); }
+  const pul = .5 + .5 * Math.sin(t * 3.2);
+  ds.forEach((ten, i) => { const y = py(i), x = wx(y);
+    if (i === k) { const R = 12 + 6 * pul, rg = ctx.createRadialGradient(x, y, 2, x, y, R); rg.addColorStop(0, `rgba(255,225,120,${.4 + .5 * pul})`); rg.addColorStop(1, 'rgba(255,215,106,0)'); ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(x, y + 3.5); ctx.rotate(.08 * Math.sin(t * 2)); senNho(0, 0, 8.5 + 1.2 * pul, '#fff1c2', '#f2a65a'); ctx.restore(); }
+    else if (i < k) senNho(x, y + 2.5, 5.5, M.senQua[0], M.senQua[1]);
+    else { ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, 3.6); ctx.quadraticCurveTo(3.8, 0, 0, -5); ctx.quadraticCurveTo(-3.8, 0, 0, 3.6); ctx.fillStyle = M.nu; ctx.fill(); ctx.strokeStyle = M.lua; ctx.lineWidth = .8; ctx.stroke(); ctx.restore(); }
+    const fs0 = i === k ? 9.8 : 9, maxW = X + Wd - 6 - (lx + 13); ctx.font = `${i === k ? 800 : 600} ${fs0}px ${SERIF}`; const mw = ctx.measureText(ten).width, fs = mw > maxW ? fs0 * maxW / mw : fs0;
+    text(ten, lx + 13, y + .5, fs, i === k ? (M.sang ? M.chu : `rgba(255,${215 + 30 * pul | 0},${120 + 100 * pul | 0},1)`) : i < k ? M.chuQua : M.chuMo, { f: SERIF, w: i === k ? 800 : 600, a: 'left' }); });
+  ctx.restore(); }
+function drawTienTrinh() { const b = buocGia(); if (!b) return; if (TT_DOC) { drawTienTrinhDoc(b[0], b[1]); return; } const [ds, k] = b, n = ds.length, x0 = SAFE_X + 4, x1 = W - SAFE_X - 4, y0 = 146, cy = y0 + 47, dx = (x1 - x0 - 64) / (n - 1); /* 25/11 13:14 anh Linh: thanh tiến trình kiểu mềm mại: dải lụa lượn sóng, hoa sen nở theo bước, không khung cứng */
   const t = S.t, px = i => x0 + 32 + i * dx, wy = x => cy + 4.5 * Math.sin((x - x0) / 62 + t * 1.1);
   ctx.save();
   { const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, 'rgba(70,10,8,0)'); g.addColorStop(.1, 'rgba(70,10,8,.78)'); g.addColorStop(.9, 'rgba(70,10,8,.78)'); g.addColorStop(1, 'rgba(70,10,8,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, cy + 2, (x1 - x0) / 2, 33, 0, 0, 7); ctx.fill(); } /* nền mờ hình bầu dục tan dần ra hai bên */
