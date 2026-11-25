@@ -2856,6 +2856,42 @@ function drawTrays(t) {
 }
 
 // ---------- Con nhang (back view) ----------
+/* 25/11 anh Linh: con nhang mới — ảnh vẽ sẵn (Gemini), đi bộ + xoay người 8 hướng mượt, ngồi/vái/lạy; ?cnm=1 (đang thử trên /tn) */
+const CNM_ON = /[?&]cnm=1/.test(location.search), CNM = { ok: 0, img: {}, meta: null };
+if (CNM_ON) { fetch('cnm/meta.json?v=2').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam'].forEach(sx => { const im = new Image(); im.onload = () => { if (++n === 2) CNM.ok = 1; }; im.src = 'cnm/' + sx + '.webp?v=2'; CNM.img[sx] = im; }); }).catch(() => {}); }
+function cnmVar(p, sx) { const coat = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null) || p.coat || ''; if (p._cvK === coat && p._cvS === sx) return p._cv;
+  const vs = CNM.meta[sx].variants, m = String(coat).match(/#([0-9a-f]{6})/i); let bi = 0;
+  if (m) { const v = parseInt(m[1], 16), c = [v >> 16 & 255, v >> 8 & 255, v & 255]; let bd = 1e12; vs.forEach((x, i) => { const d = 3 * (x[1][0] - c[0]) ** 2 + 4 * (x[1][1] - c[1]) ** 2 + 2 * (x[1][2] - c[2]) ** 2; if (d < bd) { bd = d; bi = i; } }); }
+  else { const n = String(p.name || p.x); for (let i = 0; i < n.length; i++) bi = (bi * 31 + n.charCodeAt(i)) % vs.length; }
+  p._cvK = coat; p._cvS = sx; p._cv = bi; return bi; }
+function cnmVe(p, t, s) { p._cnm = 0;
+  if (!CNM.ok || p.hd || p.nhan || p.gia || p.ghost || String(p.name).startsWith('​') || !/^(walk|enter|seat|stand)$/.test(p.state)) return false;
+  const sx = p.sex === 'nu' ? 'nu' : 'nam', M = CNM.meta[sx], O = CNM.meta.order, dt = Math.min(.1, S.dtLY || 1 / 60), seat = p.state === 'seat';
+  const ox = p._cx == null ? p.x : p._cx, oy = p._cy == null ? p.y : p._cy, dx = p.x - ox, dy = p.y - oy, mv = Math.hypot(dx, dy); p._cx = p.x; p._cy = p.y;
+  let T = p._d == null ? 4 : p._d;
+  if (mv > .12 && mv < 40) { T = ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; p._mt = t; p._wd = (p._wd || 0) + mv; }
+  const moving = p._mt != null && t - p._mt < .15 && t >= p._mt;
+  if (!moving && (seat || p.state === 'stand')) T = 4; /* ngồi / đứng chờ: quay lưng về sập */
+  if (p._d == null) p._d = T;
+  if (p._d !== T) { p._tt = (p._tt || 0) + dt; if (p._tt > .07) { p._tt = 0; const k = (T - p._d + 8) % 8; p._d = (p._d + (k <= 4 ? 1 : 7)) % 8; } } else p._tt = 0; /* xoay từng nấc qua các góc chéo */
+  const DIRK = ['front', 'fr', 'right', 'br', 'back', 'bl', 'left', 'fr'];
+  let key, mir = false, bob = 0, rot = 0;
+  if (seat && !moving && p._d === 4) {
+    key = 'sit'; const nhan = p.nc != null && S.t - p.nc < CHU_NHAN;
+    if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) key = 'pray';
+    if (p.pose === 'bow') key = Math.sin(t * 3 + p.x) > .2 ? 'bow' : 'pray';
+    if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? 'pray' : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
+    if (key === 'sit') bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
+  } else if (moving && p._d !== 0 && p._d !== 4) { key = 'w' + (Math.floor(p._wd / 8) % 4); mir = p._d >= 5; }
+  else { key = DIRK[p._d]; mir = p._d === 7; if (moving) { const ph = p._wd * .4; bob = Math.abs(Math.sin(ph)) * 2.2; rot = Math.sin(ph) * .045; } }
+  const r = M.rects[key], col = O.indexOf(key), row = cnmVar(p, sx), k = 70 * s / CNM.meta.standH, w = r[2] * k, h = r[3] * k;
+  ctx.save(); ctx.translate(p.x, p.y);
+  ctx.globalAlpha = .28; ctx.beginPath(); ctx.ellipse(0, 1.5 * s, w * .42, 5 * s, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.translate(0, -bob); if (rot) ctx.rotate(rot); if (mir) ctx.scale(-1, 1);
+  ctx.drawImage(CNM.img[sx], col * M.cw + r[0], row * M.ch + r[1], r[2], r[3], -w / 2, -h, w, h);
+  ctx.restore();
+  if (p.carry) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.7 * s, 1.7 * s); drawItem(p.carry, 11, -22, .8); ctx.restore(); }
+  p._cnm = 1; return true; }
 const VS_ON = !/[?&]vs=0/.test(location.search); /* 22/11 15:08: bật vẽ sẵn con nhang mặc định cho nhẹ khi đông người */ let VS_VE = false; const VSC = new Map(); let VS_MOI = 0;
 function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? vThu(p.name, soLanVao(p.name)) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 8 ? 4 : vS >= 5 ? 3 : vS >= 3 ? 2 : vS >= 2 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0, JSON.stringify(NV[nm] || '')].join('|'); }
 function vsVe(p, t, s, lv, rot) { if (p.state !== 'seat' || p.pose !== 'kneel' || p.carry || (p.nc != null && S.t - p.nc < CHU_NHAN) || p.hd || p.tam) return false;
@@ -2877,7 +2913,7 @@ function drawPerson1(p, t) {
   const walking = p.state === 'walk', bob = walking ? Math.abs(Math.sin(t * 8 + p.x)) * 2 : 0;
   const vsRot = p.state === 'seat' ? p.seat.lean + (p.pose === 'kneel' ? Math.sin(S.t * 2.6 + (p.seat.x % 7) * .12) * .05 : 0) : 0;
   if (p.state === 'seat' && p.seat && p.seat.canh) veChanCanh(p, t, s);
-  if (!(VS_ON && !VS_VE && vsVe(p, t, s, lv, vsRot))) { /* 22/11: con nhang ngồi yên thì dán ảnh vẽ sẵn */
+  if (!(CNM_ON && !VS_VE && cnmVe(p, t, s)) && !(VS_ON && !VS_VE && vsVe(p, t, s, lv, vsRot))) { /* 22/11: con nhang ngồi yên thì dán ảnh vẽ sẵn */
   ctx.save(); ctx.translate(p.x, p.y - bob); if (p.state === 'seat' && !VS_VE) ctx.rotate(vsRot); if (p.state === 'tui') ctx.rotate(Math.sin(t * 5.5 + p.x) * .26); /* tủi bóng lắc lư mạnh */ ctx.scale(1.7 * s, 1.7 * s);
   ctx.globalAlpha = .35; ctx.beginPath(); ctx.ellipse(0, 1, 11, 3.5, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = lv === 1 ? .62 : 1;
   if (lv === 5) { const pu = .55 + .2 * Math.sin(t * 3 + p.x), ag = ctx.createRadialGradient(0, -18, 2, 0, -18, 24); ag.addColorStop(0, `rgba(255,214,110,${pu})`); ag.addColorStop(1, 'rgba(255,190,60,0)'); ctx.fillStyle = ag; ctx.beginPath(); ctx.ellipse(0, -18, 22, 26, 0, 0, 6.28); ctx.fill(); }
@@ -2950,14 +2986,14 @@ function drawPerson1(p, t) {
   }
   if (VS_VE) return;
   // name tag
-  if (p.nhan) { ctx.font = `700 ${8.5 * Math.max(.9, s)}px ${UI}`; const w2 = ctx.measureText(p.nhan).width + 10; rr(p.x - w2 / 2, p.y - 62 * s - 6, w2, 12, 6, 'rgba(14,110,58,.9)'); text(p.nhan, p.x, p.y - 62 * s, 8.5 * Math.max(.9, s), '#eafff0', { w: 700 }); return; }
+  if (p.nhan) { ctx.font = `700 ${8.5 * Math.max(.9, s)}px ${UI}`; const w2 = ctx.measureText(p.nhan).width + 10; rr(p.x - w2 / 2, p.y - (p._cnm ? 74 : 62) * s - 6, w2, 12, 6, 'rgba(14,110,58,.9)'); text(p.nhan, p.x, p.y - (p._cnm ? 74 : 62) * s, 8.5 * Math.max(.9, s), '#eafff0', { w: 700 }); return; }
   if (String(p.name).startsWith('\u200b') || (S.dem && S.dem.p === p)) return;
   if (NH_MODE && !THAT.has(p.name)) return; // 18/11 anh Linh: chỉ hiện tên người xem thật, bỏ chữ Lv
   const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : '');
   const NK = NH_MODE ? 1.3 : 1; /* 13:25 anh Linh: tên người xem to hơn 30% */ ctx.font = `600 ${8.5 * NK * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8 * NK;
-  rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, (NV[p.name] && NV[p.name].nenTen) || ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
-  if (laThu(p.name) && !(typeof VY_TEN !== 'undefined' && p.name === VY_TEN)) { const con = Math.max(0, THU_MS - (Date.now() - THU.get(p.name))), l2 = '🎁 Trải nghiệm thử · còn ' + Math.floor(con / 60000) + ':' + String(Math.floor(con / 1000) % 60).padStart(2, '0'), f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); }
-  if (typeof VY_TEN !== 'undefined' && p.name === VY_TEN) { const l2 = 'Dự 8 lần live · ở live 30 phút', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); } /* 23/11 anh Linh: cho người xem biết cần dự bao nhiêu lần, ở live bao lâu để được như Tường Vy */
+  rr(p.x - w / 2, p.y - (p._cnm ? 74 : 62) * s - 6 * NK, w, 12 * NK, 6 * NK, (NV[p.name] && NV[p.name].nenTen) || ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - (p._cnm ? 74 : 62) * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
+  if (laThu(p.name) && !(typeof VY_TEN !== 'undefined' && p.name === VY_TEN)) { const con = Math.max(0, THU_MS - (Date.now() - THU.get(p.name))), l2 = '🎁 Trải nghiệm thử · còn ' + Math.floor(con / 60000) + ':' + String(Math.floor(con / 1000) % 60).padStart(2, '0'), f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - (p._cnm ? 74 : 62) * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); }
+  if (typeof VY_TEN !== 'undefined' && p.name === VY_TEN) { const l2 = 'Dự 8 lần live · ở live 30 phút', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - (p._cnm ? 74 : 62) * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); } /* 23/11 anh Linh: cho người xem biết cần dự bao nhiêu lần, ở live bao lâu để được như Tường Vy */
 }
 
 // ---------- Effects + overlay ----------
