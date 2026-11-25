@@ -253,7 +253,7 @@ function hoaHong(name, d) { /* 21/11 21:49 anh Linh: ấn tặng hoa hồng thì
   doiAo(name, p && !p.ghost ? p : null, [null, m[1], m[0]]); if (p && !p.ghost) { p.pose = 'raise'; p.poseT = 1.2; } imLang(name, soHoa); }
 window.__hoaHong = hoaHong;
 /* 25/11 08:11 anh Linh: 5 người đầu tiên vào chiếu mỗi phiên live được trải nghiệm thử đủ phụ kiện, hào quang như Tường Vy (không đổi số lần dự thật) */
-const THU = new Set(); function laThu(n) { return THU.has(n); } function vThu(n, v) { return THU.has(n) ? Math.max(v, 8) : v; }
+const THU = new Map(), THU_DA = new Set(), THU_MS = 5 * 60000; /* 25/11 08:29 anh Linh: trải nghiệm thử 5 phút */ function laThu(n) { const t = THU.get(n); return t != null && Date.now() - t < THU_MS; } function vThu(n, v) { return laThu(n) ? Math.max(v, 8) : v; }
 function soLanVao(name) { const r = LVK[name] && LV[LVK[name]]; return r ? (r.f || FOL_TAM[name] ? (r.v || 1) : 1) : 0; } /* chưa follow: luôn tính là lần 1, chưa có phụ kiện */
 const HANG_CHO = []; /* 20/11 20:24 anh Linh: chiếu đủ người thì người share xếp hàng chờ */
 function choVao(name) { const e = HANG_CHO.find(x => x.name === name); if (e) e.t = S.t; else HANG_CHO.push({ name, t: S.t }); }
@@ -2956,7 +2956,7 @@ function drawPerson1(p, t) {
   const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : '');
   const NK = NH_MODE ? 1.3 : 1; /* 13:25 anh Linh: tên người xem to hơn 30% */ ctx.font = `600 ${8.5 * NK * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8 * NK;
   rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, (NV[p.name] && NV[p.name].nenTen) || ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
-  if (laThu(p.name) && !(typeof VY_TEN !== 'undefined' && p.name === VY_TEN)) { const l2 = '🎁 Trải nghiệm thử phụ kiện', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); }
+  if (laThu(p.name) && !(typeof VY_TEN !== 'undefined' && p.name === VY_TEN)) { const con = Math.max(0, THU_MS - (Date.now() - THU.get(p.name))), l2 = '🎁 Trải nghiệm thử · còn ' + Math.floor(con / 60000) + ':' + String(Math.floor(con / 1000) % 60).padStart(2, '0'), f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); }
   if (typeof VY_TEN !== 'undefined' && p.name === VY_TEN) { const l2 = 'Dự 8 lần live · ở live 30 phút', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); } /* 23/11 anh Linh: cho người xem biết cần dự bao nhiêu lần, ở live bao lâu để được như Tường Vy */
 }
 
@@ -3647,10 +3647,12 @@ function lvThuLanMoi() { const r = LV['__thu__']; if (r) r.at = 0; lvEv(ME, { us
 window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvDirty = true; } };
 
 /* ---------- 23/11 anh Linh: nhân vật chim mồi duy nhất "Tường Vy" (bật bằng ?vy=1): liên tục đổi áo quần, tóc, giới tính, phụ kiện, đi lên xuống, comment như người thật; đủ phụ kiện và hào quang ---------- */
-(function () { let ph = null; try { const o = JSON.parse(localStorage.getItem('hd_thu') || 'null'); if (o && o.ph === PHIEN && Array.isArray(o.ds)) { ph = o.ph; o.ds.forEach(n => THU.add(n)); } } catch (e) {}
-  setInterval(() => { try { if (ph !== PHIEN) { ph = PHIEN; THU.clear(); } if (THU.size >= 5) return; const cu = THU.size;
-    S.people.forEach(p => { if (THU.size >= 5 || !p.name || p.ghost || p.gia || p.tam || p.ra || p.state !== 'seat' || !THAT.has(p.name) || p.name === 'Tường Vy' || THU.has(p.name)) return; const nk = norm(p.name); if (KHONG_CAM_ON.some(k => nk.includes(k))) return; THU.add(p.name); try { p.vsK = null; float(p.x, p.y - 80, '🎁 ' + tenHien(p.name) + ' được trải nghiệm thử phụ kiện', '#ffe39a'); } catch (e) {} });
-    if (THU.size !== cu) localStorage.setItem('hd_thu', JSON.stringify({ ph: PHIEN, ds: [...THU] })); } catch (e) {} }, 2000); window.__thu = () => [...THU]; })(); /* 5 người thật đầu tiên ngồi vào chiếu trong phiên */
+(function () { let ph = null; const luu = () => { try { localStorage.setItem('hd_thu', JSON.stringify({ ph: PHIEN, act: [...THU.entries()], da: [...THU_DA] })); } catch (e) {} };
+  try { const o = JSON.parse(localStorage.getItem('hd_thu') || 'null'); if (o && o.ph === PHIEN) { ph = o.ph; (o.act || []).forEach(([n, t]) => THU.set(n, t)); (o.da || []).forEach(n => THU_DA.add(n)); } } catch (e) {}
+  setInterval(() => { try { if (ph !== PHIEN) { ph = PHIEN; THU.clear(); THU_DA.clear(); } let doi = false;
+    THU.forEach((t, n) => { if (Date.now() - t >= THU_MS) { THU.delete(n); THU_DA.add(n); doi = true; const p = S.people.find(q => q.name === n && !q.ra); if (p) float(p.x, p.y - 80, '⏰ ' + tenHien(n) + ' hết 5 phút trải nghiệm · xem live nhiều lần để có phụ kiện thật', '#f6dc96'); } });
+    S.people.forEach(p => { if (THU.size >= 5 || !p.name || p.ghost || p.gia || p.tam || p.ra || p.state !== 'seat' || !THAT.has(p.name) || p.name === 'Tường Vy' || THU.has(p.name) || THU_DA.has(p.name)) return; const nk = norm(p.name); if (KHONG_CAM_ON.some(k => nk.includes(k))) return; THU.set(p.name, Date.now()); doi = true; try { float(p.x, p.y - 80, '🎁 ' + tenHien(p.name) + ' được trải nghiệm thử phụ kiện 5 phút', '#ffe39a'); } catch (e) {} });
+    if (doi) luu(); } catch (e) {} }, 1000); window.__thu = () => [...THU.entries()]; })(); /* tối đa 5 người cùng lúc, mỗi người 5 phút, mỗi người 1 lần mỗi phiên; hết suất thì người kế tiếp vào chiếu được nhận */
 const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
 (function () { if (!VY_BAT) return;
   const LENH = ['áo đỏ', 'áo xanh ngọc', 'áo tím than', 'áo vàng', 'áo hồng', 'áo đỏ vàng xanh', 'áo trắng xanh', 'quần trắng', 'quần đen', 'quần đỏ', 'vấn đỏ', 'khăn vàng', 'khăn tím', 'tóc nâu', 'tóc vàng', 'tóc đen', 'tóc ngắn', 'tóc vừa', 'tóc dài', 'giày trắng', 'giày đỏ', 'nam', 'nữ',
