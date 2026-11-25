@@ -2857,13 +2857,16 @@ function drawTrays(t) {
 
 // ---------- Con nhang (back view) ----------
 /* 25/11 anh Linh: con nhang mới — ảnh vẽ sẵn (Gemini), đi bộ + xoay người 8 hướng mượt, ngồi/vái/lạy; ?cnm=1 (đang thử trên /tn) */
-const CNM_ON = /[?&]cnm=1/.test(location.search), CNM = { ok: 0, img: {}, meta: null };
-if (CNM_ON) { fetch('cnm/meta.json?v=2').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam'].forEach(sx => { const im = new Image(); im.onload = () => { if (++n === 2) CNM.ok = 1; }; im.src = 'cnm/' + sx + '.webp?v=2'; CNM.img[sx] = im; }); }).catch(() => {}); }
-function cnmVar(p, sx) { const coat = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null) || p.coat || ''; if (p._cvK === coat && p._cvS === sx) return p._cv;
-  const vs = CNM.meta[sx].variants, m = String(coat).match(/#([0-9a-f]{6})/i); let bi = 0;
-  if (m) { const v = parseInt(m[1], 16), c = [v >> 16 & 255, v >> 8 & 255, v & 255]; let bd = 1e12; vs.forEach((x, i) => { const d = 3 * (x[1][0] - c[0]) ** 2 + 4 * (x[1][1] - c[1]) ** 2 + 2 * (x[1][2] - c[2]) ** 2; if (d < bd) { bd = d; bi = i; } }); }
-  else { const n = String(p.name || p.x); for (let i = 0; i < n.length; i++) bi = (bi * 31 + n.charCodeAt(i)) % vs.length; }
-  p._cvK = coat; p._cvS = sx; p._cv = bi; return bi; }
+const CNM_ON = /[?&]cnm=1/.test(location.search), CNM = { ok: 0, img: {}, meta: null, tint: new Map() };
+if (CNM_ON) { fetch('cnm/meta.json?v=3').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam', 'nuA', 'namA'].forEach(k => { const im = new Image(); im.onload = () => { if (++n === 4) CNM.ok = 1; }; im.src = 'cnm/' + k + '.webp?v=3'; CNM.img[k] = im; }); }).catch(() => {}); }
+/* 25/11 anh Linh: đủ 60 màu áo như trước — 18 màu × 3 độ đậm nhạt + 6 màu trơn; người xem chọn màu bằng comment thì đúng màu đó */
+const CNM_MAU = ['#952323', '#cc3333', '#d67171', '#954923', '#cc6633', '#d69271', '#956f23', '#cc9933', '#d6b471', '#959523', '#cccc33', '#d6d671', '#6f9523', '#99cc33', '#b4d671', '#499523', '#66cc33', '#92d671', '#239523', '#33cc33', '#71d671', '#239549', '#33cc66', '#71d692', '#23956f', '#33cc99', '#71d6b4', '#239595', '#33cccc', '#71d6d6', '#236f95', '#3399cc', '#71b4d6', '#234995', '#3366cc', '#7192d6', '#232395', '#3333cc', '#7171d6', '#492395', '#6633cc', '#9271d6', '#6f2395', '#9933cc', '#b471d6', '#952395', '#cc33cc', '#d671d6', '#95236f', '#cc3399', '#d671b4', '#952349', '#cc3366', '#d67192', '#efede6', '#e9d8b4', '#b9bec8', '#7d7f86', '#28232a', '#7a4a2a'];
+function cnmMau(p) { const chon = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); if (chon) { const m = String(chon).match(/#[0-9a-f]{6}/i); if (m) return m[0]; }
+  if (p.lv === 5) return '#c9962a'; if (p._cm) return p._cm; const n = String(p.name || '') + '|' + (p.seat ? p.seat.x : ''); let h = 7; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return (p._cm = CNM_MAU[h % CNM_MAU.length]); }
+function cnmTint(sx, hex) { const key = sx + hex; let c = CNM.tint.get(key); if (c) return c; if (CNM.tint.size > 90) CNM.tint.delete(CNM.tint.keys().next().value);
+  const b = CNM.img[sx], a = CNM.img[sx + 'A'], w = b.naturalWidth, h = b.naturalHeight; c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+  g.drawImage(a, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = hex; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'destination-in'; g.drawImage(a, 0, 0); g.globalCompositeOperation = 'destination-over'; g.drawImage(b, 0, 0);
+  CNM.tint.set(key, c); return c; }
 function cnmVe(p, t, s) { p._cnm = 0;
   if (!CNM.ok || p.hd || p.nhan || p.gia || p.ghost || String(p.name).startsWith('​') || !/^(walk|enter|seat|stand)$/.test(p.state)) return false;
   const sx = p.sex === 'nu' ? 'nu' : 'nam', M = CNM.meta[sx], O = CNM.meta.order, dt = Math.min(.1, S.dtLY || 1 / 60), seat = p.state === 'seat';
@@ -2884,11 +2887,11 @@ function cnmVe(p, t, s) { p._cnm = 0;
     if (key === 'sit') bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
   } else if (moving && p._d !== 0 && p._d !== 4) { key = 'w' + (Math.floor(p._wd / 8) % 4); mir = p._d >= 5; }
   else { key = DIRK[p._d]; mir = p._d === 7; if (moving) { const ph = p._wd * .4; bob = Math.abs(Math.sin(ph)) * 2.2; rot = Math.sin(ph) * .045; } }
-  const r = M.rects[key], col = O.indexOf(key), row = cnmVar(p, sx), k = 70 * s / CNM.meta.standH, w = r[2] * k, h = r[3] * k;
+  const r = M.rects[key], col = O.indexOf(key), k = 70 * s / CNM.meta.standH, w = r[2] * k, h = r[3] * k;
   ctx.save(); ctx.translate(p.x, p.y);
   ctx.globalAlpha = .28; ctx.beginPath(); ctx.ellipse(0, 1.5 * s, w * .42, 5 * s, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
   ctx.translate(0, -bob); if (rot) ctx.rotate(rot); if (mir) ctx.scale(-1, 1);
-  ctx.drawImage(CNM.img[sx], col * M.cw + r[0], row * M.ch + r[1], r[2], r[3], -w / 2, -h, w, h);
+  ctx.drawImage(cnmTint(sx, cnmMau(p)), col * M.cw + r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
   ctx.restore();
   if (p.carry) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.7 * s, 1.7 * s); drawItem(p.carry, 11, -22, .8); ctx.restore(); }
   p._cnm = 1; return true; }
