@@ -3349,7 +3349,7 @@ function drawCauDoi() { /* 25/11 12:44 anh Linh: bảng câu đối "share live 
   if (!CAU_DOI || (typeof TK !== 'undefined' && TK.on) || !LYC.y) return;
   const top = (buocGia() && !TT_DOC ? 232 : 190) + 126 + 7, bot = LYC.y - 21 - 5 - (ilHien() ? 27 : 0), cx = 30, w = 58, h = bot - top; if (h < 60) return;
   const LG = enPha(10), chu = LG.en ? ['Vietnamese', 'Mother', 'Goddess', 'Worship'] : ['Tín', 'ngưỡng', 'Đạo', 'Mẫu'], y0 = top + 7, y1 = bot - 7; /* 25/11 15:20 anh Linh: đổi chữ thành Tín ngưỡng Đạo Mẫu, xen kẽ tiếng Anh */
-  ctx.save(); const ph = (Math.sin(performance.now() / 1000 * Math.PI * .7) + 1) / 2, sc = 1 + .07 * ph, cy = (top + bot) / 2; ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); /* 25/11 13:11 anh Linh: câu đối phập phồng cho mọi người để ý */
+  ctx.save(); const ph = .5, sc = 1 /* 25/11 16:31 anh Linh: câu đối đứng im, không phập phồng */, cy = (top + bot) / 2; ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); /* 25/11 13:11 anh Linh: câu đối phập phồng cho mọi người để ý */
   ctx.strokeStyle = 'rgba(40,20,8,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 12, top + 3); ctx.lineTo(cx, top - 6); ctx.lineTo(cx + 12, top + 3); ctx.stroke(); /* dây treo */
   ctx.beginPath(); ctx.arc(cx, top - 6, 2, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill();
   ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
