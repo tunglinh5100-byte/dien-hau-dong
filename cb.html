@@ -2887,6 +2887,7 @@ function cnmVe(p, t, s) { p._cnm = 0;
     if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? 'pray' : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
     if (key === 'sit' && pk) key = pk.has('quat2') ? 'sitQ2' : pk.has('quat') ? 'sitQ' : pk.has('lung') ? 'sitL' : 'sit';
     if (/^sit/.test(key)) bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
+    if (key === 'bow') mir = (sx === 'nu' ? 1 : -1) !== (p.x < W / 2 ? 1 : -1); /* 25/11 anh Linh: lạy nghiêng về phía sập — bên trái màn quay sang phải, bên phải quay sang trái */
   } else if (moving && p._d !== 0 && p._d !== 4) { key = 'w' + (Math.floor(p._wd / 8) % 4); mir = p._d >= 5; }
   else { key = DIRK[p._d]; mir = p._d === 7; if (moving) { const ph = p._wd * .4; bob = Math.abs(Math.sin(ph)) * 2.2; rot = Math.sin(ph) * .045; } }
   const r = M.rects[key], col = O.indexOf(key), k = 70 * s / CNM.meta.standH, w = r[2] * k, h = r[3] * k;
