@@ -2801,6 +2801,16 @@ function noiKhen(name, cau) {
     u.rate = .82; u.pitch = muonNam ? (vNam ? .95 : .6) : (vNam ? 1.6 : 1.15); u.volume = VOL_KHEN; // âm lượng giọng ban khen, chỉnh trong bảng C
     speechSynthesis.speak(u); } catch (e) {}
 }
+/* 25/11 11:30 anh Linh: người mới vào live -> giọng nữ đọc "<tên> nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé"; mỗi người đọc 1 lần/phiên; đông người thì chỉ đọc 3 người mới nhất; tắt: ?docmoi=0 */
+const DOCMOI = { on: !/[?&]docmoi=0/.test(location.search), da: new Set(), q: [] };
+try { if (localStorage.getItem('hd_docmoi') === '0' && !/[?&]docmoi=1/.test(location.search)) DOCMOI.on = false; } catch (e) {}
+window.__hdDocMoi = on => { DOCMOI.on = !!on; try { localStorage.setItem('hd_docmoi', on ? '1' : '0'); } catch (e) {} S.banner = { admin: 1, text: on ? 'Bật đọc tên người mới vào live' : 'Tắt đọc tên người mới vào live', t: 0, life: 2.5 }; };
+function docMoiNoi() { if (typeof speechSynthesis === 'undefined' || !DOCMOI.q.length) return; try { if (speechSynthesis.speaking || speechSynthesis.pending) return;
+  const ten = DOCMOI.q.shift(), u = new SpeechSynthesisUtterance(ten + ' nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé'); u.lang = 'vi-VN';
+  const v = VI_NU || VI_NAM || VI_VOICE; if (v) u.voice = v; const nam = v && LA_NAM(v); u.rate = .95; u.pitch = nam ? 1.6 : 1.1; u.volume = VOL_KHEN; /* giọng nữ; máy chỉ có giọng nam thì nâng cao giọng */
+  u.onend = u.onerror = () => setTimeout(docMoiNoi, 600); speechSynthesis.speak(u); } catch (e) {} }
+window.__docMoi = nm => { if (!DOCMOI.on || !nm || DOCMOI.da.has(nm)) return; const ten = tenDoc(nm); if (!ten) return; DOCMOI.da.add(nm); DOCMOI.q.push(ten); if (DOCMOI.q.length > 3) DOCMOI.q.splice(0, DOCMOI.q.length - 3); docMoiNoi(); };
+setInterval(docMoiNoi, 1500);
 function updKhen(dt) { KHEN.nghi = Math.max(0, (KHEN.nghi || 0) - dt); if (KHEN.cur) { KHEN.cur.t += dt; if (KHEN.cur.t > 3) { KHEN.cur = null; KHEN.nghi = 0; } /* 16/11 9:21: không nghỉ giữa các lần ban khen */ } /* 16/11 anh Linh: mỗi lượt ban khen xong nghỉ 6 giây rồi mới khen người tiếp */ if (KHEN.q.length > 12 && !goiDuoc()) KHEN.q.splice(0, KHEN.q.length - 12); /* chưa tới lúc khen: giữ 12 người gần nhất */ if (!KHEN.cur && !KHEN.nghi && KHEN.q.length && !(laOng() && !ongNgoi()) && !nghiLe() && goiDuoc()) { /* 19/11 20:06 anh Linh: chỉ ban khen lúc phát lộc, ngự tửu */ /* giá ông: chỉ ban khen khi ông ngồi */ KHEN.q.sort((a, b) => a.uu - b.uu || b.t - a.t); const it = KHEN.q.pop(); KHEN.cur = { name: it.name, cau: chonLoi(it.loai), t: 0 }; if (!S.chuyen) noiKhen(KHEN.cur.name, KHEN.cur.cau); } }
 // 15/11 anh Linh: lời ban khen ngay trên đầu cô cậu đồng, cách đầu khoảng một vấn khăn, không che người: dò đỉnh đầu từ khung hình clip đang chiếu
 const DAU = { t: 0, r: null, cv: null };
@@ -4230,7 +4240,7 @@ buildCfgPanel(); napNhacGia();
     else if (t.includes('social')) { const a = JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase(); if (a.includes('share') || +d.action === 3) { shareLive(nm); K(nm, 'share', 3); } else follow(nm); }
     else if (t === 'share') { shareLive(nm); K(nm, 'share', 3); }
     else if (t === 'follow') follow(nm);
-    else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm) && (H.S.seats.some(z => !z.who) || H.S.people.some(q => q.gia && !q.ra))) { /* 11:55: chiếu đầy thì người mới vào xem không chen chỗ, chỉ ai tương tác mới vào ngồi */ if (!(window.__hd && window.__hd.S && window.__hd.S.auto === false)) person(nm); addComment(nm, 'đã vào phiên live'); } }
+    else if (t.includes('member')) { if (!H.S.people.find(p => p.name === nm) && (H.S.seats.some(z => !z.who) || H.S.people.some(q => q.gia && !q.ra))) { /* 11:55: chiếu đầy thì người mới vào xem không chen chỗ, chỉ ai tương tác mới vào ngồi */ if (!(window.__hd && window.__hd.S && window.__hd.S.auto === false)) person(nm); addComment(nm, 'đã vào phiên live'); }  try { if (window.__docMoi) window.__docMoi(nm); } catch (e) {} }
   }
   // ---- TikFinity (chạy trên cùng máy tính): tự kết nối, không cần API key ----
   let tf = null, tfOk = false, tfTimer = null, euOk = false, euTimer = null;
