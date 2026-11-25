@@ -2858,7 +2858,7 @@ function drawTrays(t) {
 // ---------- Con nhang (back view) ----------
 /* 25/11 anh Linh: con nhang mới — ảnh vẽ sẵn (Gemini), đi bộ + xoay người 8 hướng mượt, ngồi/vái/lạy; ?cnm=1 (đang thử trên /tn) */
 const CNM_ON = /[?&]cnm=1/.test(location.search), CNM = { ok: 0, img: {}, meta: null, tint: new Map() };
-if (CNM_ON) { fetch('cnm/meta.json?v=8').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam', 'nuA', 'namA', 'nuL', 'namL', 'nuQ', 'namQ', 'nuK', 'namK', 'nuT', 'namT', 'nuU', 'namU', 'nuG', 'namG', 'dem', 'demA'].forEach((k, i, A) => { const im = new Image(); im.onload = () => { if (++n === A.length) CNM.ok = 1; }; im.src = 'cnm/' + k + '.webp?v=8'; CNM.img[k] = im; }); }).catch(() => {}); }
+if (CNM_ON) { fetch('cnm/meta.json?v=9').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam', 'nuA', 'namA', 'nuL', 'namL', 'nuQ', 'namQ', 'nuK', 'namK', 'nuT', 'namT', 'nuU', 'namU', 'nuG', 'namG', 'dem', 'demA'].forEach((k, i, A) => { const im = new Image(); im.onload = () => { if (++n === A.length) CNM.ok = 1; }; im.src = 'cnm/' + k + '.webp?v=9'; CNM.img[k] = im; }); }).catch(() => {}); }
 /* 25/11 anh Linh: đủ 60 màu áo như trước — 18 màu × 3 độ đậm nhạt + 6 màu trơn; người xem chọn màu bằng comment thì đúng màu đó */
 const CNM_MAU = ['#952323', '#cc3333', '#d67171', '#954923', '#cc6633', '#d69271', '#956f23', '#cc9933', '#d6b471', '#959523', '#cccc33', '#d6d671', '#6f9523', '#99cc33', '#b4d671', '#499523', '#66cc33', '#92d671', '#239523', '#33cc33', '#71d671', '#239549', '#33cc66', '#71d692', '#23956f', '#33cc99', '#71d6b4', '#239595', '#33cccc', '#71d6d6', '#236f95', '#3399cc', '#71b4d6', '#234995', '#3366cc', '#7192d6', '#232395', '#3333cc', '#7171d6', '#492395', '#6633cc', '#9271d6', '#6f2395', '#9933cc', '#b471d6', '#952395', '#cc33cc', '#d671d6', '#95236f', '#cc3399', '#d671b4', '#952349', '#cc3366', '#d67192', '#efede6', '#e9d8b4', '#b9bec8', '#7d7f86', '#28232a', '#7a4a2a'];
 function cnmMau(p) { const chon = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); if (chon) { const m = String(chon).match(/#[0-9a-f]{6}/i); if (m) return m[0]; } const nvm = p.name && NV[p.name] && NV[p.name].mix; if (nvm && nvm.length && cnmHex(nvm[0])) return cnmHex(nvm[0]);
@@ -2888,9 +2888,9 @@ function cnmVe(p, t, s) { p._cnm = 0;
   const ngoi = seat && !moving && p._d === 4, pk = ngoi && p.name && !p.ghost ? new Set(pkCua(p.name, vThu(p.name, soLanVao(p.name))).map(x => x[0])) : null; /* phụ kiện theo số lần dự live: thắt lưng, đệm, quạt */
   if (ngoi) {
     key = 'sit'; const nhan = p.nc != null && S.t - p.nc < CHU_NHAN;
-    if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) { key = 'pray'; if (p.pose === 'clap') bob = Math.abs(Math.sin(t * 14)) * 2.2 * s; else if (p.pose === 'wave') rot = Math.sin(t * 7) * .12; else bob = Math.abs(Math.sin(t * 7)) * 3 * s; } /* vỗ tay nảy nhanh, vẫy tay lắc, giơ tay nhún */
+    const coTay = !!M.rects.gio; if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) { if (!coTay) key = 'pray'; else if (p.pose === 'clap') key = Math.sin(t * 13 + p.x) > 0 ? 'vo0' : 'vo1'; else if (p.pose === 'wave') key = Math.sin(t * 7 + p.x) > 0 ? 'vay0' : 'vay1'; else { key = 'gio'; bob = Math.abs(Math.sin(t * 6 + p.x)) * 2 * s; } } /* 25/11: vỗ tay, vẫy tay, giơ tay bằng ảnh Gemini */
     if (p.pose === 'bow') key = Math.sin(t * 3 + p.x) > .2 ? 'bow' : 'pray';
-    if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? 'pray' : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
+    if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? (coTay ? 'gio' : 'pray') : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
     if (key === 'sit' && pk) key = pk.has('quat2') ? 'sitQ2' : pk.has('quat') ? 'sitQ' : pk.has('lung') ? 'sitL' : 'sit';
     if (/^sit/.test(key)) bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
     if (p.state === 'tui') rot = Math.sin(t * 5.5 + p.x) * .22; /* tủi bóng lắc lư */
