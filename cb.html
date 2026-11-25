@@ -394,7 +394,7 @@ setInterval(() => { try { if (!NH_MODE || S.chuyen) return; const ngoi = S.peopl
 
 // ---------- Commands ----------
 function fixXung(s) { // giá Chầu, giá Cậu: con nhang gọi đúng "Chầu"/"Cậu" thay cho "cô" (giữ nguyên "cô đồng")
-  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', quannhi: 'Quan', quantu: 'Quan', ongbo: 'Quan', chuanh: 'Chúa', chuatb: 'Chúa', chuanp: 'Chúa', chualm: 'Chúa', chaudn: 'Chầu', tamtoa: 'Mẫu' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
+  const id = typeof GIA === 'function' ? GIA().id : ''; const X = { chaube: 'Chầu', chaulu: 'Chầu', caube: 'Cậu', ongmuoi: 'Ông', quantam: 'Quan', quanngu: 'Quan', quannhat: 'Quan', quannhi: 'Quan', quantu: 'Quan', ongbo: 'Quan', chuanh: 'Chúa', chuatb: 'Chúa', chuanp: 'Chúa', chualm: 'Chúa', chaudn: 'Chầu', chaumuoi: 'Chầu', tamtoa: 'Mẫu' }[id]; if (!X || typeof s !== 'string') return s; /* 18/11 19:00 Quỳnh: giá Quan con nhang gọi "Quan" (trước bị gọi "Chầu"); Cô Chín, Cô Bơ giữ "cô" */
   const x = X.toLowerCase();
   return s.replace(/(^|[^\p{L}])(Cô|cô|CÔ)(?![\p{L}])(?!\s+đồng)/gu, (m, a, c) => a + (c === 'cô' ? x : c === 'CÔ' ? X.toUpperCase() : X)); }
 function addComment(name, text, gift) { text = fixXung(text); S.comments.push({ name, text, t: S.t, gift: !!gift }); if (S.comments.length > 30) S.comments.shift(); }
@@ -1354,6 +1354,21 @@ QM.cbe = { id: 'cobe2', LAP: 1, AU: CBE_AU, NOI: 1, SRC: n => /^(thinh|tungkhan)
   BUOC: ['Thỉnh Cô', 'Thay khăn áo', 'Bái hương', 'Bài sai', 'Khai quang', 'Múa mồi', 'Phát lộc', 'Ngự trà', 'Xe giá'] /* tên bước theo cột Quy trình trong kịch bản */, K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, baisai: 3, khaiquang: 4, muamoi: 5, tientung: 6, loctung: 6, tungloc2: 6, uongnuoc: 7, segia0: 8, segia: 8 },
   TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.828, 33.2, 145.5], "vaihuong": [0.714, 44.9, 137.6], "baisai": [0.744, 42.7, 145.2], "khaiquang": [0.759, 38.0, 136.6], "muamoi": [0.722, 46.3, 157.1], "tungtien": [0.734, 38.5, 150.9], "loctung2": [0.746, 44.8, 147.1], "loctung": [0.746, 33.9, 143.9], "uongnuoc": [0.591, 67.2, 225.0], "segia": [0.725, 50.7, 191.1]}, DAU: {"thinh": 159, "tungkhan": 159, "thayao": 162, "vaihuong": 80, "baisai": 67, "khaiquang": 77, "muamoi": 52, "tungtien": 60, "loctung2": 64, "loctung": 68, "uongnuoc": 93, "segia": 122}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongnuoc: .8 }, XF: .3, XFV: 1.4 }; /* nhạc: 1 file nối liền; chỉ chỗ văn thỉnh sang thay áo đổi file (gối 0,3 giây) */
 QX.cobe2 = 'cbe';
+/* 25/11 17:47 anh Linh: ghép demo giá Chầu Mười Đồng Mỏ (clip Tú cmdm_02…09 tách nền, văn Quỳnh cmdm_01…09) lên /tn; thỉnh + tung khăn dùng clip chung cc3. Chưa có mã dâng, phối cảnh (Quỳnh chưa khai) */
+const CM_AU = { thinh: 'cm/cmdm_01_van_thinh.mp3', thay: 'cm/cmdm_02_nhac_thay-khan-ao.mp3', vai: 'cm/cmdm_03_nhac_vai-huong.mp3', khai: 'cm/cmdm_04_nhac_bai-sai.mp3', co: 'cm/cmdm_05_nhac_mua-co.mp3', kiem: 'cm/cmdm_06_nhac_mua-kiem.mp3', uong: 'cm/cmdm_07_van_uong-ruou.mp3', loc: 'cm/cmdm_08_van_phat-loc.mp3', segia: 'cm/cmdm_09_van_se-gia.mp3' };
+QM.cm = { id: 'chaumuoi', LAP: 1, AU: CM_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'cm/cm-' + n + '.mp4?v=1', LICH: [
+  ['thinh', 'thinh', 0, 19.8, 'thinh', 'lap', ''], ['tungkhan', 'thay', 0, 5.4, 'tungkhan', 'vua', ''],
+  ['thayao', 'thay', 5.4, 86.8, 'thayao', 'ngoi', '', null, null, 5.0],
+  ['vaihuong', 'vai', 0, 32.8, 'vaihuong', 'vua', ''],
+  ['khaiquang', 'khai', 0, 23.8, 'khaiquang', 'di', ''],
+  ['muaco', 'co', 0, 83.8, 'muaco', 'di', ''],
+  ['muakiem', 'kiem', 0, 58.8, 'muakiem', 'di', ''],
+  ['uongruou', 'uong', 0, 109.8, 'uongruou', 'lap', ''],
+  ['phatloc', 'loc', 0, 43.8, 'phatloc', 'lap', '', null, [3.0, 'tien']],
+  ['segia0', 'segia', 0, 36, 'uongruou', 'lap', ''], ['segia', 'segia', 36, 43.8, 'segia', 'vua', '', null, null, null, 'giu']],
+  BUOC: ['Thỉnh Chầu', 'Thay khăn áo', 'Dâng nhang', 'Khai quang', 'Múa cờ', 'Múa kiếm', 'Ngự tửu', 'Phát lộc', 'Se giá'] /* tên bước theo cột Quy trình trong kịch bản */, K: { thinh: 0, tungkhan: 0, thayao: 1, vaihuong: 2, khaiquang: 3, muaco: 4, muakiem: 5, uongruou: 6, phatloc: 7, segia0: 8, segia: 8 },
+  TF: {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "khaiquang": [0.752, 54.6, 135.2], "muaco": [0.764, 21.0, 135.0], "muakiem": [0.889, 6.3, 106.1], "phatloc": [0.606, 76.7, 222.7], "segia": [0.721, 44.2, 176.9], "thayao": [0.749, 41.6, 165.3], "uongruou": [0.713, 43.2, 186.9], "vaihuong": [0.733, 43.8, 131.2]}, DAU: {"thinh": 159, "tungkhan": 159, "khaiquang": 79, "muaco": 78, "muakiem": 100, "phatloc": 94, "segia": 143, "thayao": 153, "uongruou": 130, "vaihuong": 87}, DEM: { thinh: [74, 287, 553], tungkhan: [74, 287, 553] }, RATE: { uongruou: .8 }, XF: 2.5, XFV: 1.4 };
+QX.chaumuoi = 'cm';
 /* 19/11 15:20 anh Linh: giá Chúa Thác Bờ (clip Tú tách nền) trên /tn; 15:29 Quỳnh đã cắt văn ctb_01…09 */
 const TB_AU = { thinh: 'tb/ctb_01_van_thinh.mp3', thay: 'tb/ctb_02_nhac_thay-khan-ao.mp3', vai: 'tb/ctb_03_van_vai-huong.mp3', dang: 'tb/ctb_04_van_dang-nhang.mp3', moi: 'tb/ctb_05_nhac_mua-moi.mp3', cheo: 'tb/ctb_06_nhac_mua-cheo.mp3', tien: 'tb/ctb_07_nhac_tung-tien.mp3', uong: 'tb/ctb_08_van_uong-ruou.mp3', segia: 'tb/ctb_09_van_se-gia.mp3' };
 QM.tb = { id: 'chuatb', LAP: 1, AU: TB_AU, SRC: n => /^(thinh|tungkhan)$/.test(n) ? 'cc3/cc-' + n + '.mp4?v=3' : 'tb/tb-' + n + '.mp4?v=1', LICH: [
@@ -2640,6 +2655,7 @@ function shadeHex(hex, k) { const n = parseInt(hex.slice(1), 16), f = v => Math.
   if (QD_THU || CHUA) ds.push({ id: 'chuatb', ten: 'Chúa Thác Bờ', hang: 'co', ao: '#f2ead8', vay: '#1b1418', khan: '#1b1418', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 Chúa Thác Bờ (clip Tú) trên /tn */
   if (QD_THU || MAU) ds.unshift({ id: 'tamtoa', ten: 'Thỉnh Tam Tòa Thánh Mẫu', hang: 'co', ao: '#c8242a', vay: '#c8242a', khan: '#c62a22', vienKhan: '#e8c040', dai: '#e8c040', congCu: 'quat', tim: 'tien', coNhac: false }); /* 19/11 17:45 anh Linh: Tam Tòa Thánh Mẫu lên đầu /tn */
   if (QD_THU || QG) ds.push({ id: 'ongbo', ten: 'Quan Hoàng Bơ', hang: 'hoang', ao: '#f3efe6', vay: '#f3efe6', khan: '#f3efe6', vienKhan: '#e8c040', dai: '#f08a2a', congCu: 'quat', tim: 'tien', giong: 'nam', coNhac: false }); /* 23/11 16:43 anh Linh: Quan Hoàng Bơ lên /g */
+  if (QD_THU) ds.push({ id: 'chaumuoi', ten: 'Chầu Mười Đồng Mỏ', hang: 'co', ao: '#e8b13a', vay: '#f2efe6', khan: '#e8b13a', vienKhan: '#e8c040', dai: '#c8242a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 25/11 Chầu Mười Đồng Mỏ (clip Tú) chỉ trên /tn */
   if (QD_THU || QG) ds.push({ id: 'cobe2', ten: 'Cô Bé Thượng Ngàn', hang: 'co', ao: '#1c1a22', vay: '#b8322a', khan: '#2f86b8', vienKhan: '#e8c040', dai: '#c8246a', congCu: 'quat', tim: 'tien', coNhac: false }); /* 23/11 16:43 anh Linh: Cô Bé Thượng Ngàn lên /g */
   if (QD_THU || QG) ds.push({ id: 'quantu', ten: 'Quan Lớn Đệ Tứ', hang: 'quan', ao: '#e8b13a', vay: '#e8b13a', khan: '#c62a22', vienKhan: '#e8c040', dai: '#f08060', congCu: 'quat', tim: 'tien', giong: 'nam', coNhac: false }); /* 23/11: Quan Đệ Tứ chỉ trên /tn */
   if (QD_THU || QG) ds.push({ id: 'quannhi', ten: 'Quan Lớn Đệ Nhị', hang: 'quan', ao: '#1f8a6a', vay: '#1f8a6a', khan: '#c62a22', vienKhan: '#e8c040', dai: '#2f6a3a', congCu: 'quat', tim: 'tien', giong: 'nam', coNhac: false }); /* 22/11: Quan Đệ Nhị chỉ trên /tn */
@@ -3977,7 +3993,7 @@ function buocGia() { if (S.chuyen || S.cat) return null; // [danh sách bước,
 function senNho(x, y, r, c1, c2) { ctx.save(); ctx.translate(x, y); for (let i = -2; i <= 2; i++) { ctx.save(); ctx.rotate(i * .42); ctx.beginPath(); ctx.moveTo(0, r * .35); ctx.quadraticCurveTo(r * .55, -r * .25, 0, -r); ctx.quadraticCurveTo(-r * .55, -r * .25, 0, r * .35); ctx.fillStyle = i ? c2 : c1; ctx.fill(); ctx.restore(); } ctx.restore(); }
 const MAU_THAT = { /* 25/11 16:53 anh Linh: màu khăn áo đo từ video thật của từng giá (thân áo) */
   tamtoa: '#d61311', chualm: '#181a16', chuanh: '#1d5145', chuatb: '#d9cfca', chuanp: '#d9d1cc', quannhat: '#cd442b', quannhi: '#219786', quantam: '#e0dfcf', quantu: '#dca442', quanngu: '#326194',
-  chaudn: '#297b68', chaulu: '#8d2e39', chaube: '#1f1a13', ongbo: '#dacfc5', ongbay: '#6b3d63', ongmuoi: '#eac25a', codoi2: '#6e7e73', cobo: '#ded9db', cosau: '#af99ad', cochin: '#ec79a2', cobe2: '#151818', caube: '#31795a' };
+  chaudn: '#297b68', chaulu: '#8d2e39', chaumuoi: '#d09f48', chaube: '#1f1a13', ongbo: '#dacfc5', ongbay: '#6b3d63', ongmuoi: '#eac25a', codoi2: '#6e7e73', cobo: '#ded9db', cosau: '#af99ad', cochin: '#ec79a2', cobe2: '#151818', caube: '#31795a' };
 function mauKhungGia() { /* 25/11 13:22 anh Linh: khung câu đối và tiến trình cùng màu áo cô cậu đồng của giá; chữ tự đổi màu cho dễ đọc nhất */
   const hx = (window.__ao || MAU_THAT[GIA().id] || GIA().ao || '#8e211c').replace('#', ''), dich = [0, 2, 4].map(i => parseInt(hx.substr(i, 2), 16)); /* 25/11 13:28 anh Linh: chỉ đổi màu khi thay khăn áo xong */
   const laMau = /Mẫu/.test(GIA().ten || '') || GIA().id === 'tamtoa'; if (laMau) { dich[0] = 0xd6; dich[1] = 0x13; dich[2] = 0x11; } /* 25/11 15:09 anh Linh: giá Mẫu màu đỏ, không có thay khăn áo nên đổi ngay */
