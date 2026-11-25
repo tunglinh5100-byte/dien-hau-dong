@@ -169,7 +169,7 @@ const TRANH_CMT = NH_MODE && !/[?&]cmt=0/.test(location.search); /* ?cmt=0: xế
     if (Math.abs(x - 270) < 74 && y < 820) continue; // chừa khoảng giữa cho đệm ban lộc
     if (Math.abs(x - 270) < 34) continue; // lối đi giữa
     if (/[?&]hm=1/.test(location.search) && x < 40 && y < 900) continue; // chừa chỗ lầu hoá mã
-    if (TRANH_CMT && x < 440 && y > 848) continue; /* 25/11 12:32 anh Linh: không xếp chỗ ngồi ở vùng TikTok hiện bình luận (góc dưới bên trái) */
+    if (TRANH_CMT && x < 270 && y > 994) continue; /* 25/11 12:39 anh Linh: chỉ chừa 1/4 chiếu góc dưới bên trái (vùng TikTok hiện bình luận) */
     if (pts.some(p => Math.hypot(p.x - x, (p.y - y) * 1.6) < (NH_MODE ? 64 * KC : 52))) continue;
     pts.push({ x, y, truoc: NH_MODE && y < 870, /* 19/11: dải gần sập dành người tương tác nhiều thu hẹp lại (950 -> 870) để mọi người ngồi lên sát thảm */ s: (NH_MODE ? 1.3 * Math.pow(KC, .6) : 1) * Math.min(NH_MODE ? 1.45 : 9, .8 + (y - 640) / 260 * .32) + rnd(-.04, .04), who: null, lean: rnd(-.12, .12) });
   }
@@ -3744,7 +3744,7 @@ const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
   let GHE_VY = null;
   function gheVy() { if (GHE_VY) return GHE_VY; if (!S.seats.length) return null; /* 23/11 anh Linh: Tường Vy ngồi chính giữa chiếu, không ai ngồi đè lên */
     const ys = S.seats.map(z => z.y), cy = (Math.min(...ys) + Math.max(...ys)) / 2, gan = S.seats.slice().sort((a, b) => Math.abs(a.y - cy) - Math.abs(b.y - cy))[0];
-    const vx = TRANH_CMT ? 500 : 270, vy0 = TRANH_CMT ? 905 : cy; /* 25/11: tránh vùng bình luận thì Tường Vy ngồi giữa dải bên phải */
+    const vx = 270, vy0 = cy; /* 25/11 12:39: chỉ chừa góc dưới trái, Tường Vy về giữa chiếu như cũ */
     GHE_VY = { x: vx, y: vy0, s: gan ? gan.s : 1.3, lean: 0, who: null, vy: true };
     for (let i = S.seats.length - 1; i >= 0; i--) { const z = S.seats[i]; if (Math.abs(z.x - vx) < 58 && Math.abs(z.y - vy0) < 52) { const q = z.who; S.seats.splice(i, 1); if (q && !q.ra) { const moi = S.seats.filter(w => !w.who).sort((a, b) => Math.hypot(a.x - q.x, a.y - q.y) - Math.hypot(b.x - q.x, b.y - q.y))[0]; if (moi) { moi.who = q; q.seat = moi; goTo(q, duongVong(q, q.x, q.y, moi.x, moi.y)); } else raVe(q); } } }
     return GHE_VY; }
