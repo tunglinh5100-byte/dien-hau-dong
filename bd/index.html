@@ -79,10 +79,12 @@ function vao(i) { BI = i; napClip(i); KT = performance.now(); const L = LICH[i];
 let curN = null; const FADE = { a: 0, c: Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), n: null };
 const BUF = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), bx = BUF.getContext('2d', { willReadFrequently: true });
 const MK = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), mx = MK.getContext('2d', { willReadFrequently: true });
+/* 25/11 anh Linh: thay khăn áo ngồi 2 phút lâu quá → link thử chỉ ngồi 25 giây rồi nhảy nhạc sang bái hương (?du=1 để giữ đủ như /g) */
+const HET = L => L[0] === 'thayao' && Q.get('du') !== '1' ? L[2] + 25 : L[3];
 function capNhatGia(now) { const dt = Math.min(.2, (now - lastT) / 1000); lastT = now; if (!cur) vao(0); const L = LICH[BI], at = auNow(L); BT = at != null ? at : BT + dt;
   const v = VID[L[4]]; if (v.paused && !(L[5] === 'vua' && v.ended)) v.play().catch(() => {}); if (v.readyState < 2 && now - KT > 6000) { KT = now; v.src = v._src + '&r=' + Date.now(); v.load(); v.play().catch(() => {}); } /* video kẹt thì nạp lại */
   if (L[5] === 'ngoi' && v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = 4.5; } catch (e) {} v.play().catch(() => {}); } /* ngồi thay áo: lặp đoạn ngồi */
-  if (BT >= L[3] - .05) { if (BI + 1 < LICH.length) vao(BI + 1); else { Object.values(AU).forEach(a => a.pause()); vao(0); } } if (FADE.a > 0) FADE.a = Math.max(0, FADE.a - dt / .6); }
+  if (BT >= HET(L) - .05) { if (BI + 1 < LICH.length) vao(BI + 1); else { Object.values(AU).forEach(a => a.pause()); vao(0); } } if (FADE.a > 0) FADE.a = Math.max(0, FADE.a - dt / .6); }
 function lay(v) { if (!v || v.readyState < 2) return false; mx.drawImage(v, 0, 640, 360, 640, 0, 0, 360, 640); bx.clearRect(0, 0, 360, 640); bx.drawImage(v, 0, 0, 360, 640, 0, 0, 360, 640); const m = mx.getImageData(0, 0, 360, 640).data, c = bx.getImageData(0, 0, 360, 640); for (let i = 0; i < m.length; i += 4) c.data[i + 3] = m[i]; bx.putImageData(c, 0, 0); return true; }
 function veMot(cv2, n, x, y, k, al) { const t = TF[n] || [1, 0, 0]; g.save(); g.globalAlpha = al; g.translate(x, y); g.scale(k, k); g.translate(-178, -585); g.translate(t[1], t[2]); g.scale(t[0], t[0]); g.drawImage(cv2, 0, 0, 360, 640); g.restore(); }
 function veDong(x, y, k) { capNhatGia(performance.now()); const ok = lay(cur); if (FADE.a > 0) veMot(FADE.c, FADE.n, x, y, k, FADE.a); if (ok) veMot(BUF, curN, x, y, k, FADE.a > 0 ? Math.min(1, 1.3 - FADE.a) : 1); }
