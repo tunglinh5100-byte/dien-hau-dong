@@ -252,6 +252,8 @@ function hoaHong(name, d) { /* 21/11 21:49 anh Linh: ấn tặng hoa hồng thì
   const p = person(name), cu = aoLuu(name) || (p && p.coat); let m; do { m = AO_NN[Math.floor(Math.random() * AO_NN.length)]; } while (m[1] === cu && AO_NN.length > 1);
   doiAo(name, p && !p.ghost ? p : null, [null, m[1], m[0]]); if (p && !p.ghost) { p.pose = 'raise'; p.poseT = 1.2; } imLang(name, soHoa); }
 window.__hoaHong = hoaHong;
+/* 25/11 08:11 anh Linh: 5 người đầu tiên vào chiếu mỗi phiên live được trải nghiệm thử đủ phụ kiện, hào quang như Tường Vy (không đổi số lần dự thật) */
+const THU = new Set(); function laThu(n) { return THU.has(n); } function vThu(n, v) { return THU.has(n) ? Math.max(v, 8) : v; }
 function soLanVao(name) { const r = LVK[name] && LV[LVK[name]]; return r ? (r.f || FOL_TAM[name] ? (r.v || 1) : 1) : 0; } /* chưa follow: luôn tính là lần 1, chưa có phụ kiện */
 const HANG_CHO = []; /* 20/11 20:24 anh Linh: chiếu đủ người thì người share xếp hàng chờ */
 function choVao(name) { const e = HANG_CHO.find(x => x.name === name); if (e) e.t = S.t; else HANG_CHO.push({ name, t: S.t }); }
@@ -2855,7 +2857,7 @@ function drawTrays(t) {
 
 // ---------- Con nhang (back view) ----------
 const VS_ON = !/[?&]vs=0/.test(location.search); /* 22/11 15:08: bật vẽ sẵn con nhang mặc định cho nhẹ khi đông người */ let VS_VE = false; const VSC = new Map(); let VS_MOI = 0;
-function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 8 ? 4 : vS >= 5 ? 3 : vS >= 3 ? 2 : vS >= 2 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0, JSON.stringify(NV[nm] || '')].join('|'); }
+function vsKhoa(p, s, lv) { const vS = p.name && !p.ghost && !p.gia ? vThu(p.name, soLanVao(p.name)) : 0, nm = String(p.name || ''); return [p.sex, p.coat, p.ao || (nm && !p.ghost ? aoLuu(nm) || '' : ''), p.hairC, lv, p.quen ? 1 : 0, vS >= 8 ? 4 : vS >= 5 ? 3 : vS >= 3 ? 2 : vS >= 2 ? 1 : 0, Math.round(s * 50), nm.length % 4, nm ? (nm.length + nm.charCodeAt(0)) % 4 : 0, p.reach || 0, JSON.stringify(NV[nm] || '')].join('|'); }
 function vsVe(p, t, s, lv, rot) { if (p.state !== 'seat' || p.pose !== 'kneel' || p.carry || (p.nc != null && S.t - p.nc < CHU_NHAN) || p.hd || p.tam) return false;
   const k = vsKhoa(p, s, lv); let c = VSC.get(k);
   if (!c) { if (VS_MOI > 6) return false; /* mỗi khung vẽ sẵn tối đa 6 người, còn lại vẽ thường */ VS_MOI++; const R = window.CV_R || 1.6, w = Math.ceil(110 * s), h = Math.ceil(120 * s), ox = w / 2, oy = Math.round(h * .78), oc = document.createElement('canvas'); oc.width = Math.ceil(w * R); oc.height = Math.ceil(h * R); const g = oc.getContext('2d'); g.setTransform(R, 0, 0, R, 0, 0);
@@ -2889,7 +2891,7 @@ function drawPerson1(p, t) {
     ctx.restore(); }
   else {
   const kneel = !walking && p.pose !== 'walk' && p.state !== 'stand', nu = p.sex === 'nu', SK = '#e3b78c', sw = nu ? 7.6 : 9.2, top = (kneel ? -21 : -26) + lean * .5;
-  const vS = p.name && !p.ghost && !p.gia ? soLanVao(p.name) : 0, pk = new Set(pkCua(p.name, vS).map(x => x[0])); /* 22/11 15:00: phụ kiện theo mốc xem live */ /* 21/11 21:38 anh Linh: quà theo số lần về điện: 5 lần khăn vấn đỏ, 10 lần quạt, 30 lần áo gấm */
+  const vS = p.name && !p.ghost && !p.gia ? vThu(p.name, soLanVao(p.name)) : 0, pk = new Set(pkCua(p.name, vS).map(x => x[0])); /* 22/11 15:00: phụ kiện theo mốc xem live */ /* 21/11 21:38 anh Linh: quà theo số lần về điện: 5 lần khăn vấn đỏ, 10 lần quạt, 30 lần áo gấm */
   const nvp = (p.name && NV[p.name]) || {}, hcol = nvp.toc || p.hairC, giay = nvp.giay || '#2a1f1a'; const aoR = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); /* 21/11: màu áo người xem tự chọn bằng comment, đè màu theo cấp */
   const coat = aoR ? aoR : lv === 1 ? ['#6d6258', '#5e5a52', '#74685c', '#66605a'][(p.name.length + p.name.charCodeAt(0)) % 4] : lv === 5 ? '#c9962a' : (p.quen && lv < 3) ? '#b0261e' : p.coat;
   const g = ctx.createLinearGradient(-11, 0, 11, 0); g.addColorStop(0, shade(coat, -.35)); g.addColorStop(.45, shade(coat, .1)); g.addColorStop(1, shade(coat, -.4));
@@ -2954,6 +2956,7 @@ function drawPerson1(p, t) {
   const tag = (NH_MODE ? '' : 'Lv' + lv + ' ') + (p.quen ? '⭐ ' : '') + tenHien(p.name) + (p.que ? ' · ' + p.que : '');
   const NK = NH_MODE ? 1.3 : 1; /* 13:25 anh Linh: tên người xem to hơn 30% */ ctx.font = `600 ${8.5 * NK * Math.max(.9, s)}px ${UI}`; const w = ctx.measureText(tag).width + 8 * NK;
   rr(p.x - w / 2, p.y - 62 * s - 6 * NK, w, 12 * NK, 6 * NK, (NV[p.name] && NV[p.name].nenTen) || ['', 'rgba(60,56,52,.62)', p.quen ? 'rgba(120,20,14,.8)' : 'rgba(0,0,0,.45)', 'rgba(24,86,54,.85)', 'rgba(130,20,14,.9)', 'rgba(168,118,18,.95)'][lv]); text(tag, p.x, p.y - 62 * s, 8.5 * NK * Math.max(.9, s), (NV[p.name] && NV[p.name].mauTen) || (lv === 1 ? '#cfc6bb' : lv >= 3 || p.quen ? '#ffe39a' : '#fff'), { w: (NV[p.name] && NV[p.name].mauTen) ? 800 : 600 });
+  if (laThu(p.name) && !(typeof VY_TEN !== 'undefined' && p.name === VY_TEN)) { const l2 = '🎁 Trải nghiệm thử phụ kiện', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); }
   if (typeof VY_TEN !== 'undefined' && p.name === VY_TEN) { const l2 = 'Dự 8 lần live · ở live 30 phút', f2 = 7.5 * NK * Math.max(.9, s); ctx.font = `700 ${f2}px ${UI}`; const w2 = ctx.measureText(l2).width + 8 * NK, y2 = p.y - 62 * s - 13 * NK; rr(p.x - w2 / 2, y2 - 5.5 * NK, w2, 11 * NK, 5.5 * NK, 'rgba(40,10,6,.85)'); text(l2, p.x, y2, f2, '#ffe39a', { w: 700 }); } /* 23/11 anh Linh: cho người xem biết cần dự bao nhiêu lần, ở live bao lâu để được như Tường Vy */
 }
 
@@ -2969,7 +2972,7 @@ function veTho(t) { if (!THO_ON || TK.on) return; THO.forEach((p, i) => { thoDi(
     const ch = (t + i * 3.1) % 7; if (ch < .18) { ctx.globalAlpha = 1 - ch / .18; const fg = ctx.createRadialGradient(12, -38, 1, 12, -38, 26); fg.addColorStop(0, 'rgba(255,255,255,1)'); fg.addColorStop(1, 'rgba(255,255,240,0)'); ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(12, -38, 26, 0, 6.28); ctx.fill(); } }
   else { const lia = Math.sin(t * .5) * .1; ctx.rotate(lia); rr(2, -44, 18, 9, 2, '#262626'); rr(17, -43, 6, 7, 1.5, '#3a3a3a'); circ(23, -39.5, 2.6, '#6fa0c8'); rr(5, -47, 8, 3, 1, '#333'); if (Math.sin(t * 4) > 0) circ(5, -42, 1.3, '#ff3030'); rr(-1, -38, 6, 3, 1, '#c99a72'); }
   ctx.restore(); }); }
-function auraPhut(name) { const r = SES[name]; return r ? (Date.now() - r.t0) / 60000 : 0; }
+function auraPhut(name) { const r = SES[name]; if (r && laThu(name)) return Math.max(60, (Date.now() - r.t0) / 60000); return r ? (Date.now() - r.t0) / 60000 : 0; }
 const AURA_MOC = [[1, 'hào quang trên đầu'], [10, 'hào quang toàn thân'], [15, 'hào quang xanh'], [30, 'sao bay quanh người']];
 /* 23/11 06:21 anh Linh: hào quang bắt đầu ở đầu, lan dần toàn thân trong 10 phút (tăng liên tục từng chút, không nhảy), 15 phút đổi xanh dương, 30 phút thêm sao bay quanh */
 function veSao(p, t, truoc) { /* 23/11 06:55 anh Linh: sao bay quanh đầu như vệ tinh quanh trái đất; nửa sau khuất sau đầu, nửa trước bay trước mặt */
@@ -3644,6 +3647,10 @@ function lvThuLanMoi() { const r = LV['__thu__']; if (r) r.at = 0; lvEv(ME, { us
 window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvDirty = true; } };
 
 /* ---------- 23/11 anh Linh: nhân vật chim mồi duy nhất "Tường Vy" (bật bằng ?vy=1): liên tục đổi áo quần, tóc, giới tính, phụ kiện, đi lên xuống, comment như người thật; đủ phụ kiện và hào quang ---------- */
+(function () { let ph = null; try { const o = JSON.parse(localStorage.getItem('hd_thu') || 'null'); if (o && o.ph === PHIEN && Array.isArray(o.ds)) { ph = o.ph; o.ds.forEach(n => THU.add(n)); } } catch (e) {}
+  setInterval(() => { try { if (ph !== PHIEN) { ph = PHIEN; THU.clear(); } if (THU.size >= 5) return; const cu = THU.size;
+    S.people.forEach(p => { if (THU.size >= 5 || !p.name || p.ghost || p.gia || p.tam || p.ra || p.state !== 'seat' || !THAT.has(p.name) || p.name === 'Tường Vy' || THU.has(p.name)) return; const nk = norm(p.name); if (KHONG_CAM_ON.some(k => nk.includes(k))) return; THU.add(p.name); try { p.vsK = null; float(p.x, p.y - 80, '🎁 ' + tenHien(p.name) + ' được trải nghiệm thử phụ kiện', '#ffe39a'); } catch (e) {} });
+    if (THU.size !== cu) localStorage.setItem('hd_thu', JSON.stringify({ ph: PHIEN, ds: [...THU] })); } catch (e) {} }, 2000); window.__thu = () => [...THU]; })(); /* 5 người thật đầu tiên ngồi vào chiếu trong phiên */
 const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
 (function () { if (!VY_BAT) return;
   const LENH = ['áo đỏ', 'áo xanh ngọc', 'áo tím than', 'áo vàng', 'áo hồng', 'áo đỏ vàng xanh', 'áo trắng xanh', 'quần trắng', 'quần đen', 'quần đỏ', 'vấn đỏ', 'khăn vàng', 'khăn tím', 'tóc nâu', 'tóc vàng', 'tóc đen', 'tóc ngắn', 'tóc vừa', 'tóc dài', 'giày trắng', 'giày đỏ', 'nam', 'nữ',
