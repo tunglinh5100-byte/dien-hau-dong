@@ -3690,12 +3690,14 @@ function lvThuLanMoi() { const r = LV['__thu__']; if (r) r.at = 0; lvEv(ME, { us
 window.__hdLv = { ev: lvEv, get data() { return LV; }, xoa: () => { LV = {}; lvDirty = true; } };
 
 /* ---------- 23/11 anh Linh: nhân vật chim mồi duy nhất "Tường Vy" (bật bằng ?vy=1): liên tục đổi áo quần, tóc, giới tính, phụ kiện, đi lên xuống, comment như người thật; đủ phụ kiện và hào quang ---------- */
-(function () { let ph = null; const luu = () => { try { localStorage.setItem('hd_thu', JSON.stringify({ ph: PHIEN, act: [...THU.entries()], da: [...THU_DA] })); } catch (e) {} };
-  try { const o = JSON.parse(localStorage.getItem('hd_thu') || 'null'); if (o && o.ph === PHIEN) { ph = o.ph; (o.act || []).forEach(([n, t]) => THU.set(n, t)); (o.da || []).forEach(n => THU_DA.add(n)); } } catch (e) {}
-  setInterval(() => { try { if (ph !== PHIEN) { ph = PHIEN; THU.clear(); THU_DA.clear(); } let doi = false;
+(function () { /* 25/11 09:19 anh Linh: mỗi giá hầu, 5 người VÀO CHIẾU NHANH NHẤT sau khi sang giá được thử 5 phút; hết 5 phút là thôi tới hết giá; sang giá mới chọn lại */
+  let gia = null, cu = new WeakSet(); const luu = () => { try { localStorage.setItem('hd_thu', JSON.stringify({ gia, act: [...THU.entries()], da: [...THU_DA] })); } catch (e) {} };
+  try { const o = JSON.parse(localStorage.getItem('hd_thu') || 'null'); const g0 = (typeof GIA_DS !== 'undefined' && GIA_DS.active) || null; if (o && o.gia && o.gia === g0) { gia = o.gia; (o.act || []).forEach(([n, t]) => THU.set(n, t)); (o.da || []).forEach(n => THU_DA.add(n)); } } catch (e) {}
+  const moc = () => { cu = new WeakSet(); S.people.forEach(p => cu.add(p)); }; moc(); /* người đang ngồi sẵn lúc sang giá / lúc tải trang không tính là "vào" */
+  setInterval(() => { try { const g = GIA_DS.active; let doi = false; if (g !== gia) { gia = g; THU.clear(); THU_DA.clear(); moc(); doi = true; }
     THU.forEach((t, n) => { if (Date.now() - t >= THU_MS) { THU.delete(n); THU_DA.add(n); doi = true; const p = S.people.find(q => q.name === n && !q.ra); if (p) float(p.x, p.y - 80, '⏰ ' + tenHien(n) + ' hết 5 phút trải nghiệm · xem live nhiều lần để có phụ kiện thật', '#f6dc96'); } });
-    S.people.forEach(p => { if (THU.size >= 5 || !p.name || p.ghost || p.gia || p.tam || p.ra || p.state !== 'seat' || !THAT.has(p.name) || p.name === 'Tường Vy' || THU.has(p.name) || THU_DA.has(p.name)) return; const nk = norm(p.name); if (KHONG_CAM_ON.some(k => nk.includes(k))) return; THU.set(p.name, Date.now()); doi = true; try { float(p.x, p.y - 80, '🎁 ' + tenHien(p.name) + ' được trải nghiệm thử phụ kiện 5 phút', '#ffe39a'); } catch (e) {} });
-    if (doi) luu(); } catch (e) {} }, 1000); window.__thu = () => [...THU.entries()]; })(); /* tối đa 5 người cùng lúc, mỗi người 5 phút, mỗi người 1 lần mỗi phiên; hết suất thì người kế tiếp vào chiếu được nhận */
+    if (!S.chuyen) S.people.forEach(p => { if (THU.size + THU_DA.size >= 5 || cu.has(p) || !p.name || p.ghost || p.gia || p.tam || p.ra || p.state !== 'seat' || !THAT.has(p.name) || p.name === 'Tường Vy' || THU.has(p.name) || THU_DA.has(p.name)) return; const nk = norm(p.name); if (KHONG_CAM_ON.some(k => nk.includes(k))) return; THU.set(p.name, Date.now()); doi = true; try { float(p.x, p.y - 80, '🎁 ' + tenHien(p.name) + ' vào nhanh, được trải nghiệm thử phụ kiện 5 phút', '#ffe39a'); } catch (e) {} });
+    if (doi) luu(); } catch (e) {} }, 1000); window.__thu = () => [...THU.entries()]; window.__thuDa = () => [...THU_DA]; })();
 const VY_TEN = 'Tường Vy', VY_BAT = /[?&]vy=1(&|$)/.test(location.search);
 (function () { if (!VY_BAT) return;
   const LENH = ['áo đỏ', 'áo xanh ngọc', 'áo tím than', 'áo vàng', 'áo hồng', 'áo đỏ vàng xanh', 'áo trắng xanh', 'quần trắng', 'quần đen', 'quần đỏ', 'vấn đỏ', 'khăn vàng', 'khăn tím', 'tóc nâu', 'tóc vàng', 'tóc đen', 'tóc ngắn', 'tóc vừa', 'tóc dài', 'giày trắng', 'giày đỏ', 'nam', 'nữ',
