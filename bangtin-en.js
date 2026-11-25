@@ -1,0 +1,190 @@
+// English version of the boards (sự tích, step names, giá names). Shown alternating with Vietnamese on the live screen.
+// Bản tiếng Anh của bảng sự tích, tên bước, tên giá. Chạy xen kẽ với tiếng Việt trên màn hình live.
+window.BANG_TIN_EN = {
+  nguon: 'Nhân Dân newspaper (nhandan.vn)',
+  chung: [
+    'The Viet practice of worshipping the Mother Goddesses of Three Realms is recognised by UNESCO as an Intangible Cultural Heritage of Humanity',
+    'Mother Goddess worship blends native Vietnamese beliefs with elements of Taoism and Buddhism',
+    'The Holy Mothers and spirits on the altar come not only from the Kinh people but also from the Mường, Tày, Nùng and Dao peoples',
+    'The spirit mediumship ritual (lên đồng) brings together folk costume, music, dance and chầu văn singing',
+  ],
+  ongbay: [
+    'The Seventh Prince is the famous general Nguyễn Hoàng Bảy, who fought invaders and protected the northern lands',
+    'At the end of the Lê dynasty (1740-1786), bandits often raided Quy Hóa. The court sent him to lead troops along the Red River to drive them out',
+    'He freed Khau Bàn, built Bảo Hà into a great base and trained soldiers from local chiefs',
+    'He led land and river forces in Lào Cai, freeing the districts of Quy Hóa, today Yên Bái and Lào Cai',
+    'He died bravely in an unequal battle. Local people buried him and built a temple for him at Bảo Hà',
+    'Emperors Minh Mạng and Thiệu Trị honoured him; the temple was titled "Guardian of the Nation"',
+    'His main memorial day is the 17th of the 7th lunar month. The Bảo Hà Temple Festival became National Intangible Heritage in 2016',
+    'Bảo Hà Temple, in Bảo Hà commune, Lào Cai province, is a National Historical and Cultural Relic',
+  ],
+  nguon_chaube: 'Lạng Sơn Department of Culture; Dân Việt newspaper (danviet.vn)',
+  chaube: [
+    'The Little Royal Lady of Bắc Lệ is a famous holy lady, worshipped with the Mountain Mother at the Bắc Lệ temple complex, Hữu Lũng, Lạng Sơn',
+    'Bắc Lệ is a complex of dozens of Mother Goddess temples and the starting point of the Lạng Sơn Geopark',
+    'Legend says the Mother of Bắc Lệ and the Little Royal Lady helped dynasties defend the country',
+    'Locals believe Bắc Lệ honours the Mountain Mother, creator and ruler of all forests and mountains',
+    'The Bắc Lệ Temple Festival is held in mid 9th lunar month every year',
+  ],
+  codoi: [
+    'The Second Lady of the Mountains is one of the spirits embodied in the hầu đồng ritual',
+    'Her chầu văn song has ancient lyrics and is among the best-known',
+    'The spirits belong to the Four Palaces, with Mother Liễu Hạnh at the centre. The ritual includes male and female spirits',
+    'Chầu văn music is the heart of the spirit mediumship ritual',
+    'Her main temple is uncertain, with many stories; she is co-worshipped in temples of the Mountain Mother',
+    'The Viet practice of worshipping the Mother Goddesses of Three Realms is recognised by UNESCO as an Intangible Cultural Heritage of Humanity',
+    'Mother Goddess worship blends native Vietnamese beliefs with elements of Taoism and Buddhism',
+  ],
+  nguon_cobo: 'VinWonders, "Cô Bơ Temple, Thanh Hóa"',
+  cobo: [
+    'Legend says Lady Bơ is the daughter of the Water King, sent down to help people and then carried back to the Water Palace',
+    'People believe she appears where rivers meet, blessing boats with fair winds, so her ritual includes a rowing dance',
+    'She is also called Cô Bơ Bông or Cô Bơ Thác Hàn; her temple is on the Lèn River where it leaves the Mã River, Tống Sơn, Thanh Hóa'
+  ],
+  nguon_ongmuoi: 'Văn Hóa newspaper (baovanhoa.vn)',
+  ongmuoi: [
+    'In the Four Palaces belief, the Tenth Prince is the tenth son of the Father King of the Eight Seas',
+    'Legend tells he came down to earth to help people clear land, fight floods, farm and weave',
+    'He is worshipped at Củi Temple, Nghi Xuân, Hà Tĩnh (national relic since 1993) and at his temple in Hưng Nguyên, Nghệ An, on both banks of the Lam River',
+  ],
+  nguon_chaulu: 'oancotam.com, "The legend of Chầu Lục Cung Nương"',
+  chaulu: [
+    'Legend says the Sixth Royal Lady was a fairy who dropped a jade cup and was sent down to earth, born into a Nùng chief\'s family in Lạng Sơn',
+    'After her time on earth she became a saint, guarding the forests of Chín Tư (Hữu Lũng), helping people farm and blessing traders',
+    'Her main temple is Lục Cung Linh Từ (Chín Tư Temple), Hữu Lũng, Lạng Sơn; her feast day is the 10th of the 5th lunar month'
+  ],
+  nguon_cochin: 'Vietnam Airlines travel guide, "Cô Chín Temple, Thanh Hóa"',
+  cochin: [
+    'Legend says the Ninth Lady is the ninth daughter of the Jade Emperor, who came down as a girl selling tea by the gate of Ba Dội village',
+    'She was known for healing and helping the poor; villagers built her a temple at Chín Giếng (Bỉm Sơn, Thanh Hóa)',
+    'Each year the Holy Mother is carried from Sòng Sơn Temple to Chín Giếng, "the elder sister visiting the younger"; her feast day is the 9th of the 9th lunar month',
+  ],
+  nguon_tamtoa: 'Nhân Dân newspaper (nhandan.vn); Vietcetera; Lào Cai newspaper',
+  tamtoa: [
+    'The Three Holy Mothers lead the altar: the Heavenly Mother rules the sky, the Mountain Mother the forests, the Water Mother the rivers',
+    'The Holy Mothers are honoured as protective mothers who bring blessings, health and peace to their devotees',
+    'The Viet practice of worshipping the Mother Goddesses of Three Realms is recognised by UNESCO as an Intangible Cultural Heritage of Humanity',
+    'Phủ Dày (Vụ Bản, former Nam Định) is the largest centre of Mother worship; the Mountain Mother is mainly worshipped at Bắc Lệ (Lạng Sơn) and Đông Cuông (former Yên Bái)',
+    'The Water Mother\'s main temple is uncertain, with many stories; she is co-worshipped in Mother temples everywhere',
+  ],
+  nguon_chuanh: 'tinnguongthomauvietnam.com, "Chúa Đệ Nhị Nguyệt Hồ"',
+  chuanh: [
+    'The Second Lady of Nguyệt Hồ is the second of the Three Mường Ladies, also called the Fortune Lady of Nguyệt Hồ or Princess Nguyệt Nga',
+    'Legend says at 14 she was adopted by the sage Quỷ Cốc, who taught her astrology; her fame reached the king',
+    'Nguyệt Hồ Temple is in Hương Vĩ, Yên Thế, Bắc Giang; its feast is on the 15th of the 2nd lunar month',
+  ],
+  nguon_cosau: 'chonthieng.com, "Cô Sáu Sơn Trang"',
+  cosau: [
+    'The Sixth Lady of the Mountains, also called Cô Sáu Lục Cung, is the sixth of the Holy Ladies of the Four Palaces',
+    'Legend says she was a fairy who pitied the sick and came down to earth, born into a Nùng family in Hữu Lũng, Lạng Sơn',
+    'She was known as a healer, going deep into the forest to gather rare herbs',
+    'Her shrine is beside the Chầu Lục Temple at Chín Tư (Hữu Lũng, Lạng Sơn); her feast is the 10th of the 5th lunar month',
+  ],
+  nguon_chuanp: 'Quốc Tế newspaper (baoquocte.vn); Sun Paradise Land',
+  chuanp: [
+    'According to Prof. Ngô Đức Thịnh, the Lady of the Five Directions was a heavenly fairy who came down to earth',
+    'She was born into the Vũ family at Cửa Cấm Giang, Gia Viên, today Hải Phòng',
+    'Returning to heaven, she was given rule over the five directions; she urged people to work hard and punished the wicked',
+    'Her feast day is the 16th of the 6th lunar month, celebrated most grandly in Hải Phòng',
+    'Her main temple is uncertain; in Hải Phòng she is worshipped at Cấm Temple, Tiên Nga Temple and Cây Đa 13 Gốc Temple',
+  ],
+  nguon_chualm: 'phuday.com, "Who are the Three Mường Ladies?"',
+  chualm: [
+    'Lord Lê Mại is one of the Three Mường Lords and Ladies, linked to the high mountains',
+    'One view, given by master medium Trần Văn Hải, holds that he is the First Lord of the Mountains',
+    'Legend says the Forest Mother appearing at Đông Cuông was titled Lê Mại Đại Vương by King Lê Lợi',
+    'There are many differing stories and views about Lord Lê Mại among mediums',
+    'His main temple is uncertain; his story is tied to Đông Cuông (former Yên Bái) and he is often co-worshipped in Mother temples',
+  ],
+  nguon_chaudn: 'oancotam.com, "Chầu Đệ Nhị Thượng Ngàn"',
+  chaudn: [
+    'The Second Royal Lady of the Mountains is the second of the Twelve Royal Ladies, ruling the high forests',
+    'Legend says she was Princess Đông Quang, who stayed at Đông Cuông to teach people farming, raising animals and healing',
+    'She protects boats on the Thao River and rules 36 mountain caves',
+    'Her main temple is Đông Cuông (Văn Yên, former Yên Bái); her feast is the 2nd of the 11th lunar month',
+  ],
+  nguon_chuatb: 'Pháp luật Việt Nam newspaper',
+  chuatb: [
+    'Legend says the Lady of Thác Bờ was a fairy who became a Mường girl named Đinh Thị Vân',
+    'She taught people to farm and fish, and supplied food to King Lê Lợi\'s army crossing the Đà River rapids',
+    'It is said that wherever her boat passed, the rapids became calm',
+    'Her temple is on Chủa mountain, Ngòi Hoa, Tân Lạc (former Hòa Bình), near Thác Bờ Cave',
+  ],
+  nguon_quannhat: 'oancotam.com, "Quan Đệ Nhất Thượng Thiên"',
+  quannhat: [
+    'The First Mandarin leads the Five Great Mandarins of the Four Palaces and rules the Heavenly realm',
+    'His main temple is Đồng Bằng Temple, An Lễ, Quỳnh Phụ, Thái Bình',
+    'His birth festival is the 10th of the 1st lunar month; his memorial day is the 24th of the 8th lunar month',
+  ],
+  nguon_quannhi: 'phuday.com, "Quan lớn Đệ Nhị Giám Sát"',
+  quannhi: [
+    'The Second Mandarin, the Inspector, is second of the Five Great Mandarins and oversees the high mountains',
+    'Legend says he is the second son of the Father King of the Eight Seas; in droughts he brings rain and good weather',
+    'When embodied, he wears a green robe embroidered with dragons and often performs a sword dance',
+    'His main temple is uncertain; he is worshipped at Quan Giám Temple (Hữu Lũng, Lạng Sơn), Phố Cát (Thanh Hóa), and on many temple altars',
+    'His feast is in the 11th lunar month (sources say the 10th or 11th)',
+  ],
+  nguon_quantu: 'Four Palaces folk sources and chầu văn texts; no official press source yet',
+  quantu: [
+    'The Fourth Mandarin, the Royal Envoy, is fourth of the Five Great Mandarins of the Four Palaces',
+    'Legend says he is the royal envoy who travels on behalf of the Father King, judging good and evil in every land',
+    'When embodied, he usually wears yellow, refined and dignified',
+    'His main temple is uncertain; he is co-worshipped on temple altars, and has a chầu văn song at Mỏ Hạc Temple (Nghệ An)',
+  ],
+  nguon_quantam: 'Pháp luật Việt Nam newspaper',
+  quantam: [
+    'The Third Mandarin heads the Water Palace, said to be the third son of the Father King of the Eight Seas',
+    'Legend says he was a general of the Hùng Kings who led land and river forces and died in battle; temples were built for him along the rivers',
+    'Lảnh Giang Temple (Hà Nam) and Xích Đằng Temple (Hưng Yên) are his main temples; the 6th lunar month is the "Water Palace festival month"',
+  ],
+  nguon_quanngu: 'VOV2; Văn Hóa newspaper (baovanhoa.vn)',
+  quanngu: [
+    'The Fifth Mandarin of Tranh is a river spirit, said to be the fifth prince of the Water King, ruling the Tranh river junction',
+    'Because of a love affair he was exiled to the northern border; to prove his innocence he threw himself into the Kỳ Cùng River, and his body drifted to Tranh ferry',
+    'People built a temple for him as he protected boat traders. Tranh Temple in Ninh Giang, Hải Dương became a national relic in 2009',
+    'Tranh Temple Festival opens on the 10th of the 2nd lunar month; the main rite is on the 14th, his birthday; his feast is on the 25th of the 5th month',
+  ],
+  nguon_ongbo: 'Four Palaces folk sources and chầu văn texts; no official press source yet',
+  ongbo: [
+    'Prince Bơ of the Water Palace is a prince of the river realm in the Four Palaces belief',
+    'Legend says he watches over the rivers, protecting boatmen, fishermen and river traders',
+    'When embodied, he wears a white dragon robe with an orange-gold sash and performs a rowing dance',
+    'His main temple is uncertain; he is co-worshipped on temple altars',
+  ],
+  nguon_cobe2: 'Four Palaces folk sources and chầu văn texts; no official press source yet',
+  cobe2: [
+    'The Little Lady of the Mountains is the youngest Holy Lady, of the Mountain realm, serving the Mountain Mother',
+    'Legend says she is a lively, playful mountain girl who helps people in the forest and gathers herbs',
+    'When embodied, she wears indigo with a brocade skirt and flower scarf; she dances with torches, tosses coins and fruit, then listens to chầu văn',
+    'Her main temple is uncertain; she is worshipped in many mountain temples in Lạng Sơn, Yên Bái, Tuyên Quang and on temple altars',
+  ],
+  nguon_caube: 'chonthieng.com, "Cậu Bé Bản Đền"',
+  caube: [
+    'The Little Prince of the Temple is a Holy Boy who guards the temple, one of the Holy Boys of the Four Palaces; his colour is green',
+    'He attends the Princes or stays at a temple; he is worshipped in the Boy\'s shrine of Mother temples',
+    'His feast day is the 7th of the 3rd lunar month every year',
+    'He has no single main temple; with many stories, he is worshipped in the Boy\'s shrine of almost every Mother temple',
+  ],
+};
+window.BANG_TIN_EN.codoi2 = window.BANG_TIN_EN.codoi;
+window.BANG_TIN_EN.cobe = window.BANG_TIN_EN.cobe2;
+/* Tên giá tiếng Anh (ngắn để vừa khung) */
+window.GIA_EN = {
+  tamtoa: 'The Three Holy Mothers', ongbay: 'The Seventh Prince', ongmuoi: 'The Tenth Prince', ongbo: 'Prince Bơ of the Waters',
+  caube: 'The Little Temple Prince', cobo: 'Lady Bơ of the Waters', codoi: 'Second Mountain Lady', codoi2: 'Second Mountain Lady',
+  cobe: 'Little Mountain Lady', cobe2: 'Little Mountain Lady', cochin: 'The Ninth Lady', cosau: 'Sixth Mountain Lady',
+  chaube: 'Little Lady of Bắc Lệ', chaulu: 'The Sixth Royal Lady', chaudn: 'Second Royal Mountain Lady',
+  chualm: 'Lord Lê Mại', chuanh: 'Lady of Nguyệt Hồ', chuanp: 'Lady of Five Directions', chuatb: 'Lady of Thác Bờ',
+  quannhat: 'The First Mandarin', quannhi: 'The Second Mandarin', quantam: 'The Third Mandarin', quantu: 'The Fourth Mandarin', quanngu: 'The Fifth Mandarin',
+};
+/* Tên bước tiếng Anh */
+window.BUOC_EN = {
+  'Thỉnh mời': 'Invocation', 'Thỉnh Chúa': 'Invocation', 'Thỉnh Chầu': 'Invocation', 'Thỉnh Cô': 'Invocation', 'Thỉnh Hoàng': 'Invocation', 'Thỉnh Quan': 'Invocation',
+  'Thay khăn áo': 'Dressing', 'Tấu hương': 'Incense', 'Vái hương': 'Incense bow', 'Bái hương': 'Incense bow', 'Dâng nhang': 'Incense offering',
+  'Khai quang': 'Blessing', 'Bái sai': 'Salute', 'Bài sai': 'Salute',
+  'Múa': 'Dance', 'Múa chèo': 'Rowing dance', 'Chèo thuyền': 'Rowing dance', 'Múa cờ': 'Flag dance', 'Múa hèo': 'Staff dance', 'Múa kiếm': 'Sword dance',
+  'Múa song kiếm': 'Twin swords', 'Múa đao': 'Blade dance', 'Múa mồi': 'Torch dance', 'Múa quạt': 'Fan dance',
+  'Nghe văn': 'Chầu văn song', 'Ngâm thơ': 'Poetry', 'Ngự trà': 'Tea', 'Ngự tửu': 'Wine', 'Uống rượu': 'Wine',
+  'Phát lộc': 'Blessings', 'Ban lộc': 'Blessings', 'Tung lộc': 'Blessings', 'Tung tiền': 'Coin toss',
+  'Xe giá': 'Farewell', 'Se giá': 'Farewell', 'Mẫu Đệ Nhất': 'First Mother', 'Mẫu Đệ Nhị': 'Second Mother', 'Mẫu Đệ Tam': 'Third Mother',
+};
