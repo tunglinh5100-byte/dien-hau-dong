@@ -58,21 +58,31 @@ function di(p, khu) { if (p.ghe) { p.ghe.who = null; p.ghe = null; }
 function noi(p, s) { p.bong = { s, t: performance.now() }; }
 function lenh(ten, msg) { const p = tao(ten, false), n = norm(msg); noi(p, String(msg).slice(0, 40)); for (const [re, k] of LENH) if (re.test(n)) { di(p, k); return; } }
 
-/* ---------- Cô đồng: giá Cô Bé (clip tách nền + văn) ---------- */
-const BUOC = [['thinh', 'Thỉnh Cô', 0, 24.8, 'cc3/cc-thinh.mp4'], ['thayao', 'Thay khăn áo', 5.4, 132, 'cbe/cbe-thayao.mp4'], ['vaihuong', 'Bái hương', 132, 141, 'cbe/cbe-vaihuong.mp4'], ['baisai', 'Bài sai', 141, 166, 'cbe/cbe-baisai.mp4'],
-  ['khaiquang', 'Khai quang', 166, 198, 'cbe/cbe-khaiquang.mp4'], ['muamoi', 'Múa mồi', 198, 310, 'cbe/cbe-muamoi.mp4'], ['tungtien', 'Phát lộc', 310, 420, 'cbe/cbe-tungtien.mp4'], ['uongnuoc', 'Ngự trà', 420, 505, 'cbe/cbe-uongnuoc.mp4'], ['segia', 'Xe giá', 505, 513.8, 'cbe/cbe-segia.mp4']];
-const VID = {}; BUOC.forEach(b => { const v = document.createElement('video'); v.src = '../' + b[4]; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; VID[b[0]] = v; });
-const AU = { thinh: new Audio('../cbe/cbe_01_van_thinh.mp3'), noi: new Audio('../cbe/cbe_noi_02-10.mp3') }; Object.values(AU).forEach(a => { a.preload = 'auto'; a.muted = IM || true; });
-let BI = 0, BT0 = performance.now(), AM = false;
-function buocHt() { const t = (performance.now() - BT0) / 1000; if (BI === 0) return t >= 24.8 ? (BI = 1, BT0 = performance.now(), batAm(), BUOC[1]) : BUOC[0];
-  const tn = AU.noi.currentTime && !AU.noi.paused ? AU.noi.currentTime : 5.4 + (performance.now() - BT0) / 1000; for (let i = 1; i < BUOC.length; i++) if (tn < BUOC[i][3]) { BI = i; return BUOC[i]; }
-  BI = 0; BT0 = performance.now(); AU.noi.pause(); AU.noi.currentTime = 0; batAm(); return BUOC[0]; }
-function batAm() { if (IM || !AM) return; try { const a = BI === 0 ? AU.thinh : AU.noi; a.muted = false; if (BI === 0) a.currentTime = 0; else if (a.paused) a.currentTime = 5.4; a.play().catch(() => {}); } catch (e) {} }
-let vDang = null; const VC = document.createElement('canvas'); VC.width = 180; VC.height = 320; const vx = VC.getContext('2d', { willReadFrequently: true });
-function veDong(x, yDay, hh) { const b = buocHt(), v = VID[b[0]]; if (vDang !== v) { if (vDang) vDang.pause(); vDang = v; v.currentTime = 0; v.play().catch(() => {}); }
-  if (v.readyState < 2) return; vx.clearRect(0, 0, 180, 320); vx.drawImage(v, 0, 640, 360, 640, 0, 0, 180, 320); const m = vx.getImageData(0, 0, 180, 320); vx.drawImage(v, 0, 0, 360, 640, 0, 0, 180, 320); const c = vx.getImageData(0, 0, 180, 320);
-  for (let i = 0; i < c.data.length; i += 4) c.data[i + 3] = m.data[i]; vx.putImageData(c, 0, 0); const ww = hh * 180 / 320; g.drawImage(VC, x - ww / 2, yDay - hh, ww, hh); }
-
+/* ---------- Cô đồng: giá Cô Bé đủ các bước, đúng lịch nhạc như /g (văn thỉnh, rồi 1 bài văn liền 02→10) ---------- */
+const TF = {"thinh": [0.756, 39.9, 159.9], "tungkhan": [0.756, 39.9, 159.9], "thayao": [0.828, 33.2, 145.5], "vaihuong": [0.714, 44.9, 137.6], "baisai": [0.744, 42.7, 145.2], "khaiquang": [0.759, 38.0, 136.6], "muamoi": [0.722, 46.3, 157.1], "tungtien": [0.734, 38.5, 150.9], "loctung2": [0.746, 44.8, 147.1], "loctung": [0.746, 33.9, 143.9], "uongnuoc": [0.591, 67.2, 225.0], "segia": [0.725, 50.7, 191.1]};
+/* [id, nhạc, từ giây, tới giây, clip, kiểu, tên bước] */
+const LICH = [['thinh', 'thinh', 0, 24.8, 'thinh', 'lap', 'Thỉnh Cô'], ['tungkhan', 'noi', 0, 5.4, 'tungkhan', 'vua', 'Thay khăn áo'], ['thayao', 'noi', 5.4, 132, 'thayao', 'ngoi', 'Thay khăn áo'],
+  ['vaihuong', 'noi', 132, 141, 'vaihuong', 'vua', 'Bái hương'], ['baisai', 'noi', 141, 166, 'baisai', 'lap', 'Bài sai'], ['khaiquang', 'noi', 166, 198, 'khaiquang', 'lap', 'Khai quang'], ['muamoi', 'noi', 198, 310, 'muamoi', 'lap', 'Múa mồi'],
+  ['tientung', 'noi', 310, 347, 'tungtien', 'lap', 'Phát lộc'], ['loctung', 'noi', 347, 384, 'loctung', 'lap', 'Phát lộc'], ['tungloc2', 'noi', 384, 420, 'loctung2', 'lap', 'Phát lộc'],
+  ['uongnuoc', 'noi', 420, 505, 'uongnuoc', 'lap', 'Ngự trà'], ['segia', 'noi', 505, 513.8, 'segia', 'vua', 'Xe giá']];
+const SRC = n => /^(thinh|tungkhan)$/.test(n) ? '../cc3/cc-' + n + '.mp4?v=3' : '../cbe/cbe-' + n + '.mp4?v=2';
+const VID = {}; LICH.forEach(L => { const n = L[4]; if (VID[n]) return; const v = document.createElement('video'); v.src = SRC(n); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous'; VID[n] = v; });
+const AU = { thinh: new Audio('../cbe/cbe_01_van_thinh.mp3'), noi: new Audio('../cbe/cbe_noi_02-10.mp3') }; Object.values(AU).forEach(a => { a.preload = 'auto'; });
+let BI = 0, BT = 0, AM = Q.get('am') === '1', lastT = performance.now(), cur = null;
+function auNow(L) { const a = AU[L[1]]; return a && !a.paused && AM && !IM ? a.currentTime : null; }
+function vao(i) { BI = i; const L = LICH[i]; BT = L[2]; const a = AU[L[1]];
+  if (AM && !IM) { Object.values(AU).forEach(x => { if (x !== a) x.pause(); }); if (a.paused || Math.abs(a.currentTime - L[2]) > 1.2) { a.currentTime = L[2]; a.play().catch(() => {}); } }
+  const v = VID[L[4]], dai = L[3] - L[2]; v.loop = L[5] !== 'vua' && L[5] !== 'ngoi'; v.playbackRate = L[5] === 'vua' && v.duration ? Math.max(.4, Math.min(1, v.duration / dai)) : 1; if (cur !== v) { if (cur) { FADE.a = 1; FADE.c.getContext('2d').clearRect(0, 0, 360, 640); FADE.c.getContext('2d').drawImage(BUF, 0, 0); FADE.n = curN; cur.pause(); } cur = v; curN = L[4]; try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); } }
+let curN = null; const FADE = { a: 0, c: Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), n: null };
+const BUF = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), bx = BUF.getContext('2d', { willReadFrequently: true });
+const MK = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), mx = MK.getContext('2d', { willReadFrequently: true });
+function capNhatGia(now) { const dt = Math.min(.2, (now - lastT) / 1000); lastT = now; if (!cur) vao(0); const L = LICH[BI], at = auNow(L); BT = at != null ? at : BT + dt;
+  const v = VID[L[4]]; if (L[5] === 'ngoi' && v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = 4.5; } catch (e) {} v.play().catch(() => {}); } /* ngồi thay áo: lặp đoạn ngồi */
+  if (BT >= L[3] - .05) { if (BI + 1 < LICH.length) vao(BI + 1); else { Object.values(AU).forEach(a => a.pause()); vao(0); } } if (FADE.a > 0) FADE.a = Math.max(0, FADE.a - dt / .6); }
+function lay(v) { if (!v || v.readyState < 2) return false; mx.drawImage(v, 0, 640, 360, 640, 0, 0, 360, 640); bx.clearRect(0, 0, 360, 640); bx.drawImage(v, 0, 0, 360, 640, 0, 0, 360, 640); const m = mx.getImageData(0, 0, 360, 640).data, c = bx.getImageData(0, 0, 360, 640); for (let i = 0; i < m.length; i += 4) c.data[i + 3] = m[i]; bx.putImageData(c, 0, 0); return true; }
+function veMot(cv2, n, x, y, k, al) { const t = TF[n] || [1, 0, 0]; g.save(); g.globalAlpha = al; g.translate(x, y); g.scale(k, k); g.translate(-178, -585); g.translate(t[1], t[2]); g.scale(t[0], t[0]); g.drawImage(cv2, 0, 0, 360, 640); g.restore(); }
+function veDong(x, y, k) { capNhatGia(performance.now()); const ok = lay(cur); if (FADE.a > 0) veMot(FADE.c, FADE.n, x, y, k, FADE.a); if (ok) veMot(BUF, curN, x, y, k, FADE.a > 0 ? Math.min(1, 1.3 - FADE.a) : 1); }
+function batAm() { if (IM) return; AM = true; const L = LICH[BI], a = AU[L[1]]; a.currentTime = BT; a.play().catch(() => {}); }
 /* ---------- Vẽ ---------- */
 let DEN, SAN, NEN;
 function veNen() { const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const q = c.getContext('2d'); q.scale(2, 2); q.fillStyle = '#2a1208'; q.fillRect(0, 0, W, H); q.drawImage(SAN, 0, SY, 540, 1402 * K);
@@ -94,17 +104,16 @@ function capNhat(dt) { NG.forEach(p => { if (!p.wp.length) return; const [tx, ty
   if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); if (!p.wp.length) { if (p.khu === 'hau') { p.ngoi = true; p.dir = 4; } else if (p.khu) { const kh = KHU[p.khu]; const hx = kh.huong[0] - p.x, hy = kh.huong[1] - p.y; p.dir = ((Math.round(Math.atan2(hx, hy) / (Math.PI / 4)) % 8) + 8) % 8; } } } else { p.x += dx / d * sp; p.y += dy / d * sp; } }); }
 let last = performance.now();
 function khung(now) { const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(NEN.c, 0, 0, W, H);
-  veDong(270, NEN.ph * .885 + 13, 140);
+  veDong(270, NEN.ph * .885 + 16, .34);
   const dem = {}; NG.forEach(p => { if (!p.wp.length && p.khu) dem[p.khu] = (dem[p.khu] || 0) + 1; });
   NG.slice().sort((a, b) => a.y - b.y).forEach(p => veNguoi(p, t));
   Object.entries(KHU).forEach(([k, v]) => { if (!v.bien) return; const [x, y] = P(...v.bien); bien(x, y, v.ten, k !== 'huong' && k !== 'hoama' && k !== 'saple' ? dem[k] || 0 : 0); });
-  const b = BUOC[BI]; g.fillStyle = 'rgba(90,14,10,.85)'; g.beginPath(); g.roundRect(12, 6, 516, 40, 12); g.fill(); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.stroke();
+  const b = [0, LICH[BI][6]]; g.fillStyle = 'rgba(90,14,10,.85)'; g.beginPath(); g.roundRect(12, 6, 516, 40, 12); g.fill(); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.stroke();
   g.font = `800 14px ${SERIF}`; g.fillStyle = '#ffe39a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🏮 Giá Cô Bé Thượng Ngàn · ' + b[1], 270, 19);
   g.font = `600 9px ${UI}`; g.fillStyle = '#fff1d6'; g.fillText('Gõ: lầu cô · lầu cậu · cô chín · sơn trang · thắp hương · hoá mã · sắp lễ · xem hầu', 270, 36);
   if (!AM && !IM) { g.font = `700 11px ${UI}`; const s = '🔊 Chạm để bật tiếng', w = g.measureText(s).width + 20; g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.roundRect(270 - w / 2, 56, w, 22, 11); g.fill(); g.fillStyle = '#fff'; g.fillText(s, 270, 67.5); }
   requestAnimationFrame(khung); }
-cv.addEventListener('click', () => { AM = true; batAm(); Object.values(VID).forEach(v => v.play().catch(() => {})); });
-if (Q.get('am') === '1') AM = true;
+cv.addEventListener('click', () => { batAm(); if (cur) cur.play().catch(() => {}); });
 
 /* ---------- Người xem thật qua TikFinity ---------- */
 (function ws() { try { const s = new WebSocket('ws://localhost:21213/'); s.onmessage = e => { try { const m = JSON.parse(e.data), d = m.data || {}, ev = m.event || ''; const ten = d.nickname || d.uniqueId; if (!ten) return;
@@ -116,5 +125,5 @@ if (Q.get('am') === '1') AM = true;
   veNen(); if (SIM) { const KS = Object.keys(KHU); DS.forEach((ten, i) => { const p = tao(ten, false); p.x = N.cong[0] + (Math.random() - .5) * 60; p.y = N.cong[1] - i * 8; di(p, KS[i % KS.length]); });
     const CAU = { lauco: 'đi lầu cô', laucau: 'lên lầu cậu', cochin: 'lễ cô chín', sontrang: 'đi sơn trang', huong: 'thắp hương', hoama: 'hoá mã', saple: 'sắp lễ', hau: 'vào xem hầu' };
     setInterval(() => { const p = NG[Math.floor(Math.random() * NG.length)], k = KS[Math.floor(Math.random() * KS.length)]; if (p.wp.length) return; lenh(p.ten, CAU[k]); }, 2600); }
-  try { Object.values(VID)[0].play().catch(() => {}); } catch (e) {} requestAnimationFrame(khung); })();
+  if (AM) batAm(); requestAnimationFrame(khung); })();
 </script></body></html>
