@@ -123,7 +123,7 @@ body.livemode.rot canvas { position: fixed; left: 50%; top: 50%; width: 100vh; h
   </div>
 </div>
 
-<script src="bangtin.js?v=22"></script><script src="bangtin-en.js?v=1"></script>
+<script src="bangtin.js?v=22"></script><script src="bangtin-en.js?v=2"></script>
 <script>/* 23/11 anh Linh: chạy thử phải tắt tiếng — mở trang với ?im=1 thì toàn bộ âm thanh câm */
 (function () { if (!/[?&]im=1(&|$)/.test(location.search)) return; try { const pl = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { this.muted = true; this.volume = 0; return pl.call(this); };
   ['AudioContext', 'webkitAudioContext'].forEach(k => { const A = window[k]; if (!A) return; window[k] = class extends A { constructor(...a) { super(...a); try { super.suspend(); } catch (e) {} } resume() { return Promise.resolve(); } }; }); } catch (e) {} })();
@@ -3357,9 +3357,9 @@ function drawBinh(t) {
 }
 const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín ngưỡng Đạo Mẫu và các đền. Tôi KHÔNG nhận quà tặng dưới mọi hình thức, KHÔNG xem bói, KHÔNG tương tác với ai.';
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
-const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
+const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 }; window.__tich = TICH; /* để chạy thử đổi ngôn ngữ */
 const SONG_NGU = NH_MODE && !/[?&]en=0/.test(location.search); /* 25/11 15:20 anh Linh: chạy xen kẽ tiếng Việt và tiếng Anh; ?en=0 chỉ tiếng Việt */
-function enPha(T) { if (!SONG_NGU) return { en: false, a: 1 }; const x = (performance.now() / 1000) % (2 * T), d = Math.min(x % T, T - x % T); return { en: x >= T, a: Math.min(1, d / .45) }; }
+function enPha(T) { if (!SONG_NGU) return { en: false, a: 1 }; const en = !!TICH.en, now = performance.now(); if (enPha.en !== en) { enPha.en = en; enPha.t0 = now; } return { en, a: Math.min(1, (now - enPha.t0) / 450) }; } /* 25/11 19:07 anh Linh: 3 bảng (bước, sự tích, câu đối) cùng một ngôn ngữ – theo nhịp đổi Việt/Anh của bảng sự tích */
 const CAU_DOI = NH_MODE && !/[?&]caudoi=0/.test(location.search);
 function drawCauDoi() { /* 25/11 12:44 anh Linh: bảng câu đối "share live để vào chiếu ngồi" treo trên cột gỗ bên trái, dưới bảng sự tích */
   if (!CAU_DOI || (typeof TK !== 'undefined' && TK.on) || !LYC.y) return;
