@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Đạo Mẫu – Ritual | ADELA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --nen: #160807; --nen2: #241010; --vang: #e6b552; --vang2: #f6dc96; --chu: #f6ecdf; --mo: #c9b8a6; --vien: rgba(230,181,82,.28); --serif: 'Noto Serif', Georgia, serif; --sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--nen); color: var(--chu); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button { font: inherit; color: inherit; }
+.khung { height: 100%; display: flex; flex-direction: column; }
+header { flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 12px; border-bottom: 1px solid var(--vien); background: #1b0b0a; }
+.lui { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; color: var(--vang2); text-decoration: none; font-size: 20px; }
+.lui:hover { background: rgba(246,220,150,.08); }
+.tieu-de { flex: 1; min-width: 0; }
+.tieu-de b { display: block; font: 700 16px/1.2 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tieu-de small { display: block; color: var(--mo); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nut-ngu { display: flex; border: 1px solid var(--vien); border-radius: 999px; overflow: hidden; flex: none; }
+.nut-ngu button { background: none; border: 0; color: var(--mo); font-weight: 600; font-size: 12px; padding: 6px 10px; cursor: pointer; }
+.nut-ngu button.on { background: var(--vang); color: #2a1206; }
+main { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 8px; }
+.man { position: relative; height: 100%; aspect-ratio: 9/16; max-width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 0 0 1px var(--vien), 0 20px 60px rgba(0,0,0,.5); }
+.man iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.thanh { flex: none; border-top: 1px solid var(--vien); background: #1b0b0a; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
+.nuts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; max-width: 560px; margin: 0 auto; }
+.nuts::-webkit-scrollbar { display: none; }
+.hd { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 7px 2px 6px; border: 1px solid transparent; border-radius: 12px; background: none; cursor: pointer; color: var(--chu); }
+.hd span:first-child { font-size: 22px; line-height: 1; }
+.hd span:last-child { font-size: 11px; font-weight: 500; color: var(--mo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.hd:hover, .hd.on { background: rgba(246,220,150,.08); border-color: var(--vien); }
+.hd:active { transform: scale(.96); }
+.tam { border-top: 1px solid var(--vien); padding: 10px 6px 6px; max-width: 560px; margin: 0 auto 6px; max-height: 34vh; overflow-y: auto; }
+.tam h4 { margin: 2px 0 8px; font: 600 13px var(--sans); color: var(--vang2); text-align: center; }
+.dpad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 48px); gap: 6px; justify-content: center; }
+.dpad button { border: 1px solid var(--vien); border-radius: 12px; background: rgba(246,220,150,.06); color: var(--vang2); font-size: 20px; cursor: pointer; }
+.dpad button:active { background: rgba(246,220,150,.18); }
+.dpad .giua { border: 0; background: none; font-size: 11px; color: var(--mo); display: grid; place-items: center; text-align: center; line-height: 1.2; }
+.hang { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 8px; padding: 5px 2px; }
+.hang > span { font-size: 12.5px; color: var(--mo); }
+.mau-r { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.mau-r::-webkit-scrollbar { display: none; }
+.mau-r button { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(246,220,150,.45); cursor: pointer; }
+.mau-r button:hover { border-color: var(--vang2); transform: scale(1.08); }
+.chip { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--vien); background: none; color: var(--chu); font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.mau-r button.chip { width: auto; height: auto; border-radius: 999px; border: 1px solid var(--vien); }
+.chip.on { border-color: var(--vang); color: #2a1206; background: var(--vang); }
+.chip:hover { border-color: var(--vang); color: var(--vang2); }
+.ds-hd { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+.ds-hd button { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--vien); background: rgba(246,220,150,.04); color: var(--chu); cursor: pointer; font-size: 13px; text-align: left; }
+.ds-hd button span:first-child { font-size: 18px; }
+.ds-hd button:hover { border-color: var(--vang); }
+.bang-mau { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 6px 4px 10px; }
+.bang-mau button { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(246,220,150,.5); cursor: pointer; }
+.bang-mau button:hover { transform: scale(1.1); border-color: var(--vang2); }
+.lop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(10,3,2,.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 20px; }
+.hop { width: min(400px, 100%); background: var(--nen2); border: 1px solid var(--vien); border-radius: 18px; padding: 24px 22px; text-align: center; }
+.hop h2 { font: 700 22px/1.25 var(--serif); margin: 0 0 6px; color: var(--vang2); }
+.hop p { color: var(--mo); margin: 0 0 16px; font-size: 14px; }
+.hop input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--vien); background: #140605; color: var(--chu); font: 16px var(--sans); outline: none; }
+.hop input:focus { border-color: var(--vang); }
+.chon-gt { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 16px; }
+.chon-gt button { padding: 11px; border-radius: 12px; border: 1px solid var(--vien); background: none; cursor: pointer; color: var(--mo); font-weight: 600; }
+.chon-gt button.on { border-color: var(--vang); color: var(--vang2); background: rgba(246,220,150,.08); }
+.nut { display: inline-flex; justify-content: center; align-items: center; gap: 8px; width: 100%; font-weight: 600; font-size: 15px; padding: 13px 18px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; text-decoration: none; }
+.nut.chinh { background: var(--vang); color: #2a1206; }
+.nut.phu { border-color: rgba(246,220,150,.45); color: var(--vang2); background: none; margin-top: 10px; }
+@media (min-width: 900px) { .thanh { padding-top: 10px; } .hd span:last-child { font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="khung">
+  <header>
+    <a class="lui" href="./#gia" aria-label="Back">←</a>
+    <div class="tieu-de"><b id="ten-gia">…</b><small id="ten-gia2"></small></div>
+    <div class="nut-ngu" role="group" aria-label="Language"><button data-ngu="en">EN</button><button data-ngu="vi">VI</button></div>
+  </header>
+  <main><div class="man" id="man"></div></main>
+  <div class="thanh">
+    <div class="tam" id="tam" hidden></div>
+    <div class="nuts" id="nuts"></div>
+  </div>
+</div>
+
+<div class="lop" id="lop-ten" hidden><div class="hop">
+  <h2 data-t="tenTitle">Take your seat</h2>
+  <p data-t="tenSub">Your name appears above your character on the mat.</p>
+  <input id="o-ten" maxlength="20" autocomplete="nickname" data-ph="tenPh" placeholder="Your name">
+  <div class="chon-gt"><button data-gt="nu" data-t="nu">Female</button><button data-gt="nam" data-t="nam">Male</button></div>
+  <button class="nut chinh" id="nut-vao" data-t="vao">Enter the temple</button>
+</div></div>
+
+<div class="lop" id="lop-xong" hidden><div class="hop">
+  <h2 data-t="xongTitle">The ritual is complete 🙏</h2>
+  <p data-t="xongSub">Thank you for attending. You can choose another spirit or watch this ritual again.</p>
+  <a class="nut chinh" href="./#gia" data-t="khac">Choose another ritual</a>
+  <button class="nut phu" id="nut-lai" data-t="lai">Watch again</button>
+</div></div>
+
+<script src="gia.js?v=1"></script>
+<script>
+const Q = new URLSearchParams(location.search), G = DM_GIA.find(g => g.id === Q.get('gia')) || DM_GIA[0];
+const T = {
+  vi: { tenTitle: 'Vào chiếu ngồi', tenSub: 'Tên của bạn hiện trên đầu nhân vật khi ngồi chiếu.', tenPh: 'Tên của bạn', nu: 'Nữ', nam: 'Nam', vao: 'Vào điện', xongTitle: 'Giá hầu đã xong 🙏', xongSub: 'Cảm ơn bạn đã dự lễ. Bạn có thể chọn giá khác hoặc xem lại giá này.', khac: 'Chọn giá khác', lai: 'Xem lại' },
+};
+let NGU = 'en'; try { NGU = localStorage.getItem('dm_ngu') || ((navigator.language || '').toLowerCase().startsWith('vi') ? 'vi' : 'en'); } catch (e) {}
+let TEN = '', GT = 'nu'; try { TEN = localStorage.getItem('dm_ten') || ''; GT = localStorage.getItem('dm_gt') || 'nu'; } catch (e) {}
+const goc = {}; document.querySelectorAll('[data-t]').forEach(e => goc[e.dataset.t] = e.textContent);
+const L = (vi, en) => NGU === 'vi' ? vi : en;
+const MAU = [['đỏ', '#c4232b', 'Red'], ['vàng', '#e3b21f', 'Yellow'], ['xanh lá', '#2f8a3c', 'Green'], ['xanh dương', '#2a62b8', 'Blue'], ['xanh ngọc', '#25b3a6', 'Teal'], ['tím', '#7b3fa8', 'Purple'], ['hồng', '#e8679a', 'Pink'], ['cam', '#e57b22', 'Orange'], ['nâu', '#7a4a2a', 'Brown'], ['trắng', '#efede6', 'White'], ['kem', '#e9d8b4', 'Cream'], ['bạc', '#b9bec8', 'Silver'], ['xám', '#7d7f86', 'Grey'], ['đen', '#28232a', 'Black']];
+const NUT = [['vai', '🙏', 'Bow', 'Vái', 'vái'], ['votay', '👏', 'Clap', 'Vỗ tay', 'vỗ tay'], ['dichuyen', '🧭', 'Move', 'Di chuyển', null], ['trangphuc', '👘', 'Outfit', 'Trang phục', null], ['hanhdong', '✨', 'Actions', 'Hành động', null]];
+const HANH = [['🙏', 'Bow', 'Vái', 'vái'], ['🙇', 'Prostrate', 'Lạy', 'lạy thánh'], ['👏', 'Clap', 'Vỗ tay', 'vỗ tay'], ['👋', 'Wave', 'Vẫy tay', 'vẫy tay'], ['🙌', 'Hands up', 'Giơ tay', 'giơ tay'], ['📣', 'Cheer', 'Hú', 'hú'], ['🪔', 'Incense', 'Thắp hương', 'thắp hương'], ['🧧', 'Ask blessing', 'Xin lộc', 'cho con xin lộc ngài ạ'], ['😢', 'Weep', 'Tủi bóng', 'tủi bóng'], ['🌸', 'Praise', 'Khen đẹp', 'đẹp quá']];
+const DO = [['ao', 'Robe', 'Áo', 'áo'], ['khan', 'Headscarf', 'Khăn', 'khăn'], ['toc', 'Hair', 'Tóc', 'tóc'], ['quan', 'Trousers', 'Quần', 'quần'], ['giay', 'Shoes', 'Giày', 'giày'], ['lung', 'Sash', 'Thắt lưng', 'thắt lưng'], ['dem', 'Cushion', 'Đệm', 'đệm'], ['quat', 'Fan', 'Quạt', 'quạt']];
+let MO = null;
+function moTam(id) {
+  const tam = document.getElementById('tam'); MO = MO === id ? null : id;
+  document.querySelectorAll('.hd').forEach(b => b.classList.toggle('on', b.dataset.id === MO)); if (!MO) { tam.hidden = true; return; }
+  tam.hidden = false; tam.innerHTML = '';
+  if (MO === 'dichuyen') {
+    tam.innerHTML = `<h4>${L('Đổi chỗ ngồi trên chiếu', 'Change your seat on the mat')}</h4><div class="dpad"><span></span><button data-l="lên" aria-label="up">▲</button><span></span><button data-l="sang trái" aria-label="left">◀</button><span class="giua">${L('chỗ<br>ngồi', 'your<br>seat')}</span><button data-l="sang phải" aria-label="right">▶</button><span></span><button data-l="xuống" aria-label="down">▼</button><span></span></div>`;
+  } else if (MO === 'hanhdong') {
+    const d = document.createElement('div'); d.className = 'ds-hd'; HANH.forEach(([ic, en, vi, l]) => { const b = document.createElement('button'); b.dataset.l = l; b.innerHTML = `<span>${ic}</span><span>${L(vi, en)}</span>`; d.appendChild(b); });
+    tam.innerHTML = `<h4>${L('Hành động', 'Actions')}</h4>`; tam.appendChild(d);
+  } else if (MO === 'trangphuc') {
+    tam.innerHTML = `<h4>${L('Trang phục và phụ kiện', 'Outfit and accessories')}</h4><div class="mau-r" id="phan"></div><div class="mau-r" id="lua" style="margin-top:10px"></div>`;
+    const PH = DO.concat([['kieu', 'Hairstyle', 'Kiểu tóc', null], ['nv', 'Character', 'Nhân vật', null]]), phan = tam.querySelector('#phan'), lua = tam.querySelector('#lua');
+    const chon = id => { phan.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.p === id)); lua.innerHTML = ''; const d = PH.find(x => x[0] === id); moTam.phan = id;
+      if (id === 'kieu') [['tóc ngắn', 'Short', 'Ngắn'], ['tóc vừa', 'Medium', 'Vừa'], ['tóc dài', 'Long', 'Dài']].forEach(([l, en, vi]) => { const c = document.createElement('button'); c.className = 'chip'; c.textContent = L(vi, en); c.onclick = () => lam(l); lua.appendChild(c); });
+      else if (id === 'nv') [['nữ', 'Female', 'Nữ'], ['nam', 'Male', 'Nam']].forEach(([l, en, vi]) => { const c = document.createElement('button'); c.className = 'chip'; c.textContent = L(vi, en); c.onclick = () => lam(l); lua.appendChild(c); });
+      else MAU.forEach(([m, hex, me]) => { const c = document.createElement('button'); c.style.background = hex; c.title = L(m, me); c.onclick = () => lam(d[3] + ' ' + m); lua.appendChild(c); }); };
+    PH.forEach(([id, en, vi]) => { const c = document.createElement('button'); c.className = 'chip'; c.dataset.p = id; c.textContent = L(vi, en); c.onclick = () => chon(id); phan.appendChild(c); });
+    chon(moTam.phan || 'ao');
+  }
+  tam.querySelectorAll('[data-l]').forEach(b => b.onclick = () => lam(b.dataset.l));
+}
+function chu() {
+  document.documentElement.lang = NGU; document.title = (NGU === 'vi' ? G.vi : G.en) + ' – Đạo Mẫu';
+  document.getElementById('ten-gia').textContent = NGU === 'vi' ? G.vi : G.en;
+  document.getElementById('ten-gia2').textContent = NGU === 'vi' ? G.en : G.vi;
+  document.querySelectorAll('[data-t]').forEach(e => e.textContent = NGU === 'vi' ? (T.vi[e.dataset.t] || goc[e.dataset.t]) : goc[e.dataset.t]);
+  document.getElementById('o-ten').placeholder = NGU === 'vi' ? T.vi.tenPh : 'Your name';
+  document.querySelectorAll('[data-ngu]').forEach(b => b.classList.toggle('on', b.dataset.ngu === NGU));
+  const nuts = document.getElementById('nuts'); nuts.innerHTML = '';
+  NUT.forEach(([id, ic, en, vi, lenh]) => { const b = document.createElement('button'); b.className = 'hd'; b.dataset.id = id; b.innerHTML = `<span>${ic}</span><span>${L(vi, en)}</span>`;
+    b.onclick = () => { if (lenh) { lam(lenh); return; } moTam(id); }; nuts.appendChild(b); });
+  if (MO) { const m = MO; MO = null; moTam(m); }
+}
+function lam(lenh) { try { const w = document.querySelector('#man iframe').contentWindow; if (w.__web) w.__web.lam(lenh); } catch (e) {} }
+function moDien() {
+  const p = new URLSearchParams({ web: 1, live: 1, sim: 0, cc: 1, cl: 1, bo: 2, eu: 0, hm: 0, cd2: 1, qg: 1, chua: 1, mau: 1, vy: 0, cnm: 1, cmt: 0, docmoi: 0, ds: G.id, gia: G.id, ten: TEN, gt: GT, ngu: NGU });
+  const f = document.createElement('iframe'); f.src = '../index.html?' + p.toString(); f.allow = 'autoplay; fullscreen'; f.title = NGU === 'vi' ? G.vi : G.en;
+  const m = document.getElementById('man'); m.innerHTML = ''; m.appendChild(f);
+}
+document.querySelectorAll('[data-ngu]').forEach(b => b.onclick = () => { if (b.dataset.ngu === NGU) return; NGU = b.dataset.ngu; try { localStorage.setItem('dm_ngu', NGU); } catch (e) {} chu(); if (TEN) moDien(); });
+document.querySelectorAll('[data-gt]').forEach(b => b.onclick = () => { GT = b.dataset.gt; document.querySelectorAll('[data-gt]').forEach(x => x.classList.toggle('on', x === b)); });
+document.getElementById('nut-vao').onclick = () => { const v = document.getElementById('o-ten').value.trim().replace(/\s+/g, ' '); if (!v) { document.getElementById('o-ten').focus(); return; } TEN = v.slice(0, 20); try { localStorage.setItem('dm_ten', TEN); localStorage.setItem('dm_gt', GT); } catch (e) {} document.getElementById('lop-ten').hidden = true; moDien(); };
+document.getElementById('o-ten').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('nut-vao').click(); });
+document.getElementById('nut-lai').onclick = () => { document.getElementById('lop-xong').hidden = true; moDien(); };
+addEventListener('message', e => { const d = e.data || {}; if (!d.dm) return; if (d.loai === 'xong') document.getElementById('lop-xong').hidden = false; });
+chu();
+document.querySelector(`[data-gt=${GT}]`).classList.add('on');
+if (TEN) moDien(); else { document.getElementById('lop-ten').hidden = false; document.getElementById('o-ten').value = ''; }
+</script>
+</body>
+</html>
