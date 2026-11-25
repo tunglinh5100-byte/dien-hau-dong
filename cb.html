@@ -2858,7 +2858,7 @@ function drawTrays(t) {
 // ---------- Con nhang (back view) ----------
 /* 25/11 anh Linh: con nhang mới — ảnh vẽ sẵn (Gemini), đi bộ + xoay người 8 hướng mượt, ngồi/vái/lạy; ?cnm=1 (đang thử trên /tn) */
 const CNM_ON = /[?&]cnm=1/.test(location.search), CNM = { ok: 0, img: {}, meta: null, tint: new Map() };
-if (CNM_ON) { fetch('cnm/meta.json?v=3').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam', 'nuA', 'namA'].forEach(k => { const im = new Image(); im.onload = () => { if (++n === 4) CNM.ok = 1; }; im.src = 'cnm/' + k + '.webp?v=3'; CNM.img[k] = im; }); }).catch(() => {}); }
+if (CNM_ON) { fetch('cnm/meta.json?v=4').then(r => r.json()).then(m => { CNM.meta = m; let n = 0; ['nu', 'nam', 'nuA', 'namA', 'dem'].forEach(k => { const im = new Image(); im.onload = () => { if (++n === 5) CNM.ok = 1; }; im.src = 'cnm/' + k + '.webp?v=4'; CNM.img[k] = im; }); }).catch(() => {}); }
 /* 25/11 anh Linh: đủ 60 màu áo như trước — 18 màu × 3 độ đậm nhạt + 6 màu trơn; người xem chọn màu bằng comment thì đúng màu đó */
 const CNM_MAU = ['#952323', '#cc3333', '#d67171', '#954923', '#cc6633', '#d69271', '#956f23', '#cc9933', '#d6b471', '#959523', '#cccc33', '#d6d671', '#6f9523', '#99cc33', '#b4d671', '#499523', '#66cc33', '#92d671', '#239523', '#33cc33', '#71d671', '#239549', '#33cc66', '#71d692', '#23956f', '#33cc99', '#71d6b4', '#239595', '#33cccc', '#71d6d6', '#236f95', '#3399cc', '#71b4d6', '#234995', '#3366cc', '#7192d6', '#232395', '#3333cc', '#7171d6', '#492395', '#6633cc', '#9271d6', '#6f2395', '#9933cc', '#b471d6', '#952395', '#cc33cc', '#d671d6', '#95236f', '#cc3399', '#d671b4', '#952349', '#cc3366', '#d67192', '#efede6', '#e9d8b4', '#b9bec8', '#7d7f86', '#28232a', '#7a4a2a'];
 function cnmMau(p) { const chon = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); if (chon) { const m = String(chon).match(/#[0-9a-f]{6}/i); if (m) return m[0]; }
@@ -2879,17 +2879,20 @@ function cnmVe(p, t, s) { p._cnm = 0;
   if (p._d !== T) { p._tt = (p._tt || 0) + dt; if (p._tt > .07) { p._tt = 0; const k = (T - p._d + 8) % 8; p._d = (p._d + (k <= 4 ? 1 : 7)) % 8; } } else p._tt = 0; /* xoay từng nấc qua các góc chéo */
   const DIRK = ['front', 'fr', 'right', 'br', 'back', 'bl', 'left', 'fr'];
   let key, mir = false, bob = 0, rot = 0;
-  if (seat && !moving && p._d === 4) {
+  const ngoi = seat && !moving && p._d === 4, pk = ngoi && p.name && !p.ghost ? new Set(pkCua(p.name, vThu(p.name, soLanVao(p.name))).map(x => x[0])) : null; /* phụ kiện theo số lần dự live: thắt lưng, đệm, quạt */
+  if (ngoi) {
     key = 'sit'; const nhan = p.nc != null && S.t - p.nc < CHU_NHAN;
     if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) key = 'pray';
     if (p.pose === 'bow') key = Math.sin(t * 3 + p.x) > .2 ? 'bow' : 'pray';
     if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? 'pray' : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
-    if (key === 'sit') bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
+    if (key === 'sit' && pk) key = pk.has('quat2') ? 'sitQ2' : pk.has('quat') ? 'sitQ' : pk.has('lung') ? 'sitL' : 'sit';
+    if (/^sit/.test(key)) bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
   } else if (moving && p._d !== 0 && p._d !== 4) { key = 'w' + (Math.floor(p._wd / 8) % 4); mir = p._d >= 5; }
   else { key = DIRK[p._d]; mir = p._d === 7; if (moving) { const ph = p._wd * .4; bob = Math.abs(Math.sin(ph)) * 2.2; rot = Math.sin(ph) * .045; } }
   const r = M.rects[key], col = O.indexOf(key), k = 70 * s / CNM.meta.standH, w = r[2] * k, h = r[3] * k;
   ctx.save(); ctx.translate(p.x, p.y);
   ctx.globalAlpha = .28; ctx.beginPath(); ctx.ellipse(0, 1.5 * s, w * .42, 5 * s, 0, 0, 6.28); ctx.fillStyle = '#000'; ctx.fill(); ctx.globalAlpha = 1;
+  if (pk && pk.has('demGam')) { const d = CNM.img.dem, dw = 50 * s, dh = dw * d.naturalHeight / d.naturalWidth; ctx.drawImage(d, -dw / 2, -dh * .72, dw, dh); } /* đệm gấm dưới người ngồi */
   ctx.translate(0, -bob); if (rot) ctx.rotate(rot); if (mir) ctx.scale(-1, 1);
   ctx.drawImage(cnmTint(sx, cnmMau(p)), col * M.cw + r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
   ctx.restore();
