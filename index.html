@@ -2870,6 +2870,8 @@ function cnmTint(sx, hex, lung, quat, nvp) { const pk = ['khan', 'toc', 'quan', 
   cnmLay(g, CNM.img[sx + 'A'], hex); ['K', 'T', 'U', 'G'].forEach((m, i) => { if (pk[i]) cnmLay(g, CNM.img[sx + m], pk[i]); }); /* khăn, tóc, quần, giày */ if (lung) cnmLay(g, CNM.img[sx + 'L'], lung); if (quat) cnmLay(g, CNM.img[sx + 'Q'], quat); /* 25/11 anh Linh: đổi màu áo, thắt lưng, quạt riêng từng phần, không lem */
   CNM.tint.set(key, c); return c; }
 function cnmDem(hex) { if (!hex) return CNM.img.dem; const key = 'dem' + hex; let c = CNM.tint.get(key); if (c) return c; const d = CNM.img.dem; c = document.createElement('canvas'); c.width = d.naturalWidth; c.height = d.naturalHeight; const g = c.getContext('2d'); g.drawImage(d, 0, 0); cnmLay(g, CNM.img.demA, hex); CNM.tint.set(key, c); return c; } /* đệm đổi màu, giữ hoa văn + tua vàng */
+function cnmKhan(p, nvp) { if (nvp.khan) return nvp.khan; const lv = NH_MODE ? Math.max(2, p.lv || 2) : (p.lv || 2), n = String(p.name || p.x); /* 25/11 anh Linh: màu khăn vấn như cũ — theo cấp, khi comment thì theo comment */
+  return lv < 3 ? ['#c62a22', '#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a', '#c9962a'][(n.length + n.charCodeAt(0)) % 6] : lv === 5 ? '#e9b43a' : lv === 4 ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][n.length % 4]; }
 const cnmHex = v => (String(v || '').match(/#[0-9a-f]{6}/i) || [])[0];
 function cnmVe(p, t, s) { p._cnm = 0;
   if (!CNM.ok || p.hd || p.nhan || p.gia || p.ghost || String(p.name).startsWith('​') || !/^(walk|enter|seat|stand)$/.test(p.state)) return false;
@@ -2900,7 +2902,7 @@ function cnmVe(p, t, s) { p._cnm = 0;
   const nvp = (p.name && NV[p.name]) || {};
   if (pk && pk.has('demGam')) { const d = cnmDem(cnmHex(nvp.dem)), dw = 50 * s, dh = dw * (d.naturalHeight || d.height) / (d.naturalWidth || d.width); ctx.drawImage(d, -dw / 2, -dh * .72, dw, dh); } /* đệm gấm dưới người ngồi */
   ctx.translate(0, -bob); if (rot) ctx.rotate(rot); if (mir) ctx.scale(-1, 1);
-  ctx.drawImage(cnmTint(sx, cnmMau(p), cnmHex(nvp.lung), cnmHex(nvp.quat), nvp), col * M.cw + r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
+  ctx.drawImage(cnmTint(sx, cnmMau(p), cnmHex(nvp.lung), cnmHex(nvp.quat), Object.assign({}, nvp, { khan: cnmKhan(p, nvp) })), col * M.cw + r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
   { const kt = nvp.kieuToc, HT = { back: .6, br: .6, bl: .6, sit: .55, sitL: .55, sitQ: .55, sitQ2: .55 }[key]; /* 25/11 anh Linh: tóc vừa / dài xõa sau lưng (theo comment), tóc ngắn để như ảnh */
     if (HT && (kt === 'dai' || kt === 'vua')) { const ny = -h * HT, ey = -h * (kt === 'dai' ? (HT > .58 ? .22 : .16) : (HT > .58 ? .4 : .36)), hw = w * (/^sitQ/.test(key) ? .13 : .2), sw = Math.sin(t * 2 + p.x) * hw * .06, hc = cnmHex(nvp.toc) || '#2b1d17';
       ctx.beginPath(); ctx.moveTo(-hw, ny); ctx.quadraticCurveTo(-hw * 1.15, (ny + ey) / 2, -hw * .7 + sw, ey); ctx.quadraticCurveTo(0, ey + hw * .35, hw * .7 + sw, ey); ctx.quadraticCurveTo(hw * 1.15, (ny + ey) / 2, hw, ny); ctx.closePath(); ctx.fillStyle = hc; ctx.fill();
