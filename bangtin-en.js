@@ -175,16 +175,16 @@ window.GIA_EN = {
   cobe: 'Little Mountain Lady', cobe2: 'Little Mountain Lady', cochin: 'The Ninth Lady', cosau: 'Sixth Mountain Lady',
   chaube: 'Little Lady of Bắc Lệ', chaulu: 'The Sixth Royal Lady', chaudn: 'Second Royal Mountain Lady',
   chualm: 'Lord Lê Mại', chuanh: 'Lady of Nguyệt Hồ', chuanp: 'Lady of Five Directions', chuatb: 'Lady of Thác Bờ',
-  quannhat: 'The First Mandarin', quannhi: 'The Second Mandarin', quantam: 'The Third Mandarin', quantu: 'The Fourth Mandarin', quanngu: 'The Fifth Mandarin',
+  chaumuoi: 'Tenth Lady of Đồng Mỏ', quannhat: 'The First Mandarin', quannhi: 'The Second Mandarin', quantam: 'The Third Mandarin', quantu: 'The Fourth Mandarin', quanngu: 'The Fifth Mandarin',
 };
 /* Tên bước tiếng Anh */
-window.BUOC_EN = {
+window.BUOC_EN = { /* 25/11 19:07 anh Linh: dịch sát nghĩa nghi lễ hơn (vd Ngự tửu = Drinking wine) */
   'Thỉnh mời': 'Invocation', 'Thỉnh Chúa': 'Invocation', 'Thỉnh Chầu': 'Invocation', 'Thỉnh Cô': 'Invocation', 'Thỉnh Hoàng': 'Invocation', 'Thỉnh Quan': 'Invocation',
-  'Thay khăn áo': 'Dressing', 'Tấu hương': 'Incense', 'Vái hương': 'Incense bow', 'Bái hương': 'Incense bow', 'Dâng nhang': 'Incense offering',
-  'Khai quang': 'Blessing', 'Bái sai': 'Salute', 'Bài sai': 'Salute',
+  'Thay khăn áo': 'Changing robes', 'Tấu hương': 'Offering incense', 'Dâng nhang': 'Offering incense', 'Vái hương': 'Incense bows', 'Bái hương': 'Incense bows',
+  'Khai quang': 'Consecration', 'Bái sai': 'Opening dance', 'Bài sai': 'Opening dance',
   'Múa': 'Dance', 'Múa chèo': 'Rowing dance', 'Chèo thuyền': 'Rowing dance', 'Múa cờ': 'Flag dance', 'Múa hèo': 'Staff dance', 'Múa kiếm': 'Sword dance',
-  'Múa song kiếm': 'Twin swords', 'Múa đao': 'Blade dance', 'Múa mồi': 'Torch dance', 'Múa quạt': 'Fan dance',
-  'Nghe văn': 'Chầu văn song', 'Ngâm thơ': 'Poetry', 'Ngự trà': 'Tea', 'Ngự tửu': 'Wine', 'Uống rượu': 'Wine',
-  'Phát lộc': 'Blessings', 'Ban lộc': 'Blessings', 'Tung lộc': 'Blessings', 'Tung tiền': 'Coin toss',
-  'Xe giá': 'Farewell', 'Se giá': 'Farewell', 'Mẫu Đệ Nhất': 'First Mother', 'Mẫu Đệ Nhị': 'Second Mother', 'Mẫu Đệ Tam': 'Third Mother',
+  'Múa song kiếm': 'Twin-sword dance', 'Múa đao': 'Sabre dance', 'Múa mồi': 'Torch dance', 'Múa quạt': 'Fan dance',
+  'Nghe văn': 'Hearing hymns', 'Ngâm thơ': 'Reciting poetry', 'Ngự trà': 'Drinking tea', 'Ngự tửu': 'Drinking wine', 'Uống rượu': 'Drinking wine',
+  'Phát lộc': 'Giving blessings', 'Ban lộc': 'Giving blessings', 'Tung lộc': 'Tossing gifts', 'Tung tiền': 'Tossing money',
+  'Xe giá': 'Departure', 'Se giá': 'Departure', 'Mẫu Đệ Nhất': 'First Holy Mother', 'Mẫu Đệ Nhị': 'Second Holy Mother', 'Mẫu Đệ Tam': 'Third Holy Mother',
 };
