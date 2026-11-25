@@ -66,18 +66,22 @@ const LICH = [['thinh', 'thinh', 0, 24.8, 'thinh', 'lap', 'Thỉnh Cô'], ['tung
   ['tientung', 'noi', 310, 347, 'tungtien', 'lap', 'Phát lộc'], ['loctung', 'noi', 347, 384, 'loctung', 'lap', 'Phát lộc'], ['tungloc2', 'noi', 384, 420, 'loctung2', 'lap', 'Phát lộc'],
   ['uongnuoc', 'noi', 420, 505, 'uongnuoc', 'lap', 'Ngự trà'], ['segia', 'noi', 505, 513.8, 'segia', 'vua', 'Xe giá']];
 const SRC = n => /^(thinh|tungkhan)$/.test(n) ? '../cc3/cc-' + n + '.mp4?v=3' : '../cbe/cbe-' + n + '.mp4?v=2';
-const VID = {}; LICH.forEach(L => { const n = L[4]; if (VID[n]) return; const v = document.createElement('video'); v.src = SRC(n); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous'; VID[n] = v; });
+/* 25/11 anh Linh xem không thấy cô múa: điện thoại không cho nạp cùng lúc 11 video ngoài trang → gắn video vào trang (ẩn), chỉ nạp clip đang hầu + clip kế tiếp */
+const HOLD = document.createElement('div'); HOLD.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:4px;opacity:0;pointer-events:none;overflow:hidden'; document.body.appendChild(HOLD);
+const VID = {}; LICH.forEach(L => { const n = L[4]; if (VID[n]) return; const v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.setAttribute('muted', ''); v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.preload = 'auto'; v.style.cssText = 'width:2px;height:4px'; v._src = SRC(n); HOLD.appendChild(v); VID[n] = v; });
+function napClip(i) { [i, (i + 1) % LICH.length].forEach(k => { const v = VID[LICH[k][4]]; if (!v.getAttribute('src')) { v.src = v._src; v.load(); } }); }
 const AU = { thinh: new Audio('../cbe/cbe_01_van_thinh.mp3'), noi: new Audio('../cbe/cbe_noi_02-10.mp3') }; Object.values(AU).forEach(a => { a.preload = 'auto'; });
-let BI = 0, BT = 0, AM = Q.get('am') === '1', lastT = performance.now(), cur = null;
+let KT = 0, BI = 0, BT = 0, AM = Q.get('am') === '1', lastT = performance.now(), cur = null;
 function auNow(L) { const a = AU[L[1]]; return a && !a.paused && AM && !IM ? a.currentTime : null; }
-function vao(i) { BI = i; const L = LICH[i]; BT = L[2]; const a = AU[L[1]];
+function vao(i) { BI = i; napClip(i); KT = performance.now(); const L = LICH[i]; BT = L[2]; const a = AU[L[1]];
   if (AM && !IM) { Object.values(AU).forEach(x => { if (x !== a) x.pause(); }); if (a.paused || Math.abs(a.currentTime - L[2]) > 1.2) { a.currentTime = L[2]; a.play().catch(() => {}); } }
   const v = VID[L[4]], dai = L[3] - L[2]; v.loop = L[5] !== 'vua' && L[5] !== 'ngoi'; v.playbackRate = L[5] === 'vua' && v.duration ? Math.max(.4, Math.min(1, v.duration / dai)) : 1; if (cur !== v) { if (cur) { FADE.a = 1; FADE.c.getContext('2d').clearRect(0, 0, 360, 640); FADE.c.getContext('2d').drawImage(BUF, 0, 0); FADE.n = curN; cur.pause(); } cur = v; curN = L[4]; try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); } }
 let curN = null; const FADE = { a: 0, c: Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), n: null };
 const BUF = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), bx = BUF.getContext('2d', { willReadFrequently: true });
 const MK = Object.assign(document.createElement('canvas'), { width: 360, height: 640 }), mx = MK.getContext('2d', { willReadFrequently: true });
 function capNhatGia(now) { const dt = Math.min(.2, (now - lastT) / 1000); lastT = now; if (!cur) vao(0); const L = LICH[BI], at = auNow(L); BT = at != null ? at : BT + dt;
-  const v = VID[L[4]]; if (L[5] === 'ngoi' && v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = 4.5; } catch (e) {} v.play().catch(() => {}); } /* ngồi thay áo: lặp đoạn ngồi */
+  const v = VID[L[4]]; if (v.paused && !(L[5] === 'vua' && v.ended)) v.play().catch(() => {}); if (v.readyState < 2 && now - KT > 6000) { KT = now; v.src = v._src + '&r=' + Date.now(); v.load(); v.play().catch(() => {}); } /* video kẹt thì nạp lại */
+  if (L[5] === 'ngoi' && v.duration && v.currentTime >= v.duration - .08) { try { v.currentTime = 4.5; } catch (e) {} v.play().catch(() => {}); } /* ngồi thay áo: lặp đoạn ngồi */
   if (BT >= L[3] - .05) { if (BI + 1 < LICH.length) vao(BI + 1); else { Object.values(AU).forEach(a => a.pause()); vao(0); } } if (FADE.a > 0) FADE.a = Math.max(0, FADE.a - dt / .6); }
 function lay(v) { if (!v || v.readyState < 2) return false; mx.drawImage(v, 0, 640, 360, 640, 0, 0, 360, 640); bx.clearRect(0, 0, 360, 640); bx.drawImage(v, 0, 0, 360, 640, 0, 0, 360, 640); const m = mx.getImageData(0, 0, 360, 640).data, c = bx.getImageData(0, 0, 360, 640); for (let i = 0; i < m.length; i += 4) c.data[i + 3] = m[i]; bx.putImageData(c, 0, 0); return true; }
 function veMot(cv2, n, x, y, k, al) { const t = TF[n] || [1, 0, 0]; g.save(); g.globalAlpha = al; g.translate(x, y); g.scale(k, k); g.translate(-178, -585); g.translate(t[1], t[2]); g.scale(t[0], t[0]); g.drawImage(cv2, 0, 0, 360, 640); g.restore(); }
