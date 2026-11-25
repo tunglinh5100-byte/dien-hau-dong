@@ -2862,7 +2862,7 @@ if (CNM_ON) { fetch('cnm/meta.json?v=8').then(r => r.json()).then(m => { CNM.met
 /* 25/11 anh Linh: đủ 60 màu áo như trước — 18 màu × 3 độ đậm nhạt + 6 màu trơn; người xem chọn màu bằng comment thì đúng màu đó */
 const CNM_MAU = ['#952323', '#cc3333', '#d67171', '#954923', '#cc6633', '#d69271', '#956f23', '#cc9933', '#d6b471', '#959523', '#cccc33', '#d6d671', '#6f9523', '#99cc33', '#b4d671', '#499523', '#66cc33', '#92d671', '#239523', '#33cc33', '#71d671', '#239549', '#33cc66', '#71d692', '#23956f', '#33cc99', '#71d6b4', '#239595', '#33cccc', '#71d6d6', '#236f95', '#3399cc', '#71b4d6', '#234995', '#3366cc', '#7192d6', '#232395', '#3333cc', '#7171d6', '#492395', '#6633cc', '#9271d6', '#6f2395', '#9933cc', '#b471d6', '#952395', '#cc33cc', '#d671d6', '#95236f', '#cc3399', '#d671b4', '#952349', '#cc3366', '#d67192', '#efede6', '#e9d8b4', '#b9bec8', '#7d7f86', '#28232a', '#7a4a2a'];
 function cnmMau(p) { const chon = p.ao || (p.name && !p.ghost ? aoLuu(p.name) : null); if (chon) { const m = String(chon).match(/#[0-9a-f]{6}/i); if (m) return m[0]; } const nvm = p.name && NV[p.name] && NV[p.name].mix; if (nvm && nvm.length && cnmHex(nvm[0])) return cnmHex(nvm[0]);
-  if (p.lv === 5) return '#c9962a'; if (p._cm) return p._cm; const n = String(p.name || '') + '|' + (p.seat ? p.seat.x : ''); let h = 7; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return (p._cm = CNM_MAU[h % CNM_MAU.length]); }
+  if (p.lv === 5) return '#c9962a'; if (p.quen && (p.lv || 2) < 3) return '#b0261e'; /* như cũ: người quen cấp thấp áo đỏ */ if (p._cm) return p._cm; const n = String(p.name || '') + '|' + (p.seat ? p.seat.x : ''); let h = 7; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return (p._cm = CNM_MAU[h % CNM_MAU.length]); }
 function cnmLay(g, a, hex) { const w = a.naturalWidth, h = a.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   x.drawImage(a, 0, 0); x.globalCompositeOperation = 'multiply'; x.fillStyle = hex; x.fillRect(0, 0, w, h); x.globalCompositeOperation = 'destination-in'; x.drawImage(a, 0, 0); g.drawImage(c, 0, 0); }
 function cnmTint(sx, hex, lung, quat, nvp) { const pk = ['khan', 'toc', 'quan', 'giay'].map(k => cnmHex(nvp && nvp[k]) || ''), key = sx + hex + (lung || '') + (quat || '') + pk.join(''); let c = CNM.tint.get(key); if (c) return c; if (CNM.tint.size > 90) CNM.tint.delete(CNM.tint.keys().next().value);
@@ -2870,12 +2870,12 @@ function cnmTint(sx, hex, lung, quat, nvp) { const pk = ['khan', 'toc', 'quan', 
   cnmLay(g, CNM.img[sx + 'A'], hex); ['K', 'T', 'U', 'G'].forEach((m, i) => { if (pk[i]) cnmLay(g, CNM.img[sx + m], pk[i]); }); /* khăn, tóc, quần, giày */ if (lung) cnmLay(g, CNM.img[sx + 'L'], lung); if (quat) cnmLay(g, CNM.img[sx + 'Q'], quat); /* 25/11 anh Linh: đổi màu áo, thắt lưng, quạt riêng từng phần, không lem */
   CNM.tint.set(key, c); return c; }
 function cnmDem(hex) { if (!hex) return CNM.img.dem; const key = 'dem' + hex; let c = CNM.tint.get(key); if (c) return c; const d = CNM.img.dem; c = document.createElement('canvas'); c.width = d.naturalWidth; c.height = d.naturalHeight; const g = c.getContext('2d'); g.drawImage(d, 0, 0); cnmLay(g, CNM.img.demA, hex); CNM.tint.set(key, c); return c; } /* đệm đổi màu, giữ hoa văn + tua vàng */
-function cnmKhan(p, nvp) { if (nvp.khan) return nvp.khan; const lv = NH_MODE ? Math.max(2, p.lv || 2) : (p.lv || 2), n = String(p.name || p.x); /* 25/11 anh Linh: màu khăn vấn như cũ — theo cấp, khi comment thì theo comment */
+function cnmKhan(p, nvp) { if (nvp.khan) return nvp.khan; if (p.quen && (p.lv || 2) < 3) return '#c62a22'; const lv = NH_MODE ? Math.max(2, p.lv || 2) : (p.lv || 2), n = String(p.name || p.x); /* 25/11 anh Linh: màu khăn vấn như cũ — theo cấp, khi comment thì theo comment */
   return lv < 3 ? ['#c62a22', '#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a', '#c9962a'][(n.length + n.charCodeAt(0)) % 6] : lv === 5 ? '#e9b43a' : lv === 4 ? '#b0261e' : ['#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a'][n.length % 4]; }
 const cnmHex = v => (String(v || '').match(/#[0-9a-f]{6}/i) || [])[0];
 function cnmVe(p, t, s) { p._cnm = 0;
-  if (!CNM.ok || p.hd || p.nhan || p.gia || p.ghost || String(p.name).startsWith('​') || !/^(walk|enter|seat|stand)$/.test(p.state)) return false;
-  const sx = p.sex === 'nu' ? 'nu' : 'nam', M = CNM.meta[sx], O = CNM.meta.order, dt = Math.min(.1, S.dtLY || 1 / 60), seat = p.state === 'seat';
+  if (!CNM.ok || p.hd || p.nhan || p.gia || p.ghost || String(p.name).startsWith('​') || !/^(walk|enter|seat|stand|tam|tui|queue|xlq|xinloc|huong)$/.test(p.state)) return false;
+  const sx = p.sex === 'nu' ? 'nu' : 'nam', M = CNM.meta[sx], O = CNM.meta.order, dt = Math.min(.1, S.dtLY || 1 / 60), seat = /^(seat|tam|tui|queue|xlq|xinloc|huong)$/.test(p.state); /* 25/11: mọi trạng thái quỳ (tủi bóng, xếp hàng lộc, xin lộc, dâng hương…) đều dùng nhân vật mới */
   const ox = p._cx == null ? p.x : p._cx, oy = p._cy == null ? p.y : p._cy, dx = p.x - ox, dy = p.y - oy, mv = Math.hypot(dx, dy); p._cx = p.x; p._cy = p.y;
   let T = p._d == null ? 4 : p._d;
   if (mv > .12 && mv < 40) { T = ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; p._mt = t; p._wd = (p._wd || 0) + mv; }
@@ -2888,11 +2888,13 @@ function cnmVe(p, t, s) { p._cnm = 0;
   const ngoi = seat && !moving && p._d === 4, pk = ngoi && p.name && !p.ghost ? new Set(pkCua(p.name, vThu(p.name, soLanVao(p.name))).map(x => x[0])) : null; /* phụ kiện theo số lần dự live: thắt lưng, đệm, quạt */
   if (ngoi) {
     key = 'sit'; const nhan = p.nc != null && S.t - p.nc < CHU_NHAN;
-    if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) key = 'pray';
+    if (/^(raise|clap|wave|cheer|reach)$/.test(p.pose)) { key = 'pray'; if (p.pose === 'clap') bob = Math.abs(Math.sin(t * 14)) * 2.2 * s; else if (p.pose === 'wave') rot = Math.sin(t * 7) * .12; else bob = Math.abs(Math.sin(t * 7)) * 3 * s; } /* vỗ tay nảy nhanh, vẫy tay lắc, giơ tay nhún */
     if (p.pose === 'bow') key = Math.sin(t * 3 + p.x) > .2 ? 'bow' : 'pray';
     if (nhan) { const e = S.t - p.nc; key = e < 1.4 ? 'pray' : Math.abs(Math.sin(Math.PI * 3 * (e - 1.4) / (CHU_NHAN - 1.4))) > .55 ? 'bow' : 'pray'; }
     if (key === 'sit' && pk) key = pk.has('quat2') ? 'sitQ2' : pk.has('quat') ? 'sitQ' : pk.has('lung') ? 'sitL' : 'sit';
     if (/^sit/.test(key)) bob = Math.sin(t * 1.8 + p.x) * .35; /* thở nhẹ */
+    if (p.state === 'tui') rot = Math.sin(t * 5.5 + p.x) * .22; /* tủi bóng lắc lư */
+    if (p.state === 'huong' && key === 'sit') key = Math.sin(t * 2.2 + p.x) > 0 ? 'bowB' in M.rects && M.bowB ? 'bowB' : 'bow' : 'pray'; /* dâng hương: vái, lạy */
     if (key === 'bow') { if (M.bowB) key = 'bowB'; else mir = (sx === 'nu' ? 1 : -1) !== (p.x < W / 2 ? 1 : -1); } /* 25/11: có ảnh lạy quay lưng thì lạy thẳng lên ban công đồng */ /* 25/11 anh Linh: lạy nghiêng về phía sập — bên trái màn quay sang phải, bên phải quay sang trái */
   } else if (moving && p._d !== 0 && p._d !== 4) { key = 'w' + (Math.floor(p._wd / 8) % 4); mir = p._d >= 5; }
   else { key = DIRK[p._d]; mir = p._d === 7; if (moving) { const ph = p._wd * .4; bob = Math.abs(Math.sin(ph)) * 2.2; rot = Math.sin(ph) * .045; } }
