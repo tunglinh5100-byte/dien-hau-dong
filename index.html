@@ -3338,6 +3338,22 @@ function drawBinh(t) {
 const LUU_Y = 'Lưu ý: Nội dung chỉ nhằm mục đích giới thiệu tín ngưỡng Đạo Mẫu và các đền. Tôi KHÔNG nhận quà tặng dưới mọi hình thức, KHÔNG xem bói, KHÔNG tương tác với ai.';
 function wrapTxt(str, maxW) { const out = []; let ln = ''; String(str).split(' ').forEach(w => { const tt = ln ? ln + ' ' + w : w; if (ctx.measureText(tt).width > maxW && ln) { out.push(ln); ln = w; } else ln = tt; }); if (ln) out.push(ln); return out; }
 const TICH = { id: null, lines: [], off: 0, ph: 'dau', t: 0 };
+const CAU_DOI = NH_MODE && !/[?&]caudoi=0/.test(location.search);
+function drawCauDoi() { /* 25/11 12:44 anh Linh: bảng câu đối "share live để vào chiếu ngồi" treo trên cột gỗ bên trái, dưới bảng sự tích */
+  if (!CAU_DOI || (typeof TK !== 'undefined' && TK.on) || !LYC.y) return;
+  const top = (buocGia() ? 232 : 190) + 126 + 7, bot = LYC.y - 21 - 5 - (ilHien() ? 27 : 0), cx = 30, w = 40, h = bot - top; if (h < 60) return;
+  const chu = ['Share', 'live', 'để', 'vào', 'chiếu', 'ngồi'], y0 = top + 7, y1 = bot - 7;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(40,20,8,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 12, top + 3); ctx.lineTo(cx, top - 6); ctx.lineTo(cx + 12, top + 3); ctx.stroke(); /* dây treo */
+  ctx.beginPath(); ctx.arc(cx, top - 6, 2, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+  const g = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); g.addColorStop(0, '#7a120e'); g.addColorStop(.5, '#b3221a'); g.addColorStop(1, '#7a120e');
+  ctx.fillStyle = g; ctx.fillRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.6; ctx.strokeRect(cx - w / 2 + 2.5, y0 + 2.5, w - 5, y1 - y0 - 5);
+  for (const yy of [top, bot - 7]) { const gg = ctx.createLinearGradient(0, yy, 0, yy + 7); gg.addColorStop(0, '#5a3418'); gg.addColorStop(.5, '#a4703a'); gg.addColorStop(1, '#4a2a12'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(cx - w / 2 - 4, yy, w + 8, 7, 3.5); ctx.fill(); ctx.fillStyle = '#e6b552'; ctx.beginPath(); ctx.arc(cx - w / 2 - 4, yy + 3.5, 2.4, 0, 7); ctx.arc(cx + w / 2 + 4, yy + 3.5, 2.4, 0, 7); ctx.fill(); } /* trục gỗ trên dưới */
+  const n = chu.length, b = (y1 - y0 - 8) / n; let fs = Math.min(12.5, b * .78); ctx.font = `800 ${fs}px ${SERIF}`; const mw = Math.max(...chu.map(c => ctx.measureText(c).width)); if (mw > w - 8) fs *= (w - 8) / mw;
+  chu.forEach((c, i) => text(c, cx, y0 + 4 + b * (i + .5), fs, '#ffe08a', { f: SERIF, w: 800 }));
+  ctx.restore(); }
 function drawBangPhai() { if (TK.on) return; // hướng dẫn nhận lời ban khen + sự tích giá đang ngự, chữ cuộn lên như máy nhắc chữ
   const tt = !!buocGia(), NB = NH_MODE, X = NB ? -2 : tt || GIA().id === 'chaube' || laCU(GIA().id) ? W - 2 * SAFE_X - 150 - 8 : 8, Y = NB ? (tt ? 232 : 190) : tt ? 237 : 192, Wd = NB ? 134 : 150, cx = X + Wd / 2, h = NB ? 126 : tt ? 145 : 128, BY = Y + (NB ? 24 : 26), BH = h - (NB ? 28 : 32), LH = NB ? 13 : 12.5, FS = NB ? 10 : 9.5, /* 13:25 anh Linh: chữ sự tích to, rõ hơn trên điện thoại */ WW = Wd - 16; // 18/11 10:46 anh Linh: bảng sự tích sang chỗ bảng tương tác, nhỏ và sát mép để không che Chầu múa // anh Linh 14/11: bỏ dòng mời bình luận/chia sẻ live nhận ban khen
   panel(X, Y, Wd, h);
@@ -3469,7 +3485,7 @@ function drawOverlay(t) {
   if (NH_MODE) { drawLuuYChay(); try { drawImLang(); } catch (e) {} } else drawLuuY(); /* 20/11 20:41: bỏ vòng tròn số người chờ */ if (S.cat) { drawCat(); }
   // TikTok trên điện thoại cắt khoảng 10% mỗi bên khung dọc: dời bảng lưu ý và bình tim vào vùng an toàn
   const BX = SAFE_X; ctx.save(); ctx.translate(BX, 0);
-  drawBangPhai();
+  drawBangPhai(); drawCauDoi();
   if (!NH_MODE) drawBangTT(t); // 18/11 10:46 anh Linh: bỏ bảng hướng dẫn tương tác. 15/11 anh Linh: bảng 'Tương tác để ngài ban khen' thay cho bình tim, cùng hàng, cùng cỡ bảng sự tích
   if (S.timBan && false) { const b = S.timBan, a = b.t < .3 ? b.t / .3 : b.t > b.life - .4 ? (b.life - b.t) / .4 : 1; ctx.save(); ctx.globalAlpha = clamp(a, 0, 1);
     rr(8, 516, 150, 46, 10, 'rgba(142,33,28,.95)'); ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(8, 516, 150, 46, 10); ctx.stroke();
