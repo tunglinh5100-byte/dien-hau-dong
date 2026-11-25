@@ -3343,12 +3343,12 @@ function drawCauDoi() { /* 25/11 12:44 anh Linh: bảng câu đối "share live 
   if (!CAU_DOI || (typeof TK !== 'undefined' && TK.on) || !LYC.y) return;
   const top = (buocGia() ? 232 : 190) + 126 + 7, bot = LYC.y - 21 - 5 - (ilHien() ? 27 : 0), cx = 30, w = 40, h = bot - top; if (h < 60) return;
   const chu = ['Share', 'live', 'để', 'vào', 'chiếu', 'ngồi'], y0 = top + 7, y1 = bot - 7;
-  ctx.save();
+  ctx.save(); const ph = (Math.sin(performance.now() / 1000 * Math.PI * 1.4) + 1) / 2, sc = 1 + .07 * ph, cy = (top + bot) / 2; ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); /* 25/11 13:11 anh Linh: câu đối phập phồng cho mọi người để ý */
   ctx.strokeStyle = 'rgba(40,20,8,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 12, top + 3); ctx.lineTo(cx, top - 6); ctx.lineTo(cx + 12, top + 3); ctx.stroke(); /* dây treo */
   ctx.beginPath(); ctx.arc(cx, top - 6, 2, 0, 7); ctx.fillStyle = '#e6b552'; ctx.fill();
   ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
   const g = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); g.addColorStop(0, '#7a120e'); g.addColorStop(.5, '#b3221a'); g.addColorStop(1, '#7a120e');
-  ctx.fillStyle = g; ctx.fillRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = 'transparent';
+  ctx.fillStyle = g; ctx.fillRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = `rgba(255,210,90,${.35 + .5 * ph})`; ctx.shadowBlur = 6 + 12 * ph; ctx.shadowOffsetY = 0; ctx.strokeStyle = 'rgba(255,214,110,.9)'; ctx.lineWidth = 1; ctx.strokeRect(cx - w / 2, y0, w, y1 - y0); ctx.shadowColor = 'transparent'; /* hào quang vàng nhịp theo */
   ctx.strokeStyle = '#e6b552'; ctx.lineWidth = 1.6; ctx.strokeRect(cx - w / 2 + 2.5, y0 + 2.5, w - 5, y1 - y0 - 5);
   for (const yy of [top, bot - 7]) { const gg = ctx.createLinearGradient(0, yy, 0, yy + 7); gg.addColorStop(0, '#5a3418'); gg.addColorStop(.5, '#a4703a'); gg.addColorStop(1, '#4a2a12'); ctx.fillStyle = gg; ctx.beginPath(); ctx.roundRect(cx - w / 2 - 4, yy, w + 8, 7, 3.5); ctx.fill(); ctx.fillStyle = '#e6b552'; ctx.beginPath(); ctx.arc(cx - w / 2 - 4, yy + 3.5, 2.4, 0, 7); ctx.arc(cx + w / 2 + 4, yy + 3.5, 2.4, 0, 7); ctx.fill(); } /* trục gỗ trên dưới */
   const n = chu.length, b = (y1 - y0 - 8) / n; let fs = Math.min(12.5, b * .78); ctx.font = `800 ${fs}px ${SERIF}`; const mw = Math.max(...chu.map(c => ctx.measureText(c).width)); if (mw > w - 8) fs *= (w - 8) / mw;
