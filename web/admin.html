@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Quản trị SEO – Đạo Mẫu</title>
+<style>
+:root { --nen: #160807; --nen2: #221010; --o: #2c1413; --vang: #e6b552; --vang2: #f6dc96; --chu: #f6ecdf; --mo: #b9a796; --vien: rgba(230,181,82,.28); --do: #ff8a7a; --xanh: #8fd19e; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--nen); color: var(--chu); font: 14.5px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: #1b0b0a; border-bottom: 1px solid var(--vien); }
+header .w { display: flex; align-items: center; gap: 12px; height: 56px; }
+header b { font: 700 17px Georgia, serif; color: var(--vang2); flex: 1; }
+.w { max-width: 1060px; margin: 0 auto; padding: 0 18px; }
+.nut { border: 1px solid transparent; border-radius: 10px; padding: 9px 16px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
+.nut.chinh { background: var(--vang); color: #2a1206; }
+.nut.chinh:disabled { opacity: .5; cursor: default; }
+.nut.phu { background: none; border-color: var(--vien); color: var(--vang2); }
+.the { background: var(--nen2); border: 1px solid var(--vien); border-radius: 14px; padding: 18px; margin: 18px 0; }
+.the h2 { margin: 0 0 6px; font: 700 18px Georgia, serif; color: var(--vang2); }
+.goi-y { color: var(--mo); font-size: 13px; margin: 0 0 12px; }
+label { display: block; font-size: 12.5px; color: var(--mo); margin: 10px 0 4px; }
+input[type=text], input[type=password], textarea, select { width: 100%; background: #140605; color: var(--chu); border: 1px solid var(--vien); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: 14px; }
+textarea { resize: vertical; min-height: 64px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--vang); }
+.dem { float: right; font-size: 11.5px; }
+.dem.qua { color: var(--do); }
+.dem.vua { color: var(--xanh); }
+.hai { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.hai > div > h3 { margin: 0; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--vang); }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 0; }
+.tabs button { background: none; border: 1px solid var(--vien); color: var(--mo); border-radius: 999px; padding: 7px 14px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; }
+.tabs button.on { background: var(--vang); color: #2a1206; border-color: var(--vang); }
+.gg { background: #fff; color: #202124; border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-family: Arial, sans-serif; }
+.gg .u { font-size: 12px; color: #4d5156; }
+.gg .t { font-size: 18px; color: #1a0dab; margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gg .d { font-size: 13.5px; color: #4d5156; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tt { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #2c1413; border: 1px solid var(--vang); color: var(--chu); padding: 10px 16px; border-radius: 12px; z-index: 9; max-width: 90vw; }
+code { background: #140605; padding: 1px 6px; border-radius: 6px; }
+@media (max-width: 760px) { .hai { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><div class="w"><b>Quản trị SEO · daomau.adela.com.vn</b><span id="trang-thai" style="color:var(--mo);font-size:13px"></span><button class="nut chinh" id="luu" disabled>Lưu lên website</button></div></header>
+<main class="w">
+  <div class="the" id="ket-noi">
+    <h2>1. Kết nối GitHub</h2>
+    <p class="goi-y">Nội dung SEO nằm trong file <code>web/seo.json</code> (nhánh <code>web</code>). Bấm Lưu thì trang này ghi file lên GitHub, Cloudflare tự dựng lại website sau khoảng 1–3 phút. Cần một mã truy cập GitHub (fine-grained token): GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token → Repository access: chỉ chọn <code>dien-hau-dong</code> → Permissions: Contents = Read and write. Mã chỉ lưu trên trình duyệt của máy này.</p>
+    <label for="token">Mã truy cập GitHub</label>
+    <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="nut phu" id="nho">Lưu mã trên máy này</button><button class="nut phu" id="quen">Xóa mã</button><button class="nut phu" id="tai">Tải lại nội dung</button></div>
+  </div>
+  <div id="soan" hidden>
+    <div class="tabs" id="tabs"></div>
+    <div id="noi-dung"></div>
+  </div>
+</main>
+<div class="tt" id="tt" hidden></div>
+<script src="gia.js?v=1"></script>
+<script>
+const REPO = 'tunglinh5100-byte/dien-hau-dong', NHANH = 'web', FILE = 'web/seo.json', API = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+let SEO = null, SHA = null, TAB = 'chung', GIA_ID = DM_GIA[0].id, BAN = false;
+const $ = id => document.getElementById(id), tt = (s, ms) => { const e = $('tt'); e.textContent = s; e.hidden = false; clearTimeout(tt.h); tt.h = setTimeout(() => e.hidden = true, ms || 3500); };
+const tok = () => $('token').value.trim();
+try { $('token').value = localStorage.getItem('dm_gh') || ''; } catch (e) {}
+$('nho').onclick = () => { try { localStorage.setItem('dm_gh', tok()); tt('Đã lưu mã trên máy này'); } catch (e) {} };
+$('quen').onclick = () => { $('token').value = ''; try { localStorage.removeItem('dm_gh'); } catch (e) {} tt('Đã xóa mã'); };
+const b64ra = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), c => c.charCodeAt(0)));
+const b64vao = s => { const b = new TextEncoder().encode(s); let r = ''; for (let i = 0; i < b.length; i += 0x8000) r += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(r); };
+async function tai() {
+  $('trang-thai').textContent = 'Đang tải…';
+  try { const h = { Accept: 'application/vnd.github+json' }; if (tok()) h.Authorization = 'Bearer ' + tok();
+    const r = await fetch(API + '?ref=' + NHANH + '&t=' + Date.now(), { headers: h }); if (!r.ok) throw new Error('GitHub trả lỗi ' + r.status);
+    const j = await r.json(); SHA = j.sha; SEO = JSON.parse(b64ra(j.content)); BAN = false; $('soan').hidden = false; ve(); $('trang-thai').textContent = 'Đã tải bản mới nhất';
+  } catch (e) { $('trang-thai').textContent = ''; tt('Không tải được: ' + e.message, 6000); } }
+async function luu() {
+  if (!tok()) { tt('Cần nhập mã truy cập GitHub ở mục 1', 5000); return; }
+  $('luu').disabled = true; $('trang-thai').textContent = 'Đang lưu…';
+  try { const r = await fetch(API, { method: 'PUT', headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + tok(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'SEO: cập nhật từ trang quản trị', content: b64vao(JSON.stringify(SEO, null, 2) + '\n'), sha: SHA, branch: NHANH }) });
+    const j = await r.json(); if (!r.ok) throw new Error(r.status === 409 ? 'có người vừa sửa, bấm Tải lại rồi sửa lại' : r.status === 401 || r.status === 403 ? 'mã truy cập sai hoặc chưa có quyền ghi' : (j.message || r.status));
+    SHA = j.content.sha; BAN = false; $('trang-thai').textContent = 'Đã lưu ' + new Date().toLocaleTimeString('vi-VN'); tt('Đã lưu. Website tự cập nhật sau khoảng 1–3 phút.', 6000);
+  } catch (e) { $('luu').disabled = false; $('trang-thai').textContent = 'Chưa lưu'; tt('Không lưu được: ' + e.message, 7000); } }
+$('tai').onclick = () => { if (BAN && !confirm('Có thay đổi chưa lưu, vẫn tải lại?')) return; tai(); };
+$('luu').onclick = luu;
+addEventListener('beforeunload', e => { if (BAN) { e.preventDefault(); e.returnValue = ''; } });
+const doi = () => { BAN = true; $('luu').disabled = false; $('trang-thai').textContent = 'Có thay đổi chưa lưu'; };
+function o(obj, key, nhan, opt) { /* một ô sửa, ghi thẳng vào obj[key] */
+  opt = opt || {}; const d = document.createElement('div'), id = 'f' + Math.random().toString(36).slice(2);
+  d.innerHTML = `<label for="${id}">${nhan}${opt.max ? `<span class="dem"></span>` : ''}</label>` + (opt.dai ? `<textarea id="${id}"></textarea>` : `<input type="text" id="${id}">`);
+  const e = d.querySelector(opt.dai ? 'textarea' : 'input'), dem = d.querySelector('.dem'); e.value = obj[key] || ''; if (opt.ph) e.placeholder = opt.ph;
+  const cap = () => { if (!dem) return; const n = e.value.length; dem.textContent = n + ' / ' + opt.max + ' ký tự'; dem.className = 'dem ' + (n > opt.max ? 'qua' : n >= opt.max * .6 ? 'vua' : ''); };
+  e.oninput = () => { obj[key] = e.value; cap(); doi(); if (opt.sau) opt.sau(); }; cap(); return d; }
+function google(meta, url) { const g = document.createElement('div'); g.className = 'gg'; const ve = () => { g.innerHTML = `<div class="u">${url}</div><div class="t"></div><div class="d"></div>`; g.querySelector('.t').textContent = meta.title || '(chưa có tiêu đề)'; g.querySelector('.d').textContent = meta.description || '(chưa có mô tả)'; }; ve(); g.ve = ve; return g; }
+function cotNgu(meta, ngu, url, them) { const c = document.createElement('div'); c.innerHTML = `<h3>${ngu === 'en' ? 'Tiếng Anh (khách nước ngoài, Google hiển thị chính)' : 'Tiếng Việt'}</h3>`;
+  const gg = google(meta, url);
+  c.appendChild(o(meta, 'title', 'Tiêu đề trang (title)', { max: 60, sau: gg.ve })); c.appendChild(o(meta, 'description', 'Mô tả (meta description)', { max: 160, dai: true, sau: gg.ve }));
+  if (meta.keywords !== undefined || them) c.appendChild(o(meta, 'keywords', 'Từ khóa, cách nhau bằng dấu phẩy', { dai: true }));
+  if (them) c.appendChild(o(meta, 'intro', 'Đoạn giới thiệu hiện trên trang', { dai: true }));
+  c.appendChild(gg); return c; }
+function ve() {
+  const T = [['chung', 'Thông tin chung'], ['home', 'Trang chủ'], ['room', 'Phòng lễ'], ['gia', 'Từng giá hầu (22 trang)']];
+  $('tabs').innerHTML = ''; T.forEach(([id, ten]) => { const b = document.createElement('button'); b.textContent = ten; b.className = TAB === id ? 'on' : ''; b.onclick = () => { TAB = id; ve(); }; $('tabs').appendChild(b); });
+  const nd = $('noi-dung'); nd.innerHTML = ''; const the = (tieu, goiy) => { const t = document.createElement('div'); t.className = 'the'; t.innerHTML = `<h2>${tieu}</h2>` + (goiy ? `<p class="goi-y">${goiy}</p>` : ''); nd.appendChild(t); return t; };
+  const D = (SEO.site.domain || '').replace(/\/$/, '');
+  if (TAB === 'chung') { const t = the('Thông tin chung', 'Áp dụng cho mọi trang.');
+    t.appendChild(o(SEO.site, 'name', 'Tên website (hiện khi chia sẻ Facebook, Zalo)'));
+    t.appendChild(o(SEO.site, 'domain', 'Tên miền chính', { ph: 'https://daomau.adela.com.vn' }));
+    t.appendChild(o(SEO.site, 'ogImage', 'Ảnh khi chia sẻ link (đường dẫn trong website)', { ph: '/web/img/hero.jpg' }));
+    t.appendChild(o(SEO.site, 'googleVerify', 'Mã xác minh Google Search Console (chỉ phần content=…)', { ph: 'abc123…' }));
+    t.appendChild(o(SEO.site, 'tiktok', 'Link kênh live TikTok (nút "Vào live TikTok" trên trang chủ)', { ph: 'https://www.tiktok.com/@...' })); }
+  if (TAB === 'home' || TAB === 'room') { const p = SEO.pages[TAB], t = the(TAB === 'home' ? 'Trang chủ' : 'Phòng lễ', TAB === 'room' ? 'Gõ {gia} để tự thay bằng tên giá hầu. Phòng lễ không đưa lên Google (noindex), chỉ dùng cho tiêu đề tab và khi chia sẻ.' : 'Trang Google hiển thị nhiều nhất. Tiêu đề nên dưới 60 ký tự, mô tả 120–160 ký tự.');
+    const h = document.createElement('div'); h.className = 'hai'; h.appendChild(cotNgu(p.en, 'en', D + '/web/')); h.appendChild(cotNgu(p.vi, 'vi', D + '/web/')); t.appendChild(h); }
+  if (TAB === 'gia') { const t = the('Từng giá hầu', 'Mỗi giá có một trang riêng để lên Google, ví dụ ' + D + '/gia/ong-hoang-bay/. Đổi đường dẫn (slug) sẽ làm link cũ không vào được, chỉ đổi khi thật cần.');
+    const sel = document.createElement('select'); DM_GIA.forEach(g => { const op = document.createElement('option'); op.value = g.id; op.textContent = g.vi + ' – ' + g.en; sel.appendChild(op); }); sel.value = GIA_ID; sel.onchange = () => { GIA_ID = sel.value; ve(); }; t.appendChild(sel);
+    const G = SEO.gia[GIA_ID] = SEO.gia[GIA_ID] || { slug: GIA_ID, en: {}, vi: {} }; G.en = G.en || {}; G.vi = G.vi || {};
+    t.appendChild(o(G, 'slug', 'Đường dẫn (slug): chữ thường, không dấu, nối bằng gạch ngang'));
+    const h = document.createElement('div'); h.className = 'hai'; const url = D + '/gia/' + (G.slug || GIA_ID) + '/'; h.appendChild(cotNgu(G.en, 'en', url, true)); h.appendChild(cotNgu(G.vi, 'vi', url, true)); t.appendChild(h); }
+}
+tai();
+</script>
+</body>
+</html>

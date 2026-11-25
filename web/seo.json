@@ -1,0 +1,365 @@
+{
+  "site": {
+    "name": "Đạo Mẫu · ADELA",
+    "domain": "https://daomau.adela.com.vn",
+    "ogImage": "/web/img/hero.jpg",
+    "googleVerify": "",
+    "tiktok": ""
+  },
+  "pages": {
+    "home": {
+      "en": {
+        "title": "Đạo Mẫu – Experience Vietnamese Mother Goddess Worship | ADELA",
+        "description": "Experience Đạo Mẫu, the Vietnamese Mother Goddess worship recognised by UNESCO. Choose one of 22 spirits, take a seat on the temple mat and follow a hầu đồng ritual online.",
+        "keywords": "Đạo Mẫu, Vietnamese Mother Goddess, Mother Goddess worship, hầu đồng, lên đồng, spirit mediumship Vietnam, UNESCO intangible heritage, Vietnamese culture, things to do in Vietnam"
+      },
+      "vi": {
+        "title": "Đạo Mẫu – Trải nghiệm tín ngưỡng thờ Mẫu Tam phủ trực tuyến | ADELA",
+        "description": "Trải nghiệm tín ngưỡng thờ Mẫu Tam phủ của người Việt, di sản UNESCO. Chọn 1 trong 22 giá hầu, vào chiếu ngồi và dự trọn giá hầu đồng trực tuyến.",
+        "keywords": "Đạo Mẫu, tín ngưỡng thờ Mẫu, thờ Mẫu Tam phủ, hầu đồng, lên đồng, giá hầu, sự tích các giá hầu, chầu văn"
+      }
+    },
+    "room": {
+      "en": {
+        "title": "{gia} – Hầu đồng ritual online | Đạo Mẫu",
+        "description": "Sit on the temple mat and follow the {gia} ritual from invocation to farewell."
+      },
+      "vi": {
+        "title": "{gia} – Dự giá hầu trực tuyến | Đạo Mẫu",
+        "description": "Vào chiếu ngồi và dự trọn giá hầu {gia} từ Thỉnh mời tới Xe giá."
+      }
+    }
+  },
+  "gia": {
+    "tamtoa": {
+      "slug": "tam-toa-thanh-mau",
+      "en": {
+        "title": "Tam Tòa Thánh Mẫu – The Three Holy Mothers | Đạo Mẫu",
+        "description": "The three Holy Mothers of heaven, mountains and waters. Learn the legend and join the Tam Tòa Thánh Mẫu hầu đồng ritual online.",
+        "keywords": "Tam Tòa Thánh Mẫu, The Three Holy Mothers, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "The three Holy Mothers of heaven, mountains and waters."
+      },
+      "vi": {
+        "title": "Thỉnh Tam Tòa Thánh Mẫu – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Ba vị Thánh Mẫu cai quản trời, núi rừng và sông nước. Tìm hiểu sự tích và dự giá hầu Tam Tòa Thánh Mẫu trực tuyến.",
+        "keywords": "Tam Tòa Thánh Mẫu, sự tích Tam Tòa Thánh Mẫu, giá Tam Tòa Thánh Mẫu, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Ba vị Thánh Mẫu cai quản trời, núi rừng và sông nước."
+      }
+    },
+    "chualm": {
+      "slug": "chua-le-mai",
+      "en": {
+        "title": "Chúa Lê Mại – Lord Lê Mại | Đạo Mẫu",
+        "description": "One of the Three Mường Lords and Ladies of the high mountains. Learn the legend and join the Chúa Lê Mại hầu đồng ritual online.",
+        "keywords": "Chúa Lê Mại, Lord Lê Mại, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "One of the Three Mường Lords and Ladies of the high mountains."
+      },
+      "vi": {
+        "title": "Chúa Lê Mại – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Một trong Tam vị Chúa Mường, gắn với miền thượng ngàn. Tìm hiểu sự tích và dự giá hầu Chúa Lê Mại trực tuyến.",
+        "keywords": "Chúa Lê Mại, sự tích Chúa Lê Mại, giá Chúa Lê Mại, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Một trong Tam vị Chúa Mường, gắn với miền thượng ngàn."
+      }
+    },
+    "chuanh": {
+      "slug": "chua-de-nhi-nguyet-ho",
+      "en": {
+        "title": "Chúa Đệ Nhị Nguyệt Hồ – Lady of Nguyệt Hồ | Đạo Mẫu",
+        "description": "Second of the Three Mường Ladies, skilled in astrology. Learn the legend and join the Chúa Đệ Nhị Nguyệt Hồ hầu đồng ritual online.",
+        "keywords": "Chúa Đệ Nhị Nguyệt Hồ, Lady of Nguyệt Hồ, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Second of the Three Mường Ladies, skilled in astrology."
+      },
+      "vi": {
+        "title": "Chúa Đệ Nhị Nguyệt Hồ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Vị thứ hai trong Tam vị Chúa Mường, giỏi chiêm tinh. Tìm hiểu sự tích và dự giá hầu Chúa Đệ Nhị Nguyệt Hồ trực tuyến.",
+        "keywords": "Chúa Đệ Nhị Nguyệt Hồ, sự tích Chúa Đệ Nhị Nguyệt Hồ, giá Chúa Đệ Nhị Nguyệt Hồ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Vị thứ hai trong Tam vị Chúa Mường, giỏi chiêm tinh."
+      }
+    },
+    "chuatb": {
+      "slug": "chua-thac-bo",
+      "en": {
+        "title": "Chúa Thác Bờ – Lady of Thác Bờ | Đạo Mẫu",
+        "description": "A fairy as a Mường girl who helped King Lê Lợi cross the rapids. Learn the legend and join the Chúa Thác Bờ hầu đồng ritual online.",
+        "keywords": "Chúa Thác Bờ, Lady of Thác Bờ, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "A fairy as a Mường girl who helped King Lê Lợi cross the rapids."
+      },
+      "vi": {
+        "title": "Chúa Thác Bờ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Tiên nữ hóa thân cô gái Mường, giúp vua Lê Lợi vượt thác. Tìm hiểu sự tích và dự giá hầu Chúa Thác Bờ trực tuyến.",
+        "keywords": "Chúa Thác Bờ, sự tích Chúa Thác Bờ, giá Chúa Thác Bờ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Tiên nữ hóa thân cô gái Mường, giúp vua Lê Lợi vượt thác."
+      }
+    },
+    "chuanp": {
+      "slug": "chua-ba-nam-phuong",
+      "en": {
+        "title": "Chúa Bà Năm Phương – Lady of Five Directions | Đạo Mẫu",
+        "description": "Ruler of the five directions, who urged people to work hard. Learn the legend and join the Chúa Bà Năm Phương hầu đồng ritual online.",
+        "keywords": "Chúa Bà Năm Phương, Lady of Five Directions, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Ruler of the five directions, who urged people to work hard."
+      },
+      "vi": {
+        "title": "Chúa Bà Năm Phương – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Cai quản năm phương trời đất, khuyên dân chăm làm ăn. Tìm hiểu sự tích và dự giá hầu Chúa Bà Năm Phương trực tuyến.",
+        "keywords": "Chúa Bà Năm Phương, sự tích Chúa Bà Năm Phương, giá Chúa Bà Năm Phương, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Cai quản năm phương trời đất, khuyên dân chăm làm ăn."
+      }
+    },
+    "quannhat": {
+      "slug": "quan-lon-de-nhat",
+      "en": {
+        "title": "Quan Lớn Đệ Nhất – The First Mandarin | Đạo Mẫu",
+        "description": "Head of the Five Great Mandarins, ruler of the heavens. Learn the legend and join the Quan Lớn Đệ Nhất hầu đồng ritual online.",
+        "keywords": "Quan Lớn Đệ Nhất, The First Mandarin, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Head of the Five Great Mandarins, ruler of the heavens."
+      },
+      "vi": {
+        "title": "Quan Lớn Đệ Nhất – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Đứng đầu Ngũ vị Tôn Quan, cai quản miền trời. Tìm hiểu sự tích và dự giá hầu Quan Lớn Đệ Nhất trực tuyến.",
+        "keywords": "Quan Lớn Đệ Nhất, sự tích Quan Lớn Đệ Nhất, giá Quan Lớn Đệ Nhất, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Đứng đầu Ngũ vị Tôn Quan, cai quản miền trời."
+      }
+    },
+    "quannhi": {
+      "slug": "quan-lon-de-nhi",
+      "en": {
+        "title": "Quan Lớn Đệ Nhị – The Second Mandarin | Đạo Mẫu",
+        "description": "Overseer of the mountains, who brings rain and good weather. Learn the legend and join the Quan Lớn Đệ Nhị hầu đồng ritual online.",
+        "keywords": "Quan Lớn Đệ Nhị, The Second Mandarin, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Overseer of the mountains, who brings rain and good weather."
+      },
+      "vi": {
+        "title": "Quan Lớn Đệ Nhị – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Giám sát miền sơn lâm, ban mưa thuận gió hòa. Tìm hiểu sự tích và dự giá hầu Quan Lớn Đệ Nhị trực tuyến.",
+        "keywords": "Quan Lớn Đệ Nhị, sự tích Quan Lớn Đệ Nhị, giá Quan Lớn Đệ Nhị, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Giám sát miền sơn lâm, ban mưa thuận gió hòa."
+      }
+    },
+    "quantam": {
+      "slug": "quan-lon-de-tam",
+      "en": {
+        "title": "Quan Lớn Đệ Tam – The Third Mandarin | Đạo Mẫu",
+        "description": "Head of the Water Palace, a general of the Hùng Kings. Learn the legend and join the Quan Lớn Đệ Tam hầu đồng ritual online.",
+        "keywords": "Quan Lớn Đệ Tam, The Third Mandarin, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Head of the Water Palace, a general of the Hùng Kings."
+      },
+      "vi": {
+        "title": "Quan Lớn Đệ Tam – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Đứng đầu Thoải phủ, vị tướng thời Hùng Vương. Tìm hiểu sự tích và dự giá hầu Quan Lớn Đệ Tam trực tuyến.",
+        "keywords": "Quan Lớn Đệ Tam, sự tích Quan Lớn Đệ Tam, giá Quan Lớn Đệ Tam, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Đứng đầu Thoải phủ, vị tướng thời Hùng Vương."
+      }
+    },
+    "quantu": {
+      "slug": "quan-lon-de-tu",
+      "en": {
+        "title": "Quan Lớn Đệ Tứ – The Fourth Mandarin | Đạo Mẫu",
+        "description": "The royal envoy who judges good and evil for the Father King. Learn the legend and join the Quan Lớn Đệ Tứ hầu đồng ritual online.",
+        "keywords": "Quan Lớn Đệ Tứ, The Fourth Mandarin, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "The royal envoy who judges good and evil for the Father King."
+      },
+      "vi": {
+        "title": "Quan Lớn Đệ Tứ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Quan khâm sai thay Vua Cha đi tuần, xét việc thiện ác. Tìm hiểu sự tích và dự giá hầu Quan Lớn Đệ Tứ trực tuyến.",
+        "keywords": "Quan Lớn Đệ Tứ, sự tích Quan Lớn Đệ Tứ, giá Quan Lớn Đệ Tứ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Quan khâm sai thay Vua Cha đi tuần, xét việc thiện ác."
+      }
+    },
+    "quanngu": {
+      "slug": "quan-lon-de-ngu",
+      "en": {
+        "title": "Quan Lớn Đệ Ngũ – The Fifth Mandarin | Đạo Mẫu",
+        "description": "River spirit and protector of boat traders. Learn the legend and join the Quan Lớn Đệ Ngũ hầu đồng ritual online.",
+        "keywords": "Quan Lớn Đệ Ngũ, The Fifth Mandarin, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "River spirit and protector of boat traders."
+      },
+      "vi": {
+        "title": "Quan Lớn Đệ Ngũ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Vị thần sông nước, phù trợ người buôn thuyền bán bè. Tìm hiểu sự tích và dự giá hầu Quan Lớn Đệ Ngũ trực tuyến.",
+        "keywords": "Quan Lớn Đệ Ngũ, sự tích Quan Lớn Đệ Ngũ, giá Quan Lớn Đệ Ngũ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Vị thần sông nước, phù trợ người buôn thuyền bán bè."
+      }
+    },
+    "chaudn": {
+      "slug": "chau-de-nhi-thuong-ngan",
+      "en": {
+        "title": "Chầu Đệ Nhị Thượng Ngàn – Second Royal Mountain Lady | Đạo Mẫu",
+        "description": "Second Royal Lady, who taught farming and healing at Đông Cuông. Learn the legend and join the Chầu Đệ Nhị Thượng Ngàn hầu đồng ritual online.",
+        "keywords": "Chầu Đệ Nhị Thượng Ngàn, Second Royal Mountain Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Second Royal Lady, who taught farming and healing at Đông Cuông."
+      },
+      "vi": {
+        "title": "Chầu Đệ Nhị Thượng Ngàn – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Vị Chầu thứ hai, dạy dân Đông Cuông trồng trọt, chữa bệnh. Tìm hiểu sự tích và dự giá hầu Chầu Đệ Nhị Thượng Ngàn trực tuyến.",
+        "keywords": "Chầu Đệ Nhị Thượng Ngàn, sự tích Chầu Đệ Nhị Thượng Ngàn, giá Chầu Đệ Nhị Thượng Ngàn, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Vị Chầu thứ hai, dạy dân Đông Cuông trồng trọt, chữa bệnh."
+      }
+    },
+    "chaulu": {
+      "slug": "chau-luc-cung-nuong",
+      "en": {
+        "title": "Chầu Lục Cung Nương – The Sixth Royal Lady | Đạo Mẫu",
+        "description": "A fairy sent to earth to guard the forests of Chín Tư. Learn the legend and join the Chầu Lục Cung Nương hầu đồng ritual online.",
+        "keywords": "Chầu Lục Cung Nương, The Sixth Royal Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "A fairy sent to earth to guard the forests of Chín Tư."
+      },
+      "vi": {
+        "title": "Chầu Lục Cung Nương – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Tiên nữ đày xuống trần, trông coi núi rừng Chín Tư. Tìm hiểu sự tích và dự giá hầu Chầu Lục Cung Nương trực tuyến.",
+        "keywords": "Chầu Lục Cung Nương, sự tích Chầu Lục Cung Nương, giá Chầu Lục Cung Nương, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Tiên nữ đày xuống trần, trông coi núi rừng Chín Tư."
+      }
+    },
+    "chaube": {
+      "slug": "chau-be-bac-le",
+      "en": {
+        "title": "Chầu Bé Bắc Lệ – Little Lady of Bắc Lệ | Đạo Mẫu",
+        "description": "Worshipped with the Mountain Mother at Bắc Lệ, Lạng Sơn. Learn the legend and join the Chầu Bé Bắc Lệ hầu đồng ritual online.",
+        "keywords": "Chầu Bé Bắc Lệ, Little Lady of Bắc Lệ, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Worshipped with the Mountain Mother at Bắc Lệ, Lạng Sơn."
+      },
+      "vi": {
+        "title": "Chầu Bé Bắc Lệ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Thờ cùng Mẫu Thượng Ngàn tại quần thể đền Bắc Lệ, Lạng Sơn. Tìm hiểu sự tích và dự giá hầu Chầu Bé Bắc Lệ trực tuyến.",
+        "keywords": "Chầu Bé Bắc Lệ, sự tích Chầu Bé Bắc Lệ, giá Chầu Bé Bắc Lệ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Thờ cùng Mẫu Thượng Ngàn tại quần thể đền Bắc Lệ, Lạng Sơn."
+      }
+    },
+    "ongbo": {
+      "slug": "quan-hoang-bo",
+      "en": {
+        "title": "Quan Hoàng Bơ – Prince Bơ of the Waters | Đạo Mẫu",
+        "description": "Prince of the river realm, protector of boatmen. Learn the legend and join the Quan Hoàng Bơ hầu đồng ritual online.",
+        "keywords": "Quan Hoàng Bơ, Prince Bơ of the Waters, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Prince of the river realm, protector of boatmen."
+      },
+      "vi": {
+        "title": "Quan Hoàng Bơ – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Ông Hoàng miền sông nước, phù hộ người đi thuyền. Tìm hiểu sự tích và dự giá hầu Quan Hoàng Bơ trực tuyến.",
+        "keywords": "Quan Hoàng Bơ, sự tích Quan Hoàng Bơ, giá Quan Hoàng Bơ, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Ông Hoàng miền sông nước, phù hộ người đi thuyền."
+      }
+    },
+    "ongbay": {
+      "slug": "ong-hoang-bay",
+      "en": {
+        "title": "Ông Hoàng Bảy – The Seventh Prince | Đạo Mẫu",
+        "description": "Famed general of the northern frontier, honoured at Bảo Hà. Learn the legend and join the Ông Hoàng Bảy hầu đồng ritual online.",
+        "keywords": "Ông Hoàng Bảy, The Seventh Prince, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Famed general of the northern frontier, honoured at Bảo Hà."
+      },
+      "vi": {
+        "title": "Ông Hoàng Bảy – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Danh tướng giữ yên biên cương phía Bắc, thờ ở đền Bảo Hà. Tìm hiểu sự tích và dự giá hầu Ông Hoàng Bảy trực tuyến.",
+        "keywords": "Ông Hoàng Bảy, sự tích Ông Hoàng Bảy, giá Ông Hoàng Bảy, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Danh tướng giữ yên biên cương phía Bắc, thờ ở đền Bảo Hà."
+      }
+    },
+    "ongmuoi": {
+      "slug": "ong-hoang-muoi",
+      "en": {
+        "title": "Ông Hoàng Mười – The Tenth Prince | Đạo Mẫu",
+        "description": "Tenth son of the Father King, who helped people farm and fight floods. Learn the legend and join the Ông Hoàng Mười hầu đồng ritual online.",
+        "keywords": "Ông Hoàng Mười, The Tenth Prince, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Tenth son of the Father King, who helped people farm and fight floods."
+      },
+      "vi": {
+        "title": "Ông Hoàng Mười – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Con thứ mười của Vua Cha, giúp dân khai hoang, chống lũ. Tìm hiểu sự tích và dự giá hầu Ông Hoàng Mười trực tuyến.",
+        "keywords": "Ông Hoàng Mười, sự tích Ông Hoàng Mười, giá Ông Hoàng Mười, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Con thứ mười của Vua Cha, giúp dân khai hoang, chống lũ."
+      }
+    },
+    "codoi2": {
+      "slug": "co-doi-thuong-ngan",
+      "en": {
+        "title": "Cô Đôi Thượng Ngàn – Second Mountain Lady | Đạo Mẫu",
+        "description": "Holy Lady of the mountains with a famous ancient song. Learn the legend and join the Cô Đôi Thượng Ngàn hầu đồng ritual online.",
+        "keywords": "Cô Đôi Thượng Ngàn, Second Mountain Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Holy Lady of the mountains with a famous ancient song."
+      },
+      "vi": {
+        "title": "Cô Đôi Thượng Ngàn – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Thánh Cô miền thượng ngàn, có giá văn cổ nổi tiếng. Tìm hiểu sự tích và dự giá hầu Cô Đôi Thượng Ngàn trực tuyến.",
+        "keywords": "Cô Đôi Thượng Ngàn, sự tích Cô Đôi Thượng Ngàn, giá Cô Đôi Thượng Ngàn, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Thánh Cô miền thượng ngàn, có giá văn cổ nổi tiếng."
+      }
+    },
+    "cobo": {
+      "slug": "co-bo-thoai-cung",
+      "en": {
+        "title": "Cô Bơ Thoải Cung – Lady Bơ of the Waters | Đạo Mẫu",
+        "description": "Daughter of the Water King, blessing boats where rivers meet. Learn the legend and join the Cô Bơ Thoải Cung hầu đồng ritual online.",
+        "keywords": "Cô Bơ Thoải Cung, Lady Bơ of the Waters, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Daughter of the Water King, blessing boats where rivers meet."
+      },
+      "vi": {
+        "title": "Cô Bơ Thoải Cung – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Con gái Vua Thủy Tề, phù hộ thuyền bè nơi ngã ba sông. Tìm hiểu sự tích và dự giá hầu Cô Bơ Thoải Cung trực tuyến.",
+        "keywords": "Cô Bơ Thoải Cung, sự tích Cô Bơ Thoải Cung, giá Cô Bơ Thoải Cung, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Con gái Vua Thủy Tề, phù hộ thuyền bè nơi ngã ba sông."
+      }
+    },
+    "cosau": {
+      "slug": "co-sau-son-trang",
+      "en": {
+        "title": "Cô Sáu Sơn Trang – Sixth Mountain Lady | Đạo Mẫu",
+        "description": "A fairy healer who gathered herbs to save lives. Learn the legend and join the Cô Sáu Sơn Trang hầu đồng ritual online.",
+        "keywords": "Cô Sáu Sơn Trang, Sixth Mountain Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "A fairy healer who gathered herbs to save lives."
+      },
+      "vi": {
+        "title": "Cô Sáu Sơn Trang – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Tiên nữ giáng trần, giỏi hái thuốc chữa bệnh cứu người. Tìm hiểu sự tích và dự giá hầu Cô Sáu Sơn Trang trực tuyến.",
+        "keywords": "Cô Sáu Sơn Trang, sự tích Cô Sáu Sơn Trang, giá Cô Sáu Sơn Trang, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Tiên nữ giáng trần, giỏi hái thuốc chữa bệnh cứu người."
+      }
+    },
+    "cochin": {
+      "slug": "co-chin-song-son",
+      "en": {
+        "title": "Cô Chín Sòng Sơn – The Ninth Lady | Đạo Mẫu",
+        "description": "Ninth daughter of the Jade Emperor, healer of the poor. Learn the legend and join the Cô Chín Sòng Sơn hầu đồng ritual online.",
+        "keywords": "Cô Chín Sòng Sơn, The Ninth Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "Ninth daughter of the Jade Emperor, healer of the poor."
+      },
+      "vi": {
+        "title": "Cô Chín Sòng Sơn – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Con gái thứ chín của Ngọc Hoàng, chữa bệnh giúp dân. Tìm hiểu sự tích và dự giá hầu Cô Chín Sòng Sơn trực tuyến.",
+        "keywords": "Cô Chín Sòng Sơn, sự tích Cô Chín Sòng Sơn, giá Cô Chín Sòng Sơn, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Con gái thứ chín của Ngọc Hoàng, chữa bệnh giúp dân."
+      }
+    },
+    "cobe2": {
+      "slug": "co-be-thuong-ngan",
+      "en": {
+        "title": "Cô Bé Thượng Ngàn – Little Mountain Lady | Đạo Mẫu",
+        "description": "The youngest Holy Lady, attendant of the Mountain Mother. Learn the legend and join the Cô Bé Thượng Ngàn hầu đồng ritual online.",
+        "keywords": "Cô Bé Thượng Ngàn, Little Mountain Lady, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "The youngest Holy Lady, attendant of the Mountain Mother."
+      },
+      "vi": {
+        "title": "Cô Bé Thượng Ngàn – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Thánh Cô nhỏ tuổi nhất, theo hầu Mẫu Thượng Ngàn. Tìm hiểu sự tích và dự giá hầu Cô Bé Thượng Ngàn trực tuyến.",
+        "keywords": "Cô Bé Thượng Ngàn, sự tích Cô Bé Thượng Ngàn, giá Cô Bé Thượng Ngàn, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Thánh Cô nhỏ tuổi nhất, theo hầu Mẫu Thượng Ngàn."
+      }
+    },
+    "caube": {
+      "slug": "cau-be-ban-den",
+      "en": {
+        "title": "Cậu Bé Bản Đền – The Little Temple Prince | Đạo Mẫu",
+        "description": "The Holy Boy who guards the temple. Learn the legend and join the Cậu Bé Bản Đền hầu đồng ritual online.",
+        "keywords": "Cậu Bé Bản Đền, The Little Temple Prince, hầu đồng, lên đồng, Đạo Mẫu, Vietnamese Mother Goddess, Vietnamese spirit mediumship",
+        "intro": "The Holy Boy who guards the temple."
+      },
+      "vi": {
+        "title": "Cậu Bé Bản Đền – Sự tích và giá hầu đồng | Đạo Mẫu",
+        "description": "Thánh Cậu coi sóc bản đền, bản điện. Tìm hiểu sự tích và dự giá hầu Cậu Bé Bản Đền trực tuyến.",
+        "keywords": "Cậu Bé Bản Đền, sự tích Cậu Bé Bản Đền, giá Cậu Bé Bản Đền, hầu đồng, lên đồng, tín ngưỡng thờ Mẫu, Đạo Mẫu",
+        "intro": "Thánh Cậu coi sóc bản đền, bản điện."
+      }
+    }
+  }
+}
