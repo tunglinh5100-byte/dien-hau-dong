@@ -2587,13 +2587,14 @@ function xlnMo() { try { return !S.chuyen && /^(nghevan|ngutuu|uongruou|uongnuoc
 function xlnCau(msg) { return /cho con xin loc ngai a/.test(norm(String(msg || '')).replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ')); }
 const XLN_SLOT = i => [DEM.x - 72 + (i % 2 ? 4 : -4), (NH_MODE ? 836 : 770) + i * 34]; /* hàng xin lộc thẳng bên dưới, song song với hàng nhận lộc ở thảm */
 function xlnVe(p) { p.quatXL = false; p.carry = null; if (!S.people.includes(p) || p.ra) return; if (p.seat && p.seat.who === p) goTo(p, [[p.x, Math.max(p.y, 760)], [p.seat.x, p.seat.y]], () => { p.state = 'seat'; p.pose = 'kneel'; }); else raVe(p); }
-function xinLocNgai(p) { if (!p || p.ghost || p.ra) return; if (!xlnMo()) { float(p.x, p.y - 60, 'Đến lúc ngự tửu, phát lộc mới xin lộc được nhé', '#f6dc96'); return; }
+function xinLocNgai(p) { if (!p || p.ra) return; if (p.ghost) { if (!xlnMo()) return; try { p = nguoiTam(p.name); } catch (e) { return; } if (!p) return; } /* 25/11 20:23 anh Linh: người chưa có chỗ trong chiếu vẫn được vào xin lộc */ if (!xlnMo()) { float(p.x, p.y - 60, 'Đến lúc ngự tửu, phát lộc mới xin lộc được nhé', '#f6dc96'); return; }
   if (XLN.cur === p || XLN.q.includes(p)) return; p.xinLoc = null; if (S.queue) S.queue = S.queue.filter(q => q !== p); /* đang chờ nhận lộc ở thảm thì sang hàng xin lộc */
   XLN.q.push(p); const k = XLN.q.length + (XLN.cur ? 1 : 0); float(p.x, p.y - 60, '🙏 ' + tenHien(p.name) + ' xếp hàng xin lộc' + (k > 1 ? ' (thứ ' + k + ')' : ''), '#ffe39a'); }
-function xlnUpd() { const b = buocDangLe() || ''; if (S.chuyen || /^(segia|segia0|xegia|xegia1|xegia2)$/.test(b)) { XLN.q.forEach(xlnVe); XLN.q.length = 0; }
+window.__xlnDbg = () => ({ q: XLN.q.map(p => p.name + ':' + p.state), cur: XLN.cur && XLN.cur.name }); function xlnUpd() { const b = buocDangLe() || ''; if (S.chuyen || /^(segia|segia0|xegia|xegia1|xegia2)$/.test(b)) { XLN.q.forEach(xlnVe); XLN.q.length = 0; }
   XLN.q = XLN.q.filter(p => S.people.includes(p) && !p.ra);
   XLN.q.forEach((p, i) => { if (XL === p || p.state === 'walk' && p.xlDich === i) return; if (!(p.state === 'seat' || p.state === 'xlq' || p.state === 'queue' || p.state === 'walk')) return; const [qx, qy] = XLN_SLOT(i); if (Math.hypot(p.x - qx, p.y - qy) > 1.5) { p.xlDich = i; goTo(p, [[qx, qy]], () => { p.state = 'xlq'; p.pose = 'kneel'; p.xlDich = null; }); } });
-  if (XLN.cur || !XLN.q.length || !xlnMo() || HAU_DANG[0].bl) return; const p = XLN.q[0]; if (XL === p || p.state !== 'xlq') return; XLN.q.shift(); XLN.cur = p;
+  if (XLN.cur && S.t - (XLN.cT || 0) > 45) { const c = XLN.cur; if (HAU_DANG[0].bl && HAU_DANG[0].bl.p === c) HAU_DANG[0].bl = null; XLN.cur = null; try { xlnVe(c); } catch (e) {} } /* 25/11: chốt chặn kẹt quá 45 giây thì cho người sau lên */
+  if (XLN.cur || !XLN.q.length || !xlnMo() || HAU_DANG[0].bl) return; const p = XLN.q.find(v => XL !== v && !v.hoaMa && !v.goingHuong); if (!p) return; XLN.q.splice(XLN.q.indexOf(p), 1); XLN.cur = p; XLN.cT = S.t; /* không bắt buộc đã quỳ vào hàng mới được lên: người đầu hàng lên ngay, tránh kẹt cả hàng */
   const tx = CO.x - 64, ty = CO.y + 50; p.quatXL = true; /* cầm quạt ngay từ lúc lên */
   goTo(p, [[tx, 712], [tx, ty]], () => { p.state = 'xinloc'; p.pose = 'kneel'; p.bubble = { s: 'Con xin lộc ngài ạ 🙏', t: S.t, cmt: true };
     HAU_DANG[0].bl = { ph: 'nhan', p, dich: true, t: 0, xong: () => { XLN.cur = null; xlnVe(p); } }; }); }
