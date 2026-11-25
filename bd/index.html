@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bản đồ đền phủ – thử</title>
+<style>html,body{margin:0;background:#000;height:100%;overflow:hidden}canvas{display:block;margin:0 auto;height:100vh;width:auto;max-width:100vw;object-fit:contain}</style>
+</head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script>
+/* 25/11 anh Linh: thử màn "Bản đồ đền phủ" ghép với 1 giá (Cô Bé Thượng Ngàn). Link riêng, không ảnh hưởng /g.
+   ?im=1 tắt tiếng hẳn (chạy thử); ?sim=0 tắt người giả lập; người xem thật vào qua TikFinity (ws://localhost:21213). */
+const Q = new URLSearchParams(location.search), IM = Q.get('im') === '1', SIM = Q.get('sim') !== '0';
+const cv = document.getElementById('c'), g = cv.getContext('2d'); g.scale(2, 2);
+const W = 540, H = 960, SERIF = '"Noto Serif","Times New Roman",serif', UI = '"Segoe UI","Noto Sans",Arial,sans-serif';
+const ld = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = s; });
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+const SY = 285, K = 540 / 1122, P = (x, y) => [x * K, SY + y * K];
+
+/* ---------- Khu & đường đi (toạ độ trên ảnh sân 1122×1402) ---------- */
+const N = { cong: [560, 1380], duoi: [560, 1110], giua: [560, 900], tren: [560, 620], huongT: [560, 440], chanBac: [560, 268],
+  lcR: [420, 425], lc: [262, 410], lkR: [700, 430], lk: [880, 418], stR: [430, 690], st: [270, 705], ccR: [700, 570], cc: [860, 690],
+  hmR: [440, 1000], hm: [300, 1000], slR: [690, 1110], sl: [800, 1110] };
+const E = [['cong', 'duoi'], ['duoi', 'giua'], ['giua', 'tren'], ['tren', 'huongT'], ['huongT', 'chanBac'], ['huongT', 'lcR'], ['lcR', 'lc'], ['huongT', 'lkR'], ['lkR', 'lk'],
+  ['tren', 'stR'], ['stR', 'st'], ['tren', 'ccR'], ['ccR', 'cc'], ['giua', 'hmR'], ['hmR', 'hm'], ['duoi', 'slR'], ['slR', 'sl']];
+const KE = {}; Object.keys(N).forEach(k => KE[k] = []); E.forEach(([a, b]) => { KE[a].push(b); KE[b].push(a); });
+function duong(a, b) { const tr = { [a]: null }, q = [a]; while (q.length) { const u = q.shift(); if (u === b) break; KE[u].forEach(v => { if (!(v in tr)) { tr[v] = u; q.push(v); } }); } const r = []; for (let u = b; u; u = tr[u]) r.unshift(u); return r; }
+const KHU = {
+  lauco: { ten: 'Lầu Cô', nut: 'lc', bien: [250, 112], huong: [250, 330] },
+  laucau: { ten: 'Lầu Cậu', nut: 'lk', bien: [895, 122], huong: [890, 340] },
+  cochin: { ten: 'Lầu Cô Chín', nut: 'cc', bien: [940, 352], huong: [970, 560] },
+  sontrang: { ten: 'Ban Sơn Trang', nut: 'st', bien: [180, 368], huong: [180, 580] },
+  huong: { ten: 'Thắp Hương', nut: 'huongT', bien: [570, 228], huong: [570, 330] },
+  hoama: { ten: 'Lò Hoá Mã', nut: 'hm', bien: [170, 790], huong: [170, 960] },
+  saple: { ten: 'Sắp Lễ', nut: 'sl', bien: [960, 870], huong: [960, 1050] },
+  hau: { ten: 'Xem hầu', nut: 'chanBac' } };
+const LENH = [[/co chin/, 'cochin'], [/lau co|ban co/, 'lauco'], [/lau cau|ban cau/, 'laucau'], [/son trang/, 'sontrang'], [/thap huong|dang huong|thap nhang|dang nhang|thap nen/, 'huong'],
+  [/hoa ma|hoa vang|dot ma/, 'hoama'], [/sap le|xep le|bay le/, 'saple'], [/xem hau|vao xem|len xem|vao den|vao dien|ngoi xem|len dien/, 'hau']];
+/* chỗ ngồi xem hầu trên bậc thang (2 hàng) */
+const BAC = []; [175, 222].forEach((y, r) => { for (let i = 0; i < 6; i++) BAC.push({ x: 468 + i * 44 + (r ? 22 : 0), y, who: null }); });
+
+/* ---------- Con nhang áo dài (ảnh của /g) ---------- */
+const CN = { meta: null, img: {}, tint: new Map() };
+const MAU = ['#cc3333', '#3366cc', '#6633cc', '#cc9933', '#33cc66', '#cc3399', '#33cccc', '#e9d8b4', '#952323', '#239549', '#d671b4', '#cc6633'];
+const KHAN = ['#c62a22', '#2f7a4f', '#2f5f9e', '#8a3f8a', '#a8502a', '#c9962a'];
+function lop(x, a, hex) { const c = document.createElement('canvas'); c.width = a.naturalWidth; c.height = a.naturalHeight; const q = c.getContext('2d'); q.drawImage(a, 0, 0); q.globalCompositeOperation = 'multiply'; q.fillStyle = hex; q.fillRect(0, 0, c.width, c.height); q.globalCompositeOperation = 'destination-in'; q.drawImage(a, 0, 0); x.drawImage(c, 0, 0); }
+function anh(sx, ao, khan) { const k = sx + ao + khan; let c = CN.tint.get(k); if (c) return c; const b = CN.img[sx]; c = document.createElement('canvas'); c.width = b.naturalWidth; c.height = b.naturalHeight; const q = c.getContext('2d'); q.drawImage(b, 0, 0); lop(q, CN.img[sx + 'A'], ao); lop(q, CN.img[sx + 'K'], khan); CN.tint.set(k, c); return c; }
+
+/* ---------- Người ---------- */
+const NG = []; const DS = ['💜:ლiղᏂ Ꮒả𝚒', 'wanbi_tuấn_quỳnh', 'TTT.', 'móm thủ 🎣', 'Đậu bao thích học võ VN', 'Diệu Linh ☺️', 'mèo méo meo. 🩵', 'Hợi Đinh', '❗️hiếu❗️', 'Ptd🌻🕊️', 'Ông Nhợn', 'Hoàng Đăng Hưng', 'Phong Phạm天风', 'BảoNgọc', 'Long Nguyen Long', 'Hương Giang'];
+let hashN = s => { let h = 7; for (const c of String(s)) h = (h * 31 + c.codePointAt(0)) >>> 0; return h; };
+function tao(ten, xuatHien) { let p = NG.find(v => v.ten === ten); if (p) return p; const h = hashN(ten), [x, y] = N.cong;
+  p = { ten, sx: h % 2 ? 'nu' : 'nam', ao: MAU[h % MAU.length], khan: KHAN[(h >> 3) % KHAN.length], x, y, wp: [], nut: 'cong', khu: null, ghe: null, dir: 4, bong: null, t0: Math.random() * 9 };
+  if (xuatHien) { const ks = Object.keys(N), k = ks[h % ks.length]; [p.x, p.y] = N[k]; p.nut = k; } NG.push(p); return p; }
+function rai(nut) { const [x, y] = N[nut]; return [x + (Math.random() - .5) * 70, y + (Math.random() - .5) * 26]; }
+function di(p, khu) { if (p.ghe) { p.ghe.who = null; p.ghe = null; }
+  const dich = KHU[khu].nut, ds = duong(p.nut, dich); p.wp = [];
+  if (p.ngoi) { p.wp.push([p.x, 268]); p.ngoi = false; }
+  ds.slice(1).forEach(k => p.wp.push(N[k].slice()));
+  if (khu === 'hau') { const z = BAC.find(b => !b.who) || BAC[Math.floor(Math.random() * BAC.length)]; z.who = p; p.ghe = z; p.wp.push([z.x, z.y + 30], [z.x, z.y]); }
+  else p.wp.push(rai(dich)); p.nut = dich; p.khu = khu; }
+function noi(p, s) { p.bong = { s, t: performance.now() }; }
+function lenh(ten, msg) { const p = tao(ten, false), n = norm(msg); noi(p, String(msg).slice(0, 40)); for (const [re, k] of LENH) if (re.test(n)) { di(p, k); return; } }
+
+/* ---------- Cô đồng: giá Cô Bé (clip tách nền + văn) ---------- */
+const BUOC = [['thinh', 'Thỉnh Cô', 0, 24.8, 'cc3/cc-thinh.mp4'], ['thayao', 'Thay khăn áo', 5.4, 132, 'cbe/cbe-thayao.mp4'], ['vaihuong', 'Bái hương', 132, 141, 'cbe/cbe-vaihuong.mp4'], ['baisai', 'Bài sai', 141, 166, 'cbe/cbe-baisai.mp4'],
+  ['khaiquang', 'Khai quang', 166, 198, 'cbe/cbe-khaiquang.mp4'], ['muamoi', 'Múa mồi', 198, 310, 'cbe/cbe-muamoi.mp4'], ['tungtien', 'Phát lộc', 310, 420, 'cbe/cbe-tungtien.mp4'], ['uongnuoc', 'Ngự trà', 420, 505, 'cbe/cbe-uongnuoc.mp4'], ['segia', 'Xe giá', 505, 513.8, 'cbe/cbe-segia.mp4']];
+const VID = {}; BUOC.forEach(b => { const v = document.createElement('video'); v.src = '../' + b[4]; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; VID[b[0]] = v; });
+const AU = { thinh: new Audio('../cbe/cbe_01_van_thinh.mp3'), noi: new Audio('../cbe/cbe_noi_02-10.mp3') }; Object.values(AU).forEach(a => { a.preload = 'auto'; a.muted = IM || true; });
+let BI = 0, BT0 = performance.now(), AM = false;
+function buocHt() { const t = (performance.now() - BT0) / 1000; if (BI === 0) return t >= 24.8 ? (BI = 1, BT0 = performance.now(), batAm(), BUOC[1]) : BUOC[0];
+  const tn = AU.noi.currentTime && !AU.noi.paused ? AU.noi.currentTime : 5.4 + (performance.now() - BT0) / 1000; for (let i = 1; i < BUOC.length; i++) if (tn < BUOC[i][3]) { BI = i; return BUOC[i]; }
+  BI = 0; BT0 = performance.now(); AU.noi.pause(); AU.noi.currentTime = 0; batAm(); return BUOC[0]; }
+function batAm() { if (IM || !AM) return; try { const a = BI === 0 ? AU.thinh : AU.noi; a.muted = false; if (BI === 0) a.currentTime = 0; else if (a.paused) a.currentTime = 5.4; a.play().catch(() => {}); } catch (e) {} }
+let vDang = null; const VC = document.createElement('canvas'); VC.width = 180; VC.height = 320; const vx = VC.getContext('2d', { willReadFrequently: true });
+function veDong(x, yDay, hh) { const b = buocHt(), v = VID[b[0]]; if (vDang !== v) { if (vDang) vDang.pause(); vDang = v; v.currentTime = 0; v.play().catch(() => {}); }
+  if (v.readyState < 2) return; vx.clearRect(0, 0, 180, 320); vx.drawImage(v, 0, 640, 360, 640, 0, 0, 180, 320); const m = vx.getImageData(0, 0, 180, 320); vx.drawImage(v, 0, 0, 360, 640, 0, 0, 180, 320); const c = vx.getImageData(0, 0, 180, 320);
+  for (let i = 0; i < c.data.length; i += 4) c.data[i + 3] = m.data[i]; vx.putImageData(c, 0, 0); const ww = hh * 180 / 320; g.drawImage(VC, x - ww / 2, yDay - hh, ww, hh); }
+
+/* ---------- Vẽ ---------- */
+let DEN, SAN, NEN;
+function veNen() { const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const q = c.getContext('2d'); q.scale(2, 2); q.fillStyle = '#2a1208'; q.fillRect(0, 0, W, H); q.drawImage(SAN, 0, SY, 540, 1402 * K);
+  const ph = 540 * DEN.naturalHeight / DEN.naturalWidth, o = document.createElement('canvas'); o.width = 1080; o.height = Math.round(ph * 2); const r = o.getContext('2d'); r.drawImage(DEN, 0, 0, o.width, o.height); r.globalCompositeOperation = 'destination-out'; const gr = r.createLinearGradient(0, o.height * .86, 0, o.height); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,1)'); r.fillStyle = gr; r.fillRect(0, o.height * .86, o.width, o.height * .14); q.drawImage(o, 0, 0, 540, ph); NEN = { c, ph }; }
+function bien(x, y, t, k) { g.font = `800 10px ${SERIF}`; const w = g.measureText(t).width + 16, h = 17; g.save(); g.translate(x, y); g.fillStyle = '#7a1410'; g.beginPath(); g.roundRect(-w / 2 - 2, -2, w + 4, h + 4, 4); g.fill(); const lg = g.createLinearGradient(0, 0, 0, h); lg.addColorStop(0, '#ffe9a8'); lg.addColorStop(1, '#e7b547'); g.fillStyle = lg; g.beginPath(); g.roundRect(-w / 2, 0, w, h, 3); g.fill(); g.fillStyle = '#5a0e0a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, h / 2 + .5);
+  if (k) { g.font = `700 8px ${UI}`; const s = '👥 ' + k, ww = g.measureText(s).width + 8, duoi = x + w / 2 + ww + 6 > 538, bx = duoi ? -ww / 2 : w / 2 + 3, by = duoi ? h + 7 : 2; g.fillStyle = 'rgba(30,10,6,.8)'; g.beginPath(); g.roundRect(bx, by, ww, 13, 6.5); g.fill(); g.fillStyle = '#fff1d6'; g.fillText(s, bx + ww / 2, by + 7); } g.restore(); }
+const DIRK = ['front', 'fr', 'right', 'br', 'back', 'bl', 'left', 'fr'];
+function veNguoi(p, t) { const M = CN.meta && CN.meta[p.sx]; if (!M) return; const O = CN.meta.order, [x, y] = P(p.x, p.y), sc = .27 + .1 * (p.y - 170) / 1200;
+  let key, mir = false, bob = 0; const dang = p.wp.length > 0;
+  if (p.ngoi) key = 'sit'; else { key = DIRK[p.dir]; if (p.dir === 7) mir = true; if (dang) bob = Math.abs(Math.sin(t * 9 + p.t0)) * 2; }
+  const r = M.rects[key], idx = O.indexOf(key), src = anh(p.sx, p.ao, p.khan), dw = r[2] * sc, dh = r[3] * sc;
+  g.save(); g.translate(x, y - bob); if (mir) g.scale(-1, 1); if (!dang && !p.ngoi && p.khu && p.khu !== 'hau') { const v = Math.max(0, Math.sin(t * 1.6 + p.t0)); g.scale(1, 1 - .06 * v); } /* đứng vái */
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(0, 0, dw * .4, dw * .12, 0, 0, 7); g.fill();
+  g.drawImage(src, idx * M.cw + r[0], r[1], r[2], r[3], -dw / 2, -dh, dw, dh); g.restore();
+  g.font = `700 7.5px ${UI}`; const tt = '⭐ ' + p.ten, w = g.measureText(tt).width + 8, ty = y - dh - 12; g.fillStyle = 'rgba(16,70,40,.85)'; g.beginPath(); g.roundRect(x - w / 2, ty, w, 11, 5.5); g.fill(); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tt, x, ty + 6);
+  if (p.bong && performance.now() - p.bong.t < 4500) { g.font = `700 8.5px ${UI}`; const bw = g.measureText(p.bong.s).width + 12; g.fillStyle = '#fffbe8'; g.beginPath(); g.roundRect(x - bw / 2, ty - 17, bw, 15, 7.5); g.fill(); g.fillStyle = '#5a0e0a'; g.fillText(p.bong.s, x, ty - 9); } }
+function capNhat(dt) { NG.forEach(p => { if (!p.wp.length) return; const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = 85 * dt;
+  if (d > .5) p.dir = ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8;
+  if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); if (!p.wp.length) { if (p.khu === 'hau') { p.ngoi = true; p.dir = 4; } else if (p.khu) { const kh = KHU[p.khu]; const hx = kh.huong[0] - p.x, hy = kh.huong[1] - p.y; p.dir = ((Math.round(Math.atan2(hx, hy) / (Math.PI / 4)) % 8) + 8) % 8; } } } else { p.x += dx / d * sp; p.y += dy / d * sp; } }); }
+let last = performance.now();
+function khung(now) { const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(NEN.c, 0, 0, W, H);
+  veDong(270, NEN.ph * .885 + 13, 140);
+  const dem = {}; NG.forEach(p => { if (!p.wp.length && p.khu) dem[p.khu] = (dem[p.khu] || 0) + 1; });
+  NG.slice().sort((a, b) => a.y - b.y).forEach(p => veNguoi(p, t));
+  Object.entries(KHU).forEach(([k, v]) => { if (!v.bien) return; const [x, y] = P(...v.bien); bien(x, y, v.ten, k !== 'huong' && k !== 'hoama' && k !== 'saple' ? dem[k] || 0 : 0); });
+  const b = BUOC[BI]; g.fillStyle = 'rgba(90,14,10,.85)'; g.beginPath(); g.roundRect(12, 6, 516, 40, 12); g.fill(); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.stroke();
+  g.font = `800 14px ${SERIF}`; g.fillStyle = '#ffe39a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🏮 Giá Cô Bé Thượng Ngàn · ' + b[1], 270, 19);
+  g.font = `600 9px ${UI}`; g.fillStyle = '#fff1d6'; g.fillText('Gõ: lầu cô · lầu cậu · cô chín · sơn trang · thắp hương · hoá mã · sắp lễ · xem hầu', 270, 36);
+  if (!AM && !IM) { g.font = `700 11px ${UI}`; const s = '🔊 Chạm để bật tiếng', w = g.measureText(s).width + 20; g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.roundRect(270 - w / 2, 56, w, 22, 11); g.fill(); g.fillStyle = '#fff'; g.fillText(s, 270, 67.5); }
+  requestAnimationFrame(khung); }
+cv.addEventListener('click', () => { AM = true; batAm(); Object.values(VID).forEach(v => v.play().catch(() => {})); });
+if (Q.get('am') === '1') AM = true;
+
+/* ---------- Người xem thật qua TikFinity ---------- */
+(function ws() { try { const s = new WebSocket('ws://localhost:21213/'); s.onmessage = e => { try { const m = JSON.parse(e.data), d = m.data || {}, ev = m.event || ''; const ten = d.nickname || d.uniqueId; if (!ten) return;
+  if (ev === 'chat') lenh(ten, d.comment || ''); else if (/member|share|follow|like|gift/.test(ev)) { const p = tao(ten, false); if (!p.khu) di(p, 'hau'); } } catch (_) {} }; s.onclose = () => setTimeout(ws, 4000); } catch (e) {} })();
+
+/* ---------- Khởi động ---------- */
+(async () => { const [d, s, meta] = await Promise.all([ld('den.webp'), ld('san.webp'), fetch('../cnm/meta.json?v=9').then(r => r.json()).catch(() => null)]); DEN = d; SAN = s; CN.meta = meta;
+  const ks = ['nu', 'nam', 'nuA', 'namA', 'nuK', 'namK']; const im = await Promise.all(ks.map(k => ld('../cnm/' + k + '.webp?v=9'))); ks.forEach((k, i) => CN.img[k] = im[i]);
+  veNen(); if (SIM) { const KS = Object.keys(KHU); DS.forEach((ten, i) => { const p = tao(ten, false); p.x = N.cong[0] + (Math.random() - .5) * 60; p.y = N.cong[1] - i * 8; di(p, KS[i % KS.length]); });
+    const CAU = { lauco: 'đi lầu cô', laucau: 'lên lầu cậu', cochin: 'lễ cô chín', sontrang: 'đi sơn trang', huong: 'thắp hương', hoama: 'hoá mã', saple: 'sắp lễ', hau: 'vào xem hầu' };
+    setInterval(() => { const p = NG[Math.floor(Math.random() * NG.length)], k = KS[Math.floor(Math.random() * KS.length)]; if (p.wp.length) return; lenh(p.ten, CAU[k]); }, 2600); }
+  try { Object.values(VID)[0].play().catch(() => {}); } catch (e) {} requestAnimationFrame(khung); })();
+</script></body></html>
