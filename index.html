@@ -153,6 +153,10 @@ function text(s, x, y, size, c, o = {}) { ctx.font = `${o.w || 700} ${size}px ${
 function shade(hex, k) { const n = parseInt(hex.slice(1), 16); const f = v => Math.round(clamp(v * (1 + k), 0, 255)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
 function gold(x0, x1) { const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, '#9a6c22'); g.addColorStop(.5, '#f4d47c'); g.addColorStop(1, '#9a6c22'); return g; }
 const GIOI = {}; /* giới tính người xem đã chọn (comment nam/nữ), giữ khi ra vào lại */
+/* 26/11 anh Linh: vào từ màn chờ /bd (link /g/?bd=1): giữ trang phục người xem đã thay ở /bd, vào trong vẫn được thay tiếp (anh Linh 14:56); ai lễ đủ 7 nơi ở /bd được đệm; vào lại live sau hơn 600 giây thì mất trang phục đã thay. /g không có bd=1 thì như cũ */
+const BD = { on: /[?&]bd=1/.test(location.search), d: {}, bao: {} };
+try { if (BD.on) { const o = JSON.parse(localStorage.getItem('hd_bd') || 'null'); if (o && o.p && Date.now() - (o.t || 0) < 6 * 3600e3) BD.d = o.p; } } catch (e) {}
+function bdThay(nm, t) { if (!BD.on) return; const r = BD.d[nm] || (BD.d[nm] = {}), now = Date.now(); if (/member/.test(t) && r.last && now - r.last > 600000 && (r.ao || r.nv)) { if (NV[nm]) { const { nick, mauTen, nenTen } = NV[nm]; NV[nm] = JSON.parse(JSON.stringify({ nick, mauTen, nenTen })); } delete AO_TAM[nm]; delete r.ao; delete r.nv; /* giữ tên đã đổi, chỉ mất trang phục */ const p = S.people.find(q => q.name === nm); if (p) p.ao = null; } r.last = now; }
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
 
 // ---------- State ----------
@@ -189,7 +193,7 @@ function aoLuu(name) { return AO_TAM[name] || null; } /* 22/11 14:09 anh Linh: m
 function doiAo(name, p, m) { AO_TAM[name] = m[1]; if (p && !p.ghost) { p.ao = m[1]; p.aoT = S.t; for (let i = 0; i < 10; i++) S.particles.push({ x: p.x + rnd(-14, 14), y: p.y - rnd(20, 60), vx: rnd(-22, 22), vy: rnd(-40, -8), life: rnd(.8, 1.4), t: 0, kind: 'spark' }); float(p.x, p.y - 70, (String(name).startsWith('\u200b') ? 'Con nhang' : name) + ' mặc áo ' + m[2], '#f6dc96'); } }
 const QUA_MOC = [[2, 'thắt lưng'], [3, 'đệm ngồi'], [5, 'quạt'], [8, 'thêm một quạt']]; /* 23/11 06:21 anh Linh: 2 lần thắt lưng, 3 lần đệm ngồi đẹp, 5 lần quạt, 8 lần thêm 1 quạt */
 const PK_MOC = [[2, 'lung', 'thắt lưng'], [3, 'demGam', 'đệm ngồi'], [5, 'quat', 'quạt'], [8, 'quat2', 'thêm một quạt']];
-function pkCua(name, v) { return PK_MOC.filter(m => (v || 0) >= m[0]).map(m => [m[1], m[2]]); }
+function pkCua(name, v) { const r = PK_MOC.filter(m => (v || 0) >= m[0]).map(m => [m[1], m[2]]); if (BD.on && BD.d[name] && BD.d[name].dem && !r.some(x => x[0] === 'demGam')) r.push(['demGam', 'đệm ngồi']); /* 26/11: đệm tặng ở /bd */ return r; }
 function mocTiep(v) { return QUA_MOC.find(m => m[0] > v) || null; }
 const CHAO = []; /* thẻ chào đích danh người quen quay lại */
 function chao(name, dong2, mau) { const q = S.people.find(v => v.name === name && !v.ra); float(q ? q.x : 270, q ? q.y - 70 : 600, name + ': ' + dong2, mau || '#f6dc96'); } /* 22/11: bỏ thẻ chào, chỉ hiện chữ nổi */
@@ -287,6 +291,13 @@ const laVip = p => (p.share || 0) > 0 || (p.bl || 0) > 3 || (p.tim || 0) > 100 |
 const duocGoi = p => (p.share || 0) > 0 || (p.bl || 0) > 0 || (p.tim || 0) >= 50 || (p.qua || 0) > 0; // 18/11 10:46 anh Linh: share, bình luận, 50 tim thì được gọi lên thảm giữa nhận lộc
 function diemTT(p) { return (p.bl || 0) + 3 * Math.max(0, (p.share || 0) - 1) /* lần share để vào chiếu không tính */ + (p.tim || 0) / 30 + 5 * (p.qua || 0); }
 const NV = {}; window.__NV = NV; /* tuỳ chỉnh nhân vật trong phiên: màu quần, màu khăn, tên hiển thị, màu tên */
+function bdApDung() { Object.keys(BD.d).forEach(n => { const r = BD.d[n]; if (r.ao) AO_TAM[n] = r.ao; if (r.nv) NV[n] = JSON.parse(JSON.stringify(r.nv)); if (r.sx) GIOI[n] = r.sx; }); } if (BD.on) bdApDung(); /* 26/11: trang phục mang từ /bd sang */
+/* 26/11 14:56 anh Linh: link /sd — /g chạy ngầm sau sân đền (tải sẵn video), anh bấm chuyển cảnh thì vào luôn, người xem đi từ ngoài vào chiếu */
+window.__bdVao = () => { try { const o = JSON.parse(localStorage.getItem('hd_bd') || 'null'); if (o && o.p) BD.d = o.p; } catch (e) {} bdApDung();
+  const sk = document.getElementById('ctSkip'); if (!BATDAU && sk) sk.click();
+  const ds = Object.keys(BD.d).filter(n => Date.now() - (BD.d[n].last || 0) < 30 * 60000).sort((a, b) => (BD.d[b].last || 0) - (BD.d[a].last || 0)).slice(0, 40);
+  ds.forEach((n, i) => setTimeout(() => { try { person(n, 'vao'); } catch (e) {} }, 600 + i * 350)); return ds.length; };
+window.__bd = { get on() { return BD.on; }, ao: n => AO_TAM[n], gioi: n => GIOI[n], pk: n => pkCua(n, 0).map(x => x[0]), thay: (n, t) => bdThay(n, t) }; /* để kiểm tra */
 function tenHien(n) { return (NV[n] && NV[n].nick) || n; }
 function nhieuMau(str) { const w = String(str || '').replace(/[,+&\/-]/g, ' ').split(/\s+/).filter(x => x && !/^(và|với|mix|phối|pha|lẫn|cả)$/.test(x)); if (!w.length) return null; const out = []; let i = 0; while (i < w.length) { let ok = null; for (let k = Math.min(4, w.length - i); k >= 1; k--) { const c = mauTu(w.slice(i, i + k).join(' ')); if (c) { ok = [c, k]; break; } } if (!ok) return null; if (!out.some(x => x[1] === ok[0][1])) out.push(ok[0]); i += ok[1]; } return out.slice(0, 5); }
 function mauTu(t) { return mauX(t, true); } /* 23/11: nhận cả không dấu, emoji, sắc độ lạ */
@@ -4069,6 +4080,7 @@ setInterval(capNhatGiaInfo, 500);
 let last = performance.now();
 /* 14/11 anh Linh: tải hết video trước, hiện tiến độ, xong mới có nút "Bắt đầu canh đàn" (máy live). ?cho=0 để vào luôn */
 let BATDAU = /[?&]cho=0/.test(location.search);
+if (/[?&]bd=1/.test(location.search) && BATDAU) setTimeout(() => { try { const bS = document.getElementById('bSound'); if (bS && !bS.classList.contains('on')) bS.click(); } catch (e) {} }, 1500);
 function napTatCa() { if (napTatCa.da) return; napTatCa.da = true; try { const ids = GIA_DS.list.map(g => g.id), i0 = ids.indexOf(GIA().id); for (let k = 0; k < ids.length; k++) napAmGia(ids[(i0 + k) % ids.length]); } catch (e) {} } // tải sẵn nhạc văn mọi giá, giá đang ngự trước
 if (BATDAU) setTimeout(napTatCa, 1500);
 { const _play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { if (this.tagName !== 'VIDEO' && (!BATDAU || (typeof S !== 'undefined' && S.ket && typeof KET_AU !== 'undefined' && this !== KET_AU))) { /* màn chờ, hoặc đang màn kết: chỉ cho nhạc kết */ try { this.pause(); } catch (e) {} const pr = Promise.reject(new DOMException('cho bat dau', 'NotAllowedError')); pr.catch(() => {}); return pr; } return _play.apply(this, arguments); }; } // 15/11: báo lỗi (không giả vờ đã phát) để văn thỉnh tự phát lại sau khi bấm bắt đầu // 14/11: đang ở màn chờ thì không phát bất kỳ tiếng nào
@@ -4312,7 +4324,7 @@ buildCfgPanel(); napNhacGia();
   const KDEM = {}; const seen = new Map(); // ai đã tương tác (để cô gọi ngẫu nhiên)
   function handle(type, d) {
     const name = nameOf(d); if (!name) return;
-    const nm = String(name).slice(0, 24); seen.set(nm, H.S.t); try { if (window.__that) window.__that.add(nm); } catch (e) {}
+    const nm = String(name).slice(0, 24); if (BD.on && !BATDAU) return; /* 26/11: đang chờ ở sân đền /sd: sân đền xử lý, trong điện chưa nhận */ seen.set(nm, H.S.t); try { bdThay(nm, String(type || '').toLowerCase()); } catch (e) {} try { if (window.__that) window.__that.add(nm); } catch (e) {}
     const t = String(type || '').toLowerCase();
     try { if (window.__hangNhang) window.__hangNhang(nm, (t === 'share' || (t.includes('social') && /share/.test(JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase())) || (t.includes('social') && +d.action === 3)) ? 'share' : 'tt'); } catch (e) {} // 17/11 11:08 anh Linh: chỉ ai chia sẻ live mới vào ngồi hàng con nhang; đã ngồi thì tương tác khác -> vỗ tay
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
