@@ -227,7 +227,7 @@ function veBang(t) { const X = 10, Y = 6, Wd = 520, Hd = 132; const lg = g.creat
   chu('Lễ + tên bảng (vd: lễ lầu cô 9)  ·  sắp lễ  ·  thắp hương  ·  Đổi đồ: áo đỏ, khăn xanh, tóc dài, nữ…', 270, Y + 106, 8.6, '#f6dc96', { w: 600 });
   g.save(); g.beginPath(); g.rect(X + 8, Y + 115, Wd - 16, 14); g.clip(); g.font = `700 9px ${UI}`; const lw = g.measureText(LUU_Y).width, off = (t * 38) % lw; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#ffd0b0'; for (let x = X + 8 - off; x < X + Wd; x += lw) g.fillText(LUU_Y, x, Y + 122.5); g.restore();
   }
-cv.addEventListener('click', () => { batAm(); if (cur) cur.play().catch(() => {}); });
+['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { batAm(); if (cur) cur.play().catch(() => {}); }, { passive: true })); /* chạm bất kỳ đâu (cả vùng đen 2 bên) là có tiếng */
 setInterval(() => { if (CHUYEN) return; if (soNguoi() >= MUC_NGUOI && !DU30) { DU30 = true; if (conLai() > 30) { T0 = Date.now() - (CHO_GIAY - 30) * 1000; luuT0(); } } /* đủ 30 người: còn 30 giây là bắt đầu */ if (conLai() <= 0) chuyen(); }, 500);
 
 /* ---------- Người xem thật qua TikFinity ---------- */
