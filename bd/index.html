@@ -147,10 +147,14 @@ let CO_HINH = 0;
 /* 26/11 Quỳnh: văn thỉnh cắt 4 phần cho nhẹ, phát lần lượt 1→2→3→4 rồi lặp lại */
 const NHAC = new Audio(); NHAC.preload = 'auto'; let NI = 0, AM = !IM; /* 26/11 15:11 anh Linh: bỏ 'chạm để bật tiếng', tải xong là tự chạy nhạc */
 const nhacSrc = i => 'nhac-thinh-' + (i + 1) + '.mp3?v=1'; NHAC.src = nhacSrc(0);
-NHAC.addEventListener('ended', () => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM && !CHUYEN) NHAC.play().catch(() => {}); });
-NHAC.addEventListener('error', () => { setTimeout(() => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM) NHAC.play().catch(() => {}); }, 3000); });
-function batAm() { if (IM || CHUYEN) return; AM = true; if (NHAC.paused) NHAC.play().catch(() => {}); }
-setInterval(() => { if (AM && !IM && !CHUYEN && NHAC.paused && NHAC.readyState >= 2) NHAC.play().catch(() => {}); }, 2000); /* trình duyệt chặn tự phát thì cứ thử lại */
+NHAC.addEventListener('ended', () => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM && !CHUYEN && !(Date.now() - MOI_HON < 8000)) NHAC.play().catch(() => {}); });
+NHAC.addEventListener('error', () => { setTimeout(() => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM && !CHUYEN && !(Date.now() - MOI_HON < 8000)) NHAC.play().catch(() => {}); }, 3000); });
+/* 26/11 16:46 anh Linh: LIVE Studio nghe 2 bản văn thỉnh lệch nhau 20 giây = 2 trang sân đền cùng chạy (2 nguồn, hoặc thêm tab). Trang mở sau cùng phát nhạc, trang cũ tự câm (trang mới tắt thì trang cũ phát lại sau 8 giây) */
+const ID_TRANG = Math.random().toString(36).slice(2), T_MO = Date.now(); let MOI_HON = 0;
+try { const bc = new BroadcastChannel('bd-nhac'); bc.onmessage = e => { const d = e.data || {}; if (d.id !== ID_TRANG && d.t > T_MO && !d.ra) { MOI_HON = Date.now(); if (!NHAC.paused) NHAC.pause(); } }; const bao = () => { if (!CHUYEN) bc.postMessage({ id: ID_TRANG, t: T_MO }); }; setTimeout(() => { bao(); setInterval(bao, 3000); }, 0); addEventListener('pagehide', () => { try { bc.postMessage({ id: ID_TRANG, t: T_MO, ra: 1 }); } catch (e) {} }); } catch (e) {}
+const nhuong = () => Date.now() - MOI_HON < 8000;
+function batAm() { if (IM || CHUYEN || nhuong()) return; AM = true; if (NHAC.paused) NHAC.play().catch(() => {}); }
+setInterval(() => { if (nhuong()) { if (!NHAC.paused) NHAC.pause(); return; } if (AM && !IM && !CHUYEN && NHAC.paused && NHAC.readyState >= 2) NHAC.play().catch(() => {}); }, 2000); /* trình duyệt chặn tự phát thì cứ thử lại */
 
 /* ---------- Đếm người & đếm ngược ---------- */
 let VC = 0, T0 = Date.now(), CHUYEN = 0, DU30 = false;
