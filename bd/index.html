@@ -84,7 +84,7 @@ function tao(ten, sim) { let p = NG.find(v => v.ten === ten); if (p) return p; c
   p = { ten, sim: !!sim, sx: (r && r.sx) || (h % 2 ? 'nu' : 'nam'), x: x + (Math.random() - .5) * 60, y, wp: [], nut: 'cong', act: null, ghe: null, ngoi: false, cho: 1 + Math.random() * 3, d: 4, wd: 0, bong: null, t0: Math.random() * 9 };
   NG.push(p); if (NG.filter(v => !v.sim).length > 80) { const cu = NG.find(v => !v.sim && v !== p && !v.act); if (cu) bo(cu); } return p; }
 function bo(p) { roiHang(p); if (p.ghe) p.ghe.who = null; NG.splice(NG.indexOf(p), 1); }
-function rai(nut, k) { const [x, y] = N[nut]; return [x + (Math.random() - .5) * (k || 70), y + (Math.random() - .5) * (k ? k * .4 : 26)]; }
+function rai(nut, k) { const [x, y] = N[nut]; let best = null, bd = -1; for (let n = 0; n < 6; n++) { const c = [x + (Math.random() - .5) * (k || 90), y + (Math.random() - .5) * (k ? k * .5 : 40)]; let d = 1e9; NG.forEach(q => { const tx = q.wp.length ? q.wp[q.wp.length - 1] : [q.x, q.y]; d = Math.min(d, Math.hypot(tx[0] - c[0], (tx[1] - c[1]) * 1.4)); }); if (d > bd) { bd = d; best = c; } if (d > 40) break; } return best; } /* chọn chỗ đứng xa người khác */
 function denNut(p, dich, cuoi) { if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.wp = []; if (p.ngoi) { p.wp.push([p.x, 300]); p.ngoi = false; }
   const gan = p.ngoi ? 'chanBac' : Object.keys(N).reduce((a, k) => Math.hypot(N[k][0] - p.x, N[k][1] - p.y) < Math.hypot(N[a][0] - p.x, N[a][1] - p.y) ? k : a, 'cong'); /* đi từ chỗ đang đứng, không vòng lại điểm cũ */
   duong(gan, dich).forEach((k, i) => { if (i || Math.hypot(N[k][0] - p.x, N[k][1] - p.y) > 40) p.wp.push(rai(k, 30)); }); p.wp.push(cuoi || rai(dich)); p.nut = dich; }
@@ -228,8 +228,12 @@ function veOngTu(t) { const M = CN.meta && CN.meta.nam; if (!M || !CN.img.nam) r
   hop(bx, by, bw, bh, 8, '#fffbe8'); g.beginPath(); g.moveTo(x - 5, by + bh); g.lineTo(x, by + bh + 7); g.lineTo(x + 5, by + bh); g.fill(); g.strokeStyle = '#c8302a'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(bx, by, bw, bh, 8); g.stroke();
   dong.forEach((l, k) => chu(l, bx + bw / 2, by + 10.5 + k * 13, 9.5, '#5a0e0a', { w: 700 })); g.globalAlpha = 1; }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
-function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); NG.forEach(p => {
-  if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 95 : 60) * dt; /* đi dạo chậm, đi lễ nhanh hơn */
+function tachNhau(dt) { /* 26/11 17:45 anh Linh: không ai đứng chồng lên nhau — người đứng/đi dạo bị đẩy ra cách nhau; người đang lễ, đang ngồi, đang xếp hàng thì giữ nguyên chỗ */
+  const R = 30, co = p => !p.ngoi && !p.ghe && !p.vao && !p.tu && !(p.act && (p.act.t != null || !p.wp.length)); /* người đang đi tới chỗ lễ cũng giãn ra; đã tới chỗ xếp hàng thì đứng yên */ for (let i = 0; i < NG.length; i++) for (let j = i + 1; j < NG.length; j++) { const a = NG[i], b = NG[j], dx = b.x - a.x, dy = (b.y - a.y) * 1.4, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue;
+    const ma = co(a), mb = co(b); if (!ma && !mb) continue; const day = (R - d) * Math.min(1, dt * 6), ux = dx / d, uy = dy / d / 1.4, ka = ma && mb ? .5 : ma ? 1 : 0, kb = ma && mb ? .5 : mb ? 1 : 0;
+    a.x -= ux * day * ka; a.y -= uy * day * ka; b.x += ux * day * kb; b.y += uy * day * kb; } }
+function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); tachNhau(dt); NG.forEach(p => {
+  if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 76 : 48) * dt; /* đi dạo chậm, đi lễ nhanh hơn; 26/11 17:45 anh Linh: chậm đi 20% */
     if (d > .5) p.dir = huongDir(dx, dy);
     if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); p.wd += d;
       if (!p.wp.length && p.vao) { p.het = 1; return; }
