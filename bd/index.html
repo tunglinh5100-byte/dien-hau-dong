@@ -254,11 +254,18 @@ function veOngTu(t) { const M = CN.meta && CN.meta.nam; if (!M || !CN.img.nam) r
   hop(bx, by, bw, bh, 8, '#fffbe8'); g.beginPath(); g.moveTo(bx, by + bh / 2 - 5); g.lineTo(bx - 7, by + bh / 2 + 2); g.lineTo(bx, by + bh / 2 + 5); g.fill(); g.strokeStyle = '#c8302a'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(bx, by, bw, bh, 8); g.stroke();
   dong.forEach((l, k) => chu(l, bx + bw / 2, by + 10.5 + k * 13, 9.5, '#5a0e0a', { w: 700 })); g.globalAlpha = 1; }
 /* 26/11 18:14 anh Linh: bảng tên những người đủ 7 sao — góc trên trái, trên cột đá, thẳng từ Lầu Cô lên */
-function veBangSao(t) { const ds = Object.entries(REC).filter(([n, r]) => r && r.tham && BUOC.every(b => r.tham.includes(b))).sort((a, b) => (a[1].du7 || a[1].last || 0) - (b[1].du7 || b[1].last || 0)), moi = ds.slice(-6), x = 22, y = 150, w = 172, h = 34 + Math.max(1, moi.length) * 15;
+function veBangSao(t) { /* 18:36 anh Linh: hiện tên tất cả người đạt — 3 người đầu đứng cố định, từ người thứ 4 cuộn lên */
+  const ds = Object.entries(REC).filter(([n, r]) => r && r.tham && BUOC.every(b => r.tham.includes(b))).sort((a, b) => (a[1].du7 || a[1].last || 0) - (b[1].du7 || b[1].last || 0)), LH = 14, x = 22, y = 150, w = 172, DONG_CUON = 4;
+  const dau = ds.slice(0, 3), sau = ds.slice(3), hCuon = sau.length ? Math.min(sau.length, DONG_CUON) * LH + 4 : 0, h = 34 + Math.max(1, dau.length) * LH + (hCuon ? hCuon + 4 : 0) + 4;
   const lg = g.createLinearGradient(0, y, 0, y + h); lg.addColorStop(0, 'rgba(110,16,12,.92)'); lg.addColorStop(1, 'rgba(60,8,6,.92)'); hop(x, y, w, h, 10, lg); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.3; g.beginPath(); g.roundRect(x, y, w, h, 10); g.stroke();
   chu('🏆 Đi lễ đủ 7 ⭐', x + w / 2, y + 13, 11, '#ffe39a', { f: SERIF, w: 800 }); chu(ds.length + ' người', x + w / 2, y + 26, 8, '#f6dc96', { w: 600 });
-  if (!moi.length) chu('Chưa có ai — đi lễ đủ 7 nơi nhé', x + w / 2, y + 41, 8.5, '#fff1d6', { w: 600 });
-  moi.forEach(([n, r], i) => { let ten = (r.nv && r.nv.nick) || n; g.font = `700 9.5px ${UI}`; while (g.measureText(ten).width > w - 30 && ten.length > 2) ten = ten.slice(0, -2) + '…'; chu('⭐ ' + ten, x + 10, y + 41 + i * 15, 9.5, '#fff', { a: 'left' }); }); }
+  const tenOf = ([n, r], max) => { let ten = (r.nv && r.nv.nick) || n; g.font = `700 9.5px ${UI}`; while (g.measureText(ten).width > max && ten.length > 2) ten = ten.slice(0, -2) + '…'; return ten; };
+  if (!ds.length) chu('Chưa có ai — đi lễ đủ 7 nơi nhé', x + w / 2, y + 41, 8.5, '#fff1d6', { w: 600 });
+  dau.forEach((e, i) => chu(['🥇', '🥈', '🥉'][i] + ' ' + tenOf(e, w - 34), x + 10, y + 41 + i * LH, 9.5, '#fff', { a: 'left' }));
+  if (sau.length) { const y0 = y + 34 + dau.length * LH + 2; g.strokeStyle = 'rgba(242,207,114,.45)'; g.lineWidth = .8; g.beginPath(); g.moveTo(x + 10, y0); g.lineTo(x + w - 10, y0); g.stroke();
+    g.save(); g.beginPath(); g.rect(x + 4, y0 + 2, w - 8, hCuon); g.clip(); const vong = sau.length * LH, cuon = sau.length > DONG_CUON, off = cuon ? (t * 9) % (vong + LH) : 0;
+    for (const lap of cuon ? [0, vong + LH] : [0]) sau.forEach((e, i) => { const yy = y0 + 2 + 7 + i * LH - off + lap; if (yy < y0 - 8 || yy > y0 + hCuon + 10) return; chu((i + 4) + '. ' + tenOf(e, w - 40), x + 10, yy, 9.5, '#fff1d6', { a: 'left' }); });
+    g.restore(); } }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
 function tachNhau(dt) { /* 26/11 17:45 anh Linh: không ai đứng chồng lên nhau — người đứng/đi dạo bị đẩy ra cách nhau; người đang lễ, đang ngồi, đang xếp hàng thì giữ nguyên chỗ */
   const R = 30, co = p => !p.ngoi && !p.ghe && !p.vao && !p.tu && !(p.act && (p.act.t != null || !p.wp.length)); /* người đang đi tới chỗ lễ cũng giãn ra; đã tới chỗ xếp hàng thì đứng yên */ for (let i = 0; i < NG.length; i++) for (let j = i + 1; j < NG.length; j++) { const a = NG[i], b = NG[j], dx = b.x - a.x, dy = (b.y - a.y) * 1.4, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue;
