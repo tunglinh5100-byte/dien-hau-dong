@@ -11,7 +11,7 @@
 <iframe id="b" allow="autoplay; fullscreen"></iframe>
 <script>
 const q = location.search.replace(/^\?/, ''), G = document.getElementById('g'), B = document.getElementById('b');
-G.src = '../g/?bd=1' + (q ? '&' + q : ''); B.src = '../bd/' + (q ? '?' + q : '');
+G.src = '../g/?bd=1' + (q ? '&' + q : ''); B.src = '../bd/?' + (q ? q + '&' : '') + 't=' + Date.now(); /* 18:52: luôn lấy bản sân đền mới nhất, không dùng bản cũ trình duyệt đã lưu */
 let xong = false;
 window.__sdChuyen = () => { if (xong) return; xong = true; let n = 0; try { n = G.contentWindow.__bdVao(); } catch (e) {}
   setTimeout(() => { B.style.transition = 'opacity 1.8s ease'; B.style.opacity = '0'; setTimeout(() => { B.remove(); }, 2000); }, 1200); /* cho cảnh điện chạy 1 nhịp rồi mới mờ sân đền */ return n; };
