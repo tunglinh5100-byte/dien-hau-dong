@@ -212,8 +212,21 @@ function veNguoi(p, t, dt) { const M = CN.meta && CN.meta[p.sx]; if (!M || !CN.i
   g.restore();
   const lift = p.act && p.act.t != null && KHU[p.act.khu].kieu === 'huong' && (performance.now() - p.act.t) < 6200 ? 14 : 0, ty = y - dh - 12 - lift, cao = !p.sim && r0 && r0.tham && r0.tham.some(k => BUOC.includes(k)) ? 10 : 0;
   if (!p.sim && r0 && r0.tham && r0.tham.some(k => BUOC.includes(k))) veSao(x, ty - 8, r0.tham, t); /* 6 ngôi sao: sáng = bước đã xong */
-  if (!p.sim) { const tt = '⭐ ' + (nv.nick || p.ten); g.font = `700 7.5px ${UI}`; const w = g.measureText(tt).width + 8; hop(x - w / 2, ty, w, 11, 5.5, nv.nenTen || 'rgba(16,70,40,.85)'); chu(tt, x, ty + 6, 7.5, nv.mauTen || '#fff'); }
+  if (!p.sim) { const tt = '⭐ ' + (nv.nick || p.ten); g.font = `700 7.5px ${UI}`; const w = g.measureText(tt).width + 8; hop(x - w / 2, ty, w, 11, 5.5, nv.nenTen || 'rgba(16,70,40,.85)'); chu(tt, x, ty + 6, 7.5, nv.mauTen || '#fff');
+    if (p.act && p.act.t != null) { const tong = THOI[KHU[p.act.khu].kieu] / 1000, con = Math.max(0, tong - (performance.now() - p.act.t) / 1000), cx = x + w / 2 + 9, cy = ty + 5.5; /* 26/11 17:41 anh Linh: vòng tròn đếm ngược — hết vòng là làm xong, gõ việc tiếp theo */
+      g.beginPath(); g.arc(cx, cy, 7, 0, 7); g.fillStyle = 'rgba(30,10,6,.85)'; g.fill(); g.beginPath(); g.arc(cx, cy, 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * con / tong); g.strokeStyle = con < 1.5 ? '#7dff9a' : '#ffd84a'; g.lineWidth = 2; g.stroke(); chu(String(Math.ceil(con)), cx, cy + .5, 7, '#fff', { w: 800 }); } }
   if (p.bong && performance.now() - p.bong.t < 4000) { g.font = `700 8.5px ${UI}`; const bw = g.measureText(p.bong.s).width + 12, by = p.sim ? ty - 2 : ty - 17 - cao; hop(x - bw / 2, by, bw, 15, 7.5, '#fffbe8'); chu(p.bong.s, x, by + 8, 8.5, '#5a0e0a'); } }
+/* 26/11 17:41 anh Linh: 1 người đứng nói hướng dẫn mọi người — ông từ áo the đen đứng gần cổng, nói lần lượt từng câu */
+const HUONG_DAN = ['Chào mừng các con nhang về sân đền 🙏', 'Bước 1: gõ “sắp lễ” để sắp mâm lễ', 'Có mâm rồi gõ “lễ lầu cô”, “lễ lầu cậu”…', '“lễ lầu cô 9” là lễ Lầu Cô Chín', 'Mỗi mâm lễ chỉ dâng được 1 nơi, lễ nơi khác thì sắp lễ lại', 'Gõ “thắp hương”, “hoá mã” để thắp hương, hoá vàng', 'Vòng tròn trên đầu chạy hết là xong, gõ việc tiếp theo', 'Mỗi nơi lễ xong được 1 ⭐ — đi đủ 7 nơi sáng đủ 7 ⭐', 'Thay đồ: gõ “áo đỏ”, “khăn xanh”, “tóc dài”, “nữ”…', 'Muốn vào xem hầu: gõ “Tôi muốn vào trong xem diễn xướng hầu đồng Đạo Mẫu”'];
+const TU = { x: 730, y: 545 }; /* giữa sân, bên phải lối đi — tránh khung comment TikTok ở dưới */
+function veOngTu(t) { const M = CN.meta && CN.meta.nam; if (!M || !CN.img.nam) return; const [x, y] = P(TU.x, TU.y), sc = .27 + .1 * (TU.y - 170) / 1200, r = M.rects.front, idx = CN.meta.order.indexOf('front'), dw = r[2] * sc, dh = r[3] * sc;
+  const src = anh('nam', '#2b2320', { quan: '#efede6', giay: '#2a1f1a' }, '#2b2320'), noiNhip = Math.abs(Math.sin(t * 7)) * .6;
+  g.save(); g.translate(x, y); g.globalAlpha = .25; g.beginPath(); g.ellipse(0, 0, dw * .4, dw * .12, 0, 0, 7); g.fillStyle = '#000'; g.fill(); g.globalAlpha = 1; g.translate(0, -noiNhip); g.drawImage(src, idx * M.cw + r[0], r[1], r[2], r[3], -dw / 2, -dh, dw, dh); g.restore();
+  const ty = y - dh - 12; g.font = `800 7.5px ${UI}`; const tt = '🏮 Ông Từ hướng dẫn', w = g.measureText(tt).width + 10; hop(x - w / 2, ty, w, 11, 5.5, 'rgba(122,20,16,.92)'); chu(tt, x, ty + 6, 7.5, '#ffe39a', { w: 800 });
+  const i = Math.floor(t / 5.5) % HUONG_DAN.length, a = Math.min(1, ((t / 5.5) % 1) * 8), s = HUONG_DAN[i]; g.font = `700 9.5px ${UI}`; const tu = s.split(' '), dong = []; let d = ''; tu.forEach(wd => { const th = d ? d + ' ' + wd : wd; if (g.measureText(th).width > 230 && d) { dong.push(d); d = wd; } else d = th; }); dong.push(d);
+  const bw = Math.max(...dong.map(l => g.measureText(l).width)) + 16, bh = dong.length * 13 + 8, bx = Math.min(536 - bw, Math.max(4, x - bw / 2)), by = ty - bh - 8; g.globalAlpha = a;
+  hop(bx, by, bw, bh, 8, '#fffbe8'); g.beginPath(); g.moveTo(x - 5, by + bh); g.lineTo(x, by + bh + 7); g.lineTo(x + 5, by + bh); g.fill(); g.strokeStyle = '#c8302a'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(bx, by, bw, bh, 8); g.stroke();
+  dong.forEach((l, k) => chu(l, bx + bw / 2, by + 10.5 + k * 13, 9.5, '#5a0e0a', { w: 700 })); g.globalAlpha = 1; }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
 function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); NG.forEach(p => {
   if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 95 : 60) * dt; /* đi dạo chậm, đi lễ nhanh hơn */
@@ -255,7 +268,7 @@ let last = performance.now();
 function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(NEN.c, 0, 0, W, H);
   veDong(270, NEN.ph * .885 + 16, .34, t, dt);
   const dang = veHieuUng(t);
-  NG.slice().sort((a, b) => a.y - b.y).forEach(p => veNguoi(p, t, dt));
+  { let daVe = false; NG.slice().sort((a, b) => a.y - b.y).forEach(p => { if (!daVe && p.y > TU.y) { veOngTu(t); daVe = true; } veNguoi(p, t, dt); }); if (!daVe) veOngTu(t); }
   Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, HANG[k].length); });
   veBang(t);
   if (CHUYEN && now - CHUYEN > 3000) { const a = Math.min(1, (now - CHUYEN - 3000) / 1500); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }
