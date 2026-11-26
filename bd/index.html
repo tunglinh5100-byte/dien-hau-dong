@@ -128,7 +128,8 @@ function suKien(ten, ev, d) { /* mọi sự kiện từ live */
   r.last = now; const moi = !NG.find(v => v.ten === ten), p = tao(ten, false); if (moi) { p.cho = 0; diDao(p); }
   if (ev !== 'chat') return; const msg = String((d && (d.comment || d.content)) || ''), n = norm(msg); noi(p, msg);
   if (doiDo(ten, p, msg)) return;
-  const k = lenhLe(n); if (k) { lamLe(p, k); return; }
+  const k = lenhLe(n); if (k) { if (p.act && p.act.t != null) { if (k !== p.act.khu) { p.tiep = k; noi(p, 'Xong việc này sẽ đi ' + KHU[k].ten); } return; } p.sau = null; lamLe(p, k); return; } /* 26/11 17:50 anh Linh: đang chờ mà gõ việc khác thì rời hàng đi làm việc khác ngay; đang làm dở thì làm xong rồi đi */
+  if (VAO_RE.test(n) && p.act && p.act.t != null) { p.tiep = null; p.vaoSau = 1; noi(p, 'Xong việc này sẽ lên bậc ngồi chờ'); return; }
   if (VAO_RE.test(n)) { if (!vaoXem(p)) noi(p, 'bậc thang đã kín chỗ, chờ vào trong nhé'); } }
 window.__bdThu = (ten, msg, ev) => suKien(ten, ev || 'chat', { comment: msg }); /* để chạy thử */
 /* 26/11 17:34 anh Linh muốn tự chơi thử: mở link có ?thu=1 → ô gõ tên + comment ở dưới màn hình, không cần đang live */
@@ -239,7 +240,7 @@ function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1
       if (!p.wp.length && p.vao) { p.het = 1; return; }
       if (!p.wp.length) { if (p.ghe) { p.ngoi = true; p.dir = 4; } else if (p.act) { p.dir = 4; if (HANG[p.act.khu][0] === p && Math.hypot(p.x - KHU[p.act.khu].diem[0], p.y - KHU[p.act.khu].diem[1]) < 3) { p.act.t = now; p.d = 4; } } else p.cho = 2 + Math.random() * 5; } }
     else { p.x += dx / d * sp; p.y += dy / d * sp; p.wd += sp; } return; }
-  if (p.act && p.act.t != null) { const kh = KHU[p.act.khu]; if (now - p.act.t > THOI[kh.kieu]) { const k = p.act.khu, r = !p.sim && rec(p.ten); if (r) { if (!r.tham.includes(k)) { r.tham.push(k); if (BUOC.includes(k)) SAO_MOI.set(p, now); } if (!r.dem && DU.every(b => r.tham.includes(b))) r.dem = 1; /* đủ 7 bước: tặng đệm, không báo */ } const kieu = KHU[k].kieu; if (r && kieu === 'saple') r.mam = 1; if (r && kieu === 'le') { r.mam = 0; DANG.push({ k, t: now }); } /* sắp lễ: có 1 mâm; lễ xong: dâng mâm lại ban */ p.act = null; HANG[k].shift(); xepHang(k); if (p.sau && kieu === 'saple') { const sau = p.sau; p.sau = null; lamLe(p, sau); return; } p.sau = null; p.wp = [[p.x + (p.x < 560 ? 40 : -40), p.y + 24]]; p.cho = 1.5 + Math.random() * 2; } return; }
+  if (p.act && p.act.t != null) { const kh = KHU[p.act.khu]; if (now - p.act.t > THOI[kh.kieu]) { const k = p.act.khu, r = !p.sim && rec(p.ten); if (r) { if (!r.tham.includes(k)) { r.tham.push(k); if (BUOC.includes(k)) SAO_MOI.set(p, now); } if (!r.dem && DU.every(b => r.tham.includes(b))) r.dem = 1; /* đủ 7 bước: tặng đệm, không báo */ } const kieu = KHU[k].kieu; if (r && kieu === 'saple') r.mam = 1; if (r && kieu === 'le') { r.mam = 0; DANG.push({ k, t: now }); } /* sắp lễ: có 1 mâm; lễ xong: dâng mâm lại ban */ p.act = null; HANG[k].shift(); xepHang(k); if (p.vaoSau) { p.vaoSau = 0; vaoXem(p); return; } if (p.tiep) { const tiep = p.tiep; p.tiep = null; p.sau = null; lamLe(p, tiep); return; } if (p.sau && kieu === 'saple') { const sau = p.sau; p.sau = null; lamLe(p, sau); return; } p.sau = null; p.wp = [[p.x + (p.x < 560 ? 40 : -40), p.y + 24]]; p.cho = 1.5 + Math.random() * 2; } return; }
   if (p.act && !p.wp.length) { const k = p.act.khu; if (HANG[k][0] === p) { const [dx, dy] = KHU[k].diem; if (Math.hypot(p.x - dx, p.y - dy) < 3) { p.act.t = now; p.d = p.dir = 4; } else p.wp = [[dx, dy]]; } else p.dir = 4; return; } /* đang xếp hàng chờ tới lượt */
   if (p.ngoi || p.ghe || CHUYEN) return;
   p.cho -= dt; if (p.cho <= 0) diDao(p); }); }
