@@ -255,7 +255,7 @@ function veTuDo(t) { const [cx, by] = P(TU_DO.x, TU_DO.y), now = performance.now
   if (!TU_DO.img) return; const k = 92 / M.h; g.save(); g.translate(cx, by); g.scale(k, k); g.translate(-M.neo[0], -M.neo[1]);
   g.globalAlpha = .28; g.fillStyle = '#000'; g.beginPath(); g.ellipse(M.neo[0] + 10, M.neo[1] - 6, 120, 18, -.18, 0, 7); g.fill(); g.globalAlpha = 1; /* bóng dưới tủ */
   g.drawImage(TU_DO.img, 0, 0, M.w, M.h);
-  g.save(); g.translate(M.bien[0], M.bien[1]); g.transform(1, M.nghieng, 0, 1, 0, 0); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#00a0bc'; g.font = `900 30px ${UI}`; g.fillText('ADELA', 0, -7); g.fillStyle = '#6b3a12'; g.font = `800 15px ${UI}`; g.fillText('SmartLocker', 0, 15); g.restore(); /* chữ trên biển, nghiêng theo mặt tủ */
+  g.save(); g.translate(M.bien[0], M.bien[1]); g.transform(1, M.nghieng, 0, 1, 0, 0); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#00a0bc'; g.font = `900 40px ${UI}`; g.fillText('ADELA', 0, 2); g.restore(); /* 19:10 anh Linh: biển chỉ ghi ADELA, nghiêng theo mặt tủ */
   M.led.forEach(([lx, ly], i) => { if (TU_DO.mo === i) { if (TU_DO.imgMo) g.drawImage(TU_DO.imgMo, M.mo[0] + lx - M.led[0][0], M.mo[1] + ly - M.led[0][1]); return; } /* ô đang mở */
     if (TU_DO.o[i] && now - TU_DO.o[i] < 600000) { g.shadowColor = '#ff2a2a'; g.shadowBlur = 8; g.fillStyle = '#ff3b3b'; g.beginPath(); g.arc(lx, ly, 4.5, 0, 7); g.fill(); g.shadowBlur = 0; } }); /* đèn đỏ: ô có đồ */
   g.restore(); }
