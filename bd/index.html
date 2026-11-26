@@ -301,7 +301,12 @@ function veHieuUng(t) { const now = performance.now(); hieuUngLe(now); const dan
   if (dang.hoama) { const [x, y] = P(187, 990); for (let i = 0; i < 12; i++) { const a = ((t * 1.3 + i / 7) % 1); g.globalAlpha = (1 - a) * .8; g.beginPath(); g.arc(x + Math.sin(t * 6 + i * 2) * 7, y - a * 30, 5 * (1 - a) + 1.5, 0, 7); g.fillStyle = a < .4 ? '#ffd24a' : '#ff7a2a'; g.fill(); } g.globalAlpha = 1; } /* lửa hoá mã */
   return dang; }
 let last = performance.now();
-function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(veLa(t), 0, 0, W, H);
+/* 26/11 18:29 anh Linh hỏi máy anh có giật không: mở link có ?perf=1 → góc phải hiện tên card đồ hoạ, số khung hình/giây, thời gian vẽ mỗi khung */
+const PERF = Q.get('perf') === '1' ? { n: 0, ms: 0, mx: 0, t0: 0, cham: 0, kq: null, gpu: (() => { try { const c = document.createElement('canvas').getContext('webgl'), e = c.getExtension('WEBGL_debug_renderer_info'); return String(e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)).replace(/ANGLE \(|\)$|Direct3D11.*|vs_.*|, D3D11.*/g, '').slice(0, 46); } catch (e) { return 'không đọc được'; } })() } : null;
+function perfVe(ms, now) { const P2 = PERF; if (!P2.t0) P2.t0 = now; P2.n++; P2.ms += ms; P2.mx = Math.max(P2.mx, ms); if (ms > 33) P2.cham++; if (now - P2.t0 > 2000) { P2.kq = { fps: P2.n * 1000 / (now - P2.t0), tb: P2.ms / P2.n, mx: P2.mx, cham: P2.cham }; P2.n = 0; P2.ms = 0; P2.mx = 0; P2.cham = 0; P2.t0 = now; }
+  const k = P2.kq, x = 300, y = 148, w = 232, h = 58; hop(x, y, w, h, 8, 'rgba(0,0,0,.78)'); g.font = `600 8.5px ${UI}`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#9fe0c8'; g.fillText('Card: ' + P2.gpu, x + 7, y + 10);
+  if (k) { const ok = k.fps >= 28 && k.tb < 16 && k.cham === 0; g.fillStyle = ok ? '#7dff9a' : k.fps >= 24 ? '#ffd84a' : '#ff6a6a'; g.font = `800 11px ${UI}`; g.fillText(k.fps.toFixed(0) + ' khung/giây · ' + (ok ? 'MƯỢT' : k.fps >= 24 ? 'HƠI GIẬT' : 'GIẬT'), x + 7, y + 26); g.font = `600 8.5px ${UI}`; g.fillStyle = '#fff'; g.fillText('Vẽ mỗi khung: TB ' + k.tb.toFixed(1) + ' ms · chậm nhất ' + k.mx.toFixed(0) + ' ms', x + 7, y + 40); g.fillText('Khung bị chậm (>33 ms) trong 2 giây: ' + k.cham, x + 7, y + 51); } else { g.fillStyle = '#fff'; g.fillText('Đang đo…', x + 7, y + 30); } }
+function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const t0p = performance.now(); const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(veLa(t), 0, 0, W, H);
   veCa(t);
   veDong(270, NEN.ph * .885 + 16, .34, t, dt);
   const dang = veHieuUng(t);
@@ -309,6 +314,7 @@ function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); retur
   Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, HANG[k].length); });
   veBangSao(t); veBang(t);
   if (CHUYEN && now - CHUYEN > 3000) { const a = Math.min(1, (now - CHUYEN - 3000) / 1500); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }
+  if (PERF) perfVe(performance.now() - t0p, now);
   requestAnimationFrame(khung); }
 const LUU_Y = '⚠ Lưu ý: trang phục thay ở sân đền được giữ nguyên khi vào trong xem diễn xướng hầu  •  Rời live quá 600 giây sẽ mất hết trang phục đã thay  •  ';
 function veBang(t) { const X = 10, Y = 6, Wd = 520, Hd = 132; const lg = g.createLinearGradient(0, Y, 0, Y + Hd); lg.addColorStop(0, 'rgba(110,16,12,.93)'); lg.addColorStop(1, 'rgba(60,8,6,.93)'); hop(X, Y, Wd, Hd, 12, lg); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(X, Y, Wd, Hd, 12); g.stroke();
