@@ -190,8 +190,27 @@ function hongLauChin(q) { /* 26/11 18:14 anh Linh: Lầu Cô Chín màu hồng h
       const s = c / (1 - Math.abs(2 * l - 1)), hh = (((gg - b) / c) % 6) * 60; if (s < .4 || hh > 14 || hh < -25 || l < .12 || l > .82) continue;
       const L2 = Math.min(.8, l * 1.04 + .02), S2 = Math.min(1, s * 1.08), H2 = 330, /* 18:19 anh Linh: hồng đậm thêm */ C2 = (1 - Math.abs(2 * L2 - 1)) * S2, X2 = C2 * (1 - Math.abs((H2 / 60) % 2 - 1)), m = L2 - C2 / 2; d[i] = (C2 + m) * 255; d[i + 1] = m * 255; d[i + 2] = (X2 + m) * 255; }
     q.putImageData(im, x0, y0); } catch (e) {} }
+/* 26/11 18:21 anh Linh: cành lá rung rinh nhẹ — tách phần lá xanh của cây, bụi ra một lớp riêng, mỗi dải lá đung đưa lệch nhau chưa tới 1 điểm ảnh */
+const HO = { x: 773, y: 780, rx: 188, ry: 66 }; /* hồ sen (toạ độ ảnh sân) */
+const LA = { c: null, o: [] };
+function taoLa(q) { try { const y0 = SY * 2, h = 1920 - y0, im = q.getImageData(0, y0, 1080, h), d = im.data, out = new ImageData(1080, h), o = out.data, BH = 32, cot = [0, 360, 720, 1080], co = {};
+    const [hx, hy] = P(HO.x, HO.y), hrx = HO.rx * K * 2 + 14, hry = HO.ry * K * 2 + 12;
+    for (let y = 0; y < h; y++) for (let x = 0; x < 1080; x++) { const i = (y * 1080 + x) * 4, r = d[i], gg = d[i + 1], b = d[i + 2]; if (!(gg > r * 1.08 && gg > b * 1.1 && gg > 45 && gg < 235)) continue;
+      const ly = (y + y0) / 2, lx = x / 2; if (lx > 150 && lx < 390 && ly > 400) continue; /* lối đi lát đá: bỏ rêu cỏ */ if (((x - hx * 2) / hrx) ** 2 + ((y + y0 - hy * 2) / hry) ** 2 < 1) continue; /* hồ: lá sen đứng yên */
+      o[i] = r; o[i + 1] = gg; o[i + 2] = b; o[i + 3] = 255; co[Math.floor(y / BH) + ':' + (x < 360 ? 0 : x < 720 ? 1 : 2)] = (co[Math.floor(y / BH) + ':' + (x < 360 ? 0 : x < 720 ? 1 : 2)] || 0) + 1; }
+    const c = document.createElement('canvas'); c.width = 1080; c.height = h; c.getContext('2d').putImageData(out, 0, 0); LA.c = c; LA.o = [];
+    Object.entries(co).forEach(([k, n]) => { if (n < 400) return; const [b, k2] = k.split(':').map(Number); LA.o.push({ y: b * BH, h: BH, x: cot[k2], w: cot[k2 + 1] - cot[k2], ph: b * .45 + k2 * 1.9 }); }); } catch (e) { LA.c = null; } }
+function veLa(t) { if (!LA.c) return NEN.c; if (!LA.k) { LA.k = document.createElement('canvas'); LA.k.width = 1080; LA.k.height = 1920; LA.kx = LA.k.getContext('2d'); LA.t = -1; }
+  if (t - LA.t > .1) { LA.t = t; const gio = .75 + .25 * Math.sin(t * .37), q = LA.kx, y0 = SY * 2; q.drawImage(NEN.c, 0, 0); LA.o.forEach(s => { const dx = (Math.sin(t * 1.25 + s.ph) * .9 * gio + Math.sin(t * 2.9 + s.ph * 1.7) * .25) * 2; q.drawImage(LA.c, s.x, s.y, s.w, s.h, s.x + dx, y0 + s.y, s.w, s.h); }); } /* lá đung đưa chậm: gộp vào nền 10 lần/giây, mỗi khung chỉ vẽ 1 hình nền như cũ cho nhẹ máy */
+  return LA.k; }
+/* 26/11 18:21 anh Linh: cá vàng bơi lội nhẹ nhàng trong hồ sen */
+const CA = [['#ff8c1a', .23, 0, .17, 1.3], ['#ffc93a', .19, 2.1, .13, 4.2], ['#ff6a1a', .16, 4.0, .21, .7], ['#fff3e0', .21, 1.2, .15, 2.6], ['#ff9f2e', .14, 5.1, .19, 5.5], ['#ffd25a', .18, 3.3, .12, 3.1]].map(([c, w1, p1, w2, p2], i) => ({ c, w1, p1, w2, p2, k: i % 3 === 0 ? 1.15 : .9 }));
+function veCa(t) { CA.forEach(f => { const pos = tt => [HO.x + HO.rx * .66 * Math.sin(tt * f.w1 + f.p1), HO.y + HO.ry * .58 * Math.sin(tt * f.w2 + f.p2)], [ix, iy] = pos(t), [jx, jy] = pos(t + .05), [x, y] = P(ix, iy), a = Math.atan2((jy - iy) * K, (jx - ix) * K), wig = Math.sin(t * 9 + f.p1 * 3) * .35, k = f.k;
+    g.save(); g.translate(x, y); g.rotate(a); g.globalAlpha = .22; g.fillStyle = '#0a2a20'; g.beginPath(); g.ellipse(1, 2, 5.2 * k, 2 * k, 0, 0, 7); g.fill(); g.globalAlpha = .9;
+    g.fillStyle = f.c; g.beginPath(); g.moveTo(-4.2 * k, 0); g.lineTo(-7.5 * k, -2.4 * k + wig * 2); g.lineTo(-7.5 * k, 2.4 * k + wig * 2); g.closePath(); g.fill(); /* đuôi vẫy */
+    g.beginPath(); g.ellipse(0, 0, 5 * k, 1.9 * k, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(1.2 * k, -.6 * k, 2.2 * k, .6 * k, 0, 0, 7); g.fill(); g.globalAlpha = 1; g.restore(); }); }
 function veNen() { const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const q = c.getContext('2d'); q.scale(2, 2); q.fillStyle = '#2a1208'; q.fillRect(0, 0, W, H); q.drawImage(SAN, 0, SY, 540, 1402 * K); hongLauChin(q); 
-  const ph = 540 * DEN.naturalHeight / DEN.naturalWidth, o = document.createElement('canvas'); o.width = 1080; o.height = Math.round(ph * 2); const r = o.getContext('2d'); r.drawImage(DEN, 0, 0, o.width, o.height); r.globalCompositeOperation = 'destination-out'; const gr = r.createLinearGradient(0, o.height * .86, 0, o.height); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,1)'); r.fillStyle = gr; r.fillRect(0, o.height * .86, o.width, o.height * .14); q.drawImage(o, 0, 0, 540, ph); NEN = { c, ph }; }
+  const ph = 540 * DEN.naturalHeight / DEN.naturalWidth, o = document.createElement('canvas'); o.width = 1080; o.height = Math.round(ph * 2); const r = o.getContext('2d'); r.drawImage(DEN, 0, 0, o.width, o.height); r.globalCompositeOperation = 'destination-out'; const gr = r.createLinearGradient(0, o.height * .86, 0, o.height); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,1)'); r.fillStyle = gr; r.fillRect(0, o.height * .86, o.width, o.height * .14); q.drawImage(o, 0, 0, 540, ph); taoLa(q); NEN = { c, ph }; }
 function hop(x, y, w, h, r, c) { g.beginPath(); g.roundRect(x, y, w, h, r); g.fillStyle = c; g.fill(); }
 function chu(s, x, y, size, c, o = {}) { g.font = `${o.w || 700} ${size}px ${o.f || UI}`; g.textAlign = o.a || 'center'; g.textBaseline = 'middle'; g.fillStyle = c; g.fillText(s, x, y); }
 function bien(x, y, t, k) { g.font = `800 10px ${SERIF}`; const w = g.measureText(t).width + 16, h = 17; g.save(); g.translate(x, y); hop(-w / 2 - 2, -2, w + 4, h + 4, 4, '#7a1410'); const lg = g.createLinearGradient(0, 0, 0, h); lg.addColorStop(0, '#ffe9a8'); lg.addColorStop(1, '#e7b547'); hop(-w / 2, 0, w, h, 3, lg); chu(t, 0, h / 2 + .5, 10, '#5a0e0a', { f: SERIF, w: 800 });
@@ -282,7 +301,8 @@ function veHieuUng(t) { const now = performance.now(); hieuUngLe(now); const dan
   if (dang.hoama) { const [x, y] = P(187, 990); for (let i = 0; i < 12; i++) { const a = ((t * 1.3 + i / 7) % 1); g.globalAlpha = (1 - a) * .8; g.beginPath(); g.arc(x + Math.sin(t * 6 + i * 2) * 7, y - a * 30, 5 * (1 - a) + 1.5, 0, 7); g.fillStyle = a < .4 ? '#ffd24a' : '#ff7a2a'; g.fill(); } g.globalAlpha = 1; } /* lửa hoá mã */
   return dang; }
 let last = performance.now();
-function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(NEN.c, 0, 0, W, H);
+function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(veLa(t), 0, 0, W, H);
+  veCa(t);
   veDong(270, NEN.ph * .885 + 16, .34, t, dt);
   const dang = veHieuUng(t);
   { let daVe = false; NG.slice().sort((a, b) => a.y - b.y).forEach(p => { if (!daVe && p.y > TU.y) { veOngTu(t); daVe = true; } veNguoi(p, t, dt); }); if (!daVe) veOngTu(t); }
