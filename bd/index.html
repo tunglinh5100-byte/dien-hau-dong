@@ -51,8 +51,9 @@ const KHU = {
   huong: { ten: 'Thắp Hương', nut: 'huongT', bien: [570, 228], huong: [570, 330], kieu: 'huong', diem: [568, 418] },
   hoama: { ten: 'Lò Hoá Mã', nut: 'hm', bien: [170, 790], huong: [170, 960], kieu: 'hoama', diem: [187, 1080] },
   saple: { ten: 'Sắp Lễ', nut: 'sl', bien: [960, 870], huong: [960, 1050], kieu: 'saple', diem: [941, 1108] },
-  tudo: { ten: 'Tủ SmartLocker', nut: 'slR', bien: [740, 768], huong: [740, 980], kieu: 'tudo', diem: [740, 1012], hang: [-58, 4] } }; /* 26/11 18:46 anh Linh: tủ smartlocker ADELA, hành động cất túi đồ vào tủ */
-const TU_DO = { x: 740, y: 985, o: Array(12).fill(0), mo: -1 }; /* 12 ô tủ: 0 trống, >0 thời điểm có đồ; mo = ô đang mở */
+  tudo: { ten: 'Tủ SmartLocker', nut: 'slR', bien: [740, 742], huong: [740, 980], kieu: 'tudo', diem: [740, 1012], hang: [-58, 4] } }; /* 26/11 18:46 anh Linh: tủ smartlocker ADELA, hành động cất túi đồ vào tủ */
+const TU_DO = { x: 740, y: 985, o: Array(11).fill(0), mo: -1, img: null, imgMo: null }; /* 19:04: ảnh tủ Gemini của anh Linh, đổi sang màu gỗ như nhà Sắp Lễ; 11 ô */
+const TU_M = {"w": 266, "h": 360, "neo": [127.1, 335.2], "led": [[89.5, 80.3], [145.1, 95.2], [202.1, 110.2], [89.5, 138.6], [202.1, 170.1], [89.5, 196.2], [145.1, 212.6], [202.1, 229.9], [89.5, 253.6], [145.1, 270.9], [202.1, 289.1]], "mo": [0.0, 61.9], "bien": [116.6, 41.8], "nghieng": 0.197}; /* 12 ô tủ: 0 trống, >0 thời điểm có đồ; mo = ô đang mở */
 const BUOC = ['saple', 'huong', 'lauco', 'laucau', 'cochin', 'sontrang', 'hoama']; /* 26/11 17:11 anh Linh: mỗi bước đi lễ xong được 1 ngôi sao sáng trên đầu; 17:24: hoá mã cũng có sao → 7 sao; đủ 7 sao được tặng đệm (ẩn) */
 const DU = BUOC;
 const HANG = {}; Object.keys(KHU).forEach(k => HANG[k] = []); /* mỗi nơi từng người một, người sau đứng xếp hàng phía sau */
@@ -250,15 +251,13 @@ function veNguoi(p, t, dt) { const M = CN.meta && CN.meta[p.sx]; if (!M || !CN.i
 /* 26/11 17:41 anh Linh: 1 người đứng nói hướng dẫn mọi người — ông từ (18:46: áo xanh ADELA) đứng gần cổng, nói lần lượt từng câu */
 const HUONG_DAN = ['Chào mừng các con nhang về sân đền 🙏', 'Bước 1: gõ “sắp lễ” để sắp mâm lễ', 'Có mâm rồi gõ “lễ lầu cô”, “lễ lầu cậu”…', '“lễ lầu cô 9” là lễ Lầu Cô Chín', 'Mỗi mâm lễ chỉ dâng được 1 nơi, lễ nơi khác thì sắp lễ lại', 'Gõ “thắp hương”, “hoá mã” để thắp hương, hoá vàng', 'Gõ “cất đồ” để cất túi đồ vào tủ SmartLocker ADELA', 'Vòng tròn trên đầu chạy hết là xong, gõ việc tiếp theo', 'Mỗi nơi lễ xong được 1 ⭐ — đi đủ 7 nơi sáng đủ 7 ⭐', 'Thay đồ: gõ “áo đỏ”, “khăn xanh”, “tóc dài”, “nữ”…', 'Muốn vào xem hầu: gõ “Tôi muốn vào trong xem diễn xướng hầu đồng Đạo Mẫu”'];
 const TU = { x: 655, y: 112 }; /* 26/11 18:14 anh Linh: ông từ đứng trên bậc đá trước cửa hầu, cho đỡ che người chơi */
-function veTuDo(t) { const [cx, by] = P(TU_DO.x, TU_DO.y), w = 58, h = 80, x = cx - w / 2, y = by - h, now = performance.now();
-  g.save(); g.globalAlpha = .3; g.fillStyle = '#000'; g.beginPath(); g.ellipse(cx, by + 1, w * .6, 4, 0, 0, 7); g.fill(); g.globalAlpha = 1;
-  hop(x - 2, y - 2, w + 4, h + 4, 3, '#0a6f82'); hop(x, y, w, h, 2, '#00a0bc'); /* khung xanh ADELA */
-  hop(x + 3, y + 3, w - 6, 15, 1.5, '#ffffff'); chu('ADELA', cx, y + 8.6, 8, '#00a0bc', { w: 900 }); chu('SmartLocker', cx, y + 14.6, 4.8, '#0a6f82', { w: 800 });
-  const cw = (w - 8) / 3, ch = (h - 24) / 4; let k = 0;
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++, k++) { const dx = x + 4 + c * cw, dy = y + 20 + r * ch; if (k === 4) { hop(dx + .5, dy + .5, cw - 1, ch - 1, 1, '#1c2b33'); hop(dx + 2, dy + 2, cw - 4, ch - 6, .8, '#4ad4ef'); g.fillStyle = '#fff'; g.fillRect(dx + 3, dy + ch - 3.4, cw - 6, 1.2); continue; } /* màn hình cảm ứng */
-    if (TU_DO.mo === k) { hop(dx + .5, dy + .5, cw - 1, ch - 1, 1, '#25343c'); hop(dx - cw * .45, dy + .5, cw * .5, ch - 1, 1, '#dfe7ea'); continue; } /* ô đang mở, cánh cửa mở ra */
-    hop(dx + .5, dy + .5, cw - 1, ch - 1, 1, '#e9eef0'); g.strokeStyle = '#b8c4c9'; g.lineWidth = .5; g.beginPath(); g.roundRect(dx + .5, dy + .5, cw - 1, ch - 1, 1); g.stroke();
-    const coDo = TU_DO.o[k] && now - TU_DO.o[k] < 600000; g.fillStyle = coDo ? '#ff4a4a' : '#3ddc84'; g.beginPath(); g.arc(dx + cw - 3, dy + 3, 1, 0, 7); g.fill(); g.fillStyle = '#9aa7ad'; g.fillRect(dx + cw - 4, dy + ch / 2 - 1.5, 1.2, 3); }
+function veTuDo(t) { const [cx, by] = P(TU_DO.x, TU_DO.y), now = performance.now(), M = TU_M;
+  if (!TU_DO.img) return; const k = 92 / M.h; g.save(); g.translate(cx, by); g.scale(k, k); g.translate(-M.neo[0], -M.neo[1]);
+  g.globalAlpha = .28; g.fillStyle = '#000'; g.beginPath(); g.ellipse(M.neo[0] + 10, M.neo[1] - 6, 120, 18, -.18, 0, 7); g.fill(); g.globalAlpha = 1; /* bóng dưới tủ */
+  g.drawImage(TU_DO.img, 0, 0, M.w, M.h);
+  g.save(); g.translate(M.bien[0], M.bien[1]); g.transform(1, M.nghieng, 0, 1, 0, 0); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#00a0bc'; g.font = `900 30px ${UI}`; g.fillText('ADELA', 0, -7); g.fillStyle = '#6b3a12'; g.font = `800 15px ${UI}`; g.fillText('SmartLocker', 0, 15); g.restore(); /* chữ trên biển, nghiêng theo mặt tủ */
+  M.led.forEach(([lx, ly], i) => { if (TU_DO.mo === i) { if (TU_DO.imgMo) g.drawImage(TU_DO.imgMo, M.mo[0] + lx - M.led[0][0], M.mo[1] + ly - M.led[0][1]); return; } /* ô đang mở */
+    if (TU_DO.o[i] && now - TU_DO.o[i] < 600000) { g.shadowColor = '#ff2a2a'; g.shadowBlur = 8; g.fillStyle = '#ff3b3b'; g.beginPath(); g.arc(lx, ly, 4.5, 0, 7); g.fill(); g.shadowBlur = 0; } }); /* đèn đỏ: ô có đồ */
   g.restore(); }
 function veOngTu(t) { const M = CN.meta && CN.meta.nam; if (!M || !CN.img.nam) return; const [x, y] = P(TU.x, TU.y), sc = .27 + .1 * (TU.y - 170) / 1200, r = M.rects.front, idx = CN.meta.order.indexOf('front'), dw = r[2] * sc, dh = r[3] * sc;
   const src = anh('nam', '#00a0bc', { quan: '#efede6', giay: '#2a1f1a' }, '#00a0bc'), /* 18:46 anh Linh: ông từ mặc áo xanh ADELA */ noiNhip = Math.abs(Math.sin(t * 7)) * .6;
@@ -368,6 +367,7 @@ setInterval(() => { if (CHUYEN) return; if (soNguoi() >= MUC_NGUOI && !DU30) { D
   g.fillStyle = '#1a0604'; g.fillRect(0, 0, W, H); chu('🏮 Đang chuẩn bị sân đền…', 270, 470, 18, '#ffe39a', { f: SERIF, w: 800 });
   const doi = (el, ev) => new Promise(r => { if (el.readyState >= 3) return r(); el.addEventListener(ev, r, { once: true }); el.addEventListener('error', r, { once: true }); });
   nap(0); try { NHAC.load(); } catch (e) {} const choMedia = Promise.race([Promise.all([doi(VID[0], 'canplay'), IM ? 0 : doi(NHAC, 'canplaythrough')]), new Promise(r => setTimeout(r, 12000))]);
+  ld('tu.webp?v=1').then(i => { TU_DO.img = i; }); ld('tu-mo.webp?v=1').then(i => { TU_DO.imgMo = i; });
   const [d, s, meta] = await Promise.all([ld('den.webp'), ld('san.webp'), fetch('../cnm/meta.json?v=9').then(r => r.json()).catch(() => null)]); DEN = d; SAN = s; CN.meta = meta;
   const ks = ['nu', 'nam', 'nuA', 'namA', 'nuK', 'namK', 'nuT', 'namT', 'nuU', 'namU', 'nuG', 'namG', 'nuL', 'namL', 'nuQ', 'namQ']; const im = await Promise.all(ks.map(k => ld('../cnm/' + k + '.webp?v=9'))); ks.forEach((k, i) => CN.img[k] = im[i]);
   veNen(); if (SIM) for (let i = 0; i < 14; i++) { const p = tao('~gl' + i, true); const k = DI_DAO[i % DI_DAO.length]; [p.x, p.y] = rai(k); p.nut = k; p.cho = Math.random() * 4; }
