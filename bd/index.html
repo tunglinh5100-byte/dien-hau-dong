@@ -8,7 +8,8 @@
    - Người đi lại tự do trong sân, không tự làm gì. Chỉ khi comment mới đi làm: "lễ + tên bảng" (vd: lễ lầu cô 9), "sắp lễ", "thắp hương".
    - Ai tới đủ 7 nơi được tặng 1 đệm (ẩn, không báo) để dùng khi vào xem hầu.
    - Đổi trang phục như /g: áo, khăn, tóc, quần, giày, thắt lưng, quạt, đệm, nam/nữ, kiểu tóc, đổi tên, màu tên.
-   - Đủ 30 người (số người xem min 25) hoặc hết 600 giây đếm ngược thì sang /g/?bd=1 (trang phục giữ nguyên, khoá không đổi).
+   - Đủ 30 người (số người xem min 25) hoặc hết 600 giây đếm ngược thì mọi người đi lên vào trong điện (trang phục mang vào, vào trong vẫn thay tiếp được).
+   - Chạy trong link /sd: /g tải sẵn phía sau, chuyển cảnh là vào luôn. Mở /bd riêng thì chuyển sang /g/?bd=1&cho=0.
    - /dk có nút "Vào xem hầu ngay", "Đếm lại 10 phút", "+1 phút".
    Tham số: ?im=1 tắt tiếng; ?sim=0 tắt người giả lập; ?am=1 bật tiếng ngay; ?nochuyen=1 hết giờ không chuyển (chạy thử). */
 const Q = new URLSearchParams(location.search), IM = Q.get('im') === '1', SIM = Q.get('sim') !== '0', NOCHUYEN = Q.get('nochuyen') === '1';
@@ -115,7 +116,7 @@ function doiDo(ten, p, msg) { /* giống /g: trả về true nếu là lệnh đ
   { const ao = aoCmt(msg); if (ao) { r.ao = ao[1]; if (r.nv) delete r.nv.mix; noi(p, 'mặc áo ' + ao[0]); return true; } }
   return false; }
 function suKien(ten, ev, d) { /* mọi sự kiện từ live */
-  if (!ten) return; ten = String(ten).slice(0, 24); const now = Date.now(), r = rec(ten);
+  if (!ten || CHUYEN) return; ten = String(ten).slice(0, 24); const now = Date.now(), r = rec(ten);
   if (/member/.test(ev) && r.last && now - r.last > MAT_DO && (r.ao || r.nv)) { delete r.ao; if (r.nv) { const { nick, mauTen, nenTen } = r.nv; r.nv = JSON.parse(JSON.stringify({ nick, mauTen, nenTen })); } } /* vào lại live sau hơn 600 giây: mất hết trang phục đã thay */
   r.last = now; const moi = !NG.find(v => v.ten === ten), p = tao(ten, false); if (moi) { p.cho = 0; diDao(p); }
   if (ev !== 'chat') return; const msg = String((d && (d.comment || d.content)) || ''), n = norm(msg); noi(p, msg);
@@ -143,7 +144,11 @@ function veDong(x, y, k, t, dt) { const now = performance.now(); if (CI < 0 || n
 let CO_HINH = 0;
 
 /* ---------- Nhạc thỉnh ---------- */
-const NHAC = new Audio('nhac-thinh.mp3?v=1'); NHAC.loop = true; NHAC.preload = 'auto'; let AM = Q.get('am') === '1';
+/* 26/11 Quỳnh: văn thỉnh cắt 4 phần cho nhẹ, phát lần lượt 1→2→3→4 rồi lặp lại */
+const NHAC = new Audio(); NHAC.preload = 'auto'; let NI = 0, AM = Q.get('am') === '1';
+const nhacSrc = i => 'nhac-thinh-' + (i + 1) + '.mp3?v=1'; NHAC.src = nhacSrc(0);
+NHAC.addEventListener('ended', () => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM && !CHUYEN) NHAC.play().catch(() => {}); });
+NHAC.addEventListener('error', () => { setTimeout(() => { NI = (NI + 1) % 4; NHAC.src = nhacSrc(NI); if (AM && !IM) NHAC.play().catch(() => {}); }, 3000); });
 function batAm() { if (IM) return; AM = true; NHAC.play().catch(() => {}); }
 
 /* ---------- Đếm người & đếm ngược ---------- */
@@ -152,7 +157,11 @@ try { const o = JSON.parse(localStorage.getItem('hd_bd_t0') || 'null'); if (o &&
 const luuT0 = () => { try { localStorage.setItem('hd_bd_t0', JSON.stringify(T0)); } catch (e) {} }; luuT0();
 const soNguoi = () => Math.max(MIN_NGUOI, VC);
 const conLai = () => Math.max(0, Math.ceil(CHO_GIAY - (Date.now() - T0) / 1000));
-function chuyen() { if (CHUYEN) return; CHUYEN = performance.now(); luu(); try { localStorage.removeItem('hd_bd_t0'); } catch (e) {} if (NOCHUYEN) return; setTimeout(() => { location.replace('../g/?bd=1'); }, 2600); }
+function chuyen() { if (CHUYEN) return; CHUYEN = performance.now(); luu(); try { localStorage.removeItem('hd_bd_t0'); } catch (e) {}
+  NG.forEach((p, i) => { p.act = null; if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.ngoi = false; p.vao = 1; denNut(p, 'chanBac'); p.wp.push([560 + (Math.random() - .5) * 70, 190], [560 + (Math.random() - .5) * 30, 150]); }); /* mọi người đi từ sân lên bậc vào trong điện */
+  let v = 1; const nh = setInterval(() => { v = Math.max(0, v - .05); try { NHAC.volume = v; } catch (e) {} if (v <= 0) { clearInterval(nh); NHAC.pause(); } }, 150); /* nhạc nhỏ dần */
+  setTimeout(() => { try { if (window.parent !== window && window.parent.__sdChuyen) { window.parent.__sdChuyen(); return; } } catch (e) {} if (!NOCHUYEN) location.replace('../g/?bd=1&cho=0'); }, 5200); }
+window.__bdChuyen = chuyen;
 
 /* ---------- Vẽ ---------- */
 let DEN, SAN, NEN;
@@ -183,14 +192,15 @@ function veNguoi(p, t, dt) { const M = CN.meta && CN.meta[p.sx]; if (!M || !CN.i
   if (!p.sim) { const tt = '⭐ ' + (nv.nick || p.ten); g.font = `700 7.5px ${UI}`; const w = g.measureText(tt).width + 8; hop(x - w / 2, ty, w, 11, 5.5, nv.nenTen || 'rgba(16,70,40,.85)'); chu(tt, x, ty + 6, 7.5, nv.mauTen || '#fff'); }
   if (p.bong && performance.now() - p.bong.t < 4000) { g.font = `700 8.5px ${UI}`; const bw = g.measureText(p.bong.s).width + 12, by = p.sim ? ty - 2 : ty - 17; hop(x - bw / 2, by, bw, 15, 7.5, '#fffbe8'); chu(p.bong.s, x, by + 8, 8.5, '#5a0e0a'); } }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
-function capNhat(dt) { const now = performance.now(); NG.forEach(p => {
-  if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act ? 95 : 60) * dt; /* đi dạo chậm, đi lễ nhanh hơn */
+function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); NG.forEach(p => {
+  if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 95 : 60) * dt; /* đi dạo chậm, đi lễ nhanh hơn */
     if (d > .5) p.dir = huongDir(dx, dy);
     if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); p.wd += d;
+      if (!p.wp.length && p.vao) { p.het = 1; return; }
       if (!p.wp.length) { if (p.ghe) { p.ngoi = true; p.dir = 4; } else if (p.act) { const kh = KHU[p.act.khu]; p.act.t = now; p.dir = kh.kieu === 'le' || kh.kieu === 'huong' ? 4 : huongDir(kh.huong[0] - p.x, kh.huong[1] - p.y); p.d = p.dir; } else p.cho = 2 + Math.random() * 5; } }
     else { p.x += dx / d * sp; p.y += dy / d * sp; p.wd += sp; } return; }
   if (p.act && p.act.t != null) { if (now - p.act.t > 7000) { const r = !p.sim && rec(p.ten); if (r) { if (!r.tham.includes(p.act.khu)) r.tham.push(p.act.khu); if (!r.dem && DU.every(k => r.tham.includes(k))) r.dem = 1; /* đủ 7 nơi: tặng đệm, không báo */ } p.act = null; p.cho = 1.5 + Math.random() * 2; } return; }
-  if (p.ngoi || p.ghe) return;
+  if (p.ngoi || p.ghe || CHUYEN) return;
   p.cho -= dt; if (p.cho <= 0) diDao(p); }); }
 function veHieuUng(t) { const dang = {}; NG.forEach(p => { if (p.act && p.act.t != null) dang[p.act.khu] = (dang[p.act.khu] || 0) + 1; });
   if (dang.huong) { const [x, y] = P(560, 345); for (let i = 0; i < 6; i++) { const a = ((t * .5 + i / 6) % 1), sx = x + Math.sin(t * 1.5 + i) * 4 * a; g.globalAlpha = (1 - a) * .35; g.beginPath(); g.arc(sx, y - a * 40, 3 + a * 5, 0, 7); g.fillStyle = '#e8e2d8'; g.fill(); } g.globalAlpha = 1; } /* khói hương */
@@ -203,9 +213,9 @@ function khung(now) { const dt = Math.min(.1, (now - last) / 1000), t = now / 10
   NG.slice().sort((a, b) => a.y - b.y).forEach(p => veNguoi(p, t, dt));
   Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, dang[k] || 0); });
   veBang(t);
-  if (CHUYEN) { const a = Math.min(1, (now - CHUYEN) / 1200); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }
+  if (CHUYEN && now - CHUYEN > 3000) { const a = Math.min(1, (now - CHUYEN - 3000) / 1500); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }
   requestAnimationFrame(khung); }
-const LUU_Y = '⚠ Lưu ý: khi đã vào trong xem diễn xướng hầu, trang phục giữ nguyên, không đổi được nữa  •  Rời live quá 600 giây sẽ mất hết trang phục đã thay  •  ';
+const LUU_Y = '⚠ Lưu ý: trang phục thay ở sân đền được giữ nguyên khi vào trong xem diễn xướng hầu  •  Rời live quá 600 giây sẽ mất hết trang phục đã thay  •  ';
 function veBang(t) { const X = 10, Y = 6, Wd = 520, Hd = 132; const lg = g.createLinearGradient(0, Y, 0, Y + Hd); lg.addColorStop(0, 'rgba(110,16,12,.93)'); lg.addColorStop(1, 'rgba(60,8,6,.93)'); hop(X, Y, Wd, Hd, 12, lg); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(X, Y, Wd, Hd, 12); g.stroke();
   chu('🏮 Đủ ' + MUC_NGUOI + ' người sẽ bắt đầu chương trình', 270, Y + 15, 12.5, '#fff1d6', { f: SERIF, w: 700 });
   chu('“Diễn xướng hầu đồng tín ngưỡng Đạo Mẫu”', 270, Y + 34, 16.5, '#ffe39a', { f: SERIF, w: 800 });

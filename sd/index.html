@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sân đền → Diễn xướng hầu đồng</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}iframe{position:fixed;inset:0;width:100%;height:100%;border:0}#b{z-index:2;background:#000}#g{z-index:1}</style>
+</head><body>
+<!-- 26/11 14:56 anh Linh: link gộp — sân đền /bd ở trước, /g chạy ngầm phía sau để tải sẵn video.
+     Anh bấm "Vào trong xem diễn xướng hầu ngay" trên /dk (hoặc hết 600 giây / đủ 30 người): người trong sân đi lên bậc vào điện,
+     sân đền mờ dần, cảnh điện /g bắt đầu luôn (không màn tải), người xem đi từ ngoài vào chiếu, trang phục thay ở sân đền giữ nguyên.
+     Tham số của link (vd ?im=1) được chuyển cho cả hai cảnh. -->
+<iframe id="g" allow="autoplay; fullscreen"></iframe>
+<iframe id="b" allow="autoplay; fullscreen"></iframe>
+<script>
+const q = location.search.replace(/^\?/, ''), G = document.getElementById('g'), B = document.getElementById('b');
+G.src = '../g/?bd=1' + (q ? '&' + q : ''); B.src = '../bd/' + (q ? '?' + q : '');
+let xong = false;
+window.__sdChuyen = () => { if (xong) return; xong = true; let n = 0; try { n = G.contentWindow.__bdVao(); } catch (e) {}
+  setTimeout(() => { B.style.transition = 'opacity 1.8s ease'; B.style.opacity = '0'; setTimeout(() => { B.remove(); }, 2000); }, 1200); /* cho cảnh điện chạy 1 nhịp rồi mới mờ sân đền */ return n; };
+</script></body></html>
