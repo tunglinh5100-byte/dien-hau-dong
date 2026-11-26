@@ -44,14 +44,19 @@ const E = [['cong', 'duoi'], ['duoi', 'giua'], ['giua', 'tren'], ['tren', 'huong
 const KE = {}; Object.keys(N).forEach(k => KE[k] = []); E.forEach(([a, b]) => { KE[a].push(b); KE[b].push(a); });
 function duong(a, b) { const tr = { [a]: null }, q = [a]; while (q.length) { const u = q.shift(); if (u === b) break; KE[u].forEach(v => { if (!(v in tr)) { tr[v] = u; q.push(v); } }); } const r = []; for (let u = b; u; u = tr[u]) r.unshift(u); return r; }
 const KHU = {
-  lauco: { ten: 'Lầu Cô', nut: 'lc', bien: [250, 112], huong: [250, 330], kieu: 'le' },
-  laucau: { ten: 'Lầu Cậu', nut: 'lk', bien: [895, 122], huong: [890, 340], kieu: 'le' },
-  cochin: { ten: 'Lầu Cô Chín', nut: 'cc', bien: [940, 352], huong: [970, 560], kieu: 'le' },
-  sontrang: { ten: 'Ban Sơn Trang', nut: 'st', bien: [180, 368], huong: [180, 580], kieu: 'le' },
-  huong: { ten: 'Thắp Hương', nut: 'huongT', bien: [570, 228], huong: [570, 330], kieu: 'huong' },
-  hoama: { ten: 'Lò Hoá Mã', nut: 'hm', bien: [170, 790], huong: [170, 960], kieu: 'hoama' },
-  saple: { ten: 'Sắp Lễ', nut: 'sl', bien: [960, 870], huong: [960, 1050], kieu: 'saple' } };
-const DU = Object.keys(KHU); /* đủ 7 nơi thì được đệm */
+  lauco: { ten: 'Lầu Cô', nut: 'lc', bien: [250, 112], huong: [250, 330], kieu: 'le', diem: [249, 386] },
+  laucau: { ten: 'Lầu Cậu', nut: 'lk', bien: [895, 122], huong: [890, 340], kieu: 'le', diem: [896, 378] },
+  cochin: { ten: 'Lầu Cô Chín', nut: 'cc', bien: [960, 392], huong: [970, 560], kieu: 'le', diem: [975, 672] },
+  sontrang: { ten: 'Ban Sơn Trang', nut: 'st', bien: [150, 420], huong: [180, 580], kieu: 'le', diem: [181, 683] },
+  huong: { ten: 'Thắp Hương', nut: 'huongT', bien: [570, 228], huong: [570, 330], kieu: 'huong', diem: [568, 418] },
+  hoama: { ten: 'Lò Hoá Mã', nut: 'hm', bien: [170, 790], huong: [170, 960], kieu: 'hoama', diem: [187, 1080] },
+  saple: { ten: 'Sắp Lễ', nut: 'sl', bien: [960, 870], huong: [960, 1050], kieu: 'saple', diem: [941, 1108] } };
+const BUOC = ['saple', 'huong', 'lauco', 'laucau', 'cochin', 'sontrang']; /* 26/11 17:11 anh Linh: 6 bước đi lễ — mỗi bước xong được 1 ngôi sao sáng trên đầu; đủ 6 sao được tặng đệm (ẩn). Hoá mã là bước cuối, không tính sao */
+const DU = BUOC;
+const HANG = {}; Object.keys(KHU).forEach(k => HANG[k] = []); /* mỗi nơi từng người một, người sau đứng xếp hàng phía sau */
+const THOI = { le: 7500, huong: 8000, saple: 7500, hoama: 7500 };
+function roiHang(p) { Object.keys(HANG).forEach(k => { const i = HANG[k].indexOf(p); if (i >= 0) { HANG[k].splice(i, 1); xepHang(k); } }); }
+function xepHang(k) { const [dx, dy] = KHU[k].diem; HANG[k].forEach((q, i) => { if (q.act && q.act.t != null) return; const tg = [dx + (i ? (i % 2 ? 6 : -6) : 0), dy + i * 42]; q.wp = q.nut === KHU[k].nut || Math.hypot(q.x - dx, q.y - dy) < 140 ? [tg] : q.wp.length ? q.wp.slice(0, -1).concat([tg]) : [tg]; q.cho = 0; }); }
 const DI_DAO = ['duoi', 'giua', 'tren', 'huongT', 'lcR', 'lkR', 'stR', 'ccR', 'hmR', 'slR', 'lc', 'lk', 'st', 'cc', 'sl']; /* chỗ đi dạo tự do (không lên bậc đền) */
 const BAC = []; [175, 222].forEach((y, r) => { for (let i = 0; i < 6; i++) BAC.push({ x: 468 + i * 44 + (r ? 22 : 0), y, who: null }); }); /* chỗ ngồi chờ trên bậc thang */
 
@@ -78,13 +83,13 @@ const NG = [];
 function tao(ten, sim) { let p = NG.find(v => v.ten === ten); if (p) return p; const h = hashN(ten), [x, y] = N.cong, r = !sim && REC[ten];
   p = { ten, sim: !!sim, sx: (r && r.sx) || (h % 2 ? 'nu' : 'nam'), x: x + (Math.random() - .5) * 60, y, wp: [], nut: 'cong', act: null, ghe: null, ngoi: false, cho: 1 + Math.random() * 3, d: 4, wd: 0, bong: null, t0: Math.random() * 9 };
   NG.push(p); if (NG.filter(v => !v.sim).length > 80) { const cu = NG.find(v => !v.sim && v !== p && !v.act); if (cu) bo(cu); } return p; }
-function bo(p) { if (p.ghe) p.ghe.who = null; NG.splice(NG.indexOf(p), 1); }
+function bo(p) { roiHang(p); if (p.ghe) p.ghe.who = null; NG.splice(NG.indexOf(p), 1); }
 function rai(nut, k) { const [x, y] = N[nut]; return [x + (Math.random() - .5) * (k || 70), y + (Math.random() - .5) * (k ? k * .4 : 26)]; }
 function denNut(p, dich, cuoi) { if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.wp = []; if (p.ngoi) { p.wp.push([p.x, 300]); p.ngoi = false; }
   duong(p.nut, dich).slice(1).forEach(k => p.wp.push(rai(k, 30))); p.wp.push(cuoi || rai(dich)); p.nut = dich; }
-function diDao(p) { let k; do { k = DI_DAO[Math.floor(Math.random() * DI_DAO.length)]; } while (k === p.nut && DI_DAO.length > 1); p.act = null; denNut(p, k); }
-function lamLe(p, khu) { p.act = { khu, t: null }; denNut(p, KHU[khu].nut); }
-function vaoXem(p) { p.act = null; let z = BAC.find(b => !b.who); if (!z && !p.sim) { z = BAC.find(b => b.who && b.who.sim); if (z) diDao(z.who); } if (!z) return false;
+function diDao(p) { roiHang(p); let k; do { k = DI_DAO[Math.floor(Math.random() * DI_DAO.length)]; } while (k === p.nut && DI_DAO.length > 1); p.act = null; denNut(p, k); }
+function lamLe(p, khu) { if (p.act && p.act.khu === khu) return; roiHang(p); p.act = { khu, t: null }; HANG[khu].push(p); const i = HANG[khu].length - 1, [dx, dy] = KHU[khu].diem; denNut(p, KHU[khu].nut, [dx + (i ? (i % 2 ? 6 : -6) : 0), dy + i * 42]); }
+function vaoXem(p) { roiHang(p); p.act = null; let z = BAC.find(b => !b.who); if (!z && !p.sim) { z = BAC.find(b => b.who && b.who.sim); if (z) diDao(z.who); } if (!z) return false;
   denNut(p, 'chanBac', [z.x, z.y + 30]); p.wp.push([z.x, z.y]); z.who = p; p.ghe = z; return true; }
 function noi(p, s) { p.bong = { s: String(s).slice(0, 44), t: performance.now() }; }
 
@@ -163,7 +168,7 @@ const luuT0 = () => { try { localStorage.setItem('hd_bd_t0', JSON.stringify(T0))
 const soNguoi = () => Math.max(MIN_NGUOI, VC);
 const conLai = () => Math.max(0, Math.ceil(CHO_GIAY - (Date.now() - T0) / 1000));
 function chuyen() { if (CHUYEN) return; CHUYEN = performance.now(); luu(); try { localStorage.removeItem('hd_bd_t0'); } catch (e) {}
-  NG.forEach((p, i) => { p.act = null; if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.ngoi = false; p.vao = 1; denNut(p, 'chanBac'); p.wp.push([560 + (Math.random() - .5) * 70, 190], [560 + (Math.random() - .5) * 30, 150]); }); /* mọi người đi từ sân lên bậc vào trong điện */
+  Object.keys(HANG).forEach(k => HANG[k] = []); NG.forEach((p, i) => { p.act = null; if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.ngoi = false; p.vao = 1; denNut(p, 'chanBac'); p.wp.push([560 + (Math.random() - .5) * 70, 190], [560 + (Math.random() - .5) * 30, 150]); }); /* mọi người đi từ sân lên bậc vào trong điện */
   let v = 1; const nh = setInterval(() => { v = Math.max(0, v - .05); try { NHAC.volume = v; } catch (e) {} if (v <= 0) { clearInterval(nh); NHAC.pause(); } }, 150); /* nhạc nhỏ dần */
   setTimeout(() => { try { if (window.parent !== window && window.parent.__sdChuyen) { window.parent.__sdChuyen(); return; } } catch (e) {} if (!NOCHUYEN) location.replace('../g/?bd=1&cho=0'); }, 5200); }
 window.__bdChuyen = chuyen;
@@ -183,8 +188,8 @@ function veNguoi(p, t, dt) { const M = CN.meta && CN.meta[p.sx]; if (!M || !CN.i
   let key, mir = false, bob = 0, rot = 0;
   if (p.ngoi) { key = 'sit'; bob = Math.sin(t * 1.8 + p.t0) * .35; }
   else if (p.act && p.act.t != null) { const e = (performance.now() - p.act.t) / 1000, kh = KHU[p.act.khu];
-    if (kh.kieu === 'le' || kh.kieu === 'huong') key = M.bowB && Math.sin(e * 2.2) > .1 ? 'bowB' : 'pray'; /* quỳ lạy hướng lên ban */
-    else { key = DIRK[p.d]; mir = p.d === 7; bob = -Math.max(0, Math.sin(e * 2.4)) * 1.5; } }
+    if (kh.kieu === 'le') { const ph = e < 1 ? -1 : ((e - 1) % 2) / 2; key = ph > .2 && ph < .7 && e < 7 ? (M.rects.bowB ? 'bowB' : 'bow') : 'pray'; } /* quỳ chắp tay rồi lạy 3 lạy, chính diện lên ban */
+    else { key = 'back'; if (kh.kieu === 'huong' && e > 1.2 && e < 6) bob = -Math.max(0, Math.sin((e - 1.2) * Math.PI / 1.6)) * 2.2; else if (kh.kieu !== 'huong' && e > 5.2) bob = -Math.max(0, Math.sin((e - 5.2) * Math.PI / 1.2)) * 2.2; } } /* đứng quay lưng, vái */
   else if (dang && p.d !== 0 && p.d !== 4) { key = 'w' + (Math.floor(p.wd / 8) % 4); mir = p.d >= 5; }
   else { key = DIRK[p.d]; mir = p.d === 7; if (dang) { const ph = p.wd * .4; bob = Math.abs(Math.sin(ph)) * 2; rot = Math.sin(ph) * .045; } }
   const r = M.rects[key] || M.rects.front, idx = O.indexOf(M.rects[key] ? key : 'front'), src = anh(p.sx, mauAo(p), nv, mauKhan(p)), dw = r[2] * sc, dh = r[3] * sc;
@@ -192,31 +197,52 @@ function veNguoi(p, t, dt) { const M = CN.meta && CN.meta[p.sx]; if (!M || !CN.i
   g.translate(0, -bob); if (rot) g.rotate(rot); if (mir) g.scale(-1, 1);
   g.drawImage(src, idx * M.cw + r[0], r[1], r[2], r[3], -dw / 2, -dh, dw, dh);
   { const kt = nv.kieuToc, HT = { back: .6, br: .6, bl: .6, sit: .55 }[key]; if (HT && (kt === 'dai' || kt === 'vua')) { const ny = -dh * HT, ey = -dh * (kt === 'dai' ? .22 : .4), hw = dw * .2, sw = Math.sin(t * 2 + p.t0) * hw * .06; g.beginPath(); g.moveTo(-hw, ny); g.quadraticCurveTo(-hw * 1.15, (ny + ey) / 2, -hw * .7 + sw, ey); g.quadraticCurveTo(0, ey + hw * .35, hw * .7 + sw, ey); g.quadraticCurveTo(hw * 1.15, (ny + ey) / 2, hw, ny); g.closePath(); g.fillStyle = cnmHex(nv.toc) || '#2b1d17'; g.fill(); } } /* tóc vừa / dài xoã */
+  if (p.act && p.act.t != null) veCam(p, (performance.now() - p.act.t) / 1000, dw, dh, t);
   g.restore();
-  const ty = y - dh - 12;
+  const lift = p.act && p.act.t != null && KHU[p.act.khu].kieu === 'huong' && (performance.now() - p.act.t) < 6200 ? 14 : 0, ty = y - dh - 12 - lift, cao = !p.sim && r0 && r0.tham && r0.tham.some(k => BUOC.includes(k)) ? 10 : 0;
+  if (!p.sim && r0 && r0.tham && r0.tham.some(k => BUOC.includes(k))) veSao(x, ty - 8, r0.tham, t); /* 6 ngôi sao: sáng = bước đã xong */
   if (!p.sim) { const tt = '⭐ ' + (nv.nick || p.ten); g.font = `700 7.5px ${UI}`; const w = g.measureText(tt).width + 8; hop(x - w / 2, ty, w, 11, 5.5, nv.nenTen || 'rgba(16,70,40,.85)'); chu(tt, x, ty + 6, 7.5, nv.mauTen || '#fff'); }
-  if (p.bong && performance.now() - p.bong.t < 4000) { g.font = `700 8.5px ${UI}`; const bw = g.measureText(p.bong.s).width + 12, by = p.sim ? ty - 2 : ty - 17; hop(x - bw / 2, by, bw, 15, 7.5, '#fffbe8'); chu(p.bong.s, x, by + 8, 8.5, '#5a0e0a'); } }
+  if (p.bong && performance.now() - p.bong.t < 4000) { g.font = `700 8.5px ${UI}`; const bw = g.measureText(p.bong.s).width + 12, by = p.sim ? ty - 2 : ty - 17 - cao; hop(x - bw / 2, by, bw, 15, 7.5, '#fffbe8'); chu(p.bong.s, x, by + 8, 8.5, '#5a0e0a'); } }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
 function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); NG.forEach(p => {
   if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 95 : 60) * dt; /* đi dạo chậm, đi lễ nhanh hơn */
     if (d > .5) p.dir = huongDir(dx, dy);
     if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); p.wd += d;
       if (!p.wp.length && p.vao) { p.het = 1; return; }
-      if (!p.wp.length) { if (p.ghe) { p.ngoi = true; p.dir = 4; } else if (p.act) { const kh = KHU[p.act.khu]; p.act.t = now; p.dir = kh.kieu === 'le' || kh.kieu === 'huong' ? 4 : huongDir(kh.huong[0] - p.x, kh.huong[1] - p.y); p.d = p.dir; } else p.cho = 2 + Math.random() * 5; } }
+      if (!p.wp.length) { if (p.ghe) { p.ngoi = true; p.dir = 4; } else if (p.act) { p.dir = 4; if (HANG[p.act.khu][0] === p && Math.hypot(p.x - KHU[p.act.khu].diem[0], p.y - KHU[p.act.khu].diem[1]) < 3) { p.act.t = now; p.d = 4; } } else p.cho = 2 + Math.random() * 5; } }
     else { p.x += dx / d * sp; p.y += dy / d * sp; p.wd += sp; } return; }
-  if (p.act && p.act.t != null) { if (now - p.act.t > 7000) { const r = !p.sim && rec(p.ten); if (r) { if (!r.tham.includes(p.act.khu)) r.tham.push(p.act.khu); if (!r.dem && DU.every(k => r.tham.includes(k))) r.dem = 1; /* đủ 7 nơi: tặng đệm, không báo */ } p.act = null; p.cho = 1.5 + Math.random() * 2; } return; }
+  if (p.act && p.act.t != null) { const kh = KHU[p.act.khu]; if (now - p.act.t > THOI[kh.kieu]) { const k = p.act.khu, r = !p.sim && rec(p.ten); if (r) { if (!r.tham.includes(k)) { r.tham.push(k); if (BUOC.includes(k)) SAO_MOI.set(p, now); } if (!r.dem && DU.every(b => r.tham.includes(b))) r.dem = 1; /* đủ 6 bước: tặng đệm, không báo */ } p.act = null; HANG[k].shift(); xepHang(k); p.wp = [[p.x + (p.x < 560 ? 40 : -40), p.y + 24]]; p.cho = 1.5 + Math.random() * 2; } return; }
+  if (p.act && !p.wp.length) { const k = p.act.khu; if (HANG[k][0] === p) { const [dx, dy] = KHU[k].diem; if (Math.hypot(p.x - dx, p.y - dy) < 3) { p.act.t = now; p.d = p.dir = 4; } else p.wp = [[dx, dy]]; } else p.dir = 4; return; } /* đang xếp hàng chờ tới lượt */
   if (p.ngoi || p.ghe || CHUYEN) return;
   p.cho -= dt; if (p.cho <= 0) diDao(p); }); }
-function veHieuUng(t) { const dang = {}; NG.forEach(p => { if (p.act && p.act.t != null) dang[p.act.khu] = (dang[p.act.khu] || 0) + 1; });
-  if (dang.huong) { const [x, y] = P(560, 345); for (let i = 0; i < 6; i++) { const a = ((t * .5 + i / 6) % 1), sx = x + Math.sin(t * 1.5 + i) * 4 * a; g.globalAlpha = (1 - a) * .35; g.beginPath(); g.arc(sx, y - a * 40, 3 + a * 5, 0, 7); g.fillStyle = '#e8e2d8'; g.fill(); } g.globalAlpha = 1; } /* khói hương */
-  if (dang.hoama) { const [x, y] = P(185, 960); for (let i = 0; i < 7; i++) { const a = ((t * 1.3 + i / 7) % 1); g.globalAlpha = (1 - a) * .8; g.beginPath(); g.arc(x + Math.sin(t * 6 + i * 2) * 5, y - a * 22, 4 * (1 - a) + 1, 0, 7); g.fillStyle = a < .4 ? '#ffd24a' : '#ff7a2a'; g.fill(); } g.globalAlpha = 1; } /* lửa hoá mã */
+const SAO_MOI = new Map(), LU = [], MAM = [], PT = []; /* sao vừa được (nhấp nháy), hương cắm trong lư, lễ vật trên quầy, tàn lửa/giấy */
+function veSao(cx, cy, tham, t) { const n = BUOC.length, kc = 9, x0 = cx - (n - 1) * kc / 2; for (let i = 0; i < n; i++) { const da = tham.includes(BUOC[i]), x = x0 + i * kc; g.save(); g.translate(x, cy); if (da) { g.shadowColor = '#ffd84a'; g.shadowBlur = 6; } g.beginPath(); for (let j = 0; j < 10; j++) { const r = j % 2 ? 1.6 : 4, a = -Math.PI / 2 + j * Math.PI / 5; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fillStyle = da ? '#ffd84a' : 'rgba(255,255,255,.28)'; g.fill(); if (!da) { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = .6; g.stroke(); } g.restore(); } }
+function nenHuong(x0, y0, x1, y1, t, khoi) { g.strokeStyle = '#8a3b1c'; g.lineWidth = .9; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); g.fillStyle = '#ff5a1f'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 4; g.beginPath(); g.arc(x1, y1, 1.1, 0, 7); g.fill(); g.shadowBlur = 0;
+  if (khoi) { for (let i = 0; i < 3; i++) { const a = (t * .6 + i / 3) % 1; g.globalAlpha = (1 - a) * .3; g.beginPath(); g.arc(x1 + Math.sin(t * 2 + i) * 3 * a, y1 - a * 18, 1 + a * 3, 0, 7); g.fillStyle = '#ece6dc'; g.fill(); } g.globalAlpha = 1; } }
+function veCam(p, e, dw, dh, t) { const kieu = KHU[p.act.khu].kieu;
+  if (kieu === 'huong' && e < 6.2) { const hx = 0, hy = -dh * .52; [-2.2, 0, 2.2].forEach(d => nenHuong(hx + d * .6, hy, hx + d, hy - dh * .62, t, d === 0)); } /* 3 nén hương giơ cao trước mặt (thấy từ sau lưng) */
+  if (kieu === 'le' && e < 1) { [-1.5, 0, 1.5].forEach(d => nenHuong(d * .5, -dh * .45, d, -dh * .95, t, false)); }
+  if (kieu === 'saple' && e > .5 && e < 4.8) { g.fillStyle = '#b3261e'; g.beginPath(); g.ellipse(0, -dh * .55, dw * .42, dw * .11, 0, 0, 7); g.fill(); [['#f39a1e', -.2], ['#e8d23a', 0], ['#d63a6a', .2]].forEach(([c, o]) => { g.fillStyle = c; g.beginPath(); g.arc(dw * o, -dh * .6, dw * .08, 0, 7); g.fill(); }); } /* bưng mâm lễ */
+  if (kieu === 'hoama' && e < 5) { const n = Math.max(0, 6 - Math.floor(e * 1.3)); for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#e8b13a' : '#c8302a'; g.fillRect(-dw * .22, -dh * .55 - i * 1.2, dw * .44, 1.6); } } } /* cầm xấp vàng mã, mỏng dần khi cho vào lò */
+function hieuUngLe(now) { NG.forEach(p => { if (!p.act || p.act.t == null) return; const e = (now - p.act.t) / 1000, kh = KHU[p.act.khu], f = p.act;
+  if (kh.kieu === 'huong' && e > 6.2 && !f.cam) { f.cam = 1; LU.push({ t: now, dx: (Math.random() - .5) * 18 }); if (LU.length > 24) LU.shift(); } /* cắm hương vào lư */
+  if (kh.kieu === 'saple' && e > 4.8 && !f.dat) { f.dat = 1; const mau = [['#f39a1e', 'cam'], ['#e8d23a', 'chuoi'], ['#d63a6a', 'hoa'], ['#3f8a3c', 'banh']]; for (let i = 0; i < 3; i++) MAM.push({ t: now + i * 250, c: mau[Math.floor(Math.random() * 4)], x: 885 + Math.random() * 105, y: 1046 + Math.random() * 10 }); while (MAM.length > 18) MAM.shift(); } /* đặt lễ lên quầy */
+  if (kh.kieu === 'hoama' && e < 5 && (!f.gt || now - f.gt > 380)) { f.gt = now; PT.push({ k: 'giay', x: p.x, y: p.y - 70, tx: 187 + (Math.random() - .5) * 24, ty: 1000, t: now, d: 700, c: Math.random() < .5 ? '#e8b13a' : '#c8302a' }); } }); }
+function veHieuUng(t) { const now = performance.now(); hieuUngLe(now); const dang = {}; NG.forEach(p => { if (p.act && p.act.t != null) dang[p.act.khu] = (dang[p.act.khu] || 0) + 1; });
+  for (let i = LU.length - 1; i >= 0; i--) if (now - LU[i].t > 120000) LU.splice(i, 1); { const [lx, ly] = P(568, 318); LU.forEach((h, i) => { const x = lx + h.dx * K; nenHuong(x, ly, x + (i % 3 - 1) * .6, ly - 13, t + i, i % 3 === 0); }); } /* hương đã cắm trong lư, cháy 2 phút */
+  for (let i = MAM.length - 1; i >= 0; i--) if (now - MAM[i].t > 180000) MAM.splice(i, 1); MAM.forEach(m => { if (now < m.t) return; const [x, y] = P(m.x, m.y), a = Math.min(1, (now - m.t) / 300); g.globalAlpha = a; g.fillStyle = m.c[0]; g.beginPath(); if (m.c[1] === 'chuoi') g.ellipse(x, y, 5.5, 2.2, -.3, 0, 7); else if (m.c[1] === 'banh') g.rect(x - 3.5, y - 3.5, 7, 7); else g.arc(x, y, 3.6, 0, 7); g.fill(); g.globalAlpha = 1; }); /* lễ vật trên quầy */
+  for (let i = PT.length - 1; i >= 0; i--) { const q = PT[i], a = (now - q.t) / q.d; if (a >= 1) { if (q.k === 'giay') for (let j = 0; j < 4; j++) PT.push({ k: 'tan', x: q.tx + (Math.random() - .5) * 20, y: q.ty, vy: -30 - Math.random() * 40, vx: (Math.random() - .5) * 14, t: now, d: 1400 }); PT.splice(i, 1); continue; }
+    if (q.k === 'giay') { const x = q.x + (q.tx - q.x) * a, y = q.y + (q.ty - q.y) * a - Math.sin(a * Math.PI) * 50, [sx, sy] = P(x, y); g.save(); g.translate(sx, sy); g.rotate(a * 6); g.fillStyle = q.c; g.fillRect(-2.5, -1.6, 5, 3.2); g.restore(); }
+    else { const s = (now - q.t) / 1000, [sx, sy] = P(q.x + q.vx * s * 2, q.y + q.vy * s * 2); g.globalAlpha = 1 - a; g.fillStyle = a < .5 ? '#ffd24a' : '#ff7a2a'; g.beginPath(); g.arc(sx, sy, 1.2, 0, 7); g.fill(); g.globalAlpha = 1; } } /* giấy vàng mã bay vào lò, tàn lửa bốc lên */
+  if (dang.huong || LU.length) { const [x, y] = P(568, 318); for (let i = 0; i < 6; i++) { const a = ((t * .5 + i / 6) % 1), sx = x + Math.sin(t * 1.5 + i) * 4 * a; g.globalAlpha = (1 - a) * .35; g.beginPath(); g.arc(sx, y - a * 40, 3 + a * 5, 0, 7); g.fillStyle = '#e8e2d8'; g.fill(); } g.globalAlpha = 1; } /* khói hương */
+  if (dang.hoama) { const [x, y] = P(187, 990); for (let i = 0; i < 12; i++) { const a = ((t * 1.3 + i / 7) % 1); g.globalAlpha = (1 - a) * .8; g.beginPath(); g.arc(x + Math.sin(t * 6 + i * 2) * 7, y - a * 30, 5 * (1 - a) + 1.5, 0, 7); g.fillStyle = a < .4 ? '#ffd24a' : '#ff7a2a'; g.fill(); } g.globalAlpha = 1; } /* lửa hoá mã */
   return dang; }
 let last = performance.now();
 function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(NEN.c, 0, 0, W, H);
   veDong(270, NEN.ph * .885 + 16, .34, t, dt);
   const dang = veHieuUng(t);
   NG.slice().sort((a, b) => a.y - b.y).forEach(p => veNguoi(p, t, dt));
-  Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, dang[k] || 0); });
+  Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, HANG[k].length); });
   veBang(t);
   if (CHUYEN && now - CHUYEN > 3000) { const a = Math.min(1, (now - CHUYEN - 3000) / 1500); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }
   requestAnimationFrame(khung); }
