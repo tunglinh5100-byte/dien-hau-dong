@@ -16,13 +16,16 @@ input,select{background:#1b0f08;color:#f3e6d0;border:1px solid #6b4426;border-ra
 #rong{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#cdb79a;text-align:center;padding:20px}
 textarea{width:100%;height:150px;background:#1b0f08;color:#f3e6d0;border:1px solid #6b4426;border-radius:5px;font:12px monospace}
 </style></head><body>
-<div id="trai"><canvas id="cv"></canvas><div id="rong"><div style="font-size:18px;color:#ffd27a">Bước 1: mở ảnh nền đền</div><div>Ảnh Tú làm bằng Gemini (tải từ thư mục Drive về máy) — kéo thả vào đây hoặc bấm nút</div><label><button onclick="document.getElementById('fAnh').click()">Chọn ảnh nền…</button></label></div></div>
+<div id="trai"><canvas id="cv"></canvas><div id="rong"><div style="font-size:18px;color:#ffd27a">Đền mới: vẽ sơ đồ trước</div><div>Đặt các khối (cổng, ban, lầu, lò hoá mã…) đúng chỗ → tải ảnh sơ đồ → đưa Gemini vẽ theo</div><button onclick="soDoMoi()">🧱 Vẽ sơ đồ đền mới</button><div style="margin-top:14px">Đã có ảnh Gemini? Kéo thả vào đây hoặc</div><button onclick="document.getElementById('fAnh').click()">🖼 Mở ảnh nền…</button></div></div>
 <div id="phai">
 <h1>🏯 Tạo đền</h1>
 <div class="goi">Tên đền: <input id="tenDen" placeholder="VD: Đền Bắc Lệ" style="width:100%"></div>
 <div class="cong" style="margin-top:6px"><input type="file" id="fAnh" accept="image/*" hidden><button onclick="fAnh.click()">🖼 Ảnh nền</button><input type="file" id="fJson" accept=".json" hidden><button onclick="fJson.click()">📂 Mở bản đã lưu</button></div>
 
-<h2>Bước 2: vẽ</h2>
+<h2>Bước 1: sơ đồ khối (cho Gemini)</h2>
+<div class="cong"><button data-m="khoi">🧱 Đặt khối</button><select id="loaiKhoi"></select><button onclick="soDoMoi()">Sơ đồ mới</button></div>
+<div class="cong"><button onclick="taiSoDo()">⬇ Tải ảnh sơ đồ (.png)</button><label class="goi" style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="hienKhoi" checked onchange="ve()"> hiện khối</label></div>
+<h2>Bước 2: đường đi & điểm</h2>
 <div class="cong">
 <button data-m="duong" class="on">🛤 Đường đi</button><button data-m="diem">🙏 Điểm lễ</button><button data-m="cong">🚪 Cổng vào</button><button data-m="sua">✋ Kéo / sửa</button></div>
 <div class="goi" id="goiY"></div>
@@ -41,26 +44,38 @@ textarea{width:100%;height:150px;background:#1b0f08;color:#f3e6d0;border:1px sol
 const LOAI = { le: ['Lễ ban/lầu', '🙏'], huong: ['Thắp hương', '🕯'], saple: ['Sắp lễ', '🧺'], hoama: ['Hoá mã', '🔥'], tudo: ['Tủ cất đồ', '🔒'], ngam: ['Chỉ ngắm / giới thiệu', '👀'] };
 const cv = document.getElementById('cv'), g = cv.getContext('2d');
 let ANH = null, ANH_SRC = '', TL = 1, MODE = 'duong', CHON = null, KEO = null, NOI = null, THU = null;
-let D = { ten: '', anh: '', w: 0, h: 0, nut: [], canh: [], diem: [], cong: null };
+let D = { ten: '', anh: '', w: 0, h: 0, nut: [], canh: [], diem: [], cong: null, khoi: [] };
+const KL = { dien: ['Điện chính', '#b8432f', 'le'], le: ['Ban / lầu', '#d4932c', 'le'], cong: ['Cổng', '#6b5a4a'], huong: ['Bát hương', '#e0a93b', 'huong'], saple: ['Nhà sắp lễ', '#9a6a3a', 'saple'], hoama: ['Lò hoá mã', '#a8322a', 'hoama'], tudo: ['Tủ cất đồ', '#2a8f8f', 'tudo'], ho: ['Hồ nước', '#4a8fd8'], cay: ['Cây / vườn', '#4c9a4c'], khac: ['Công trình khác', '#8a7a9a'] };
+let idK = 1;
 let idN = 1;
 const $ = id => document.getElementById(id);
-document.getElementById('prompt').value = `Vẽ phối cảnh một ngôi đền thờ Mẫu Việt Nam [TÊN ĐỀN, ĐỊA ĐIỂM] nhìn từ trên cao xuống, góc chéo khoảng 45 độ từ phía cổng vào (cổng ở cạnh dưới ảnh, điện chính ở phía trên ảnh).
-Phong cách: tranh minh hoạ 2.5D kiểu game, nét sạch, màu ấm, ánh sáng ban ngày dịu, giống ảnh sân đền mẫu đính kèm.
-Bố cục (từ dưới lên): [VD: cổng tam quan → sân lát gạch → bên trái lò hoá mã, bên phải nhà sắp lễ → giữa sân bát hương lớn → hai bên lầu Cô, lầu Cậu → trên cùng điện chính có bậc đá].
-Yêu cầu:
-- Ảnh dọc tỉ lệ 4:5 (hoặc 9:16), độ phân giải cao.
-- Sân trống, KHÔNG có người, không chữ, không logo, không biển tên.
-- Lối đi giữa các ban/lầu rõ ràng, đủ rộng để nhân vật đi lại.
-- Trước mỗi ban/lầu có khoảng sân trống để người quỳ lễ.`;
+$('loaiKhoi').innerHTML = Object.entries(KL).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('');
+document.getElementById('prompt').value = `Vẽ lại ảnh sơ đồ đính kèm thành phối cảnh một ngôi đền thờ Mẫu Việt Nam ([TÊN ĐỀN]).
+QUAN TRỌNG: giữ ĐÚNG vị trí, kích thước và khung hình của từng khối trong sơ đồ — mỗi khối có ghi tên là công trình nào. Không thêm, bớt hay đổi chỗ công trình. Dải màu xám nhạt là lối đi lát đá. Ảnh ra cùng tỉ lệ khung với ảnh sơ đồ.
+Góc nhìn: từ trên cao xuống, chéo khoảng 45 độ từ phía cổng (cổng ở cạnh dưới ảnh).
+Phong cách: tranh minh hoạ 2.5D kiểu game, nét sạch, màu ấm, nắng dịu, giống ảnh sân đền mẫu (nếu đính kèm).
+Sân trống, KHÔNG có người, KHÔNG chữ, không logo, không biển tên, không vẽ lại các nhãn chữ trong sơ đồ.
+Trước mỗi ban/lầu để khoảng sân trống cho người quỳ lễ.`;
+function soDoMoi() { if (D.nut.length + D.diem.length + (D.khoi || []).length && !confirm('Bắt đầu sơ đồ mới (xoá bản đang vẽ)?')) return; D = { ten: $('tenDen').value, anh: 'so-do', soDo: 1, w: 1080, h: 1350, nut: [], canh: [], diem: [], cong: null, khoi: [] }; moAnh(nenGiay(1080, 1350), true); setMode('khoi'); }
+function nenGiay(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; const q = c.getContext('2d'); q.fillStyle = '#efe6d2'; q.fillRect(0, 0, w, h); q.strokeStyle = 'rgba(0,0,0,.07)'; for (let x = 0; x < w; x += 54) { q.beginPath(); q.moveTo(x, 0); q.lineTo(x, h); q.stroke(); } for (let y = 0; y < h; y += 54) { q.beginPath(); q.moveTo(0, y); q.lineTo(w, y); q.stroke(); } return c.toDataURL(); }
+function veKhoi(q, s, nhan) { (D.khoi || []).forEach(k => { const v = KL[k.loai] || KL.khac, d = D.diem.find(x => x.khoi === k.id), t = d ? d.ten : (k.ten || v[0]);
+  q.fillStyle = v[1]; q.strokeStyle = !nhan && CHON && CHON.o === k ? '#fff' : '#2a1406'; q.lineWidth = 3 * s; q.beginPath(); q.roundRect(k.x, k.y, k.w, k.h, k.loai === 'ho' ? Math.min(k.w, k.h) / 2 : 8 * s); q.fill(); q.stroke();
+  if (!nhan) { q.fillStyle = '#fff'; q.fillRect(k.x + k.w - 9 * s, k.y + k.h - 9 * s, 9 * s, 9 * s); }
+  q.fillStyle = '#fff'; q.font = `bold ${Math.max(14, Math.min(34, k.w / Math.max(4, t.length) * 1.7))}px system-ui`; q.textAlign = 'center'; q.textBaseline = 'middle'; q.lineWidth = 4; q.strokeStyle = 'rgba(0,0,0,.55)'; q.strokeText(t, k.x + k.w / 2, k.y + k.h / 2); q.fillText(t, k.x + k.w / 2, k.y + k.h / 2); }); }
+function taiSoDo() { if (!D.khoi || !D.khoi.length) return alert('Chưa có khối nào'); const c = document.createElement('canvas'); c.width = D.w; c.height = D.h; const q = c.getContext('2d'); q.fillStyle = '#efe6d2'; q.fillRect(0, 0, D.w, D.h);
+  q.lineCap = 'round'; q.strokeStyle = '#c9c2b4'; q.lineWidth = 46; D.canh.forEach(([a, b]) => { a = nutId(a); b = nutId(b); if (!a || !b) return; q.beginPath(); q.moveTo(a.x, a.y); q.lineTo(b.x, b.y); q.stroke(); });
+  veKhoi(q, 1, 1); const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = 'so-do-' + slug() + '.png'; a.click(); }
+function slug() { return (D.ten || 'moi').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function setMode(m) { MODE = m; NOI = null; document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === m));
   $('goiY').innerHTML = { duong: 'Bấm vào chỗ trống để đặt <b>nút đường</b>. Bấm 1 nút rồi bấm nút khác để <b>nối đường</b> (người chơi chỉ đi theo các đường này). Bấm vào giữa đường để xoá đường.',
+    khoi: 'Chọn loại khối, rồi <b>kéo chuột</b> trên ảnh để vẽ khối. Kéo góc dưới phải để đổi cỡ. Khối ban/lầu, lò hoá mã, nhà sắp lễ… tự có điểm quỳ lễ phía trước. Khối <b>Cổng</b> là có luôn cổng vào.',
     diem: 'Bấm vào <b>chỗ người quỳ lễ</b> (ngay trước ban/lầu, mặt hướng lên ban). Bảng tên tự đặt phía trên, kéo được. Điểm tự nối vào nút đường gần nhất.',
     cong: 'Bấm vào chỗ <b>cổng vào</b> — người chơi xuất hiện và ra về ở đây.',
     sua: 'Kéo nút, điểm lễ, bảng tên để chỉnh. Chọn rồi bấm <b>Delete</b> để xoá.' }[m]; ve(); }
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => setMode(b.dataset.m)); setMode('duong');
-function moAnh(src, giuDiem) { const im = new Image(); im.onload = () => { ANH = im; ANH_SRC = src; if (!giuDiem && D.w && (D.w !== im.width || D.h !== im.height) && D.nut.length) { const sx = im.width / D.w, sy = im.height / D.h; D.nut.forEach(n => { n.x *= sx; n.y *= sy; }); D.diem.forEach(d => { d.x *= sx; d.y *= sy; d.bx *= sx; d.by *= sy; }); if (D.cong) { D.cong.x *= sx; D.cong.y *= sy; } } D.w = im.width; D.h = im.height; $('rong').style.display = 'none'; coGian(); }; im.src = src; }
+function moAnh(src, giuDiem) { const im = new Image(); im.onload = () => { ANH = im; ANH_SRC = src; if (!giuDiem) D.soDo = 0; if (!giuDiem && D.w && (D.w !== im.width || D.h !== im.height) && (D.nut.length || D.diem.length || (D.khoi || []).length)) { const sx = im.width / D.w, sy = im.height / D.h; D.nut.forEach(n => { n.x *= sx; n.y *= sy; }); D.diem.forEach(d => { d.x *= sx; d.y *= sy; d.bx *= sx; d.by *= sy; }); (D.khoi || []).forEach(k => { k.x *= sx; k.y *= sy; k.w *= sx; k.h *= sy; }); if (D.cong) { D.cong.x *= sx; D.cong.y *= sy; } } D.w = im.width; D.h = im.height; $('rong').style.display = 'none'; coGian(); }; im.src = src; }
 $('fAnh').onchange = e => { const f = e.target.files[0]; if (!f) return; D.anh = f.name; if (!D.ten) { $('tenDen').value = D.ten = f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '); } const r = new FileReader(); r.onload = () => moAnh(r.result); r.readAsDataURL(f); };
-$('fJson').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => { const o = JSON.parse(t); D = Object.assign({ nut: [], canh: [], diem: [], cong: null }, o); idN = Math.max(0, ...D.nut.map(n => n.id)) + 1; $('tenDen').value = D.ten || ''; if (ANH) coGian(); else cap(); alert('Đã mở bản lưu. Mở thêm ảnh nền "' + (D.anh || '') + '" nếu chưa có.'); }); };
+$('fJson').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => { const o = JSON.parse(t); D = Object.assign({ nut: [], canh: [], diem: [], cong: null, khoi: [] }, o); idN = Math.max(0, ...D.nut.map(n => n.id)) + 1; idK = Math.max(0, ...D.khoi.map(k => k.id)) + 1; if (D.soDo) moAnh(nenGiay(D.w, D.h), true); $('tenDen').value = D.ten || ''; if (ANH) coGian(); else cap(); alert('Đã mở bản lưu. Mở thêm ảnh nền "' + (D.anh || '') + '" nếu chưa có.'); }); };
 $('tenDen').oninput = e => { D.ten = e.target.value; tuLuu(); };
 document.body.ondragover = e => e.preventDefault(); document.body.ondrop = e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (!f) return; if (/json/.test(f.type) || /\.json$/.test(f.name)) { $('fJson').files = e.dataTransfer.files; $('fJson').onchange({ target: { files: [f] } }); } else $('fAnh').onchange({ target: { files: [f] } }); };
 function coGian() { if (!ANH) return; const t = $('trai'); TL = Math.min((t.clientWidth - 10) / ANH.width, (t.clientHeight - 10) / ANH.height, 1.5); cv.width = ANH.width * TL; cv.height = ANH.height * TL; ve(); cap(); }
@@ -72,12 +87,16 @@ function trung(x, y) { const r = 12 / TL;
   if (D.cong && Math.hypot(D.cong.x - x, D.cong.y - y) < r * 1.3) return { k: 'cong', o: D.cong };
   for (const n of D.nut) if (Math.hypot(n.x - x, n.y - y) < r) return { k: 'nut', o: n };
   for (let i = 0; i < D.canh.length; i++) { const [a, b] = D.canh[i].map(nutId); if (a && b && kcDoan(x, y, a, b) < r * .6) return { k: 'canh', i }; }
+  if ($('hienKhoi').checked) for (let i = (D.khoi || []).length - 1; i >= 0; i--) { const k = D.khoi[i]; if (x > k.x - 4 && x < k.x + k.w + 4 && y > k.y - 4 && y < k.y + k.h + 4) { const goc = Math.hypot(x - k.x - k.w, y - k.y - k.h) < r * 1.6; return { k: goc ? 'goc' : 'khoi', o: k }; } }
   return null; }
 const nutId = id => D.nut.find(n => n.id === id);
 function kcDoan(x, y, a, b) { const dx = b.x - a.x, dy = b.y - a.y, l = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l)); return Math.hypot(x - a.x - t * dx, y - a.y - t * dy); }
 function nutGan(x, y) { let m = null, dm = 1e9; D.nut.forEach(n => { const d = Math.hypot(n.x - x, n.y - y); if (d < dm) { dm = d; m = n; } }); return m; }
-cv.onpointerdown = e => { if (!ANH) return; const [x, y] = xy(e), h = trung(x, y); THU = null;
-  if (h && h.k !== 'canh' && (MODE === 'sua' || h.k === 'bien' || (MODE !== 'duong' && h.k !== 'nut'))) { CHON = h; KEO = h; cv.setPointerCapture(e.pointerId); ve(); cap(); return; }
+cv.onpointerdown = e => { if (!ANH) return; const [x, y] = xy(e); let h = trung(x, y); THU = null;
+  if (MODE === 'khoi' && !(h && /^(bien|diem|goc|khoi)$/.test(h.k))) { const k = { id: idK++, loai: $('loaiKhoi').value, x, y, w: 1, h: 1, x0: x, y0: y }; D.khoi.push(k); KEO = { k: 'moi', o: k }; CHON = { k: 'khoi', o: k }; cv.setPointerCapture(e.pointerId); return; }
+  if (h && (h.k === 'khoi' || h.k === 'goc') && MODE !== 'khoi' && MODE !== 'sua') h = null;
+  if (h && h.k === 'canh' && MODE !== 'duong') h = null;
+  if (h && h.k !== 'canh' && (MODE === 'sua' || MODE === 'khoi' || h.k === 'bien' || (MODE !== 'duong' && h.k !== 'nut'))) { CHON = h; KEO = h; cv.setPointerCapture(e.pointerId); ve(); cap(); return; }
   if (MODE === 'duong') {
     if (h && h.k === 'canh') { D.canh.splice(h.i, 1); }
     else if (h && h.k === 'nut') { if (NOI && NOI !== h.o) { if (!D.canh.some(c => c.includes(NOI.id) && c.includes(h.o.id))) D.canh.push([NOI.id, h.o.id]); NOI = h.o; } else NOI = NOI === h.o ? null : h.o; CHON = h; KEO = h; cv.setPointerCapture(e.pointerId); }
@@ -85,14 +104,20 @@ cv.onpointerdown = e => { if (!ANH) return; const [x, y] = xy(e), h = trung(x, y
   } else if (MODE === 'diem') { const d = { x, y, bx: x, by: y - 70, ten: 'Ban ' + (D.diem.length + 1), loai: 'le', nut: null }; D.diem.push(d); CHON = { k: 'diem', o: d }; setTimeout(() => { const i = document.querySelector('#ds .dg.chon input'); if (i) { i.focus(); i.select(); } }, 30); }
   else if (MODE === 'cong') { D.cong = { x, y }; }
   ve(); cap(); };
-cv.onpointermove = e => { if (!KEO) return; const [x, y] = xy(e), o = KEO.o; if (KEO.k === 'bien') { o.bx = x; o.by = y; } else if (KEO.k === 'diem') { const dx = x - o.x, dy = y - o.y; o.x = x; o.y = y; o.bx += dx; o.by += dy; } else { o.x = x; o.y = y; } KEO.moved = 1; ve(); };
-cv.onpointerup = () => { if (KEO && KEO.moved) cap(); KEO = null; };
+cv.onpointermove = e => { if (!KEO) return; const [x, y] = xy(e), o = KEO.o; if (KEO.px == null) { KEO.px = x; KEO.py = y; }
+  if (KEO.k === 'moi') { o.x = Math.min(x, o.x0); o.y = Math.min(y, o.y0); o.w = Math.abs(x - o.x0); o.h = Math.abs(y - o.y0); KEO.moved = 1; ve(); return; }
+  if (KEO.k === 'goc') { o.w = Math.max(20, x - o.x); o.h = Math.max(20, y - o.y); KEO.moved = 1; datDiemKhoi(o); ve(); return; }
+  if (KEO.k === 'khoi') { const dx = x - KEO.px, dy = y - KEO.py; KEO.px = x; KEO.py = y; o.x += dx; o.y += dy; const d = D.diem.find(q => q.khoi === o.id); if (d) { d.x += dx; d.y += dy; d.bx += dx; d.by += dy; } if (o.loai === 'cong' && D.cong) { D.cong.x += dx; D.cong.y += dy; } KEO.moved = 1; ve(); return; }
+  if (KEO.k === 'bien') { o.bx = x; o.by = y; } else if (KEO.k === 'diem') { const dx = x - o.x, dy = y - o.y; o.x = x; o.y = y; o.bx += dx; o.by += dy; } else { o.x = x; o.y = y; } KEO.moved = 1; ve(); };
+cv.onpointerup = () => { if (KEO && KEO.k === 'moi') { const k = KEO.o; delete k.x0; delete k.y0; if (k.w < 15 || k.h < 15) { D.khoi.pop(); } else { const v = KL[k.loai]; if (v[2]) { D.diem.push({ x: 0, y: 0, bx: 0, by: 0, ten: k.loai === 'le' ? 'Lầu ' + (D.diem.filter(d => d.loai === 'le').length + 1) : v[0], loai: v[2], khoi: k.id }); datDiemKhoi(k); CHON = { k: 'diem', o: D.diem[D.diem.length - 1] }; setTimeout(() => { const i = document.querySelector('#ds .dg.chon input'); if (i) { i.focus(); i.select(); } }, 30); } if (k.loai === 'cong') D.cong = { x: k.x + k.w / 2, y: k.y + k.h - 20 }; } ve(); cap(); KEO = null; return; } if (KEO && KEO.moved) cap(); KEO = null; };
+function datDiemKhoi(k) { const d = D.diem.find(q => q.khoi === k.id); if (!d) return; d.x = k.x + k.w / 2; d.y = k.y + k.h + 30; d.bx = k.x + k.w / 2; d.by = k.y - 18; }
 document.onkeydown = e => { if ((e.key === 'Delete' || e.key === 'Backspace') && CHON && document.activeElement.tagName !== 'INPUT') { xoa(CHON); e.preventDefault(); } if (e.key === 'Escape') { NOI = null; CHON = null; ve(); } };
-function xoa(h) { if (h.k === 'nut') { D.nut = D.nut.filter(n => n !== h.o); D.canh = D.canh.filter(c => !c.includes(h.o.id)); if (NOI === h.o) NOI = null; } else if (h.k === 'diem' || h.k === 'bien') D.diem = D.diem.filter(d => d !== h.o); else if (h.k === 'cong') D.cong = null; CHON = null; ve(); cap(); }
+function xoa(h) { if (h.k === 'nut') { D.nut = D.nut.filter(n => n !== h.o); D.canh = D.canh.filter(c => !c.includes(h.o.id)); if (NOI === h.o) NOI = null; } else if (h.k === 'diem' || h.k === 'bien') D.diem = D.diem.filter(d => d !== h.o); else if (h.k === 'cong') D.cong = null; else if (h.k === 'khoi' || h.k === 'goc') { D.khoi = D.khoi.filter(k => k !== h.o); D.diem = D.diem.filter(d => d.khoi !== h.o.id); if (h.o.loai === 'cong') D.cong = null; } CHON = null; ve(); cap(); }
 /* điểm lễ tự nối vào nút đường gần nhất */
 function gan() { D.diem.forEach(d => { const n = nutGan(d.x, d.y); d.nut = n ? n.id : null; }); }
 function ve() { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); if (!ANH) return; g.drawImage(ANH, 0, 0, cv.width, cv.height); g.setTransform(TL, 0, 0, TL, 0, 0); const s = 1 / TL;
-  g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, 0, ANH.width, ANH.height);
+  if (!D.soDo) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, 0, ANH.width, ANH.height); }
+  if ($('hienKhoi').checked && D.khoi && D.khoi.length) { g.globalAlpha = D.soDo ? 1 : .4; veKhoi(g, s); g.globalAlpha = 1; }
   g.lineCap = 'round'; D.canh.forEach(([a, b]) => { a = nutId(a); b = nutId(b); if (!a || !b) return; g.strokeStyle = 'rgba(255,220,120,.9)'; g.lineWidth = 6 * s; g.setLineDash([]); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); });
   gan(); D.diem.forEach(d => { const n = nutId(d.nut); if (n) { g.strokeStyle = 'rgba(140,230,150,.9)'; g.lineWidth = 3 * s; g.setLineDash([6 * s, 5 * s]); g.beginPath(); g.moveTo(n.x, n.y); g.lineTo(d.x, d.y); g.stroke(); g.setLineDash([]); } });
   if (NOI && MODE === 'duong') { g.strokeStyle = '#fff'; g.lineWidth = 2 * s; g.beginPath(); g.arc(NOI.x, NOI.y, 15 * s, 0, 7); g.stroke(); }
@@ -126,10 +151,10 @@ function chayThu() { if (!D.cong || !D.diem.length) return alert('Cần có cổ
   THU = { ng: D.diem.slice(0, 5).map((d, i) => { const ids = duongDi(c.id, d.nut) || []; const wp = [[D.cong.x, D.cong.y], ...ids.map(id => [nutId(id).x, nutId(id).y]), [d.x, d.y]]; return { x: D.cong.x, y: D.cong.y, wp, c: mau[i], tre: i * 25 }; }) };
   const buoc = () => { if (!THU) return; let con = 0; THU.ng.forEach(p => { if (p.tre-- > 0) { con++; return; } const t = p.wp[0]; if (!t) return; con++; const dx = t[0] - p.x, dy = t[1] - p.y, l = Math.hypot(dx, dy), v = 3 / Math.min(1, TL) ; if (l < v) { p.x = t[0]; p.y = t[1]; p.wp.shift(); } else { p.x += dx / l * v; p.y += dy / l * v; } }); ve(); if (con) requestAnimationFrame(buoc); else setTimeout(() => { THU = null; ve(); }, 1500); }; buoc(); }
 function xuat() { gan(); const c = D.cong && nutGan(D.cong.x, D.cong.y); return { ban: 1, ten: D.ten, anh: D.anh, w: D.w, h: D.h, cong: D.cong && { x: Math.round(D.cong.x), y: Math.round(D.cong.y), nut: c && c.id },
-  nut: D.nut.map(n => ({ id: n.id, x: Math.round(n.x), y: Math.round(n.y) })), canh: D.canh, diem: D.diem.map((d, i) => ({ so: i + 1, ten: d.ten, loai: d.loai, x: Math.round(d.x), y: Math.round(d.y), bx: Math.round(d.bx), by: Math.round(d.by), nut: d.nut })) }; }
-function luu() { if (!kiemTra() && !confirm('Còn lỗi ở phần kiểm tra. Vẫn tải file?')) return; const o = xuat(), a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(o, null, 1)], { type: 'application/json' })); a.download = 'den-' + (D.ten || 'moi').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.json'; a.click(); }
+  nut: D.nut.map(n => ({ id: n.id, x: Math.round(n.x), y: Math.round(n.y) })), canh: D.canh, diem: D.diem.map((d, i) => ({ so: i + 1, ten: d.ten, loai: d.loai, x: Math.round(d.x), y: Math.round(d.y), bx: Math.round(d.bx), by: Math.round(d.by), nut: d.nut, khoi: d.khoi })), khoi: (D.khoi || []).map(k => ({ id: k.id, loai: k.loai, x: Math.round(k.x), y: Math.round(k.y), w: Math.round(k.w), h: Math.round(k.h) })), soDo: D.soDo ? 1 : 0 }; }
+function luu() { if (!kiemTra() && !confirm('Còn lỗi ở phần kiểm tra. Vẫn tải file?')) return; const o = xuat(), a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(o, null, 1)], { type: 'application/json' })); a.download = 'den-' + slug() + '.json'; a.click(); }
 function tuLuu() { try { localStorage.setItem('tao_den', JSON.stringify(xuat())); } catch (e) {} }
-try { const o = JSON.parse(localStorage.getItem('tao_den') || 'null'); if (o && o.nut) { D = Object.assign(D, o); D.diem = (o.diem || []).map(d => Object.assign({}, d)); idN = Math.max(0, ...D.nut.map(n => n.id)) + 1; $('tenDen').value = D.ten || ''; } } catch (e) {}
+try { const o = JSON.parse(localStorage.getItem('tao_den') || 'null'); if (o && o.nut) { D = Object.assign(D, o); D.diem = (o.diem || []).map(d => Object.assign({}, d)); idN = Math.max(0, ...D.nut.map(n => n.id)) + 1; D.khoi = (o.khoi || []).map(k => Object.assign({}, k)); idK = Math.max(0, ...D.khoi.map(k => k.id)) + 1; $('tenDen').value = D.ten || ''; if (D.soDo && !new URLSearchParams(location.search).get('anh')) moAnh(nenGiay(D.w, D.h), true); } } catch (e) {}
 const qa = new URLSearchParams(location.search).get('anh'); if (qa) moAnh(qa, true);
 cap(); window.__td = { D: () => D, xuat, moAnh };
 </script></body></html>
