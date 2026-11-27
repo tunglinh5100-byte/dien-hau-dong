@@ -9,6 +9,9 @@ hoặc 'ban be' hoặc 'quan tri') được cộng dồn, người chưa follow 
 import json, sys, datetime
 from collections import defaultdict
 TU = datetime.datetime(2026, 11, 22)
+# 27/11 anh Linh: không tính phiên thử /sd chiều 26/11 (bắt đầu 15:45)
+BO = [(datetime.datetime(2026, 11, 26, 15, 0), datetime.datetime(2026, 11, 26, 17, 30))]
+BAN = 2  # đổi số này khi muốn trang /g lấy lại số lần dự xem theo Sheet (ghi đè số trên máy live)
 P = lambda s: datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
 def fnv(s):
     h = 0x811c9dc5
@@ -24,13 +27,14 @@ for f in sys.argv[1:]:
         except Exception: continue
         if t >= TU: ev.append((t, r[4], r[11]))
 ev.sort()
-ph = 0; last = None; sp = {}; fol = {}
+ph = 0; last = None; sp = {}; fol = {}; bd = {}
 for t, u, q in ev:
-    if last is None or (t - last).total_seconds() >= 1800: ph += 1
+    if last is None or (t - last).total_seconds() >= 1800: ph += 1; bd[ph] = t
     last = t; s = sp.setdefault((u, ph), [t, t]); s[1] = t
     if any(x in q for x in ('theo doi', 'ban be', 'quan tri')) and 'chua theo doi' != q: fol[u] = 1
 cnt = defaultdict(int)
+bo = {p for p, t in bd.items() if any(a <= t <= b for a, b in BO)}
 for (u, p), (a, b) in sp.items():
-    if (b - a).total_seconds() >= 300: cnt[u] += 1
+    if p not in bo and (b - a).total_seconds() >= 300: cnt[u] += 1
 out = {fnv(u): [c if fol.get(u) else 1, fol.get(u, 0)] for u, c in cnt.items()}
-json.dump({'tu': '2026-11-22', 'luc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'phien': ph, 'd': out}, sys.stdout, separators=(',', ':'))
+json.dump({'tu': '2026-11-22', 'luc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC'), 'phien': ph - len(bo), 'ban': BAN, 'd': out}, sys.stdout, separators=(',', ':'))

@@ -3705,8 +3705,8 @@ const LV_GIO = 3 * 3600 * 1000; // vắng quá 3 giờ rồi vào lại thì tí
 let LV = {}; try { LV = JSON.parse(localStorage.getItem('hd_lv') || '{}') || {}; } catch (e) {}
 /* 24/11 anh Linh: máy live bị xoá bộ nhớ thì số lần dự về 1 – lấy bản tính lại từ Sheet nhật ký (từ 22/11), gộp lấy số lớn hơn. Khoá là mã băm của ID TikTok, không lưu tên */
 let LV_GOC = null; function lvBam(s) { let h = 0x811c9dc5; for (const c of new TextEncoder().encode(String(s))) { h ^= c; h = Math.imul(h, 0x01000193) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
-function lvGop(k, r) { if (!LV_GOC || !r || r.gocDa) return; r.gocDa = 1; const g = LV_GOC[lvBam(k)]; if (!g) return; if (g[1]) r.f = 1; if ((g[0] || 0) > (r.v || 0)) { r.v = g[0]; r.xp = Math.max(r.xp || 0, g[0] * 10); } lvDirty = true; }
-fetch('lv-goc.json?t=' + Date.now()).then(x => x.json()).then(j => { LV_GOC = (j && j.d) || null; if (LV_GOC) Object.keys(LV).forEach(k => { const r = LV[k]; if (r) { r.gocDa = 0; lvGop(k, r); } }); }).catch(() => {});
+let LV_BAN = 0; function lvGop(k, r) { if (!LV_GOC || !r || r.gocDa) return; r.gocDa = 1; const g = LV_GOC[lvBam(k)]; if (LV_BAN && r.gocBan !== LV_BAN) { r.gocBan = LV_BAN; lvDirty = true; if (g && r.v > g[0]) r.v = g[0]; } /* 27/11 anh Linh: bỏ phiên thử chiều 26/11 — lấy lại số lần theo Sheet một lần (ghi đè số lớn hơn trên máy live) */ if (!g) return; if (g[1]) r.f = 1; if ((g[0] || 0) > (r.v || 0)) { r.v = g[0]; r.xp = Math.max(r.xp || 0, g[0] * 10); } lvDirty = true; }
+fetch('lv-goc.json?t=' + Date.now()).then(x => x.json()).then(j => { LV_GOC = (j && j.d) || null; LV_BAN = (j && j.ban) || 0; if (LV_GOC) Object.keys(LV).forEach(k => { const r = LV[k]; if (r) { r.gocDa = 0; lvGop(k, r); } }); }).catch(() => {});
 const LVK = {}; // tên đang hiện trên màn hình -> khoá lưu (ID TikTok)
 let lvDirty = false; setInterval(() => { if (!lvDirty) return; lvDirty = false;
   try { const ks = Object.keys(LV); if (ks.length > 4000) ks.sort((a, b) => LV[a].at - LV[b].at).slice(0, ks.length - 3500).forEach(k => delete LV[k]); localStorage.setItem('hd_lv', JSON.stringify(LV)); } catch (e) {} }, 4000);
