@@ -11,8 +11,8 @@
    - Đủ 30 người (số người xem min 25) hoặc hết 600 giây đếm ngược thì mọi người đi lên vào trong điện (trang phục mang vào, vào trong vẫn thay tiếp được).
    - Chạy trong link /sd: /g tải sẵn phía sau, chuyển cảnh là vào luôn. Mở /bd riêng thì chuyển sang /g/?bd=1&cho=0.
    - /dk có nút "Vào xem hầu ngay", "Đếm lại 10 phút", "+1 phút".
-   Tham số: ?im=1 tắt tiếng; ?sim=0 tắt người giả lập; ?am=1 bật tiếng ngay; ?nochuyen=1 hết giờ không chuyển (chạy thử). */
-const Q = new URLSearchParams(location.search), IM = Q.get('im') === '1', SIM = Q.get('sim') !== '0', NOCHUYEN = Q.get('nochuyen') === '1';
+   Tham số: ?im=1 tắt tiếng; ?sim=1 bật người giả lập để thử (mặc định tắt); ?am=1 bật tiếng ngay; ?nochuyen=1 hết giờ không chuyển (chạy thử). */
+const Q = new URLSearchParams(location.search), IM = Q.get('im') === '1', SIM = Q.get('sim') === '1' /* 27/11 anh Linh: bỏ hết con nhang giả lập (TikTok hạn chế), ?sim=1 để thử */, NOCHUYEN = Q.get('nochuyen') === '1';
 const cv = document.getElementById('c'), g = cv.getContext('2d'); g.scale(2, 2);
 const W = 540, H = 960, SERIF = '"Noto Serif","Times New Roman",serif', UI = '"Segoe UI","Noto Sans",Arial,sans-serif';
 const ld = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = s; });
