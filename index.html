@@ -2842,8 +2842,8 @@ function noiKhen(name, cau) {
     speechSynthesis.speak(u); } catch (e) {}
 }
 /* 25/11 11:30 anh Linh: người mới vào live -> giọng nữ đọc "<tên> nhanh vào chiếu ngồi ngay, bạn chia sẻ live nhé"; mỗi người đọc 1 lần/phiên; đông người thì chỉ đọc 3 người mới nhất; tắt: ?docmoi=0 */
-const DOCMOI = { on: !/[?&]docmoi=0/.test(location.search), da: new Set(), q: [] };
-try { if (localStorage.getItem('hd_docmoi') === '0' && !/[?&]docmoi=1/.test(location.search)) DOCMOI.on = false; } catch (e) {}
+const DOCMOI = { on: /[?&]docmoi=1/.test(location.search) /* 27/11 anh Linh: tắt hết tự nói trên live (TikTok hạn chế), ?docmoi=1 để bật lại */, da: new Set(), q: [] };
+
 window.__hdDocMoi = on => { DOCMOI.on = !!on; try { localStorage.setItem('hd_docmoi', on ? '1' : '0'); } catch (e) {} S.banner = { admin: 1, text: on ? 'Bật đọc tên người mới vào live' : 'Tắt đọc tên người mới vào live', t: 0, life: 2.5 }; };
 function docMoiNoi() { if (!DOCMOI.q.length || DOCMOI.dang) return; const ten = DOCMOI.q.shift(), cau = ten + ' ơi, mời bạn vào chiếu ngồi nhé.';
   DOCMOI.dang = true; const xong = () => { DOCMOI.dang = false; setTimeout(docMoiNoi, 400); };
