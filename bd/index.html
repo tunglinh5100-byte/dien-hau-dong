@@ -300,7 +300,28 @@ function veHD(t) { const M = CN.meta && CN.meta.nu; if (!M || !CN.img.nu) return
   if (HD.dang && HD.t) { const a = Math.min(1, (performance.now() - HD.t) / 1100), [px, py] = P(HD.dang.x, HD.dang.y), vx = x + (px - x) * a, vy = y - dh * .5 + (py - dh * .45 - (y - dh * .5)) * a - Math.sin(a * Math.PI) * 10;
     g.save(); g.translate(vx, vy); g.rotate(-.15 + a * .3); g.fillStyle = '#c8302a'; g.fillRect(-6, -4, 12, 8); g.strokeStyle = '#ffd84a'; g.lineWidth = 1; g.strokeRect(-6, -4, 12, 8); g.fillStyle = '#ffd84a'; g.fillRect(-3.5, -1, 7, 1.4); g.restore(); } /* tờ vé mời đỏ viền vàng bay sang tay người ngồi */
   const ty = y - dh - 12; g.font = `800 7.5px ${UI}`; const tt = '🎫 Hầu dâng phát vé', w = g.measureText(tt).width + 10; hop(x - w / 2, ty, w, 11, 5.5, 'rgba(160,20,50,.92)'); chu(tt, x, ty + 6, 7.5, '#ffe39a', { w: 800 }); }
-function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); tachNhau(dt); if (!CHUYEN) capHD(dt, now); NG.forEach(p => {
+/* 27/11 09:10 anh Linh: thêm 2 chú chó cỏ đi lại trong sân (ảnh Gemini anh vẽ: chó vàng, chó mực) — tự đi dạo, chạy theo người, ngồi chầu, nằm cạnh hồ */
+const CHO_IMG = { img: null }; ld('cho.webp?v=1').then(i => CHO_IMG.img = i);
+const CHO = [{ k: 'vang', ten: 'Vàng' }, { k: 'muc', ten: 'Mực' }].map((c, i) => Object.assign(c, { laCho: 1, x: 500 + i * 120, y: 900 + i * 60, wp: [], ghe: null, ngoi: false, st: 'dung', cho: 1 + i * 2, d: 0, dir: 0, wd: 0, t0: Math.random() * 9, theo: null }));
+const CHO_THU = { vang: ['front', 'back', 'right', 'w', 'sit', 'lay'], muc: ['front', 'back', 'right', 'w', 'sit', 'lay'] };
+function capCho(dt) { CHO.forEach(c => {
+  if (c.theo && c.wp.length <= 1) { const q = c.theo; if (!NG.includes(q) || q.vao) c.theo = null; else if (Math.hypot(q.x - c.x, q.y - c.y) > 50) c.wp = [[q.x + (c.k === 'vang' ? 28 : -28), q.y + 14]]; }
+  if (c.wp.length) { const [tx, ty] = c.wp[0], dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy), sp = (c.theo ? 85 : 62) * dt; if (d > .5) c.dir = huongDir(dx, dy); if (d <= sp) { c.x = tx; c.y = ty; c.wp.shift(); c.wd += d; if (!c.wp.length) { c.st = c.sau || 'dung'; c.sau = null; c.cho = c.st === 'nam' ? 8 + Math.random() * 10 : c.st === 'ngoi' ? 4 + Math.random() * 5 : c.theo ? .6 : 1.5 + Math.random() * 3; } } else { c.x += dx / d * sp; c.y += dy / d * sp; c.wd += sp; } if (c.wp.length) c.st = 'di'; return; }
+  c.cho -= dt; if (c.cho > 0) return; if (c.theo) { if (Math.random() < .25) c.theo = null; else { c.cho = .6; return; } }
+  const r = Math.random(), that = NG.filter(q => !q.sim && !q.vao && !q.ngoi);
+  if (r < .22 && that.length) { c.theo = that[Math.floor(Math.random() * that.length)]; c.wp = [[c.theo.x, c.theo.y + 14]]; }
+  else if (r < .38) { c.wp = [[HO.x - HO.rx * .8 + Math.random() * 60, HO.y - HO.ry - 10 + Math.random() * 14]]; c.sau = 'nam'; } /* nằm phơi nắng cạnh hồ */
+  else if (r < .52) { c.wp = [[560 + (c.k === 'vang' ? -70 : 70), 300 + Math.random() * 20]]; c.sau = 'ngoi'; } /* ngồi chầu dưới chân bậc */
+  else { denNut(c, DI_DAO[Math.floor(Math.random() * DI_DAO.length)]); c.sau = Math.random() < .3 ? 'ngoi' : 'dung'; } }); }
+function veCho(c, t) { const im = CHO_IMG.img; if (!im) return; const [x, y] = P(c.x, c.y), sc = (.27 + .1 * (c.y - 170) / 1200) * .75, j = ['front', 'back', 'right', 'w', 'sit', 'lay'], o = c.k === 'muc' ? 6 : 0;
+  let f = 'front', mir = false, bob = 0; const dang = c.st === 'di';
+  if (dang) { if (c.dir === 0) { f = 'front'; bob = Math.abs(Math.sin(c.wd * .35)) * 1.6; } else if (c.dir === 4) { f = 'back'; bob = Math.abs(Math.sin(c.wd * .35)) * 1.6; } else { f = Math.floor(c.wd / 7) % 2 ? 'w' : 'right'; mir = c.dir >= 5; } }
+  else if (c.st === 'ngoi') f = 'sit'; else if (c.st === 'nam') f = 'lay'; else { f = c.dir >= 5 && c.dir <= 7 ? 'right' : c.dir >= 1 && c.dir <= 3 ? 'right' : c.dir === 4 ? 'back' : 'front'; mir = c.dir >= 5 && c.dir <= 7; }
+  const i = o + j.indexOf(f), dw = 100 * sc, dh = 130 * sc;
+  g.save(); g.translate(x, y); g.globalAlpha = .22; g.beginPath(); g.ellipse(0, -1, dw * .3, dw * .09, 0, 0, 7); g.fillStyle = '#000'; g.fill(); g.globalAlpha = 1; g.translate(0, -bob); if (mir) g.scale(-1, 1);
+  if (c.st === 'nam') g.translate(0, Math.sin(t * 1.5 + c.t0) * .3); g.drawImage(im, i * 100, 0, 100, 130, -dw / 2, -dh + dh * .015, dw, dh); g.restore();
+  const tt = '🐕 ' + c.ten; g.font = `700 6.5px ${UI}`; const w = g.measureText(tt).width + 7, ty = y - dh * (c.st === 'nam' ? .55 : .95) - 9; hop(x - w / 2, ty, w, 9.5, 4.75, 'rgba(90,50,10,.75)'); chu(tt, x, ty + 5, 6.5, '#fff1d6'); }
+function capNhat(dt) { const now = performance.now(); for (let i = NG.length - 1; i >= 0; i--) if (NG[i].het) NG.splice(i, 1); tachNhau(dt); if (!CHUYEN) { capHD(dt, now); capCho(dt); } NG.forEach(p => {
   if (p.wp.length) { const [tx, ty] = p.wp[0], dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy), sp = (p.act || p.vao ? 76 : 48) * dt; /* đi dạo chậm, đi lễ nhanh hơn; 26/11 17:45 anh Linh: chậm đi 20% */
     if (d > .5) p.dir = huongDir(dx, dy);
     if (d <= sp) { p.x = tx; p.y = ty; p.wp.shift(); p.wd += d;
@@ -349,7 +370,7 @@ function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); retur
   veCa(t);
   veDong(270, NEN.ph * .885 + 16, .34, t, dt);
   const dang = veHieuUng(t);
-  { let daVe = false, daTu = false, daHD = false; NG.slice().sort((a, b) => a.y - b.y).forEach(p => { if (!daHD && p.y > HD.y) { veHD(t); daHD = true; } if (!daVe && p.y > TU.y) { veOngTu(t); daVe = true; } if (!daTu && p.y > TU_DO.y) { veTuDo(t); daTu = true; } veNguoi(p, t, dt); }); if (!daHD) veHD(t); if (!daVe) veOngTu(t); if (!daTu) veTuDo(t); }
+  { let daVe = false, daTu = false, daHD = false; NG.concat(CHUYEN ? [] : CHO).sort((a, b) => a.y - b.y).forEach(p => { if (p.laCho) { veCho(p, t); return; } if (!daHD && p.y > HD.y) { veHD(t); daHD = true; } if (!daVe && p.y > TU.y) { veOngTu(t); daVe = true; } if (!daTu && p.y > TU_DO.y) { veTuDo(t); daTu = true; } veNguoi(p, t, dt); }); if (!daHD) veHD(t); if (!daVe) veOngTu(t); if (!daTu) veTuDo(t); }
   Object.entries(KHU).forEach(([k, v]) => { const [x, y] = P(...v.bien); bien(x, y, v.ten, HANG[k].length); });
   veBangSao(t); veBang(t);
   if (CHUYEN && now - CHUYEN > 3000) { const a = Math.min(1, (now - CHUYEN - 3000) / 1500); g.fillStyle = `rgba(20,4,2,${.85 * a})`; g.fillRect(0, 0, W, H); g.globalAlpha = a; chu('🏮 Mời mọi người vào trong', 270, 440, 22, '#ffe39a', { f: SERIF, w: 800 }); chu('xem diễn xướng hầu đồng tín ngưỡng Đạo Mẫu', 270, 474, 15, '#fff1d6', { f: SERIF, w: 700 }); g.globalAlpha = 1; }

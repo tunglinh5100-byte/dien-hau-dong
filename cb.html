@@ -4330,7 +4330,7 @@ buildCfgPanel(); napNhacGia();
   const KDEM = {}; const seen = new Map(); // ai đã tương tác (để cô gọi ngẫu nhiên)
   function handle(type, d) {
     const name = nameOf(d); if (!name) return;
-    const nm = String(name).slice(0, 24); try { if (window.__bdDangCho && window.__bdDangCho()) return; } catch (e) {} /* 26/11: đang chờ ở sân đền /sd: sân đền xử lý, trong điện chưa nhận */ seen.set(nm, H.S.t); try { if (window.__bdThay) window.__bdThay(nm, String(type || '').toLowerCase()); } catch (e) {} try { if (window.__that) window.__that.add(nm); } catch (e) {}
+    const nm = String(name).slice(0, 24); try { if (window.__bdDangCho && window.__bdDangCho()) { try { if (window.__hdLv) window.__hdLv.ev(nm, d, String(type || '').toLowerCase()); } catch (e) {} return; } } catch (e) {} /* 27/11 09:10: lúc chờ ở sân đền vẫn tính phiên live và số lần dự xem (trước đây bỏ qua nên người chỉ ở sân đền không được tính) */ /* 26/11: đang chờ ở sân đền /sd: sân đền xử lý, trong điện chưa nhận */ seen.set(nm, H.S.t); try { if (window.__bdThay) window.__bdThay(nm, String(type || '').toLowerCase()); } catch (e) {} try { if (window.__that) window.__that.add(nm); } catch (e) {}
     const t = String(type || '').toLowerCase();
     try { if (window.__hangNhang) window.__hangNhang(nm, (t === 'share' || (t.includes('social') && /share/.test(JSON.stringify(d.common && d.common.displayText || d.action || d.displayType || '').toLowerCase())) || (t.includes('social') && +d.action === 3)) ? 'share' : 'tt'); } catch (e) {} // 17/11 11:08 anh Linh: chỉ ai chia sẻ live mới vào ngồi hàng con nhang; đã ngồi thì tương tác khác -> vỗ tay
     const K = window.__hdKhen || (() => {}), dem = KDEM[nm] = KDEM[nm] || { bl: 0, tim: 0 }; // 15/11: ban khen ngầm theo tương tác thật
