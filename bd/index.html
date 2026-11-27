@@ -18,7 +18,9 @@ const W = 540, H = 960, SERIF = '"Noto Serif","Times New Roman",serif', UI = '"S
 const ld = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = s; });
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
 const SY = 285, K = 540 / 1122, P = (x, y) => [x * K, SY + y * K];
-const MUC_NGUOI = 30, MIN_NGUOI = 25, CHO_GIAY = 600, MAT_DO = 600000; /* 30 người bắt đầu; số người hiện tối thiểu 25; đếm ngược 600 giây; rời live quá 600 giây mất đồ */
+/* 27/11 07:42 anh Linh: chỉ để đồng hồ chờ 999 giây cho dễ nhìn, bỏ luật đủ 30 người — streamer tự nói, anh bấm vào ở /dk */
+const VANG_GIAY = 180; /* giữ chỗ hàng đầu: đủ 7 sao, 3 phút gần nhất không tương tác thì mất chỗ */
+const MUC_NGUOI = 30, MIN_NGUOI = 25, CHO_GIAY = 999, MAT_DO = 600000; /* 30 người bắt đầu; số người hiện tối thiểu 25; đếm ngược 600 giây; rời live quá 600 giây mất đồ */
 
 /* ---------- Màu (giống hệt /g) ---------- */
 const AO_NN = [['đỏ', '#c4232b'], ['đỏ đô', '#8a1420'], ['đỏ son', '#e0402f'], ['hồng phấn', '#f2a0bd'], ['hồng cánh sen', '#d63a85'], ['tím', '#7b3fa8'], ['tím than', '#3d2a5e'], ['tím mộng mơ', '#b48ad8'], ['xanh dương', '#2a62b8'], ['xanh da trời', '#5aa6e6'], ['xanh lam', '#1f4fb0'], ['xanh ngọc', '#25b3a6'], ['xanh lá', '#2f8a3c'], ['xanh lá mạ', '#8cc63f'], ['xanh rêu', '#5a6b2e'], ['vàng', '#e3b21f'], ['vàng chanh', '#e6d43a'], ['vàng kim', '#c9962a'], ['cam', '#e57b22'], ['cam đất', '#b85a2a'], ['nâu', '#7a4a2a'], ['be', '#e9d8b4'], ['trắng', '#efede6'], ['bạc', '#b9bec8'], ['xám', '#7d7f86'], ['đen', '#28232a'], ['lam ngọc', '#2a8aa0'], ['san hô', '#f07a6a'], ['bạc hà', '#9fe0c8'], ['mận chín', '#6a1f45']];
@@ -181,7 +183,7 @@ let DA_LUU_T0 = false; try { const o = JSON.parse(localStorage.getItem('hd_bd_t0
 const luuT0 = () => { try { localStorage.setItem('hd_bd_t0', JSON.stringify(T0)); } catch (e) {} }; luuT0();
 const soNguoi = () => Math.max(MIN_NGUOI, VC);
 const conLai = () => Math.max(0, Math.ceil(CHO_GIAY - (Date.now() - T0) / 1000));
-function chuyen() { if (CHUYEN) return; CHUYEN = performance.now(); luu(); try { localStorage.removeItem('hd_bd_t0'); } catch (e) {}
+function chuyen() { if (CHUYEN) return; CHUYEN = performance.now(); const nw = Date.now(); Object.values(REC).forEach(r => { if (r && r.tham) r.dau = BUOC.every(b => r.tham.includes(b)) && nw - (r.last || 0) < VANG_GIAY * 1000; }); luu(); /* 27/11 anh Linh (ý 1): người giữ chỗ vào ngồi hàng đầu trong điện */ try { localStorage.removeItem('hd_bd_t0'); } catch (e) {}
   Object.keys(HANG).forEach(k => HANG[k] = []); NG.forEach((p, i) => { p.act = null; if (p.ghe) { p.ghe.who = null; p.ghe = null; } p.ngoi = false; p.vao = 1; denNut(p, 'chanBac'); p.wp.push([560 + (Math.random() - .5) * 70, 190], [560 + (Math.random() - .5) * 30, 150]); }); /* mọi người đi từ sân lên bậc vào trong điện */
   let v = 1; const nh = setInterval(() => { v = Math.max(0, v - .05); try { NHAC.volume = v; } catch (e) {} if (v <= 0) { clearInterval(nh); NHAC.pause(); } }, 150); /* nhạc nhỏ dần */
   setTimeout(() => { try { if (window.parent !== window && window.parent.__sdChuyen) { window.parent.__sdChuyen(); return; } } catch (e) {} if (!NOCHUYEN) location.replace('../g/?bd=1&cho=0'); }, 5200); }
@@ -269,16 +271,16 @@ function veOngTu(t) { const M = CN.meta && CN.meta.nam; if (!M || !CN.img.nam) r
   dong.forEach((l, k) => chu(l, bx + bw / 2, by + 10.5 + k * 13, 9.5, '#5a0e0a', { w: 700 })); g.globalAlpha = 1; }
 /* 26/11 18:14 anh Linh: bảng tên những người đủ 7 sao — góc trên trái, trên cột đá, thẳng từ Lầu Cô lên */
 function veBangSao(t) { /* 18:36 anh Linh: hiện tên tất cả người đạt — 3 người đầu đứng cố định, từ người thứ 4 cuộn lên */
-  const ds = Object.entries(REC).filter(([n, r]) => r && r.tham && BUOC.every(b => r.tham.includes(b))).sort((a, b) => (a[1].du7 || a[1].last || 0) - (b[1].du7 || b[1].last || 0)), LH = 14, x = 22, y = 150, w = 172, DONG_CUON = 4;
+  const nw = Date.now(), vang = r => nw - (r.last || 0) >= VANG_GIAY * 1000, ds = Object.entries(REC).filter(([n, r]) => r && r.tham && BUOC.every(b => r.tham.includes(b))).sort((a, b) => (vang(a[1]) - vang(b[1])) || ((a[1].du7 || a[1].last || 0) - (b[1].du7 || b[1].last || 0))), LH = 14, x = 22, y = 150, w = 172, DONG_CUON = 4;
   const dau = ds.slice(0, 3), sau = ds.slice(3), hCuon = sau.length ? Math.min(sau.length, DONG_CUON) * LH + 4 : 0, h = 34 + Math.max(1, dau.length) * LH + (hCuon ? hCuon + 4 : 0) + 4;
   const lg = g.createLinearGradient(0, y, 0, y + h); lg.addColorStop(0, 'rgba(110,16,12,.92)'); lg.addColorStop(1, 'rgba(60,8,6,.92)'); hop(x, y, w, h, 10, lg); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.3; g.beginPath(); g.roundRect(x, y, w, h, 10); g.stroke();
-  chu('🏆 Đi lễ đủ 7 ⭐', x + w / 2, y + 13, 11, '#ffe39a', { f: SERIF, w: 800 }); chu(ds.length + ' người', x + w / 2, y + 26, 8, '#f6dc96', { w: 600 });
+  chu('🪷 Giữ chỗ hàng đầu', x + w / 2, y + 13, 11, '#ffe39a', { f: SERIF, w: 800 }); chu('đi lễ đủ 7 ⭐ · ' + ds.filter(e => !vang(e[1])).length + ' người', x + w / 2, y + 26, 8, '#f6dc96', { w: 600 });
   const tenOf = ([n, r], max) => { let ten = (r.nv && r.nv.nick) || n; g.font = `700 9.5px ${UI}`; while (g.measureText(ten).width > max && ten.length > 2) ten = ten.slice(0, -2) + '…'; return ten; };
   if (!ds.length) chu('Chưa có ai — đi lễ đủ 7 nơi nhé', x + w / 2, y + 41, 8.5, '#fff1d6', { w: 600 });
-  dau.forEach((e, i) => chu(['🥇', '🥈', '🥉'][i] + ' ' + tenOf(e, w - 34), x + 10, y + 41 + i * LH, 9.5, '#fff', { a: 'left' }));
+  dau.forEach((e, i) => { const v = vang(e[1]); g.globalAlpha = v ? .45 : 1; chu(['🥇', '🥈', '🥉'][i] + ' ' + tenOf(e, w - (v ? 64 : 34)) + (v ? ' (vắng)' : ''), x + 10, y + 41 + i * LH, 9.5, '#fff', { a: 'left' }); g.globalAlpha = 1; });
   if (sau.length) { const y0 = y + 34 + dau.length * LH + 2; g.strokeStyle = 'rgba(242,207,114,.45)'; g.lineWidth = .8; g.beginPath(); g.moveTo(x + 10, y0); g.lineTo(x + w - 10, y0); g.stroke();
     g.save(); g.beginPath(); g.rect(x + 4, y0 + 2, w - 8, hCuon); g.clip(); const vong = sau.length * LH, cuon = sau.length > DONG_CUON, off = cuon ? (t * 9) % (vong + LH) : 0;
-    for (const lap of cuon ? [0, vong + LH] : [0]) sau.forEach((e, i) => { const yy = y0 + 2 + 7 + i * LH - off + lap; if (yy < y0 - 8 || yy > y0 + hCuon + 10) return; chu((i + 4) + '. ' + tenOf(e, w - 40), x + 10, yy, 9.5, '#fff1d6', { a: 'left' }); });
+    for (const lap of cuon ? [0, vong + LH] : [0]) sau.forEach((e, i) => { const yy = y0 + 2 + 7 + i * LH - off + lap; if (yy < y0 - 8 || yy > y0 + hCuon + 10) return; const v = vang(e[1]); g.globalAlpha = v ? .45 : 1; chu((i + 4) + '. ' + tenOf(e, w - (v ? 70 : 40)) + (v ? ' (vắng)' : ''), x + 10, yy, 9.5, '#fff1d6', { a: 'left' }); g.globalAlpha = 1; });
     g.restore(); } }
 function huongDir(dx, dy) { return ((Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) % 8) + 8) % 8; }
 function tachNhau(dt) { /* 26/11 17:45 anh Linh: không ai đứng chồng lên nhau — người đứng/đi dạo bị đẩy ra cách nhau; người đang lễ, đang ngồi, đang xếp hàng thì giữ nguyên chỗ */
@@ -328,7 +330,7 @@ let last = performance.now();
 /* 26/11 18:29 anh Linh hỏi máy anh có giật không: mở link có ?perf=1 → góc phải hiện tên card đồ hoạ, số khung hình/giây, thời gian vẽ mỗi khung */
 const PERF = Q.get('perf') === '1' ? { n: 0, ms: 0, mx: 0, t0: 0, cham: 0, kq: null, gpu: (() => { try { const c = document.createElement('canvas').getContext('webgl'), e = c.getExtension('WEBGL_debug_renderer_info'); return String(e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)).replace(/ANGLE \(|\)$|Direct3D11.*|vs_.*|, D3D11.*/g, '').slice(0, 46); } catch (e) { return 'không đọc được'; } })() } : null;
 function perfVe(ms, now) { const P2 = PERF; if (!P2.t0) P2.t0 = now; P2.n++; P2.ms += ms; P2.mx = Math.max(P2.mx, ms); if (ms > 33) P2.cham++; if (now - P2.t0 > 2000) { P2.kq = { fps: P2.n * 1000 / (now - P2.t0), tb: P2.ms / P2.n, mx: P2.mx, cham: P2.cham }; P2.n = 0; P2.ms = 0; P2.mx = 0; P2.cham = 0; P2.t0 = now; }
-  const k = P2.kq, x = 300, y = 148, w = 232, h = 58; hop(x, y, w, h, 8, 'rgba(0,0,0,.78)'); g.font = `600 8.5px ${UI}`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#9fe0c8'; g.fillText('Card: ' + P2.gpu, x + 7, y + 10);
+  const k = P2.kq, x = 300, y = 232, w = 232, h = 58; hop(x, y, w, h, 8, 'rgba(0,0,0,.78)'); g.font = `600 8.5px ${UI}`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#9fe0c8'; g.fillText('Card: ' + P2.gpu, x + 7, y + 10);
   if (k) { const ok = k.fps >= 28 && k.tb < 16 && k.cham === 0; g.fillStyle = ok ? '#7dff9a' : k.fps >= 24 ? '#ffd84a' : '#ff6a6a'; g.font = `800 11px ${UI}`; g.fillText(k.fps.toFixed(0) + ' khung/giây · ' + (ok ? 'MƯỢT' : k.fps >= 24 ? 'HƠI GIẬT' : 'GIẬT'), x + 7, y + 26); g.font = `600 8.5px ${UI}`; g.fillStyle = '#fff'; g.fillText('Vẽ mỗi khung: TB ' + k.tb.toFixed(1) + ' ms · chậm nhất ' + k.mx.toFixed(0) + ' ms', x + 7, y + 40); g.fillText('Khung bị chậm (>33 ms) trong 2 giây: ' + k.cham, x + 7, y + 51); } else { g.fillStyle = '#fff'; g.fillText('Đang đo…', x + 7, y + 30); } }
 function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); return; } /* 26/11 15:11: 30 khung/giây là đủ cho live, đỡ nặng máy */ const t0p = performance.now(); const dt = Math.min(.1, (now - last) / 1000), t = now / 1000; last = now; capNhat(dt); g.drawImage(veLa(t), 0, 0, W, H);
   veCa(t);
@@ -341,18 +343,15 @@ function khung(now) { if (now - last < 30) { requestAnimationFrame(khung); retur
   if (PERF) perfVe(performance.now() - t0p, now);
   requestAnimationFrame(khung); }
 const LUU_Y = '⚠ Lưu ý: trang phục thay ở sân đền được giữ nguyên khi vào trong xem diễn xướng hầu  •  Rời live quá 600 giây sẽ mất hết trang phục đã thay  •  ';
-function veBang(t) { const X = 10, Y = 6, Wd = 520, Hd = 132; const lg = g.createLinearGradient(0, Y, 0, Y + Hd); lg.addColorStop(0, 'rgba(110,16,12,.93)'); lg.addColorStop(1, 'rgba(60,8,6,.93)'); hop(X, Y, Wd, Hd, 12, lg); g.strokeStyle = '#f2cf72'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(X, Y, Wd, Hd, 12); g.stroke();
-  chu('🏮 Đủ ' + MUC_NGUOI + ' người sẽ bắt đầu chương trình', 270, Y + 15, 12.5, '#fff1d6', { f: SERIF, w: 700 });
-  chu('“Diễn xướng hầu đồng tín ngưỡng Đạo Mẫu”', 270, Y + 34, 16.5, '#ffe39a', { f: SERIF, w: 800 });
-  const n = soNguoi(), cl = conLai(), nhay = cl <= 10 && Math.floor(t * 4) % 2 === 0;
-  hop(24, Y + 48, 236, 30, 15, 'rgba(255,240,200,.14)'); chu('👥 ' + n + '/' + MUC_NGUOI + ' người đang xem', 142, Y + 63.5, 13.5, '#fff', { w: 800 });
-  hop(280, Y + 48, 236, 30, 15, nhay ? 'rgba(220,40,40,.9)' : 'rgba(255,240,200,.14)'); chu('⏳ Bắt đầu sau ' + cl + ' giây', 398, Y + 63.5, 13.5, '#ffe39a', { w: 800 });
-  chu('💬 Comment: “Tôi muốn vào trong xem diễn xướng hầu đồng Đạo Mẫu”', 270, Y + 90, 10, '#fff6e6', { w: 700 });
-  chu('Lễ + tên bảng (vd: lễ lầu cô 9) · sắp lễ · thắp hương · cất đồ · Đổi đồ: áo đỏ, khăn xanh, tóc dài, nữ…', 270, Y + 106, 8.6, '#f6dc96', { w: 600 });
-  g.save(); g.beginPath(); g.rect(X + 8, Y + 115, Wd - 16, 14); g.clip(); g.font = `700 9px ${UI}`; const lw = g.measureText(LUU_Y).width, off = (t * 38) % lw; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#ffd0b0'; for (let x = X + 8 - off; x < X + Wd; x += lw) g.fillText(LUU_Y, x, Y + 122.5); g.restore();
+function veBang(t) { /* 27/11 07:42 anh Linh: bỏ bảng chữ, chỉ để đồng hồ chờ to dễ nhìn; đặt dưới thanh TikTok, giữa bảng giữ chỗ và khung cam streamer */
+  const cl = conLai(), nhay = cl <= 10 && Math.floor(t * 4) % 2 === 0, cx = 290, X = cx - 92, Y = 146, Wd = 184, Hd = 74;
+  const lg = g.createLinearGradient(0, Y, 0, Y + Hd); lg.addColorStop(0, nhay ? 'rgba(200,30,24,.95)' : 'rgba(110,16,12,.93)'); lg.addColorStop(1, nhay ? 'rgba(120,10,8,.95)' : 'rgba(60,8,6,.93)'); hop(X, Y, Wd, Hd, 14, lg);
+  g.strokeStyle = '#f2cf72'; g.lineWidth = 2; g.beginPath(); g.roundRect(X, Y, Wd, Hd, 14); g.stroke();
+  chu('⏳ Vào xem hầu sau', cx, Y + 14, 11.5, '#fff1d6', { f: SERIF, w: 700 });
+  g.font = `800 42px ${SERIF}`; const sw = g.measureText(String(cl)).width; chu(String(cl), cx - 12, Y + 46, 42, '#ffe39a', { f: SERIF, w: 800 }); chu('giây', cx - 12 + sw / 2 + 18, Y + 52, 12, '#f6dc96', { w: 700 });
   }
 ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { batAm(); if (cur) cur.play().catch(() => {}); }, { passive: true })); /* chạm bất kỳ đâu (cả vùng đen 2 bên) là có tiếng */
-setInterval(() => { if (CHUYEN) return; if (soNguoi() >= MUC_NGUOI && !DU30) { DU30 = true; if (conLai() > 30) { T0 = Date.now() - (CHO_GIAY - 30) * 1000; luuT0(); } } /* đủ 30 người: còn 30 giây là bắt đầu */ if (conLai() <= 0) chuyen(); }, 500);
+setInterval(() => { if (CHUYEN) return; if (conLai() <= 0) chuyen(); }, 500);
 
 /* ---------- Người xem thật qua TikFinity ---------- */
 (function ws() { try { const s = new WebSocket('ws://localhost:21213/'); s.onmessage = e => { try { const m = JSON.parse(e.data), d = m.data || {}, ev = String(m.event || m.type || '').toLowerCase();
